@@ -43,6 +43,16 @@ export class BaseComponent {
         // Override in subclasses to handle UI interactions
     }
 
+    onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number) {
+        // Override in subclasses
+    }
+
+    onI2CStart?(address: number, read: boolean): boolean;
+    onI2CByte?(address: number, data: number): boolean;
+    onI2CStop?(): void;
+
+    onSPIByte?(data: number): number | void;
+
     setState(newState: any) {
         let changed = false;
         for (const key in newState) {

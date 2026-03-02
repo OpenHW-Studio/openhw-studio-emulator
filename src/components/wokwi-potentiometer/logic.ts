@@ -10,8 +10,8 @@ export class PotentiometerLogic extends BaseComponent {
         super.update(time, wires, instances);
         let val = Number(this.state.value) || 0;
 
-        const v1 = this.getPinVoltage('1');
-        const v2 = this.getPinVoltage('2');
+        const v1 = this.getPinVoltage('VCC') || this.getPinVoltage('1');
+        const v2 = this.getPinVoltage('GND') || this.getPinVoltage('2');
 
         const sigV = v1 + (v2 - v1) * (val / 100.0);
         this.setPinVoltage('SIG', sigV);

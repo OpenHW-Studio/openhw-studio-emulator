@@ -7,15 +7,18 @@ export const NeopixelUI = ({ state, attrs }: { state: any, attrs: any }) => {
 
     // Apply pixel data if provided in state
     useEffect(() => {
-        if (state?.pixels && elRef.current) {
+        if (state?.pixels && Array.isArray(state.pixels) && elRef.current) {
             const el = elRef.current as any;
             if (typeof el.setPixel === 'function') {
-                for (const [row, col, rgb] of state.pixels) {
+                const cols = attrs?.cols || 1;
+                state.pixels.forEach((rgb: number, index: number) => {
+                    const row = Math.floor(index / cols);
+                    const col = index % cols;
                     el.setPixel(row, col, rgb);
-                }
+                });
             }
         }
-    }, [state?.pixels]);
+    }, [state?.pixels, attrs?.cols]);
 
     return (
         <div style={{ pointerEvents: 'none' }}>
