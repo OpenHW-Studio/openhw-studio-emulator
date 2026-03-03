@@ -9,12 +9,24 @@ export const PotentiometerUI = ({ state, attrs }: { state: any, attrs: any }) =>
 
         const handleInput = (e: any) => {
             if (attrs.onInteract) {
-                attrs.onInteract({ type: 'input', value: e.target.value });
+                let val = undefined;
+                if (typeof e.detail === 'number') val = e.detail;
+                else if (e.detail && e.detail.value !== undefined) val = e.detail.value;
+                else if (e.target && e.target.value !== undefined) val = e.target.value;
+                else if (e.target && e.target.percent !== undefined) val = e.target.percent;
+
+                if (val !== undefined) {
+                    attrs.onInteract({ type: 'input', value: Number(val) });
+                }
             }
         };
 
         el.addEventListener('input', handleInput);
-        return () => el.removeEventListener('input', handleInput);
+        el.addEventListener('change', handleInput);
+        return () => {
+            el.removeEventListener('input', handleInput);
+            el.removeEventListener('change', handleInput);
+        };
     }, [attrs.onInteract]);
 
     return (
