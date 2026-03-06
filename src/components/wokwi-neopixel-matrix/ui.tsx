@@ -1,33 +1,64 @@
 import React, { useRef, useEffect } from 'react';
 
-const spinBtn: React.CSSProperties = {
-    width: 20, height: 20, border: '1px solid var(--border)', borderRadius: 4,
-    background: 'var(--bg2)', color: 'var(--text)', cursor: 'pointer',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    fontSize: 14, lineHeight: 1, padding: 0, flexShrink: 0,
+const numberInput: React.CSSProperties = {
+    width: 64,
+    background: 'var(--card)',
+    color: 'var(--text)',
+    border: '1px solid var(--border)',
+    borderRadius: 6,
+    padding: '3px 4px 3px 8px',
+    fontSize: 13,
+    fontFamily: 'JetBrains Mono, monospace',
+    fontWeight: 600,
+    outline: 'none',
+    textAlign: 'center',
+    appearance: 'auto',
+    WebkitAppearance: 'auto',
+    cursor: 'default',
 };
 
-const numDisplay: React.CSSProperties = {
-    minWidth: 22, textAlign: 'center', fontSize: 12,
-    color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace',
+const rowStyle: React.CSSProperties = {
+    display: 'flex', alignItems: 'center', gap: 8,
+};
+
+const label: React.CSSProperties = {
+    fontSize: 11, color: 'var(--text2)', width: 30, flexShrink: 0, fontWeight: 600,
 };
 
 export const NeopixelContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (key: string, value: any) => void }) => {
     const cols = Math.max(1, Math.min(16, parseInt(attrs?.cols ?? '8', 10)));
     const rows = Math.max(1, Math.min(16, parseInt(attrs?.rows ?? '8', 10)));
+
+    const handleChange = (key: string, raw: string, min: number, max: number) => {
+        const v = Math.max(min, Math.min(max, parseInt(raw, 10) || min));
+        onUpdate(key, v);
+    };
+
     return (
         <>
-            <span style={{ fontSize: 12, color: 'var(--text2)' }}>Cols:</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                <button style={spinBtn} onClick={() => onUpdate('cols', Math.max(1, cols - 1))}>−</button>
-                <span style={numDisplay}>{cols}</span>
-                <button style={spinBtn} onClick={() => onUpdate('cols', Math.min(16, cols + 1))}>+</button>
+            <div style={rowStyle}>
+                <span style={label}>Cols</span>
+                <input
+                    type="number"
+                    min={1}
+                    max={16}
+                    value={cols}
+                    onChange={e => handleChange('cols', e.target.value, 1, 16)}
+                    onDoubleClick={e => e.stopPropagation()}
+                    style={numberInput}
+                />
             </div>
-            <span style={{ fontSize: 12, color: 'var(--text2)' }}>Rows:</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                <button style={spinBtn} onClick={() => onUpdate('rows', Math.max(1, rows - 1))}>−</button>
-                <span style={numDisplay}>{rows}</span>
-                <button style={spinBtn} onClick={() => onUpdate('rows', Math.min(16, rows + 1))}>+</button>
+            <div style={rowStyle}>
+                <span style={label}>Rows</span>
+                <input
+                    type="number"
+                    min={1}
+                    max={16}
+                    value={rows}
+                    onChange={e => handleChange('rows', e.target.value, 1, 16)}
+                    onDoubleClick={e => e.stopPropagation()}
+                    style={numberInput}
+                />
             </div>
         </>
     );

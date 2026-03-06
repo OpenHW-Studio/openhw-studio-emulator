@@ -10,11 +10,11 @@ const spinBtn: React.CSSProperties = {
 export const ResistorContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (key: string, value: any) => void }) => {
     const raw = attrs?.value ?? '1000';
     const numeric = parseFloat(raw);
-    const canStep = !isNaN(numeric) && numeric > 0;
+    const canStep = !isNaN(numeric);
 
-    const step = (multiply: boolean) => {
+    const step = (add: boolean) => {
         if (!canStep) return;
-        const next = multiply ? numeric * 10 : Math.max(1, numeric / 10);
+        const next = add ? numeric + 10 : Math.max(0, numeric - 10);
         onUpdate('value', String(Math.round(next)));
     };
 
@@ -22,14 +22,15 @@ export const ResistorContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate:
         <>
             <span style={{ fontSize: 12, color: 'var(--text2)' }}>Res (Ω):</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                <button style={spinBtn} title="÷10" onClick={() => step(false)}>−</button>
+                <button style={spinBtn} title="−10" onClick={() => step(false)}>−</button>
                 <input
                     type="text"
                     value={raw}
                     onChange={e => onUpdate('value', e.target.value)}
-                    style={{ width: 52, background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 4, padding: '2px 4px', outline: 'none', textAlign: 'center', fontSize: 12 }}
+                    onDoubleClick={e => e.stopPropagation()}
+                    style={{ width: 56, background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 6, padding: '3px 4px', outline: 'none', textAlign: 'center', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', fontWeight: 600 }}
                 />
-                <button style={spinBtn} title="×10" onClick={() => step(true)}>+</button>
+                <button style={spinBtn} title="+10" onClick={() => step(true)}>+</button>
             </div>
         </>
     );
