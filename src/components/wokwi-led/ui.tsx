@@ -6,7 +6,7 @@ export const LEDContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (key
         <select
             value={attrs?.color || 'red'}
             onChange={e => onUpdate('color', e.target.value)}
-            style={{ background: 'var(--bg)', color: 'white', border: '1px solid var(--border)', borderRadius: 4, padding: 2, outline: 'none' }}
+            style={{ background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 4, padding: 2, outline: 'none' }}
         >
             <option value="red">Red</option>
             <option value="green">Green</option>

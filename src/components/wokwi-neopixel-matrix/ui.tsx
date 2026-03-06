@@ -1,27 +1,37 @@
 import React, { useRef, useEffect } from 'react';
 
-export const NeopixelContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (key: string, value: any) => void }) => (
-    <>
-        <span style={{ fontSize: 12, color: 'var(--text2)' }}>Cols:</span>
-        <input
-            type="number"
-            min="1"
-            max="16"
-            value={attrs?.cols ?? '8'}
-            onChange={e => onUpdate('cols', e.target.value)}
-            style={{ width: 40, background: 'var(--bg)', color: 'white', border: '1px solid var(--border)', borderRadius: 4, padding: '2px 4px', outline: 'none' }}
-        />
-        <span style={{ fontSize: 12, color: 'var(--text2)' }}>Rows:</span>
-        <input
-            type="number"
-            min="1"
-            max="16"
-            value={attrs?.rows ?? '8'}
-            onChange={e => onUpdate('rows', e.target.value)}
-            style={{ width: 40, background: 'var(--bg)', color: 'white', border: '1px solid var(--border)', borderRadius: 4, padding: '2px 4px', outline: 'none' }}
-        />
-    </>
-);
+const spinBtn: React.CSSProperties = {
+    width: 20, height: 20, border: '1px solid var(--border)', borderRadius: 4,
+    background: 'var(--bg2)', color: 'var(--text)', cursor: 'pointer',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: 14, lineHeight: 1, padding: 0, flexShrink: 0,
+};
+
+const numDisplay: React.CSSProperties = {
+    minWidth: 22, textAlign: 'center', fontSize: 12,
+    color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace',
+};
+
+export const NeopixelContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (key: string, value: any) => void }) => {
+    const cols = Math.max(1, Math.min(16, parseInt(attrs?.cols ?? '8', 10)));
+    const rows = Math.max(1, Math.min(16, parseInt(attrs?.rows ?? '8', 10)));
+    return (
+        <>
+            <span style={{ fontSize: 12, color: 'var(--text2)' }}>Cols:</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                <button style={spinBtn} onClick={() => onUpdate('cols', Math.max(1, cols - 1))}>−</button>
+                <span style={numDisplay}>{cols}</span>
+                <button style={spinBtn} onClick={() => onUpdate('cols', Math.min(16, cols + 1))}>+</button>
+            </div>
+            <span style={{ fontSize: 12, color: 'var(--text2)' }}>Rows:</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                <button style={spinBtn} onClick={() => onUpdate('rows', Math.max(1, rows - 1))}>−</button>
+                <span style={numDisplay}>{rows}</span>
+                <button style={spinBtn} onClick={() => onUpdate('rows', Math.min(16, rows + 1))}>+</button>
+            </div>
+        </>
+    );
+};
 
 // For Neopixels, we really just render the wokwi-neopixel-matrix element.
 // In the frontend, the setPixel function is called directly on the DOM element if there's state changes.

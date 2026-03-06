@@ -1,18 +1,35 @@
 import React from 'react';
 
-export const PowerSupplyContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (key: string, value: any) => void }) => (
-    <>
-        <span style={{ fontSize: 12, color: 'var(--text2)' }}>Voltage:</span>
-        <input
-            type="number"
-            step="0.1"
-            value={attrs?.voltage ?? '5.0'}
-            onChange={e => onUpdate('voltage', e.target.value)}
-            style={{ width: 50, background: 'var(--bg)', color: 'white', border: '1px solid var(--border)', borderRadius: 4, padding: '2px 4px', outline: 'none' }}
-        />
-        <span style={{ fontSize: 12, color: 'var(--text2)' }}>V</span>
-    </>
-);
+const spinBtn: React.CSSProperties = {
+    width: 20, height: 20, border: '1px solid var(--border)', borderRadius: 4,
+    background: 'var(--bg2)', color: 'var(--text)', cursor: 'pointer',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: 14, lineHeight: 1, padding: 0, flexShrink: 0,
+};
+
+export const PowerSupplyContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (key: string, value: any) => void }) => {
+    const voltage = parseFloat(attrs?.voltage ?? '5.0');
+    const step = (delta: number) => {
+        const next = Math.round((voltage + delta) * 10) / 10;
+        onUpdate('voltage', next.toFixed(1));
+    };
+    return (
+        <>
+            <span style={{ fontSize: 12, color: 'var(--text2)' }}>Voltage:</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                <button style={spinBtn} onClick={() => step(-0.5)}>−</button>
+                <input
+                    type="text"
+                    value={attrs?.voltage ?? '5.0'}
+                    onChange={e => onUpdate('voltage', e.target.value)}
+                    style={{ width: 38, background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 4, padding: '2px 4px', outline: 'none', textAlign: 'center', fontSize: 12 }}
+                />
+                <button style={spinBtn} onClick={() => step(+0.5)}>+</button>
+            </div>
+            <span style={{ fontSize: 12, color: 'var(--text2)' }}>V</span>
+        </>
+    );
+};
 
 export const PowerSupplyUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const voltage = attrs?.voltage || '5.0';
