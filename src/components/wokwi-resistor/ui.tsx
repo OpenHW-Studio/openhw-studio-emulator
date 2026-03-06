@@ -1,5 +1,17 @@
 import React from 'react';
 
+export const ResistorContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (key: string, value: any) => void }) => (
+    <>
+        <span style={{ fontSize: 12, color: 'var(--text2)' }}>Res (Ω):</span>
+        <input
+            type="text"
+            value={attrs?.value ?? '1000'}
+            onChange={e => onUpdate('value', e.target.value)}
+            style={{ width: 60, background: 'var(--bg)', color: 'white', border: '1px solid var(--border)', borderRadius: 4, padding: '2px 4px', outline: 'none' }}
+        />
+    </>
+);
+
 export const ResistorUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const value = attrs?.value || '220';
 

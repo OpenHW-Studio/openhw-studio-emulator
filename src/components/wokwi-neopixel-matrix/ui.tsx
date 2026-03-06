@@ -1,5 +1,28 @@
 import React, { useRef, useEffect } from 'react';
 
+export const NeopixelContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (key: string, value: any) => void }) => (
+    <>
+        <span style={{ fontSize: 12, color: 'var(--text2)' }}>Cols:</span>
+        <input
+            type="number"
+            min="1"
+            max="16"
+            value={attrs?.cols ?? '8'}
+            onChange={e => onUpdate('cols', e.target.value)}
+            style={{ width: 40, background: 'var(--bg)', color: 'white', border: '1px solid var(--border)', borderRadius: 4, padding: '2px 4px', outline: 'none' }}
+        />
+        <span style={{ fontSize: 12, color: 'var(--text2)' }}>Rows:</span>
+        <input
+            type="number"
+            min="1"
+            max="16"
+            value={attrs?.rows ?? '8'}
+            onChange={e => onUpdate('rows', e.target.value)}
+            style={{ width: 40, background: 'var(--bg)', color: 'white', border: '1px solid var(--border)', borderRadius: 4, padding: '2px 4px', outline: 'none' }}
+        />
+    </>
+);
+
 // For Neopixels, we really just render the wokwi-neopixel-matrix element.
 // In the frontend, the setPixel function is called directly on the DOM element if there's state changes.
 export const NeopixelUI = ({ state, attrs }: { state: any, attrs: any }) => {

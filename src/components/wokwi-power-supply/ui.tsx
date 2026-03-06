@@ -1,5 +1,19 @@
 import React from 'react';
 
+export const PowerSupplyContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (key: string, value: any) => void }) => (
+    <>
+        <span style={{ fontSize: 12, color: 'var(--text2)' }}>Voltage:</span>
+        <input
+            type="number"
+            step="0.1"
+            value={attrs?.voltage ?? '5.0'}
+            onChange={e => onUpdate('voltage', e.target.value)}
+            style={{ width: 50, background: 'var(--bg)', color: 'white', border: '1px solid var(--border)', borderRadius: 4, padding: '2px 4px', outline: 'none' }}
+        />
+        <span style={{ fontSize: 12, color: 'var(--text2)' }}>V</span>
+    </>
+);
+
 export const PowerSupplyUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const voltage = attrs?.voltage || '5.0';
     return (
