@@ -1,0 +1,123 @@
+{
+    "type": "wokwi-lcd1602",
+    "label": "LCD 1602",
+    "description": "16x2 Character LCD Display",
+    "group": "Displays",
+    "w": 303,
+    "h": 140,
+    "pins":
+    [
+        {
+            "id":"VSS",
+            "description":"Ground pin of the LCD",
+            "x": 32,
+            "y": 131,
+            "type": "power"
+        },
+        {
+            "id":"VDD",
+            "description":"Power supply pin for the LCD",
+            "x": 41.5,
+            "y": 131,
+            "type": "power"
+        },
+        {
+            "id":"V0",
+            "description":"Contrast control pin; connected to a potentiometer to adjust text visibility.",
+            "x": 51.2,
+            "y": 131,
+            "type": "signal"
+        },
+        {
+            "id":"RS",
+            "description":"Selects command mode or data mode (0 = command, 1 = character data).",
+            "x": 60.8,
+            "y": 131,
+            "type": "signal"
+        },
+        {
+            "id":"RW",
+            "description":"Controls read or write operation (0 = write to LCD, 1 = read from LCD).",
+            "x": 70.3,
+            "y": 131,
+            "type": "signal"
+        },
+        {
+            "id":"E",
+            "description":"Enable pin; triggers data read/write on rising edge.",
+            "x": 80,
+            "y": 131,
+            "type": "signal"
+        },
+        {
+            "id":"D0",
+            "description":"Data pin 0 (least significant bit).",
+            "x": 89.5,
+            "y": 131,
+            "type": "signal"
+        },
+        {
+            "id":"D1",
+            "description":"Data pin 1.",
+            "x": 99,
+            "y": 131,
+            "type": "signal"
+        },
+        {
+            "id":"D2",
+            "description":"Data pin 2.",
+            "x": 108.5,
+            "y": 131,
+            "type": "signal"
+        },
+        {
+            "id":"D3",
+            "description":"Data pin 3.",
+            "x": 118.24,
+            "y": 131,
+            "type": "signal"
+        },
+        {
+            "id":"D4",
+            "description":"Data pin 4.",
+            "x": 128.2,
+            "y": 131,
+            "type": "signal"
+        },
+        {
+            "id":"D5",
+            "description":"Data pin 5.",
+            "x": 137.7,
+            "y": 131,
+            "type": "signal"        
+        },
+        {
+            "id":"D6",
+            "description":"Data pin 6.",
+            "x": 147.2,
+            "y": 131,
+            "type": "signal"
+        },
+        {
+            "id":"D7",
+            "description":"Data pin 7 (most significant bit).",
+            "x": 156.5,
+            "y": 131,
+            "type": "signal"
+        },
+        {
+            "id":"A",
+            "description":"Backlight anode (positive terminal).",
+            "x": 166.5,
+            "y": 131,
+            "type": "power"
+        },
+        {
+            "id":"K",
+            "description":"Backlight cathode (negative terminal).",
+            "x": 176,
+            "y": 131,
+            "type": "power"
+        }
+    ]
+}

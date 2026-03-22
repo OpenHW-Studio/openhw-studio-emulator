@@ -1,0 +1,14 @@
+{
+    "type": "wokwi-dht22",
+    "label": "DHT22",
+    "description": "DHT22 Temperature and Humidity Sensor",
+    "group": "Sensors",
+    "width": 57,
+    "height": 117,
+    "pins": [
+        { "id": "VCC", "label": "VCC", "x": 10, "y": 114.9, "type": "power" },
+        { "id": "SDA", "label": "SDA", "x": 22.4, "y": 114.9, "type": "digital" },
+        { "id": "NC", "label": "NC", "x": 35.3, "y": 114.9, "type": "digital" },
+        { "id": "GND", "label": "GND", "x": 48.0, "y": 114.9, "type": "power" }
+    ]
+}

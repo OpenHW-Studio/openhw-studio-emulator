@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analog Soil Moisture Sensor - Comprehensive Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f7f9fc;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #1a365d;
+            border-bottom: 3px solid #e2e8f0;
+            padding-bottom: 15px;
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #2b6cb0;
+            margin-top: 40px;
+            font-size: 1.8em;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+        p {
+            font-size: 1.1em;
+            color: #4a5568;
+        }
+        .hero-img {
+            display: block;
+            margin: 30px auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .infobox {
+            background-color: #ebf8ff;
+            border-left: 5px solid #3182ce;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .infobox h4 {
+            margin-top: 0;
+            color: #2b6cb0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 1.1em;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #f7fafc;
+            color: #4a5568;
+        }
+        pre {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 1.05em;
+        }
+        .pin-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: white;
+        }
+        .pin-vcc { background-color: #e53e3e; }
+        .pin-sig { background-color: #805ad5; }
+        .pin-gnd { background-color: #000000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Analog Soil Moisture Sensor</h1>
+        
+        <p>The <strong>Soil Moisture Sensor</strong> is a simple breakout board used to measure the volumetric content of water inside the soil. It is frequently employed in automated plant watering systems, smart agriculture, and greenhouse monitoring.</p>
+
+        <img src="./soil_sensor.png" alt="Analog Soil Moisture Sensor Diagram" class="hero-img" />
+
+        <h2>How It Works</h2>
+        <p>This sensor operates on the principle of electrical resistance (or conductivity):</p>
+        <ol>
+            <li><strong>The Forked Probe:</strong> The two large exposed conductive pads act as a variable resistor. The resistance depends on the moisture content of the soil they are buried in.</li>
+            <li><strong>Dry Soil:</strong> Has very high electrical resistance because dry dirt acts as an insulator. The sensor outputs a high voltage reading.</li>
+            <li><strong>Wet Soil:</strong> Water is a great conductor. When the soil is moist, electricity easily bridges the gap between the two prongs, drastically lowering the resistance. The sensor outputs a lower voltage reading.</li>
+            <li><strong>Output:</strong> The analog signal from the probe is passed to your Arduino's Analog Input, where it is converted into a digital value ranging from 0 (soaking wet) to 1023 (bone dry).</li>
+        </ol>
+
+        <h2>Hardware Pinout</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Pin</th>
+                    <th>Function</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="pin-tag pin-vcc">VCC</span></td>
+                    <td>Power supply. Connect to Arduino 5V or 3.3V.</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-gnd">GND</span></td>
+                    <td>Common ground connection.</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-sig">SIG / A0</span></td>
+                    <td>Analog Output. Connect to an Arduino Analog pin (e.g., A0) to read the moisture levels.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Using the Emulator</h2>
+        <div class="infobox">
+            <h4>💡 Simulation Testing</h4>
+            <p>During a running simulation, a dark <strong>floating control panel</strong> with a slider labeled "Soil Moisture" will appear near the sensor. Drag this slider to simulate watering a dry plant (from 0% moisture up to 100%). Your Arduino's `analogRead(A0)` will decrease automatically as the simulated moisture increases!</p>
+        </div>
+
+        <h2>Arduino Code Exampe</h2>
+        <p>Reading the sensor is as simple as using Arduino's built-in <code>analogRead()</code> function and mapping the inverse relationship.</p>
+        
+        <pre><code>// Define Sensor Pins
+const int sensorPin = A0;  // Analog pin connected to SIG
+
+void setup() {
+  Serial.begin(9600);      // Start serial monitor
+  Serial.println("Soil Moisture Sensor active.");
+}
+
+void loop() {
+  // Read the raw analog moisture value (0 to 1023)
+  // Remember: 1023 = Completely Dry, 0 = In Water
+  int sensorValue = analogRead(sensorPin);
+
+  // Map the raw value to a human-readable percentage (0% to 100%)
+  // We invert the scale here so 100% means fully wet.
+  int moisturePercent = map(sensorValue, 1023, 0, 0, 100);
+  
+  // Safely clamp the values just in case
+  moisturePercent = constrain(moisturePercent, 0, 100);
+
+  Serial.print("Raw Value: ");
+  Serial.print(sensorValue);
+  Serial.print(" | Moisture Level: ");
+  Serial.print(moisturePercent);
+  Serial.println("%");
+  
+  // Example automation logic
+  if (moisturePercent < 30) {
+    Serial.println("⚠️ Plant is THIRSTY! Turn on water pump!");
+  }
+  
+  delay(2000); // Wait 2 seconds before the next reading
+}</code></pre>
+
+    </div>
+</body>
+</html>

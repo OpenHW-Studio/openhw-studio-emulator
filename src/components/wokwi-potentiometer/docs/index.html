@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rotary Potentiometer - Comprehensive Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f7f9fc;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #1a365d;
+            border-bottom: 3px solid #e2e8f0;
+            padding-bottom: 15px;
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #2b6cb0;
+            margin-top: 40px;
+            font-size: 1.8em;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+        p {
+            font-size: 1.1em;
+            color: #4a5568;
+        }
+        .hero-img {
+            display: block;
+            margin: 30px auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .infobox {
+            background-color: #ebf8ff;
+            border-left: 5px solid #3182ce;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .infobox h4 {
+            margin-top: 0;
+            color: #2b6cb0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 1.1em;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #f7fafc;
+            color: #4a5568;
+        }
+        pre {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 1.05em;
+        }
+        .pin-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: white;
+        }
+        .pin-vcc { background-color: #e53e3e; }
+        .pin-gnd { background-color: #000000; }
+        .pin-sig { background-color: #805ad5; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rotary Potentiometer</h1>
+        
+        <p>A <strong>Potentiometer</strong> (often called a "pot") is a three-terminal resistor with a sliding or rotating contact that forms an adjustable voltage divider. In electronics, it's typically used to control electrical devices such as volume controls on audio equipment.</p>
+
+        <img src="./potentiometer.png" alt="Potentiometer Diagram" class="hero-img" />
+
+        <h2>How It Works</h2>
+        <p>Inside the metal casing is a circular track made of resistive material (like carbon).</p>
+        <ol>
+            <li><strong>The Track:</strong> The two outer pins connect to the ends of this solid resistive track. If you measure the resistance across the two outer pins, it will always equal the total rating of the pot (e.g., 10k&Omega;).</li>
+            <li><strong>The Wiper:</strong> The center pin connects to a "wiper" that physically slides along this resistive track when you turn the knob.</li>
+            <li><strong>Voltage Division:</strong> If you connect 5V to the left pin and GND to the right pin, the center pin acts like a dynamic volume knob for electricity. Turning the dial sweeps the output voltage smoothly between 0V and 5V.</li>
+        </ol>
+
+        <h2>Hardware Pinout</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Pin</th>
+                    <th>Function</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="pin-tag pin-gnd">Left (GND)</span></td>
+                    <td>Common ground connection. (If swapped with VCC, the dial rotation mapping simply reverses).</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-sig">Middle (SIG)</span></td>
+                    <td>The analog output voltage. Connect to an Arduino Analog Pin (e.g., A0) to read the dial's position.</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-vcc">Right (VCC)</span></td>
+                    <td>Power supply. Connect to Arduino 5V.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Using the Emulator</h2>
+        <div class="infobox">
+            <h4>💡 Simulation Testing</h4>
+            <p>During a running simulation, hover your mouse over the potentiometer dial. Click and drag smoothly in a circle (or slowly left/right) to rotate the knob. Your Arduino code will instantly detect the varying voltage!</p>
+        </div>
+
+        <h2>Arduino Code Exampe</h2>
+        <p>Reading a potentiometer is the fundamental way to get analog input into a microcontroller.</p>
+        
+        <pre><code>int potPin = A0;  // Analog pin connected to the potentiometer's middle pin
+int val = 0;      // Variable to store the read value
+
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  // read the voltage on the analog pin
+  // (value will be between 0 and 1023)
+  val = analogRead(potPin);
+
+  Serial.print("Potentiometer Value: ");
+  Serial.println(val);
+
+  // Example: Map the value to control an LED's brightness
+  // int brightness = map(val, 0, 1023, 0, 255);
+  // analogWrite(9, brightness);
+
+  delay(100);
+}</code></pre>
+
+    </div>
+</body>
+</html>

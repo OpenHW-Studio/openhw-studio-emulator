@@ -1,0 +1,14 @@
+{
+    "type": "wokwi-gas-sensor",
+    "label": "MQ-2 Gas Sensor",
+    "description": "Analog/Digital Gas Sensor Module",
+    "group": "Sensors",
+    "width": 200,
+    "height": 200,
+    "pins": [
+        { "id": "VCC", "label": "VCC", "x": 135, "y": 46 },
+        { "id": "GND", "label": "GND", "x": 135, "y": 36 },
+        { "id": "DO", "label": "D0", "x": 135, "y": 26 },
+        { "id": "AO", "label": "A0", "x": 135, "y": 17 }
+    ]
+}

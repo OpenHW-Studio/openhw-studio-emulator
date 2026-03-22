@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>74HC595 Shift Register - Comprehensive Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f7f9fc;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #1a365d;
+            border-bottom: 3px solid #e2e8f0;
+            padding-bottom: 15px;
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #2b6cb0;
+            margin-top: 40px;
+            font-size: 1.8em;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+        p {
+            font-size: 1.1em;
+            color: #4a5568;
+        }
+        .hero-img {
+            display: block;
+            margin: 30px auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .infobox {
+            background-color: #ebf8ff;
+            border-left: 5px solid #3182ce;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .infobox h4 {
+            margin-top: 0;
+            color: #2b6cb0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 1em;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f7fafc;
+            color: #4a5568;
+        }
+        pre {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 1.05em;
+        }
+        .pin-tag {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85em;
+            color: white;
+            background-color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>74HC595 Shift Register</h1>
+        
+        <p>The <strong>74HC595</strong> is an 8-bit serial-in, parallel-out shift register. It is a fundamental building block in digital electronics that allows you to "expand" the number of output pins on your Arduino—controlling 8 outputs using only 3 digital pins.</p>
+
+        <img src="./shift_register.png" alt="74HC595 Pinout Diagram" class="hero-img" />
+
+        <h2>How It Works</h2>
+        <p>The chip works like a small memory shelf with 8 slots:</p>
+        <ol>
+            <li><strong>Serial Input (DS):</strong> You "push" bits (1s or 0s) into the chip one by one.</li>
+            <li><strong>Shift Clock (SHCP):</strong> Every time this pin pulses, the internal "shelf" moves over, making room for the next bit.</li>
+            <li><strong>Storage Clock (STCP):</strong> Also called the <em>Latch</em>. When you pulse this pin, the 8 bits you just pushed in are pushed out to the physical pins (Q0-Q7) all at once.</li>
+            <li><strong>Daisy Chaining:</strong> By connecting the <strong>Q7'</strong> pin of one chip to the <strong>DS</strong> pin of another, you can chain multiple registers to control 16, 24, or even 100+ outputs from the same 3 Arduino pins!</li>
+        </ol>
+
+        <h2>Hardware Pinout Reference</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Pin</th>
+                    <th>Label</th>
+                    <th>Function</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>15, 1-7</td><td>Q0 - Q7</td><td>Parallel Data Outputs</td></tr>
+                <tr><td>8</td><td>GND</td><td>Ground (0V)</td></tr>
+                <tr><td>9</td><td>Q7'</td><td>Serial Out (for daisy chaining)</td></tr>
+                <tr><td>10</td><td>MR / SRCLR</td><td>Master Reset (Active LOW - usually tied to 5V)</td></tr>
+                <tr><td>11</td><td>SHCP / SRCLK</td><td>Shift Register Clock</td></tr>
+                <tr><td>12</td><td>STCP / RCLK</td><td>Storage Register Clock (Latch)</td></tr>
+                <tr><td>13</td><td>OE</td><td>Output Enable (Active LOW - usually tied to GND)</td></tr>
+                <tr><td>14</td><td>DS / SER</td><td>Serial Data Input</td></tr>
+                <tr><td>16</td><td>VCC</td><td>Power Supply (2V to 6V)</td></tr>
+            </tbody>
+        </table>
+
+        <h2>Wiring Diagram</h2>
+        <pre><code>Arduino D11 ── SER   (DS)
+Arduino D12 ── SRCLK (SHCP)
+Arduino D8  ── RCLK  (STCP)
+GND         ── /OE
+5V          ── /SRCLR
+VCC = 5V,  GND = GND</code></pre>
+
+        <h2>Arduino Code Exampe (shiftOut)</h2>
+        <pre><code>#define SER   11
+#define SRCLK 12
+#define RCLK  8
+
+void setup() {
+  pinMode(SER, OUTPUT);
+  pinMode(SRCLK, OUTPUT);
+  pinMode(RCLK, OUTPUT);
+}
+
+void writeRegister(byte data) {
+  digitalWrite(RCLK, LOW);
+  // Shift out the 8 bits
+  shiftOut(SER, SRCLK, MSBFIRST, data);
+  // Latch the data to the outputs
+  digitalWrite(RCLK, HIGH);
+}
+
+void loop() {
+  for (int i = 0; i &lt; 8; i++) {
+    writeRegister(1 << i);   // Light each output in sequence
+    delay(200);
+  }
+}</code></pre>
+
+    </div>
+</body>
+</html>

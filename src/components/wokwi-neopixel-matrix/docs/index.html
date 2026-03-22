@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoPixel 8x8 RGB LED Matrix - Comprehensive Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f7f9fc;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #1a365d;
+            border-bottom: 3px solid #e2e8f0;
+            padding-bottom: 15px;
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #2b6cb0;
+            margin-top: 40px;
+            font-size: 1.8em;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+        p {
+            font-size: 1.1em;
+            color: #4a5568;
+        }
+        .hero-img {
+            display: block;
+            margin: 30px auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .infobox {
+            background-color: #ebf8ff;
+            border-left: 5px solid #3182ce;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .infobox h4 {
+            margin-top: 0;
+            color: #2b6cb0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 1.1em;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #f7fafc;
+            color: #4a5568;
+        }
+        pre {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 1.05em;
+        }
+        .pin-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: white;
+        }
+        .pin-vcc { background-color: #e53e3e; }
+        .pin-sig { background-color: #ed8936; }
+        .pin-gnd { background-color: #000000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>NeoPixel 8x8 RGB LED Matrix</h1>
+        
+        <p>The <strong>NeoPixel 8x8 Matrix</strong> is an array of 64 individually addressable RGB LEDs (NeoPixels) arranged in a grid. Each LED contains its own WS2812 driver chip, allowing you to control thousands of colors using just a single digital pin.</p>
+
+        <img src="./matrix.png" alt="NeoPixel Matrix Diagram" class="hero-img" />
+
+        <h2>How It Works</h2>
+        <p>NeoPixels are "smart" LEDs that use a high-speed serial communication protocol:</p>
+        <ol>
+            <li><strong>The Driver Chip:</strong> Every LED on the board has a built-in constant-current driver IC. This chip receives data, strips off the first 24 bits (8 bits for Red, 8 for Green, 8 for Blue), and passes the rest onto the next LED in the series.</li>
+            <li><strong>Chaining:</strong> This "shift register" behavior allows you to chain hundreds of LEDs together and still control each one independently.</li>
+            <li><strong>Colors:</strong> By mixing various intensities of Red, Green, and Blue, each NeoPixel can display any of 16.7 million colors.</li>
+        </ol>
+
+        <h2>Hardware Pinout</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Pin</th>
+                    <th>Function</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="pin-tag pin-vcc">VCC / +5V</span></td>
+                    <td>Power supply. Connect to Arduino 5V (requires a decent power supply for high brightness).</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-sig">DIN / DI</span></td>
+                    <td>Data Input. Connect to any digital pin (recommended Pin 6).</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-gnd">GND</span></td>
+                    <td>Common ground connection.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Using the Emulator</h2>
+        <div class="infobox">
+            <h4>💡 Simulation Testing</h4>
+            <p>In OpenHW Studio, the NeoPixel matrix will render colors dynamically as your simulation runs. Note that driving all 64 LEDs at full white (255, 255, 255) consumes a lot of virtual current!</p>
+        </div>
+
+        <h2>Arduino Code Exampe</h2>
+        <p>You must install the <strong>Adafruit_NeoPixel</strong> library via the Library Manager.</p>
+        
+        <pre><code>#include &lt;Adafruit_NeoPixel.h&gt;
+
+#define PIN        6
+#define NUMPIXELS 64 // 8x8 matrix
+
+Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+
+void setup() {
+  pixels.begin(); // INITIALIZE NeoPixel strips object
+}
+
+void loop() {
+  pixels.clear(); // Set all pixel colors to 'off'
+
+  // Fill the matrix with a color sequence
+  for(int i=0; i&lt;NUMPIXELS; i++) {
+    pixels.setPixelColor(i, pixels.Color(0, 150, 0)); // Moderate Green
+    pixels.show(); // Send the updated color to the hardware
+    delay(50);
+  }
+}</code></pre>
+
+    </div>
+</body>
+</html>
