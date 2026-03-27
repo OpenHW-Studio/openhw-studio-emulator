@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arduino Uno R3 - Comprehensive Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f7f9fc;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #1a365d;
+            border-bottom: 3px solid #e2e8f0;
+            padding-bottom: 15px;
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #2b6cb0;
+            margin-top: 40px;
+            font-size: 1.8em;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+        p {
+            font-size: 1.1em;
+            color: #4a5568;
+        }
+        .hero-img {
+            display: block;
+            margin: 30px auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .infobox {
+            background-color: #ebf8ff;
+            border-left: 5px solid #3182ce;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .infobox h4 {
+            margin-top: 0;
+            color: #2b6cb0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 1em;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f7fafc;
+            color: #4a5568;
+        }
+        pre {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 1.05em;
+        }
+        .pin-tag {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85em;
+            color: white;
+            background-color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Arduino Uno R3</h1>
+        
+        <p>The <strong>Arduino Uno</strong> is a microcontroller board based on the ATmega328P. It has 14 digital input/output pins (of which 6 can be used as PWM outputs), 6 analog inputs, a 16 MHz quartz crystal, a USB connection, a power jack, an ICSP header, and a reset button.</p>
+
+        <img src="./Arduino-UNO-Description.webp" alt="Arduino Uno Pinout Diagram" class="hero-img" />
+
+        <h2>Technical Specifications</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Specification</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Microcontroller</td><td>ATmega328P</td></tr>
+                <tr><td>Operating Voltage</td><td>5V</td></tr>
+                <tr><td>Input Voltage (recommended)</td><td>7-12V</td></tr>
+                <tr><td>Digital I/O Pins</td><td>14 (6 provide PWM output)</td></tr>
+                <tr><td>Analog Input Pins</td><td>6</td></tr>
+                <tr><td>Flash Memory</td><td>32 KB (0.5 KB used by bootloader)</td></tr>
+                <tr><td>SRAM</td><td>2 KB</td></tr>
+                <tr><td>EEPROM</td><td>1 KB</td></tr>
+                <tr><td>Clock Speed</td><td>16 MHz</td></tr>
+            </tbody>
+        </table>
+
+        <h2>Detailed Pinout Reference</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Pins</th>
+                    <th>Primary Function</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>0 (RX), 1 (TX)</td><td>Serial / UART</td><td>Used to receive/transmit TTL serial data. Do not use for other tasks if you are using Serial.print().</td></tr>
+                <tr><td>2, 3</td><td>External Interrupts</td><td>Can be configured to trigger an interrupt on a low value, a rising or falling edge, or a change in value.</td></tr>
+                <tr><td>3, 5, 6, 9, 10, 11</td><td>PWM (~)</td><td>Provide 8-bit PWM output with the <code>analogWrite()</code> function.</td></tr>
+                <tr><td>10 (SS), 11 (MOSI), 12 (MISO), 13 (SCK)</td><td>SPI Bus</td><td>Used for high-speed synchronous communication with sensors and SD cards.</td></tr>
+                <tr><td>13</td><td>Built-in LED</td><td>There is a built-in LED connected to digital pin 13. When the pin is HIGH, the LED is on.</td></tr>
+                <tr><td>A0 - A5</td><td>Analog Inputs</td><td>6 analog inputs, each of which provides 10 bits of resolution (1024 different values).</td></tr>
+                <tr><td>A4 (SDA), A5 (SCL)</td><td>I2C / Wire</td><td>Used for the I2C communication protocol using the Wire library.</td></tr>
+            </tbody>
+        </table>
+
+        <h2>Using the Emulator</h2>
+        <div class="infobox">
+            <h4>💡 Simulation Testing</h4>
+            <p>In OpenHW Studio, the Arduino Uno R3 is the heart of your project. It automatically executes the code you've written in the editor. You can monitor the state of any pin by attaching an LED, using `Serial.println()`, or using the built-in logic probe tool!</p>
+        </div>
+
+    </div>
+</body>
+</html>

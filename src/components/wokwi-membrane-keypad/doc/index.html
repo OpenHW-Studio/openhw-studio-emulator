@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membrane Keypad Documentation</title>
+</head>
+<body>
+    <h1>Membrane Keypad</h1>
+    <p>A 4x4 membrane keypad with 16 keys arranged in a telephone-style layout.</p>
+    
+    <h2>Pin Configuration</h2>
+    <ul>
+        <li><strong>R1-R4</strong>: Row pins (output)</li>
+        <li><strong>C1-C4</strong>: Column pins (input)</li>
+    </ul>
+    
+    <h2>Key Layout</h2>
+    <pre>
+1 2 3 +
+4 5 6 -
+7 8 9 *
+. 0 = /
+    </pre>
+    
+    <h2>Usage</h2>
+    <p>The keypad uses a matrix scanning technique and is configured as a calculator-style keypad. To detect key presses:</p>
+    <ol>
+        <li>Set one row pin HIGH (3.3V/5V)</li>
+        <li>Read all column pins</li>
+        <li>A column pin reading LOW indicates a pressed key at that intersection</li>
+        <li>Repeat for each row</li>
+    </ol>
+    
+    <h2>Attributes</h2>
+    <ul>
+        <li><strong>type</strong>: Keypad type (4x4 or 4x3)</li>
+    </ul>
+    
+    <h2>Example Circuit</h2>
+    <p>Connect row pins to digital output pins and column pins to digital input pins with pull-up resistors.</p>
+</body>
+</html>

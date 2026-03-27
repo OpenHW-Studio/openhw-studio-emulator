@@ -20,10 +20,14 @@ export { default as wokwiIli9341 } from './wokwi-ili9341';
 export { default as wokwiLcd2004I2C } from './wokwi-lcd2004-i2c';
 export { default as wokwiLdrModule } from './wokwi-ldr-module';
 export { default as max30102 } from './max30102';
+export {default as wokwiMembraneKeypad} from './wokwi-membrane-keypad' ;
+export {default as lcd16x2} from './wokwi-LCD1602';
+export {default as wokwiPIRMotionSensor} from './wokwi-PIR-Motion-Sensor';
+export {default as wokwiGasSensor} from './wokwi-gas-sensor';
+export {default as wokwiPingSensor} from './wokwi-hc-sr04';
+export {default as wokwiSoilMoistureSensor} from './wokwi-soil-moisture-sensor';
+export {default as wokwiAnalogJoystick} from './wokwi-analog-joystick';
+export {default as wokwiDht22 } from './wokwi-dht22';
+  
 
-
-
-
-
-
-
+    

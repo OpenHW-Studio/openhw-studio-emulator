@@ -1,0 +1,15 @@
+{
+    "type": "wokwi-analog-joystick",
+    "label": "Analog Joystick",
+    "description": "Analog Thumbstick Joystick Module",
+    "group": "Input",
+    "width": 110,
+    "height": 110,
+    "pins": [
+        { "id": "GND", "label": "GND", "x": -5, "y": 6.8, "type": "power" },
+        { "id": "VCC", "label": "VCC", "x": -5, "y": 16.2, "type": "power" },
+        { "id": "VER", "label": "VRy", "x": -5, "y": 25.8, "type": "analog" },
+        { "id": "HOR", "label": "VRx", "x": -5, "y": 35.5, "type": "analog" },
+        { "id": "SEL", "label": "SW", "x": -5, "y": 45.1, "type": "digital" }
+    ]
+}

@@ -2,7 +2,6 @@ import { validation } from './validation';
 import manifest from './manifest.json';
 import { PushbuttonLogic } from './logic';
 import { PushbuttonUI, PushbuttonContextMenu, BOUNDS } from './ui';
-import docHtml from './doc/index.html?raw';
 
 export default {
     manifest,
@@ -11,5 +10,4 @@ export default {
     ContextMenu: PushbuttonContextMenu,
     BOUNDS,
     validation,
-    doc: docHtml
 };

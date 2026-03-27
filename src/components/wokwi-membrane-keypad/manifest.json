@@ -1,0 +1,66 @@
+{
+    "type": "wokwi-membrane-keypad",
+    "label": "Membrane Keypad",
+    "description": "4x4 membrane keypad with 16 keys",
+    "group": "Input",
+    "width": 265,
+    "height": 350,
+    "pins": [
+        {
+            "id": "R1",
+            "description": "KeyPad R1",
+            "x": 100,
+            "y": 338,
+            "type": "digital"
+        },
+        {
+            "id": "R2",
+            "description": "KeyPad R2",
+            "x": 110,
+            "y": 338,
+            "type": "digital"
+        },
+        {
+            "id": "R3",
+            "description": "KeyPad R3",
+            "x": 119.3,
+            "y": 338,
+            "type": "digital"
+        },
+        {
+            "id": "R4",
+            "description": "KeyPad R4",
+            "x": 129,
+            "y": 338,
+            "type": "digital"
+        },
+        {
+            "id": "C1",
+            "description": "KeyPad C1",
+            "x": 138.5,
+            "y": 338,
+            "type": "digital"
+        },
+        {
+            "id": "C2",
+            "description": "KeyPad C2",
+            "x": 148,
+            "y": 338,
+            "type": "digital"
+        },
+        {
+            "id": "C3",
+            "description": "KeyPad C3",
+            "x": 157.5,
+            "y": 338,
+            "type": "digital"
+        },
+        {
+            "id": "C4",
+            "description": "KeyPad C4",
+            "x": 167,
+            "y": 338,
+            "type": "digital"
+        }
+    ]
+}

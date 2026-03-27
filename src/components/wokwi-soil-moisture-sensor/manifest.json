@@ -1,0 +1,13 @@
+{
+    "type": "wokwi-soil-moisture-sensor",
+    "label": "Soil Moisture Sensor",
+    "description": "Analog Soil Moisture Sensor with probe",
+    "group": "Sensors",
+    "width": 130,
+    "height": 250,
+    "pins": [
+        { "id": "VCC", "label": "VCC", "x": 38, "y": 15, "type": "power" },
+        { "id": "GND", "label": "GND", "x": 55, "y": 15, "type": "power" },
+        { "id": "SIG", "label": "SIG", "x": 72, "y": 15, "type": "analog" }
+    ]
+}

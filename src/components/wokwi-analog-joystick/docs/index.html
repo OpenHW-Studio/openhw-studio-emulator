@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analog Joystick - Comprehensive Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f7f9fc;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #1a365d;
+            border-bottom: 3px solid #e2e8f0;
+            padding-bottom: 15px;
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #2b6cb0;
+            margin-top: 40px;
+            font-size: 1.8em;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+        p {
+            font-size: 1.1em;
+            color: #4a5568;
+        }
+        .hero-img {
+            display: block;
+            margin: 30px auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .infobox {
+            background-color: #ebf8ff;
+            border-left: 5px solid #3182ce;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .infobox h4 {
+            margin-top: 0;
+            color: #2b6cb0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 1.1em;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #f7fafc;
+            color: #4a5568;
+        }
+        pre {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 1.05em;
+        }
+        .pin-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: white;
+        }
+        .pin-vcc { background-color: #e53e3e; }
+        .pin-gnd { background-color: #000000; }
+        .pin-ana { background-color: #805ad5; }
+        .pin-dig { background-color: #3182ce; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Analog Joystick Module</h1>
+        
+        <p>The <strong>Analog Joystick</strong> is a multi-axis physical controller, functionally identical to the thumbsticks found on PlayStation or Xbox controller pads. It allows for precise, omni-directional 360-degree input alongside a tactile click button.</p>
+
+        <img src="./joystick.png" alt="Analog Joystick Diagram" class="hero-img" />
+
+        <h2>How It Works</h2>
+        <p>The joystick is essentially a clever mechanical wrapper around <strong>two potentiometers</strong> and <strong>one momentary tactile switch</strong>:</p>
+        <ol>
+            <li><strong>X and Y Axes (Analog):</strong> When you push the joystick, a mechanical gimbal turns two separate 10k potentiometer shafts. One tracks the Left/Right movement (X-axis, VRx), and the other tracks Up/Down movement (Y-axis, VRy). Because they are standard potentiometers, they output a smoothly varying analog voltage from 0V to 5V.</li>
+            <li><strong>Center Click (Digital):</strong> Pressing the joystick straight down like a button clicks a small momentary tactile switch housed directly underneath the stick mechanism.</li>
+            <li><strong>Idle State:</strong> When released, springs snap the joystick back to dead-center. In a 5V environment, both analog pins will rest naturally around 2.5V (which translates to an <code>analogRead()</code> value of roughly 512).</li>
+        </ol>
+
+        <h2>Hardware Pinout</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Pin</th>
+                    <th>Function</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="pin-tag pin-vcc">VCC</span></td>
+                    <td>Power supply. Connect to Arduino 5V.</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-gnd">GND</span></td>
+                    <td>Common ground connection.</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-ana">VRx / HOR</span></td>
+                    <td>Analog Output for X-axis (Horizontal). Connect to an Analog Pin (e.g., A0).</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-ana">VRy / VER</span></td>
+                    <td>Analog Output for Y-axis (Vertical). Connect to an Analog Pin (e.g., A1).</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-dig">SW / SEL</span></td>
+                    <td>Digital switch output. Connect to a Digital Pin. Needs a pull-up resistor (<code>INPUT_PULLUP</code>).</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Using the Emulator</h2>
+        <div class="infobox">
+            <h4>💡 Simulation Testing</h4>
+            <p>To use the joystick during a simulation, simply <strong>click and drag the black thumbstick</strong>! It supports full 360-degree analog sweeping. You can also quickly click the center of the thumbstick to trigger the downward button press event.</p>
+        </div>
+
+        <h2>Arduino Code Exampe</h2>
+        <p>You need to read two analog pins and one digital pin (configured with an internal pull-up resistor). Note that when resting, analog pins will read near 512.</p>
+        
+        <pre><code>// Define Connections
+const int xPin = A0;   // connected to VRx
+const int yPin = A1;   // connected to VRy
+const int swPin = 2;   // connected to SW
+
+void setup() {
+  Serial.begin(9600);
+  
+  // The switch shorts to ground when pressed, 
+  // so we must use the internal pull-up resistor!
+  pinMode(swPin, INPUT_PULLUP);
+}
+
+void loop() {
+  // Read analog voltages (Values will be 0 to 1023)
+  int xValue = analogRead(xPin);
+  int yValue = analogRead(yPin);
+  
+  // Read the digital button (LOW means pressed)
+  int buttonState = digitalRead(swPin);
+
+  Serial.print("X: ");
+  Serial.print(xValue);
+  Serial.print(" | Y: ");
+  Serial.print(yValue);
+  Serial.print(" | Status: ");
+
+  if (buttonState == LOW) {
+    Serial.println("CLICKED! 🔴");
+  } else {
+    Serial.println("Released");
+  }
+
+  delay(200); // Short delay to prevent serial spam
+}</code></pre>
+
+    </div>
+</body>
+</html>

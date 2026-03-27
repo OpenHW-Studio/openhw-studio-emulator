@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQ-2 Gas Sensor - Comprehensive Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f7f9fc;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #1a365d;
+            border-bottom: 3px solid #e2e8f0;
+            padding-bottom: 15px;
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #2b6cb0;
+            margin-top: 40px;
+            font-size: 1.8em;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+        p {
+            font-size: 1.1em;
+            color: #4a5568;
+        }
+        .hero-img {
+            display: block;
+            margin: 30px auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .infobox {
+            background-color: #ebf8ff;
+            border-left: 5px solid #3182ce;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .infobox h4 {
+            margin-top: 0;
+            color: #2b6cb0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 1.1em;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #f7fafc;
+            color: #4a5568;
+        }
+        pre {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 1.05em;
+        }
+        .pin-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: white;
+        }
+        .pin-vcc { background-color: #e53e3e; }
+        .pin-a0 { background-color: #805ad5; }
+        .pin-d0 { background-color: #3182ce; }
+        .pin-gnd { background-color: #000000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MQ-2 Gas Sensor Module</h1>
+        
+        <p>The <strong>MQ-2 Gas Sensor</strong> is a popular chemoresistor-based component used for detecting gas leakage in homes or industry. It is highly sensitive to flammable gases like LPG, propane, methane, hydrogen, alcohol, smoke, and carbon monoxide.</p>
+
+        <img src="./gas_sensor.png" alt="MQ-2 Gas Sensor Diagram" class="hero-img" />
+
+        <h2>How It Works</h2>
+        <p>Inside the metallic mesh dome lies a small heating element (a resistor) and a sensing material usually made of Tin Dioxide (SnO2):</p>
+        <ol>
+            <li><strong>The Heater:</strong> When powered, an internal coil heats the sensor to high temperatures, making the SnO2 highly reactive.</li>
+            <li><strong>Chemiresistor Principle:</strong> In clean air, oxygen molecules attract electrons on the surface of the SnO2, keeping its electrical resistance very high.</li>
+            <li><strong>Gas Detection:</strong> When combustible gases or smoke enter the mesh, they react with the adsorbed oxygen, releasing the trapped electrons. This sudden downpour of electrons causes the sensor's internal resistance to plummet.</li>
+            <li><strong>Output:</strong> A built-in LM393 comparator chip processes this resistance change and outputs both an analog voltage proportional to the gas concentration (A0) and a hard digital trigger (D0).</li>
+        </ol>
+
+        <h2>Hardware Pinout</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Pin</th>
+                    <th>Function</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="pin-tag pin-vcc">VCC</span></td>
+                    <td>Power supply. Connect to Arduino 5V.</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-gnd">GND</span></td>
+                    <td>Common ground connection.</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-d0">D0</span></td>
+                    <td>Digital Output. Goes LOW (0V) when the gas concentration exceeds the threshold set by the built-in potentiometer.</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-a0">A0</span></td>
+                    <td>Analog Output. Outputs a voltage (0-5V) directly proportional to the measured gas concentration.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Using the Emulator</h2>
+        <div class="infobox">
+            <h4>💡 Simulation Testing</h4>
+            <p>During a running simulation, a dark <strong>floating control panel</strong> with a slider will appear beneath the MQ-2 module. Drag this slider to simulate an increase in ambient smoke or gas parts-per-million (ppm). Your Arduino's `analogRead(A0)` will immediately spike alongside it!</p>
+        </div>
+
+        <h2>Arduino Code Exampe</h2>
+        <p>You can use both the analog and digital outputs simultaneously. The analog output provides a raw concentration value, while the digital output acts as a simple boolean trigger.</p>
+        
+        <pre><code>// Define Sensor Pins
+const int analogPin = A0;  // Analog pin for raw reading
+const int digitalPin = 2;  // Digital pin for threshold reading
+
+void setup() {
+  pinMode(digitalPin, INPUT); // Set digital pin as input
+  Serial.begin(9600);         // Start serial monitor
+  Serial.println("MQ-2 Heating up... (Wait 20s in real life)");
+}
+
+void loop() {
+  // Read the raw analog gas concentration value (0 to 1023)
+  int gasLevel = analogRead(analogPin);
+  
+  // Read the boolean digital threshold state
+  // LOW means the gas concentration is above the danger threshold!
+  int dangerLevel = digitalRead(digitalPin);
+
+  Serial.print("Raw Gas PPM Value: ");
+  Serial.print(gasLevel);
+
+  if (dangerLevel == LOW) {
+    Serial.println(" --- ⚠️ DANGER: HIGH GAS DETECTED!");
+  } else {
+    Serial.println(" --- Environment Safe.");
+  }
+  
+  delay(1000); // Read every second
+}</code></pre>
+
+    </div>
+</body>
+</html>

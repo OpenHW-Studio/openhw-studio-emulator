@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCD 16x2 Character Display - Comprehensive Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f7f9fc;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #1a365d;
+            border-bottom: 3px solid #e2e8f0;
+            padding-bottom: 15px;
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #2b6cb0;
+            margin-top: 40px;
+            font-size: 1.8em;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+        p {
+            font-size: 1.1em;
+            color: #4a5568;
+        }
+        .hero-img {
+            display: block;
+            margin: 30px auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .infobox {
+            background-color: #ebf8ff;
+            border-left: 5px solid #3182ce;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .infobox h4 {
+            margin-top: 0;
+            color: #2b6cb0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 1em;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f7fafc;
+            color: #4a5568;
+        }
+        pre {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 1.05em;
+        }
+        .pin-tag {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85em;
+            color: white;
+            background-color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LCD 16x2 Character Display</h1>
+        
+        <p>The <strong>LCD 16x2</strong> is a very common character display that can show up to 32 characters (16 per row) across two lines. It uses the Hitachi HD44780 controller protocol, making it extremely easy to use with Arduino.</p>
+
+        <img src="./lcd.png" alt="LCD 16x2 Diagram" class="hero-img" />
+
+        <h2>How It Works</h2>
+        <p>The display uses Liquid Crystal technology to block or allow light through tiny rectangular sub-pixels (5x8 dots per character).</p>
+        <ol>
+            <li><strong>Character Matrix:</strong> The screen is divided into 32 cells. Each cell contains its own tiny grid of dots that can be toggled to form letters, numbers, or symbols.</li>
+            <li><strong>Backlight:</strong> Most modules include an LED backlight (usually green or blue) so the text is visible in the dark.</li>
+            <li><strong>Data Interface:</strong> The display can be used in 8-bit mode (using many wires) or 4-bit mode (saving Arduino pins). The 4-bit mode is the standard for most hobby projects.</li>
+        </ol>
+
+        <h2>Hardware Pinout</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Pin</th>
+                    <th>Symbol</th>
+                    <th>Function</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>1</td><td>VSS</td><td>Ground (GND)</td></tr>
+                <tr><td>2</td><td>VDD</td><td>Power supply (5V)</td></tr>
+                <tr><td>3</td><td>V0</td><td>Contrast adjustment (usually connected to a potentiometer)</td></tr>
+                <tr><td>4</td><td>RS</td><td>Register Select (Instruction or Data)</td></tr>
+                <tr><td>5</td><td>RW</td><td>Read/Write (usually grounded)</td></tr>
+                <tr><td>6</td><td>E</td><td>Enable Signal</td></tr>
+                <tr><td>11-14</td><td>D4-D7</td><td>Data Bus (used in 4-bit mode)</td></tr>
+                <tr><td>15</td><td>A</td><td>Backlight Anode (+)</td></tr>
+                <tr><td>16</td><td>K</td><td>Backlight Cathode (-)</td></tr>
+            </tbody>
+        </table>
+
+        <h2>Using the Emulator</h2>
+        <div class="infobox">
+            <h4>💡 Simulation Testing</h4>
+            <p>In the OpenHW Studio emulator, the LCD will update its text instantly as your code runs. You don't need to worry about adjusting the contrast (V0) potentiometer in the software; it defaults to maximum clarity!</p>
+        </div>
+
+        <h2>Arduino Code Exampe</h2>
+        <p>Use the standard <code>LiquidCrystal</code> library included with Arduino.</p>
+        
+        <pre><code>#include &lt;LiquidCrystal.h&gt;
+
+// Initialize the library with the numbers of the interface pins
+// RS, E, D4, D5, D6, D7
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+void setup() {
+  // set up the LCD's number of columns and rows:
+  lcd.begin(16, 2);
+  // Print a message to the LCD.
+  lcd.print("Hello, World!");
+}
+
+void loop() {
+  // set the cursor to column 0, line 1
+  // (note: line 1 is the second row, since counting begins with 0):
+  lcd.setCursor(0, 1);
+  // print the number of seconds since reset:
+  lcd.print(millis() / 1000);
+}</code></pre>
+
+    </div>
+</body>
+</html>

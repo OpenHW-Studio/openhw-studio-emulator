@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HC-SR04 Ultrasonic Sensor - Comprehensive Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f7f9fc;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #1a365d;
+            border-bottom: 3px solid #e2e8f0;
+            padding-bottom: 15px;
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #2b6cb0;
+            margin-top: 40px;
+            font-size: 1.8em;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+        p {
+            font-size: 1.1em;
+            color: #4a5568;
+        }
+        .hero-img {
+            display: block;
+            margin: 30px auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .infobox {
+            background-color: #ebf8ff;
+            border-left: 5px solid #3182ce;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .infobox h4 {
+            margin-top: 0;
+            color: #2b6cb0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 1.1em;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #f7fafc;
+            color: #4a5568;
+        }
+        pre {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 1.05em;
+        }
+        .pin-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: white;
+        }
+        .pin-vcc { background-color: #e53e3e; }
+        .pin-trig { background-color: #ed8936; }
+        .pin-echo { background-color: #38a169; }
+        .pin-gnd { background-color: #000000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>HC-SR04 Ultrasonic Distance Sensor</h1>
+        
+        <p>The <strong>HC-SR04</strong> is an ultrasonic ranging module that provides 2cm to 400cm non-contact measurement functionality with a ranging accuracy that can reach up to 3mm.</p>
+
+        <img src="./hcsr04_sensor.png" alt="HC-SR04 Sensor Diagram" class="hero-img" />
+
+        <h2>How It Works</h2>
+        <p>This sensor operates on the same principle as a bat's echolocation (sonar):</p>
+        <ol>
+            <li><strong>Trigger:</strong> The Arduino sends a short 10µs electrical pulse to the <code>TRIG</code> pin.</li>
+            <li><strong>Transmit:</strong> The sensor's Transmitter (the left metal cylinder) broadcasts an 8-cycle sonic burst at 40kHz (way above human hearing).</li>
+            <li><strong>Echo:</strong> The sensor pulls the <code>ECHO</code> pin HIGH instantly, and waits for the sound waves to bounce off an object and return to the Receiver (the right metallic cylinder).</li>
+            <li><strong>Measure:</strong> Once the sound wave returns, the sensor drops the <code>ECHO</code> pin LOW. By measuring how long the <code>ECHO</code> pin stayed HIGH, your Arduino code can calculate the exact distance using the speed of sound.</li>
+        </ol>
+
+        <h2>Hardware Pinout</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Pin</th>
+                    <th>Function</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="pin-tag pin-vcc">VCC</span></td>
+                    <td>Power supply. Connect to Arduino 5V.</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-trig">TRIG</span></td>
+                    <td>Trigger Input. Arduino pulses this line HIGH for 10µs to trigger a ping.</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-echo">ECHO</span></td>
+                    <td>Echo Output. Sensor pulls this HIGH while the sound pulse is traveling.</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-gnd">GND</span></td>
+                    <td>Common ground connection.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Using the Emulator</h2>
+        <div class="infobox">
+            <h4>💡 Simulation Testing</h4>
+            <p>During a running simulation, a dark <strong>floating control panel</strong> with a slider will appear beneath the HC-SR04 module. Use this slider to manually adjust the virtual distance (in centimeters) between the sensor and an imaginary object. Your Arduino code will instantly measure the new distance.</p>
+        </div>
+
+        <h2>Arduino Code Exampe</h2>
+        <p>Because the sensor relies on precise timing of a high-speed pulse, we use the Arduino's built-in <code>pulseIn()</code> function to measure the duration of the ECHO pulse.</p>
+        
+        <pre><code>// Define the pins connected to the sensor
+const int trigPin = 9;
+const int echoPin = 10;
+
+// Variables for calculation
+long duration;
+int distanceCm;
+
+void setup() {
+  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin, INPUT);  // Sets the echoPin as an Input
+  
+  Serial.begin(9600); // Starts the serial communication
+  Serial.println("HC-SR04 Ready!");
+}
+
+void loop() {
+  // Clears the trigPin
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  
+  // Sets the trigPin HIGH for 10 micro-seconds
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration = pulseIn(echoPin, HIGH);
+  
+  // Calculating the distance
+  // Speed of sound wave divided by 2 (go and back)
+  distanceCm = duration * 0.034 / 2;
+  
+  // Prints the distance on the Serial Monitor
+  Serial.print("Distance: ");
+  Serial.print(distanceCm);
+  Serial.println(" cm");
+  
+  delay(100); // Short delay before next ping
+}</code></pre>
+
+    </div>
+</body>
+</html>

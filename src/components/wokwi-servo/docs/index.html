@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servo Motor - Comprehensive Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f7f9fc;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #1a365d;
+            border-bottom: 3px solid #e2e8f0;
+            padding-bottom: 15px;
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #2b6cb0;
+            margin-top: 40px;
+            font-size: 1.8em;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+        p {
+            font-size: 1.1em;
+            color: #4a5568;
+        }
+        .hero-img {
+            display: block;
+            margin: 30px auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .infobox {
+            background-color: #ebf8ff;
+            border-left: 5px solid #3182ce;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .infobox h4 {
+            margin-top: 0;
+            color: #2b6cb0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 1.1em;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #f7fafc;
+            color: #4a5568;
+        }
+        pre {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 1.05em;
+        }
+        .pin-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: white;
+        }
+        .pin-vcc { background-color: #e53e3e; }
+        .pin-gnd { background-color: #000000; }
+        .pin-pwm { background-color: #805ad5; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Servo Motor</h1>
+        
+        <p>A <strong>Servo Motor</strong> is a rotary actuator that allows for precise control of angular position. Unlike a standard DC motor which spins continuously, a servo can be instructed to move to a specific angle (usually between 0 and 180 degrees) and hold that position.</p>
+
+        <img src="./servo.png" alt="Servo Motor Diagram" class="hero-img" />
+
+        <h2>How It Works</h2>
+        <p>A servo motor is a closed-loop system that uses position feedback to control its motion and final position.</p>
+        <ol>
+            <li><strong>The Motor & Gears:</strong> Inside is a small DC motor connected to a set of plastic or metal gears. These gears increase the torque (strength) of the motor while slowing down the speed.</li>
+            <li><strong>Potentiometer Feedback:</strong> One of the gears is connected to a small potentiometer. As the motor turns, the potentiometer turns too, telling the internal control circuit exactly which angle the shaft is at.</li>
+            <li><strong>PWM Control:</strong> The motor is controlled by a Pulse Width Modulation (PWM) signal. The width of the pulse (usually between 1ms and 2ms) tells the servo which angle to seek.</li>
+        </ol>
+
+        <h2>Hardware Pinout</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Pin / Wire Color</th>
+                    <th>Function</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="pin-tag pin-gnd">GND (Brown/Black)</span></td>
+                    <td>Common ground connection.</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-vcc">VCC (Red)</span></td>
+                    <td>Power supply. Typically 4.8V to 6V.</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-pwm">PWM / Signal (Orange/White)</span></td>
+                    <td>Control signal. Connect to a PWM-capable Arduino pin (e.g., Pin 9).</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Using the Emulator</h2>
+        <div class="infobox">
+            <h4>💡 Simulation Testing</h4>
+            <p>In the OpenHW Studio emulator, the servo will physically rotate its horn in real-time based on the commands sent from your Arduino sketch. You can observe the angle changes visually as the simulation runs!</p>
+        </div>
+
+        <h2>Arduino Code Exampe</h2>
+        <p>Using the built-in <code>Servo.h</code> library makes controlling a servo incredibly simple.</p>
+        
+        <pre><code>#include &lt;Servo.h&gt;
+
+Servo myservo;  // create servo object to control a servo
+
+int pos = 0;    // variable to store the servo position
+
+void setup() {
+  myservo.attach(9);  // attaches the servo on pin 9 to the servo object
+}
+
+void loop() {
+  for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
+    // in steps of 1 degree
+    myservo.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(15);                       // waits 15ms for the servo to reach the position
+  }
+  for (pos = 180; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
+    myservo.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(15);                       // waits 15ms for the servo to reach the position
+  }
+}</code></pre>
+
+    </div>
+</body>
+</html>

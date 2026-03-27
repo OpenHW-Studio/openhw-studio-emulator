@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DC Motor (130-Style) - Comprehensive Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f7f9fc;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #1a365d;
+            border-bottom: 3px solid #e2e8f0;
+            padding-bottom: 15px;
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #2b6cb0;
+            margin-top: 40px;
+            font-size: 1.8em;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+        p {
+            font-size: 1.1em;
+            color: #4a5568;
+        }
+        .hero-img {
+            display: block;
+            margin: 30px auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .infobox {
+            background-color: #ebf8ff;
+            border-left: 5px solid #3182ce;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .infobox h4 {
+            margin-top: 0;
+            color: #2b6cb0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 1.1em;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #f7fafc;
+            color: #4a5568;
+        }
+        pre {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 1.05em;
+        }
+        .pin-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: white;
+            background-color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DC Toy Motor (130-Style)</h1>
+        
+        <p>A <strong>DC Motor</strong> is a simple actuator that converts direct current (DC) electrical energy into mechanical energy (rotation). These small 130-style motors are common in toys, fans, and small hobby robots.</p>
+
+        <img src="./motor.png" alt="DC Motor Diagram" class="hero-img" />
+
+        <h2>How It Works</h2>
+        <p>DC motors rely on electromagnetism and permanent magnets:</p>
+        <ol>
+            <li><strong>The Stator:</strong> Two permanent magnets (North and South) sit inside the motor's steel housing, creating a constant magnetic field.</li>
+            <li><strong>The Rotor (Armature):</strong> Inside the stator is a coil of wire (the rotor). When electricity flows through this coil, it becomes an electromagnet.</li>
+            <li><strong>Lorentz Force:</strong> The magnetic fields of the rotor and stator repel and attract each other, forcing the rotor to spin.</li>
+            <li><strong>Commutation:</strong> Small brushes at the back of the motor swap the direction of the electrical current in the rotor as it turns, ensuring it keeps spinning instead of stopping.</li>
+        </ol>
+
+        <h2>Important Note: Power Consumption</h2>
+        <div class="infobox" style="border-left-color: #e53e3e; background-color: #fff5f5;">
+            <h4 style="color: #c53030;">⚠️ DO NOT Connect Directly to Arduino Pins!</h4>
+            <p>A DC motor consumes much more current than a single Arduino pin can safely provide (typically 400mA+). Connecting a motor directly to a digital pin will likely permanent damage your Arduino. Always use a <strong>Motor Driver</strong> (like the L298N) or a transistor (like the TIP120) to control a motor.</p>
+        </div>
+
+        <h2>Hardware Pinout</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Pin</th>
+                    <th>Function</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="pin-tag">Terminal 1</span></td>
+                    <td>Positive or Negative (Polarity determines rotation direction).</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag">Terminal 2</span></td>
+                    <td>Positive or Negative.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Using the Emulator</h2>
+        <div class="infobox">
+            <h4>💡 Simulation Testing</h4>
+            <p>In the OpenHW Studio emulator, the motor shaft will visually spin when it receives power. If you swap the positive and negative wires, you will see the motor rotate in the opposite direction!</p>
+        </div>
+
+        <h2>Arduino Code Exampe</h2>
+        <p>This code assumes you are using a basic transistor or a single-channel driver to toggle the motor.</p>
+        
+        <pre><code>int motorPin = 9; // Connected to the base of a transistor or driver pin
+
+void setup() {
+  pinMode(motorPin, OUTPUT);
+}
+
+void loop() {
+  // Turn the motor on at full speed
+  digitalWrite(motorPin, HIGH);
+  delay(2000); // Run for 2 seconds
+
+  // Turn it off
+  digitalWrite(motorPin, LOW);
+  delay(2000); // Stop for 2 seconds
+
+  // Using PWM for speed control
+  analogWrite(motorPin, 128); // Run at half speed
+  delay(2000);
+}</code></pre>
+
+    </div>
+</body>
+</html>
