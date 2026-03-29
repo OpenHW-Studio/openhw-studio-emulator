@@ -1,0 +1,20 @@
+{
+    "type": "wokwi-mfrc522",
+    "label": "MFRC522 RFID Reader",
+    "group": "Sensors",
+    "w": 156,
+    "h": 120,
+    "attrs": {
+        "cardPresent": "false"
+    },
+    "pins": [
+        { "id": "3V3",  "x": 8, "y": 18,  "type": "input",  "description": "Power (3.3V ONLY)" },
+        { "id": "RST",  "x": 8, "y": 30,  "type": "input",  "description": "Reset" },
+        { "id": "GND",  "x": 8, "y": 42,  "type": "input",  "description": "Ground" },
+        { "id": "IRQ",  "x": 8, "y": 54,  "type": "output", "description": "Interrupt" },
+        { "id": "MISO", "x": 8, "y": 66,  "type": "output", "description": "SPI MISO" },
+        { "id": "MOSI", "x": 8, "y": 78,  "type": "input",  "description": "SPI MOSI" },
+        { "id": "SCK",  "x": 8, "y": 90,  "type": "input",  "description": "SPI Clock" },
+        { "id": "SDA",  "x": 8, "y": 102, "type": "input",  "description": "SPI Chip Select (SDA/SS)" }
+    ]
+}

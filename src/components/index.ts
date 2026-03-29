@@ -20,8 +20,14 @@ export { default as wokwiIli9341 } from './wokwi-ili9341';
 export { default as wokwiLcd2004I2C } from './wokwi-lcd2004-i2c';
 export { default as wokwiLdrModule } from './wokwi-ldr-module';
 export { default as max30102 } from './max30102';
-
-
+export { default as wokwiDS18B20 } from './wokwi-ds18b20';
+export { default as wokwiNTCThermistor } from './wokwi-ntc-thermistor';
+export { default as wokwiBMP180 } from './wokwi-bmp180';
+export { default as wokwiIRReceiver } from './wokwi-ir-receiver';
+export { default as wokwiRelayModule } from './wokwi-relay-module';
+export { default as wokwiDS1307RTC } from './wokwi-ds1307-rtc';
+export { default as wokwiMFRC522 } from './wokwi-mfrc522';
+export { default as wokwiMPU6050 } from './wokwi-mpu6050';
 
 
 

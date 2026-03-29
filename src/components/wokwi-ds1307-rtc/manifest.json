@@ -1,0 +1,25 @@
+{
+    "type": "wokwi-ds1307-rtc",
+    "label": "DS1307 RTC Module",
+    "group": "Sensors",
+    "w": 160,
+    "h": 160,
+    "attrs": {
+        "datetime": "2024-01-01T00:00:00"
+    },
+    "pins": [
+        { "id": "SQ", "x": 160, "y": 20, "type": "output", "description": "Square Wave Output" },
+        { "id": "DS", "x": 160, "y": 40, "type": "bidirectional", "description": "DS18B20 Data" },
+        { "id": "SCL", "x": 160, "y": 60, "type": "input", "description": "I2C Clock" },
+        { "id": "SDA", "x": 160, "y": 80, "type": "bidirectional", "description": "I2C Data" },
+        { "id": "VCC", "x": 160, "y": 100, "type": "input", "description": "Power (5V)" },
+        { "id": "GND", "x": 160, "y": 120, "type": "input", "description": "Ground" },
+        { "id": "BAT", "x": 160, "y": 140, "type": "output", "description": "Battery Voltage" },
+
+        { "id": "DS_2", "x": 0, "y": 40, "type": "bidirectional", "description": "DS18B20 Data (Left)" },
+        { "id": "SCL_2", "x": 0, "y": 60, "type": "input", "description": "I2C Clock (Left)" },
+        { "id": "SDA_2", "x": 0, "y": 80, "type": "bidirectional", "description": "I2C Data (Left)" },
+        { "id": "VCC_2", "x": 0, "y": 100, "type": "input", "description": "Power 5V (Left)" },
+        { "id": "GND_2", "x": 0, "y": 120, "type": "input", "description": "Ground (Left)" }
+    ]
+}

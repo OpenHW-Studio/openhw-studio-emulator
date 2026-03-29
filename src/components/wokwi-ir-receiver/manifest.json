@@ -1,0 +1,33 @@
+{
+    "type": "wokwi-ir-receiver",
+    "label": "IR Receiver",
+    "group": "Inputs",
+    "w": 70,
+    "h": 105,
+    "attrs": {
+        "frequency": "38"
+    },
+    "pins": [
+        {
+            "id": "GND",
+            "x": 24.5,
+            "y": 101.5,
+            "type": "input",
+            "description": "Ground (G)"
+        },
+        {
+            "id": "VCC",
+            "x": 35.0,
+            "y": 101.5,
+            "type": "input",
+            "description": "Power (V)"
+        },
+        {
+            "id": "OUT",
+            "x": 45.5,
+            "y": 101.5,
+            "type": "output",
+            "description": "Signal output (R)"
+        }
+    ]
+}
