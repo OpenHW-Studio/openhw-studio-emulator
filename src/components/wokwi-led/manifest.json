@@ -8,28 +8,20 @@
     "attrs": {
         "color": "red"
     },
-    "telemetry": {
-        "template": "illuminated=${state.illuminated}, brightness=${state.brightness}, burnedOut=${state.burnedOut}",
-        "criticalKeys": [
-            "state.illuminated",
-            "state.brightness",
-            "state.burnedOut"
-        ]
-    },
     "pins": [
         {
-            "id": "K",
+            "id": "A",
             "x": 16,
             "y": 43,
             "type": "input",
-            "description": "Cathode (-)"
+            "description": "Anode (+)"
         },
         {
-            "id": "A",
+            "id": "K",
             "x": 24,
             "y": 43,
             "type": "input",
-            "description": "Anode (+)"
+            "description": "Cathode (-)"
         }
     ]
 }

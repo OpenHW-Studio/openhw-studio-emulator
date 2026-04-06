@@ -5,12 +5,6 @@
     "group": "Basic",
     "w": 68,
     "h": 44,
-    "telemetry": {
-        "template": "pressed=${state.pressed}",
-        "criticalKeys": [
-            "state.pressed"
-        ]
-    },
     "pins": [
         {
             "id": "1",

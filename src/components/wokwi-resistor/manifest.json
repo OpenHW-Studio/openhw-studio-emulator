@@ -8,12 +8,6 @@
     "attrs": {
         "value": "220"
     },
-    "telemetry": {
-        "template": "resistance=${attr.value} Ohms",
-        "criticalKeys": [
-            "attr.value"
-        ]
-    },
     "pins": [
         {
             "id": "p1",
