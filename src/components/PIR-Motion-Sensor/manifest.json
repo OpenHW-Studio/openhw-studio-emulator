@@ -1,0 +1,13 @@
+{
+    "type":"wokwi-pir-motion-sensor",
+    "label":"PIR Motion Sensor",
+    "description":"PIR Motion Sensor",
+    "group": "Inputs",
+    "w": 90,
+    "h": 90,
+    "pins":[
+        {"id":"VCC","type":"power","description":"Power","x":35.5,"y":90},
+        {"id":"GND","type":"power","description":"Ground","x":56,"y":90},
+        {"id":"OUT","type":"digital","description":"Digital Output","x":46.5,"y":90}
+    ]
+}
