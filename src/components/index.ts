@@ -58,6 +58,10 @@ export { default as logicIc74xx } from './logic-ic-74xx';
 export { default as wokwiArduinoMega } from './wokwi-arduino-mega';
 export { default as wokwiAttiny85 } from './wokwi-attiny85';
 export { default as wokwiHcSr04 } from './wokwi-hc-sr04';
+export { default as SoundSensor4pin } from './Sound-sensor-4pin';
+export { default as wokwiRaindropPad } from './wokwi-raindrop-pad';
+export { default as wokwiRaindropModule } from './wokwi-raindrop-module';
+
 
 
 
