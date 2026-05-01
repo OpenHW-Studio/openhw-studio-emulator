@@ -61,6 +61,7 @@ export { default as wokwiHcSr04 } from './wokwi-hc-sr04';
 export { default as SoundSensor4pin } from './Sound-sensor-4pin';
 export { default as wokwiRaindropPad } from './wokwi-raindrop-pad';
 export { default as wokwiRaindropModule } from './wokwi-raindrop-module';
+export { default as wokwiDht22 } from './DHT-22';
 
 
 
