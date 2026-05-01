@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 430, h: 228 };
+export const BOUNDS = { x: 0, y: 0, w: 390, h: 195 };
 
 export const MegaUI = ({ state, attrs }: { state: any, attrs: any }) => {
     return (
