@@ -62,6 +62,7 @@ export { default as SoundSensor4pin } from './Sound-sensor-4pin';
 export { default as wokwiRaindropPad } from './wokwi-raindrop-pad';
 export { default as wokwiRaindropModule } from './wokwi-raindrop-module';
 export { default as wokwiDht22 } from './DHT-22';
+export { default as wokwiGasSensor } from './MQ2-gas-sensor';
 
 
 
