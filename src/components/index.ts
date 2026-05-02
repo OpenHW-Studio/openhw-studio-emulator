@@ -57,13 +57,13 @@ export { default as logicClockGenerator } from './logic-clock-generator';
 export { default as logicIc74xx } from './logic-ic-74xx';
 export { default as wokwiArduinoMega } from './wokwi-arduino-mega';
 export { default as wokwiAttiny85 } from './wokwi-attiny85';
-export { default as wokwiHcSr04 } from './wokwi-hc-sr04';
+// export { default as wokwiHcSr04 } from './wokwi-hc-sr04';
 export { default as SoundSensor4pin } from './Sound-sensor-4pin';
 export { default as wokwiRaindropPad } from './wokwi-raindrop-pad';
 export { default as wokwiRaindropModule } from './wokwi-raindrop-module';
 export { default as wokwiDht22 } from './DHT-22';
 export { default as wokwiGasSensor } from './MQ2-gas-sensor';
-
+export { default as UltrasonicSensor } from './Ultrasonic-sensor';
 
 
 
