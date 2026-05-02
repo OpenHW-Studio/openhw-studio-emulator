@@ -1,0 +1,54 @@
+{
+    "type": "wokwi-raindrop-module",
+    "label": "Raindrop Module",
+    "description": "LM393-based raindrop comparator module. Reads from sensing pad and outputs AO (analog) and DO (digital, active LOW) for Arduino.",
+    "group": "Sensors",
+    "w":70,
+    "h": 160,
+    "width": 70,
+    "height": 160,
+    "pins": [
+        {
+            "id": "VCC",
+            "label": "VCC",
+            "type": "power",
+            "x": 49,
+            "y": 155
+        },
+        {
+            "id": "GND",
+            "label": "GND",
+            "type": "power",
+            "x": 39,
+            "y": 155
+        },
+        {
+            "id": "DO",
+            "label": "DO",
+            "type": "digital",
+            "x": 30,
+            "y": 155
+        },
+        {
+            "id": "AO",
+            "label": "AO",
+            "type": "analog",
+            "x": 21,
+            "y": 155
+        },
+        {
+            "id": "PAD+",
+            "label": "PAD+",
+            "type": "analog",
+            "x": 33,
+            "y": 5
+        },
+        {
+            "id": "PAD-",
+            "label": "PAD-",
+            "type": "power",
+            "x": 42.5,
+            "y": 5
+        }
+    ]
+}
