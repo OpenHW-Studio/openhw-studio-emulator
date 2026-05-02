@@ -5,6 +5,8 @@
     "group": "Sensors",
     "width": 138,
     "height": 63,
+    "w": 138,
+    "h": 63,
     "pins": [
         { "id": "VCC", "label": "VCC", "x": 135, "y": 46 },
         { "id": "GND", "label": "GND", "x": 135, "y": 36 },
