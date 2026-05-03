@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import padImage from './RainDropPad.png';
 
 const W = 300, H = 220;
 const BOUNDS = { w: W, h: H };
@@ -188,7 +189,7 @@ export const RaindropPadUI = ({ state, attrs, isRunning }: { state: any; attrs: 
 
             <div style={{ position: 'relative', width: W, height: H }}>
                 <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} style={{ display: 'block' }}>
-                    <image href="/RainDropPad.png" x={PADDING} y={PADDING} width={imgW} height={imgH} preserveAspectRatio="xMidYMid meet" />
+                    <image href={padImage} x={PADDING} y={PADDING} width={imgW} height={imgH} preserveAspectRatio="xMidYMid meet" />
                     {intensity > 0 && (
                         <rect x={PADDING + 25} y={PADDING + 23} width={imgW - 75} height={imgH - 40}
                             fill={`rgba(30,120,200,${intensity * 0.4})`}

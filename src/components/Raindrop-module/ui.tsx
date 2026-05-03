@@ -1,4 +1,5 @@
 import React from 'react';
+import moduleImage from './RainDropModule.png';
 
 const W = 97, H = 227;
 
@@ -57,7 +58,7 @@ export const RaindropModuleUI = ({
             }}>
                 <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H}
                     style={{ display: 'block', borderRadius: 6, overflow: 'hidden' }}>
-                    <image href="/RainDropModule.png" x={0} y={0}
+                    <image href={moduleImage} x={0} y={0}
                         width={W} height={H} preserveAspectRatio="xMidYMin meet" />
 
                     {/* PWR LED */}

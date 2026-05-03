@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import soundSensorImage from './SoundSensor.png';
 
 const BOUNDS = { w: 100, h: 190 };
 
@@ -191,7 +192,7 @@ export const SoundSensorUI = ({
                 {/* ── Sensor image as SVG ──────────────────────────────────── */}
                 <svg viewBox={`0 0 ${BOUNDS.w} ${BOUNDS.h}`} width={BOUNDS.w} height={BOUNDS.h}
                     style={{ display: 'block', borderRadius: 6, overflow: 'hidden' }}>
-                    <image href="/SoundSensor.png" x={-53} y={0}
+                    <image href={soundSensorImage} x={-53} y={0}
                         width={200} height={190} preserveAspectRatio="xMidYMid meet" />
 
                     {/* PWR LED overlay */}
