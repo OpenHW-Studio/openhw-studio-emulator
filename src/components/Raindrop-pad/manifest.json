@@ -1,0 +1,26 @@
+{
+    "type": "wokwi-raindrop-pad",
+    "label": "Rain Sensor Pad",
+    "description": "Raindrop sensing pad — resistive PCB that detects water. Wire AOUT to the Raindrop Module's PAD+ pin.",
+    "group": "Sensors",
+    "w": 247,
+    "h": 167,
+    "pins": [
+        {
+            "id": "AOUT",
+            "label": "AOUT",
+            "type": "analog",
+            "description": "Analog signal",
+            "x": 240,
+            "y": 78
+        },
+        {
+            "id": "GND",
+            "label": "GND",
+            "type": "power",
+            "description": "Ground",
+            "x": 240,
+            "y": 90
+        }
+    ]
+}

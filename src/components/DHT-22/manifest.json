@@ -1,0 +1,16 @@
+{
+    "type": "DHT-22",
+    "label": "DHT22",
+    "description": "DHT22 Temperature and Humidity Sensor",
+    "group": "Sensors",
+    "width": 60,
+    "height": 200,
+    "w": 60,
+    "h": 200,
+    "pins": [
+        { "id": "VCC", "label": "VCC", "x": 15, "y": 114.9, "type": "power" },
+        { "id": "SDA", "label": "SDA", "x": 24.5, "y": 114.9, "type": "digital" },
+        { "id": "NC", "label": "NC", "x": 34, "y": 114.9, "type": "digital" },
+        { "id": "GND", "label": "GND", "x": 43.5, "y": 114.9, "type": "power" }
+    ]
+}

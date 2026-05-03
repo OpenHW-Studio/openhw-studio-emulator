@@ -1,0 +1,14 @@
+{
+    "type": "Sound-sensor-4pin",
+    "label": "Sound Sensor",
+    "description": "Sound Detection Sensor Module (detects sound via microphone)",
+    "group": "Sensors",
+    "w": 100,
+    "h": 190,
+    "pins": [
+        { "id": "VCC", "label": "VCC", "type": "power", "description": "Power (3.3V - 5V)", "x": 57, "y": 185 },
+        { "id": "GND", "label": "GND", "type": "power", "description": "Ground", "x": 45, "y": 185 },
+        { "id": "DO", "label": "DO", "type": "digital", "description": "Digital Output", "x": 69, "y": 185 },
+        { "id": "AO", "label": "AO", "type": "analog", "description": "Analog Output", "x": 33, "y": 185 }
+    ]
+}
