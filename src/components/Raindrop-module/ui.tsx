@@ -102,6 +102,12 @@ export const RaindropModuleUI = ({
                             <span style={{ color: '#a78bfa' }}>{aoVoltage}V</span>
                         </div>
 
+                        {/* Pad Input debug */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                            <span style={{ color: '#94a3b8' }}>Pad Input:</span>
+                            <span style={{ color: '#60a5fa' }}>{padVoltage.toFixed(2)}V</span>
+                        </div>
+
                         {/* DO */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginTop: 2 }}>
                             <span style={{ color: '#94a3b8' }}>DO:</span>

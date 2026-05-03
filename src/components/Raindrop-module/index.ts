@@ -6,9 +6,9 @@ import { BOUNDS } from './constants';
 
 export default {
     manifest,
-    Logic: RaindropModuleLogic,
     UI: RaindropModuleUI,
+    LogicClass: RaindropModuleLogic,
     ContextMenu: RaindropModuleContextMenu,
-    validate: validateRaindropModule,
-    bounds: BOUNDS,
+    BOUNDS,
+    validation: validateRaindropModule,
 };

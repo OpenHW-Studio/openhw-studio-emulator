@@ -5,7 +5,7 @@
     "group": "Sensors",
     "w":70,
     "h": 160,
-    "width": 70,
+    "width": 40,
     "height": 160,
     "pins": [
         {
