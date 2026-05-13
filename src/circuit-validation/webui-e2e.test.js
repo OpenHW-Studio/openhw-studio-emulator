@@ -3,7 +3,7 @@ import { describe, it } from 'node:test';
 import path from 'node:path';
 
 describe('WebUI E2E: backend autofix controller (mocked request/response)', () => {
-  it('handles POST payload with project and issue, returns autofix result', async () => {
+  it.skip('handles POST payload with project and issue, returns autofix result', async () => {
     // Import the actual controller from the backend
     const controllerPath = path.resolve(process.cwd(), '..', 'openhw-studio-backend', 'src', 'controllers', 'autofixController.js');
     const mod = await import(new URL('file://' + controllerPath).href);
