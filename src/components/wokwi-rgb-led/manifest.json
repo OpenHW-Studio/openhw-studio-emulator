@@ -2,8 +2,8 @@
     "type": "wokwi-rgb-led",
     "label": "RGB LED (4-pin)",
     "group": "Outputs",
-    "w": 30,
-    "h": 30,
+    "w": 64.2,
+    "h": 64.2,
     "attrs": {
         "common": "cathode",
         "breadboard": {
@@ -13,26 +13,26 @@
     "pins": [
         {
             "id": "R",
-            "x": 5,
-            "y": 30,
+            "x": 10.7,
+            "y": 64.2,
             "type": "digital"
         },
         {
             "id": "COM",
-            "x": 12,
-            "y": 30,
-            "type": "power"
+            "x": 25.7,
+            "y": 64.2,
+            "type": "digital"
         },
         {
             "id": "G",
-            "x": 19,
-            "y": 30,
+            "x": 40.7,
+            "y": 64.2,
             "type": "digital"
         },
         {
             "id": "B",
-            "x": 26,
-            "y": 30,
+            "x": 55.7,
+            "y": 64.2,
             "type": "digital"
         }
     ],

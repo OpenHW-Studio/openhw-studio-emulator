@@ -1,7 +1,7 @@
 import React from 'react';
 
 // ─── Selection & hit-box bounds ────────────────────────────────────────────────
-export const BOUNDS = { x: 13, y: 7, w: 74, h: 56 };
+export const BOUNDS = { x: 0, y: 0, w: 198, h: 158.4 };
 
 // ─── Sync flags (required for ZIP / dynamic loader) ────────────────────────────
 export const contextMenuDuringRun = true;
@@ -26,15 +26,30 @@ export const MAX30102UI = ({
     const redGlowId = 'max30102-red-glow';
     const irFill = irLedOn ? '#7B3F00' : '#222222';
 
+    const nativeW = 200;
+    const nativeH = 160;
+    const scaleX = BOUNDS.w / nativeW;
+    const scaleY = BOUNDS.h / nativeH;
+
     return (
-        <div style={{ pointerEvents: 'none', position: 'absolute', inset: 0 }}>
+        <div style={{ 
+            pointerEvents: 'none', 
+            width: BOUNDS.w, 
+            height: BOUNDS.h,
+            position: 'relative' 
+        }}>
             <svg
-                width="100"
-                height="70"
+                width={nativeW}
+                height={nativeH}
                 viewBox="0 0 200 160"
                 xmlns="http://www.w3.org/2000/svg"
-                style={{ display: 'block' }}
+                style={{ 
+                    display: 'block',
+                    transform: `scale(${scaleX}, ${scaleY})`,
+                    transformOrigin: '0 0'
+                }}
             >
+
                 <defs>
                     {/* ── Red LED glow filter ── */}
                     <filter id={redGlowId} x="-60%" y="-60%" width="220%" height="220%">

@@ -1,38 +1,54 @@
 import React from 'react';
 
 // Bounding box for the blue selection ring.
-export const BOUNDS = { x: 0, y: 0, w: 260, h: 70 };
+export const BOUNDS = { x: 0, y: 0, w: 386.3, h: 104 };
 
 export const Wokwi7SegmentUI = ({ state, attrs }: { state: any, attrs: any }) => {
     // Parse attributes
-    const numDigits = parseInt(attrs?.digits || '1', 10);
+    const numDigits = parseInt(attrs?.digits || '4', 10);
     const hasColon = attrs?.colon === '1' || attrs?.colon === 'true';
     const activeColor = attrs?.color || 'red';
     const offColor = '#333333';
 
-    // Geometry layout
+    // Geometry layout (original constants)
     const digitWidth = 50;
     const digitSpacing = 60; // 50 width + 10 gap
     const colonWidth = hasColon && numDigits >= 2 ? 20 : 0;
     
-    // Total SVG canvas size
-    const totalWidth = (numDigits * digitSpacing) + colonWidth;
-    const totalHeight = 70;
+    // Total original SVG canvas size (at 1x scale)
+    const originalTotalWidth = (numDigits * digitSpacing) + colonWidth;
+    const originalTotalHeight = 70;
+
+    // Scale to match BOUNDS
+    const scaleX = BOUNDS.w / originalTotalWidth;
+    const scaleY = BOUNDS.h / originalTotalHeight;
 
     const getFill = (digitIndex: number, seg: string) => {
         return state?.digits?.[digitIndex]?.[seg] ? activeColor : offColor;
     };
 
     return (
-        <svg 
-            width="100%" 
-            height="100%" 
-            viewBox={`0 0 ${totalWidth} ${totalHeight}`} 
-            xmlns="http://www.w3.org/2000/svg"
-            style={{ display: 'block' }}
-        >
+        <div style={{
+            pointerEvents: 'none',
+            width: BOUNDS.w,
+            height: BOUNDS.h,
+            position: 'relative'
+        }}>
+            <svg 
+                width={originalTotalWidth} 
+                height={originalTotalHeight} 
+                viewBox={`0 0 ${originalTotalWidth} ${originalTotalHeight}`} 
+                xmlns="http://www.w3.org/2000/svg"
+                style={{ 
+                    display: 'block',
+                    transform: `scale(${scaleX}, ${scaleY})`,
+                    transformOrigin: '0 0'
+                }}
+            >
+
             {/* Background Base */}
-            <rect width={totalWidth} height={totalHeight} fill="#1e1e1e" rx="4" />
+            <rect width={originalTotalWidth} height={originalTotalHeight} fill="#1e1e1e" rx="4" />
+
 
             {/* Render Digits */}
             {Array.from({ length: numDigits }).map((_, i) => {
@@ -62,5 +78,6 @@ export const Wokwi7SegmentUI = ({ state, attrs }: { state: any, attrs: any }) =>
                 </g>
             )}
         </svg>
+    </div>
     );
-};
+};

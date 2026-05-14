@@ -52,6 +52,12 @@ export { default as wokwiBattery } from './wokwi-battery';
 export { default as wokwiCharger } from './wokwi-charger';
 export { default as wokwiPhotoresistor } from './wokwi-photoresistor';
 export { default as wokwiNtcTemperatureSensor } from './wokwi-ntc-temperature-sensor';
+export { default as wokwiBmp180 } from './wokwi-bmp180';
+export { default as wokwiDs1307Rtc } from './wokwi-ds1307-rtc';
+export { default as wokwiMpu6050 } from './wokwi-mpu6050';
+export { default as wokwiNtcThermistor } from './wokwi-ntc-thermistor';
+export { default as wokwiRelayModule } from './wokwi-relay-module';
+
 
 export { default as logicMux2to1 } from './logic-mux-2to1';
 export { default as logicDFlipFlop } from './logic-d-flipflop';

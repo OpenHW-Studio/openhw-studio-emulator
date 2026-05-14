@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 
 // Bounding box for the selection ring
-export const BOUNDS = { x: 0, y: 0, w: 90, h: 105 };
+export const BOUNDS = { x: 0, y: 0, w: 135, h: 157.5 };
 
 const ROWS = ['1', '2', '3', 'A', '4', '5', '6', 'B', '7', '8', '9', 'C', '*', '0', '#', 'D'];
 
-const KEY_W = 18;
-const KEY_H = 18;
-const GAP = 4;
-const PAD_X = 5;
-const PAD_Y = 12; // leave room for ribbon cable header
+const KEY_W = 27;
+const KEY_H = 27;
+const GAP = 6;
+const PAD_X = 7.5;
+const PAD_Y = 18; // leave room for ribbon cable header
 
 export const KeypadUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning: boolean }) => {
     const [pressedKey, setPressedKey] = useState<string | null>(null);
@@ -36,21 +36,21 @@ export const KeypadUI = ({ state, attrs, isRunning }: { state: any, attrs: any, 
             <svg
                 width="100%" 
                 height="100%"
-                viewBox="0 0 90 105"
+                viewBox="0 0 135 157.5"
                 xmlns="http://www.w3.org/2000/svg"
                 style={{ display: 'block', overflow: 'visible', pointerEvents: 'none' }}
             >
                 {/* Body */}
-                <rect x={1} y={8} width={88} height={96} rx={4} fill="#1c1c1c" stroke="#444" strokeWidth={1} />
+                <rect x={1.5} y={12} width={132} height={144} rx={6} fill="#1c1c1c" stroke="#444" strokeWidth={1.5} />
 
-                {/* Ribbon header dots */}
+                {/* Ribbon header dots (15px pitch) */}
                 {[0, 1, 2, 3, 4, 5, 6, 7].map(i => (
-                    <circle key={i} cx={PAD_X + 5 + i * 10.5} cy={4} r={2.5} fill="#c0a000" stroke="#888" strokeWidth={0.8} />
+                    <circle key={i} cx={15 + i * 15} cy={0} r={3.75} fill="#c0a000" stroke="#888" strokeWidth={1.2} />
                 ))}
 
                 {/* Key labels above grid */}
                 {['R1', 'R2', 'R3', 'R4', 'C1', 'C2', 'C3', 'C4'].map((lbl, i) => (
-                    <text key={lbl} x={PAD_X + 5 + i * 10.5} y={10} textAnchor="middle" fontSize={4} fill="#666" fontFamily="monospace">{lbl}</text>
+                    <text key={lbl} x={15 + i * 15} y={15} textAnchor="middle" fontSize={6} fill="#666" fontFamily="monospace">{lbl}</text>
                 ))}
 
                 {/* Keys 4x4 grid */}
@@ -98,9 +98,9 @@ export const KeypadUI = ({ state, attrs, isRunning }: { state: any, attrs: any, 
                                 style={{ transition: 'fill 0.05s' }}
                             />
                             <text
-                                x={kx + KEY_W / 2} y={ky + KEY_H / 2 + 4}
+                                x={kx + KEY_W / 2} y={ky + KEY_H / 2 + 6}
                                 textAnchor="middle"
-                                fontSize={7}
+                                fontSize={10.5}
                                 fontWeight="bold"
                                 fontFamily="monospace"
                                 fill={textFill}

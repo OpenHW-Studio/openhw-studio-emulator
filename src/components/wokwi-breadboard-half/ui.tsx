@@ -1,6 +1,8 @@
 import React from 'react';
 import manifest from './manifest.json';
 
+export const BOUNDS = { x: 0, y: 0, w: manifest.w, h: manifest.h };
+
 export const HalfBreadboardUI = () => {
     const { w, h, pins } = manifest;
 

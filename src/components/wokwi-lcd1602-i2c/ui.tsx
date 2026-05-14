@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 300, h: 133 };
+export const BOUNDS = { x: 0, y: 0, w: 315, h: 135 };
 
 export const Lcd1602I2CUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const lcdRef = useRef<any>(null);
 
-    const nativeW = 280;
-    const nativeH = 110;
+    const nativeW = 315;
+    const nativeH = 135;
     const scaleX = BOUNDS.w / nativeW;
     const scaleY = BOUNDS.h / nativeH;
 

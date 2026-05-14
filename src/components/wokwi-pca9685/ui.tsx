@@ -1,5 +1,7 @@
 import React from 'react';
 
+export const BOUNDS = { x: 0, y: 0, w: 180, h: 150 };
+
 export const PCA9685UI = ({ state, attrs }: { state: any, attrs: any }) => {
     const topLabels = ['SDA', 'SCL', 'TXD', 'RXD', '#4', '#17', '#18', '#27', '#22', '#23', '#24', '#25', 'MOSI', 'MISO', 'CLK', 'CE0', 'CE1', '#5', '#6', '#12', '#13', '#16', '#19', '#20', '#21'];
 
@@ -42,7 +44,7 @@ export const PCA9685UI = ({ state, attrs }: { state: any, attrs: any }) => {
     });
 
     return (
-        <svg width="180" height="150" viewBox="0 0 180 150" xmlns="http://www.w3.org/2000/svg">
+        <svg width={BOUNDS.w} height={BOUNDS.h} viewBox="0 0 180 150" xmlns="http://www.w3.org/2000/svg">
             {/* Raspberry Pi HAT Board Outline */}
             <path d="M 15 0 L 165 0 A 15 15 0 0 1 180 15 L 180 135 A 15 15 0 0 1 165 150 L 15 150 A 15 15 0 0 1 0 135 L 0 100 A 4 4 0 0 0 10 96 L 10 64 A 4 4 0 0 0 0 60 L 0 15 A 15 15 0 0 1 15 0 Z" fill="#144f9c" />
 

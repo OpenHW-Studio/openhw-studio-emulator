@@ -1,5 +1,7 @@
 import React from 'react';
 
+export const BOUNDS = { x: 0, y: 0, w: 342.8, h: 171.4 };
+
 export const PCA9865UI = ({ state, attrs }: { state: any, attrs: any }) => {
 
     // PWM Pin Grids (4 blocks of 4x3)
@@ -27,8 +29,26 @@ export const PCA9865UI = ({ state, attrs }: { state: any, attrs: any }) => {
 
     const sideLabels = ['GND', 'OE', 'SCL', 'SDA', 'VCC', 'V+'];
 
+    const nativeW = 160;
+    const nativeH = 80;
+    const scale = BOUNDS.w / nativeW;
+
     return (
-        <svg width="160" height="80" viewBox="0 0 160 80" xmlns="http://www.w3.org/2000/svg">
+        <div style={{
+            width: BOUNDS.w,
+            height: BOUNDS.h,
+            pointerEvents: 'none',
+            position: 'relative'
+        }}>
+            <svg 
+                width={nativeW} height={nativeH} viewBox="0 0 160 80" 
+                xmlns="http://www.w3.org/2000/svg"
+                style={{
+                    display: 'block',
+                    transform: `scale(${scale})`,
+                    transformOrigin: '0 0'
+                }}
+            >
             {/* PCB Outline */}
             <rect x="10" y="5" width="140" height="70" fill="#144f9c" rx="4" />
 
@@ -107,5 +127,6 @@ export const PCA9865UI = ({ state, attrs }: { state: any, attrs: any }) => {
             {pwmBlocks}
 
         </svg>
-    );
+    </div>
+  );
 };

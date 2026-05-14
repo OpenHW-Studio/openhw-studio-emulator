@@ -2,58 +2,18 @@
     "type": "wokwi-nokia-5110",
     "label": "Nokia 5110 Screen",
     "group": "Displays",
-    "w": 50,
-    "h": 50,
+    "w": 200,
+    "h": 240,
     "attrs": {},
     "pins": [
-        {
-            "id": "VCC",
-            "x": 14,
-            "y": 70,
-            "type": "power"
-        },
-        {
-            "id": "GND",
-            "x": 18.5,
-            "y": 70,
-            "type": "power"
-        },
-        {
-            "id": "SCE",
-            "x": 23,
-            "y": 70,
-            "type": "digital"
-        },
-        {
-            "id": "RST",
-            "x": 27.5,
-            "y": 70,
-            "type": "digital"
-        },
-        {
-            "id": "DC",
-            "x": 32,
-            "y": 70,
-            "type": "digital"
-        },
-        {
-            "id": "DN",
-            "x": 36.5,
-            "y": 70,
-            "type": "digital"
-        },
-        {
-            "id": "SCLK",
-            "x": 41,
-            "y": 70,
-            "type": "digital"
-        },
-        {
-            "id": "LED",
-            "x": 45.5,
-            "y": 70,
-            "type": "digital"
-        }
+        { "id": "VCC", "x": 47.5, "y": 230, "type": "power" },
+        { "id": "GND", "x": 62.5, "y": 230, "type": "power" },
+        { "id": "SCE", "x": 77.5, "y": 230, "type": "digital" },
+        { "id": "RST", "x": 92.5, "y": 230, "type": "digital" },
+        { "id": "DC", "x": 107.5, "y": 230, "type": "digital" },
+        { "id": "DN", "x": 122.5, "y": 230, "type": "digital" },
+        { "id": "SCLK", "x": 137.5, "y": 230, "type": "digital" },
+        { "id": "LED", "x": 152.5, "y": 230, "type": "digital" }
     ],
     "autowiring": {
         "connections": [

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const LEDContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (key: string, value: any) => void }) => (
+export const ChargerContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (key: string, value: any) => void }) => (
     <>
         <span style={{ fontSize: 12, color: 'var(--text2)' }}>Charge Current (mA):</span>
         <select 
@@ -17,7 +17,7 @@ export const LEDContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (key
 
 export const BOUNDS = { x: 0, y: 0, w: 80, h: 50 };
 
-export const LEDUI = ({ state, attrs }: { state: any, attrs: any }) => {
+export const ChargerUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const isCharging = state?.isCharging;
     const inputVoltage = state?.inputVoltage || 0;
 

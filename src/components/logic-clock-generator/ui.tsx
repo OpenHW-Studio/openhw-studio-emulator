@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 80, h: 60 };
+export const BOUNDS = { x: 0, y: 0, w: 125, h: 100 };
 
 export const ClockGeneratorUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const componentColor = '#9c27b0';
@@ -10,8 +10,29 @@ export const ClockGeneratorUI = ({ state, attrs }: { state: any, attrs: any }) =
     let units = attrs?.units || 'KHz';
     const dispTxt = `${freq}${units.replace('Hz', '').toLowerCase()}`;
 
+    const nativeW = 80;
+    const nativeH = 60;
+    const scaleX = BOUNDS.w / nativeW;
+    const scaleY = BOUNDS.h / nativeH;
+
     return (
-        <svg width="80" height="60" viewBox="0 0 80 60" style={{ pointerEvents: 'none' }}>
+        <div style={{
+            pointerEvents: 'none',
+            width: BOUNDS.w,
+            height: BOUNDS.h,
+            position: 'relative'
+        }}>
+            <svg
+                width={nativeW}
+                height={nativeH}
+                viewBox="0 0 80 60"
+                style={{
+                    display: 'block',
+                    transform: `scale(${scaleX}, ${scaleY})`,
+                    transformOrigin: '0 0'
+                }}
+            >
+
             <rect
                 x="3" y="3" width="54" height="54"
                 fill="#e0e0e0"
@@ -31,8 +52,11 @@ export const ClockGeneratorUI = ({ state, attrs }: { state: any, attrs: any }) =
             </text>
             <line x1="57" y1="40" x2="80" y2="40" stroke={wireColor} strokeWidth="3" />
         </svg>
+    </div>
+
     );
 };
+
 
 export const ClockGeneratorContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (k: string, v: any) => void }) => {
     return (

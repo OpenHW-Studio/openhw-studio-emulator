@@ -1,7 +1,7 @@
 import React from 'react';
 
 // Bounding box for the selection area
-export const BOUNDS = { x: 0, y: 0, w: 244.1, h: 161.3 };
+export const BOUNDS = { x: 0, y: 0, w: 258.75, h: 171 };
 
 export const HCSR04UI = ({ state, attrs }: { state: any, attrs: any }) => {
     // Precise Wokwi HC-SR04 native dimensions from doc viewBox

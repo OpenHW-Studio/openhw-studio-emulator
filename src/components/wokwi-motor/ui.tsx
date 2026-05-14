@@ -25,9 +25,9 @@ export const MotorUI = ({ state, attrs }: { state: any, attrs: any }) => {
                 <circle cx="72" cy="15" r="1.5" fill="#333" />
                 <circle cx="72" cy="35" r="1.5" fill="#333" />
 
-                {/* Terminals (Red & Black) */}
+                {/* Terminals (Red & Black) at 15 and 45 */}
                 <path d="M 0 15 L -10 15" stroke="#E74C3C" strokeWidth="2" strokeLinecap="round" />
-                <path d="M 0 35 L -10 35" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
+                <path d="M 0 45 L -10 45" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
 
                 {/* White Plastic Shaft */}
                 <rect x="80" y="18" width="12" height="14" rx="2" fill="#ECF0F1" />

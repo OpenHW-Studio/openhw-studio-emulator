@@ -1,5 +1,7 @@
 import React from 'react';
 
+export const BOUNDS = { x: 0, y: 0, w: 180, h: 120 };
+
 export const MAX7219UI = ({ state, attrs }: { state: any, attrs: any }) => {
     const { matrix = new Array(8).fill(0), active = false } = state;
     const ledColor = attrs.color || '#FF0000';
@@ -13,31 +15,31 @@ export const MAX7219UI = ({ state, attrs }: { state: any, attrs: any }) => {
             leds.push(
                 <circle 
                     key={`${row}-${col}`}
-                    cx={25 + col * 10} 
-                    cy={5 + row * 10} 
-                    r={4} 
+                    cx={37.5 + col * 15} 
+                    cy={7.5 + row * 15} 
+                    r={6} 
                     fill={isOn ? ledColor : offColor} 
                 />
             );
         }
     }
 
-    const pinYs = [20, 30, 40, 50, 60];
+    const pinYs = [30, 45, 60, 75, 90];
 
     return (
-        <svg width="120" height="80" viewBox="0 0 120 80">
-            {/* Left Pins (IN) */}
+        <svg width={BOUNDS.w} height={BOUNDS.h} viewBox="0 0 180 120">
+            {/* Left Pins (IN) at 15px pitch */}
             {pinYs.map((y, i) => (
-                <line key={`l-pin-${i}`} x1="0" y1={y} x2="20" y2={y} stroke={pinColor} strokeWidth="3" strokeLinecap="round" />
+                <line key={`l-pin-${i}`} x1="0" y1={y} x2="30" y2={y} stroke={pinColor} strokeWidth="4.5" strokeLinecap="round" />
             ))}
 
-            {/* Right Pins (OUT) */}
+            {/* Right Pins (OUT) at 15px pitch */}
             {pinYs.map((y, i) => (
-                <line key={`r-pin-${i}`} x1="100" y1={y} x2="120" y2={y} stroke={pinColor} strokeWidth="3" strokeLinecap="round" />
+                <line key={`r-pin-${i}`} x1="150" y1={y} x2="180" y2={y} stroke={pinColor} strokeWidth="4.5" strokeLinecap="round" />
             ))}
 
             {/* Black Matrix Body */}
-            <rect x="20" y="0" width="80" height="80" fill="#000000" />
+            <rect x="30" y="0" width="120" height="120" fill="#000000" />
             
             {/* 8x8 LED Grid */}
             {leds}

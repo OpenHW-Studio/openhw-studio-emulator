@@ -1,8 +1,10 @@
 import React from 'react';
 
+export const BOUNDS = { x: 0, y: 0, w: 15, h: 25 };
+
 export const NPNTransistorUI = ({ state, attrs }: { state: any, attrs: any }) => {
     return (
-        <svg width="15" height="25" viewBox="0 0 15 25" xmlns="http://www.w3.org/2000/svg">
+        <svg width={BOUNDS.w} height={BOUNDS.h} viewBox="0 0 15 25" xmlns="http://www.w3.org/2000/svg">
             <path d="M 1 10 C 1 -2, 14 -2, 14 10 Z" fill="#2c3e50" />
             <rect x="1" y="10" width="13" height="5" fill="#2c3e50" />
 

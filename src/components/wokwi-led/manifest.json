@@ -37,8 +37,8 @@
     ],
     "autocoding": {
         "arduino": {
-            "setup": "pinMode(13, OUTPUT);",
-            "loop": "digitalWrite(13, HIGH);\ndelay(500);\ndigitalWrite(13, LOW);\ndelay(500);"
+            "setup": "pinMode(${A}, OUTPUT);",
+            "loop": "digitalWrite(${A}, HIGH);\ndelay(500);\ndigitalWrite(${A}, LOW);\ndelay(500);"
         },
         "micropython": {
             "setup": "from machine import Pin\nfrom time import sleep\nled = Pin(25, Pin.OUT)",
