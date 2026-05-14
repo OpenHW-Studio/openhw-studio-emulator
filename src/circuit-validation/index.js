@@ -1,21 +1,46 @@
-export { FullCircuitValidator } from './engine.js';
-export { analyzeCodeHardwareSync } from './sync-analyzer.js';
-export { ProtocolAnalyzer } from './protocol-analyzer.js';
+import { FullCircuitValidator } from './engine.js';
+import { analyzeCodeHardwareSync } from './sync-analyzer.js';
+import { ProtocolAnalyzer } from './protocol-analyzer.js';
 
-// The Integration "Glue" Code (likely sitting in a React component or Redux thunk)
+export { FullCircuitValidator, analyzeCodeHardwareSync, ProtocolAnalyzer };
+
+/**
+ * Unified Validation Engine Entry Point
+ * Runs both physics-based circuit validation and software-hardware sync analysis.
+ * 
+ * @param {Object} project { components, connections, code, activeCodeFileId }
+ * @param {Object} options Validation options (profile, incremental, etc.)
+ * @returns {Object} { safe, physicsSafe, syncPassed, errors, syncIssues, healthScore }
+ */
+export const runUnifiedValidation = (project, options = {}) => {
+    // 1. Physics & Wiring Validation
+    const validator = new FullCircuitValidator(project, { registry: options.registry });
+    const physicsSafe = validator.runValidation(options);
+
+    // 2. Software-Hardware Sync Analysis
+    const syncResult = analyzeCodeHardwareSync(project);
+    
+    // 3. Unified Health Score Calculation
+    const healthScore = validator.calculateHealthScore(syncResult.issues || []);
+
+    return {
+        safe: physicsSafe && syncResult.passed,
+        physicsSafe,
+        syncPassed: syncResult.passed,
+        errors: validator.errors || [],
+        syncIssues: syncResult.issues || [],
+        healthScore
+    };
+};
+
+// The Integration "Glue" Code (legacy helper)
 export const handleCompileAndRun = (projectState, startCompilationPipeline, handleValidationFailure) => {
+    const { safe, errors } = runUnifiedValidation(projectState);
 
-    // 1. Instantiate the modular engine
-    const validator = new FullCircuitValidator(projectState);
-
-    // 2. Run the Physics/Wiring Checks
-    const isCircuitSafe = validator.runValidation();
-
-    if (!isCircuitSafe) {
-        if (handleValidationFailure) handleValidationFailure(validator.errors);
-        return; // HALT EXECUTION
+    if (!safe) {
+        if (handleValidationFailure) handleValidationFailure(errors);
+        return; 
     }
 
-    // 3. If safe, proceed to compilation
     if (startCompilationPipeline) startCompilationPipeline(projectState.code);
 };

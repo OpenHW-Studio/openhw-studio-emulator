@@ -63,5 +63,5 @@ export { default as wokwiArduinoMega } from './wokwi-arduino-mega';
 export { default as wokwiAttiny85 } from './wokwi-attiny85';
 export { default as wokwiHcSr04 } from './wokwi-hc-sr04';
 
-export { FullCircuitValidator, analyzeCodeHardwareSync, ProtocolAnalyzer } from '../circuit-validation/index.js';
+export { FullCircuitValidator, analyzeCodeHardwareSync, ProtocolAnalyzer, runUnifiedValidation } from '../circuit-validation/index.js';
 

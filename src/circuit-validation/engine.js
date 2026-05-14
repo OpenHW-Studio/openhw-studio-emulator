@@ -3,9 +3,10 @@ import * as emulatorComponents from '../components/index.js'; // Note typescript
 import { inferValidationRemediation } from '../components/component-schema.js';
 
 export class FullCircuitValidator {
-    constructor(projectData = {}) {
+    constructor(projectData = {}, options = {}) {
         this.components = Array.isArray(projectData.components) ? projectData.components : [];
         this.connections = Array.isArray(projectData.connections) ? projectData.connections : [];
+        this.registry = options.registry || null;
         this.graph = this.buildGraph(this.connections);
         this.resetValidationState();
         this.lastRunMeta = {
@@ -747,6 +748,7 @@ export class FullCircuitValidator {
     }
 
     getComponentRegistry() {
+        if (this.registry) return this.registry;
         const defaultRegistry = emulatorComponents['default'];
         const namedRegistry = emulatorComponents['registry'];
         const registry = defaultRegistry || namedRegistry || emulatorComponents;
