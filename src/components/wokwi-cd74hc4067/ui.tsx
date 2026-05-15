@@ -1,46 +1,78 @@
 import React from 'react';
 
+export const BOUNDS = { x: 0, y: 0, w: 298.7, h: 179.2 };
+
 export const CD74HC4067UI = ({ state, attrs }: { state: any, attrs: any }) => {
     const active = state?.activeChannel ?? -1;
 
+    const nativeW = 300;
+    const nativeH = 180;
+    const scaleX = BOUNDS.w / nativeW;
+    const scaleY = BOUNDS.h / nativeH;
+
     return (
-        <svg width="60" height="100" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
+        <div style={{
+            pointerEvents: 'none',
+            width: BOUNDS.w,
+            height: BOUNDS.h,
+            position: 'relative'
+        }}>
+            <svg
+                width={nativeW}
+                height={nativeH}
+                viewBox="0 0 300 180"
+                xmlns="http://www.w3.org/2000/svg"
+                style={{
+                    display: 'block',
+                    transform: `scale(${scaleX}, ${scaleY})`,
+                    transformOrigin: '0 0'
+                }}
+            >
+
             {/* PCB Base */}
-            <rect width="60" height="100" fill="#8e44ad" rx="3" />
+            <rect width="300" height="180" fill="#8e44ad" rx="6" />
+            <rect x="5" y="5" width="290" height="170" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" rx="4" />
 
-            {/* Chip outline */}
-            <rect x="25" y="20" width="10" height="60" fill="#2c3e50" rx="1" />
+            {/* Chip outline (Landscape) */}
+            <rect x="60" y="70" width="180" height="40" fill="#2c3e50" rx="2" />
+            <circle cx="70" cy="90" r="3" fill="#1a252f" />
+            <text x="150" y="95" fill="rgba(255,255,255,0.4)" fontSize="12" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">CD74HC4067</text>
 
-            {/* Left Pins (Control / Common) */}
-            <circle cx="5" cy="10" r="2" fill="#e74c3c" />
-            <text x="9" y="11" fontSize="3" fill="white">VCC</text>
+            {/* Top Pins (Control / Power) - y=15 */}
+            <g transform="translate(0, 15)">
+                <circle cx="270" cy="0" r="4" fill="#e74c3c" />
+                <text x="270" y="15" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">VCC</text>
 
-            <circle cx="5" cy="20" r="2" fill="#34495e" />
-            <text x="9" y="21" fontSize="3" fill="white">GND</text>
+                <circle cx="240" cy="0" r="4" fill="#34495e" />
+                <text x="240" y="15" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">GND</text>
 
-            <circle cx="5" cy="30" r="2" fill="#95a5a6" />
-            <text x="9" y="31" fontSize="3" fill="white">EN</text>
+                <circle cx="210" cy="0" r="4" fill="#95a5a6" />
+                <text x="210" y="15" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">EN</text>
 
-            {[45, 55, 65, 75].map((y, i) => (
-                <g key={`S${i}`}>
-                    <circle cx="5" cy={y} r="2" fill="#f39c12" />
-                    <text x="9" y={y + 1} fontSize="3" fill="white">S{i}</text>
-                </g>
-            ))}
+                <circle cx="165" cy="0" r="4" fill="#f39c12" />
+                <text x="165" y="15" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">S0</text>
+                <circle cx="135" cy="0" r="4" fill="#f39c12" />
+                <text x="135" y="15" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">S1</text>
+                <circle cx="105" cy="0" r="4" fill="#f39c12" />
+                <text x="105" y="15" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">S2</text>
+                <circle cx="75" cy="0" r="4" fill="#f39c12" />
+                <text x="75" y="15" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">S3</text>
 
-            <circle cx="5" cy="90" r="2" fill="#3498db" />
-            <text x="9" y="91" fontSize="3" fill="white" fontWeight="bold">SIG</text>
+                <circle cx="30" cy="0" r="4" fill="#3498db" />
+                <text x="30" y="15" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">SIG</text>
+            </g>
 
-            {/* Right Pins (C0-C15) */}
-            {Array.from({ length: 16 }).map((_, i) => (
-                <g key={`C${i}`}>
-                    <circle cx="55" cy={10 + i * 5} r="1.5" fill={active === i ? "#2ecc71" : "#ecf0f1"} />
-                    <text x="51" y={11 + i * 5} fontSize="3" fill={active === i ? "#2ecc71" : "white"} textAnchor="end">C{i}</text>
-                    {active === i && (
-                        <line x1="35" y1={10 + i * 5} x2="52" y2={10 + i * 5} stroke="#2ecc71" strokeWidth="0.5" strokeDasharray="1,1" />
-                    )}
-                </g>
-            ))}
+            {/* Bottom Pins (C0-C15) - y=165 */}
+            <g transform="translate(0, 165)">
+                {Array.from({ length: 16 }).map((_, i) => (
+                    <g key={`C${i}`} transform={`translate(${270 - i * 15}, 0)`}>
+                        <circle cx="0" cy="0" r="3.5" fill={active === i ? "#2ecc71" : "#ecf0f1"} />
+                        <text x="0" y="-10" fontSize="7" fill={active === i ? "#2ecc71" : "white"} textAnchor="middle" fontWeight="bold">C{i}</text>
+                    </g>
+                ))}
+            </g>
         </svg>
+    </div>
     );
 };
+

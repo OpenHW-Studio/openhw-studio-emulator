@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
+export const BOUNDS = { x: 0, y: 0, w: 375, h: 225 };
+
 export const Lcd2004I2CUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const lcdRef = useRef<any>(null);
 
@@ -19,7 +21,7 @@ export const Lcd2004I2CUI = ({ state, attrs }: { state: any, attrs: any }) => {
     }, [state]);
 
     return (
-        <div style={{ position: 'relative', width: 120, height: 80, pointerEvents: 'auto' }}>
+        <div style={{ position: 'relative', width: BOUNDS.w, height: BOUNDS.h, pointerEvents: 'auto' }}>
             <wokwi-lcd2004
                 ref={lcdRef}
                 pins="i2c"

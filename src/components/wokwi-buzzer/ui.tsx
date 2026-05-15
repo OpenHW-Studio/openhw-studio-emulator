@@ -1,10 +1,7 @@
 import React from 'react';
 
 // Bounding box for the blue selection ring.
-// x, y: offset from comp.x/comp.y (top-left corner of the visual area)
-// w, h: width and height of the visual area
-// Bounding box for the blue selection ring.
-export const BOUNDS = { x: 0, y: 0, w: 64, h: 90 };
+export const BOUNDS = { x: 0, y: 0, w: 36, h: 47.6 };
 
 export const BuzzerUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const nativeW = 64;

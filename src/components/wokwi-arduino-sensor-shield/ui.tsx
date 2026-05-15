@@ -1,5 +1,7 @@
 import React from 'react';
 
+export const BOUNDS = { x: 0, y: 0, w: 230, h: 210 };
+
 export const SensorShieldUI = ({ state, attrs }: { state: any, attrs: any }) => {
 
     const renderColumn = (label: string, x: number, y: number) => {
@@ -18,7 +20,7 @@ export const SensorShieldUI = ({ state, attrs }: { state: any, attrs: any }) => 
     };
 
     return (
-        <svg width="230" height="210" viewBox="0 0 230 210" xmlns="http://www.w3.org/2000/svg">
+        <svg width={BOUNDS.w} height={BOUNDS.h} viewBox={`0 0 230 210`} xmlns="http://www.w3.org/2000/svg">
             <path d="M 0 0 L 230 0 L 230 50 L 215 65 L 215 195 A 15 15 0 0 1 200 210 L 0 210 Z" fill="#1f618d" />
 
             <circle cx="15" cy="15" r="5" fill="#fcfcfc" />

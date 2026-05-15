@@ -18,8 +18,8 @@
     },
     "autocoding": {
         "arduino": {
-            "setup": "Serial.begin(9600);\npinMode(2, INPUT_PULLUP);\nSerial.println(\"Push Button Ready\");",
-            "loop": "bool pressed = (digitalRead(2) == LOW);\nSerial.print(\"Button: \");\nSerial.println(pressed ? \"PRESSED\" : \"released\");\ndelay(100);"
+            "setup": "Serial.begin(9600);\npinMode(${1}, INPUT_PULLUP);\nSerial.println(\"Push Button Ready\");",
+            "loop": "bool pressed = (digitalRead(${1}) == LOW);\nSerial.print(\"Button: \");\nSerial.println(pressed ? \"PRESSED\" : \"released\");\ndelay(100);"
         }
     }
 }

@@ -3,8 +3,8 @@
     "label": "Photoresistor (LDR)",
     "description": "Light-dependent resistor. Resistance decreases with increasing light intensity.",
     "group": "Sensors",
-    "w": 30,
-    "h": 30,
+    "w": 22.5,
+    "h": 22.5,
     "attrs": {
         "lux": "100",
         "gamma": "0.7",
@@ -16,14 +16,14 @@
     "pins": [
         {
             "id": "p1",
-            "x": 5,
-            "y": 30,
+            "x": 3.75,
+            "y": 22.5,
             "type": "passive"
         },
         {
             "id": "p2",
-            "x": 25,
-            "y": 30,
+            "x": 18.75,
+            "y": 22.5,
             "type": "passive"
         }
     ],

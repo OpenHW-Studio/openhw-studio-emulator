@@ -9,9 +9,21 @@ export const PhotoresistorUI = ({ state, attrs, onAttrChange, isRunning }: { sta
         }
     };
 
+    const nativeW = 30;
+    const nativeH = 30;
+    const scale = BOUNDS.w / nativeW;
+
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '30px', position: 'relative' }}>
-            <svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block' }}>
+        <div style={{ position: 'relative', width: BOUNDS.w, height: BOUNDS.h }}>
+            <svg 
+                width={nativeW} height={nativeH} viewBox="0 0 30 30" 
+                style={{ 
+                    display: 'block',
+                    transform: `scale(${scale})`,
+                    transformOrigin: '0 0'
+                }}
+                xmlns="http://www.w3.org/2000/svg"
+            >
                 <defs>
                     <radialGradient id="ceramicGrad" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
                         <stop offset="0%" style={{ stopColor: '#f9f9f9', stopOpacity: 1 }} />
@@ -87,4 +99,4 @@ export const PhotoresistorUI = ({ state, attrs, onAttrChange, isRunning }: { sta
     );
 };
 
-export const BOUNDS = { x: 0, y: 0, w: 30, h: 30 };
+export const BOUNDS = { x: 0, y: 0, w: 22.5, h: 22.5 };

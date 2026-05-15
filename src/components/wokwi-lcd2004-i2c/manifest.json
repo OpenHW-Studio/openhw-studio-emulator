@@ -2,8 +2,8 @@
   "type": "wokwi-lcd2004-i2c",
   "label": "LCD 2004 (I2C)",
   "group": "Displays",
-  "w": 120,
-  "h": 80,
+  "w": 375,
+  "h": 225,
   "attrs": {
     "color": "blue",
     "pins": "i2c"
@@ -15,34 +15,34 @@
       "state.illuminated"
     ]
   },
-  "pins": [
-    {
-      "id": "GND",
-      "x": 15,
-      "y": -4,
-      "type": "power",
-      "description": "Ground"
-    },
-    {
-      "id": "VCC",
-      "x": 25,
-      "y": -4,
-      "type": "power",
-      "description": "5V Power"
-    },
-    {
-      "id": "SDA",
-      "x": 35,
-      "y": -4,
-      "type": "input",
-      "description": "I2C Data"
-    },
-    {
-      "id": "SCL",
-      "x": 45,
-      "y": -4,
-      "type": "input",
-      "description": "I2C Clock"
-    }
-  ]
+    "pins": [
+        {
+            "id": "GND",
+            "x": 7.5,
+            "y": 75,
+            "type": "power",
+            "description": "Ground"
+        },
+        {
+            "id": "VCC",
+            "x": 7.5,
+            "y": 90,
+            "type": "power",
+            "description": "5V Power"
+        },
+        {
+            "id": "SDA",
+            "x": 7.5,
+            "y": 105,
+            "type": "input",
+            "description": "I2C Data"
+        },
+        {
+            "id": "SCL",
+            "x": 7.5,
+            "y": 120,
+            "type": "input",
+            "description": "I2C Clock"
+        }
+    ]
 }

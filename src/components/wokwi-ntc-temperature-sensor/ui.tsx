@@ -9,9 +9,21 @@ export const NtcUI = ({ state, attrs, onAttrChange, isRunning }: { state: any, a
         }
     };
 
+    const nativeW = 30;
+    const nativeH = 30;
+    const scale = BOUNDS.w / nativeW;
+
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '30px', position: 'relative' }}>
-            <svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block' }}>
+        <div style={{ position: 'relative', width: BOUNDS.w, height: BOUNDS.h }}>
+            <svg 
+                width={nativeW} height={nativeH} viewBox="0 0 30 30" 
+                style={{ 
+                    display: 'block',
+                    transform: `scale(${scale})`,
+                    transformOrigin: '0 0'
+                }}
+                xmlns="http://www.w3.org/2000/svg"
+            >
                 <defs>
                     <radialGradient id="beadGrad" cx="40%" cy="30%" r="60%" fx="40%" fy="30%">
                         <stop offset="0%" style={{ stopColor: '#3498db', stopOpacity: 1 }} />
@@ -78,4 +90,4 @@ export const NtcUI = ({ state, attrs, onAttrChange, isRunning }: { state: any, a
     );
 };
 
-export const BOUNDS = { x: 0, y: 0, w: 30, h: 30 };
+export const BOUNDS = { x: 0, y: 0, w: 22.5, h: 22.5 };

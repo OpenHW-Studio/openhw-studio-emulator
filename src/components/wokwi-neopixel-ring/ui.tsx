@@ -1,22 +1,22 @@
 import React from 'react';
 
 // Bounding box for the blue selection ring.
-export const BOUNDS = { x: 0, y: 0, w: 80, h: 80 };
+export const BOUNDS = { x: 0, y: 0, w: 60, h: 60 };
 
 export const NeopixelRingUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const pixels = parseInt(attrs?.pixels || '16', 10);
-    const radius = 30;
-    const center = 40;
+    const radius = 22.5;
+    const center = 30;
 
     return (
         <svg 
             width="100%" 
             height="100%" 
-            viewBox="0 0 80 80" 
+            viewBox="0 0 60 60" 
             xmlns="http://www.w3.org/2000/svg"
             style={{ display: 'block' }}
         >
-            <circle cx={center} cy={center} r={radius} fill="none" stroke="#222" strokeWidth="6" />
+            <circle cx={center} cy={center} r={radius} fill="none" stroke="#222" strokeWidth="4.5" />
 
             {Array.from({ length: pixels }).map((_, i) => {
                 const angle = (i * 360 / pixels) * (Math.PI / 180);
@@ -30,14 +30,14 @@ export const NeopixelRingUI = ({ state, attrs }: { state: any, attrs: any }) => 
 
                 const isActive = (r > 0 || g > 0 || b > 0);
                 const fill = isActive ? `rgb(${r},${g},${b})` : '#333';
-                const shadow = isActive ? `drop-shadow(0 0 4px rgb(${r},${g},${b}))` : 'none';
+                const shadow = isActive ? `drop-shadow(0 0 3px rgb(${r},${g},${b}))` : 'none';
 
                 return (
                     <circle
                         key={i}
                         cx={x}
                         cy={y}
-                        r="3"
+                        r="2.25"
                         fill={fill}
                         style={{ filter: shadow }}
                     />

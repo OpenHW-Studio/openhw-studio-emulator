@@ -1,7 +1,7 @@
 import { validation } from './validation';
 import manifest from './manifest.json';
 import { ChargerLogic } from './logic';
-import { LEDUI as ChargerUI, LEDContextMenu as ChargerContextMenu, BOUNDS } from './ui';
+import { ChargerUI, ChargerContextMenu, BOUNDS } from './ui';
 
 import uiRaw from './ui.tsx?raw';
 import logicRaw from './logic.ts?raw';

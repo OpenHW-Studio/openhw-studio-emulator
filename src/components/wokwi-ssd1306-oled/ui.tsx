@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
 // Bounding box for the selection ring
-export const BOUNDS = { x: 0, y: 0, w: 150, h: 140 };
+export const BOUNDS = { x: 0, y: 0, w: 135, h: 120 };
 
 export const SSD1306UI = ({ state, attrs }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -84,50 +84,62 @@ export const SSD1306UI = ({ state, attrs }) => {
     return () => cancelAnimationFrame(animationId);
   }, []);
 
+  const nativeW = 135;
+  const nativeH = 120;
+
   return (
-    <svg 
-        width="100%" 
-        height="100%" 
-        viewBox="0 0 150 140" 
-        xmlns="http://www.w3.org/2000/svg"
-        style={{ display: 'block' }}
-    >
-      <path d="M 0,0 H 150 V 140 H 105 A 5,5 0 0,1 100,135 V 125 H 50 V 135 A 5,5 0 0,1 45,140 H 0 Z" fill="#104271" />
+    <div style={{
+        width: BOUNDS.w,
+        height: BOUNDS.h,
+        pointerEvents: 'none',
+        position: 'relative'
+    }}>
+        <svg 
+            width={nativeW} 
+            height={nativeH} 
+            viewBox={`0 0 ${nativeW} ${nativeH}`} 
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ 
+                display: 'block'
+            }}
+        >
+        <rect width={nativeW} height={nativeH} fill="#104271" rx="4" />
 
-      {/* Mounting holes */}
-      <circle cx="15" cy="15" r="6.5" fill="#FFFFFF" />
-      <circle cx="135" cy="15" r="6.5" fill="#FFFFFF" />
-      <circle cx="15" cy="115" r="6.5" fill="#FFFFFF" />
-      <circle cx="135" cy="115" r="6.5" fill="#FFFFFF" />
+        {/* Mounting holes */}
+        <circle cx="10" cy="10" r="5" fill="#FFFFFF" />
+        <circle cx={nativeW - 10} cy="10" r="5" fill="#FFFFFF" />
+        <circle cx="10" cy={nativeH - 10} r="5" fill="#FFFFFF" />
+        <circle cx={nativeW - 10} cy={nativeH - 10} r="5" fill="#FFFFFF" />
 
-      {/* I2C Header Plastic */}
-      <rect x="42" y="5" width="66" height="20" fill="#222" rx="2" />
+        {/* I2C Header Plastic */}
+        <rect x="25" y="4" width="66" height="16" fill="#222" rx="2" />
 
-      {/* Pins */}
-      <circle cx="50" cy="15" r="4.5" stroke="#E5B85C" strokeWidth="2.5" fill="#FFFFFF" />
-      <circle cx="67" cy="15" r="4.5" stroke="#E5B85C" strokeWidth="2.5" fill="#FFFFFF" />
-      <circle cx="84" cy="15" r="4.5" stroke="#E5B85C" strokeWidth="2.5" fill="#FFFFFF" />
-      <circle cx="101" cy="15" r="4.5" stroke="#E5B85C" strokeWidth="2.5" fill="#FFFFFF" />
+        {/* Pins at 30, 45, 60, 75 (15px pitch) */}
+        <circle cx="30" cy="7.5" r="3.5" stroke="#E5B85C" strokeWidth="2" fill="#FFFFFF" />
+        <circle cx="45" cy="7.5" r="3.5" stroke="#E5B85C" strokeWidth="2" fill="#FFFFFF" />
+        <circle cx="60" cy="7.5" r="3.5" stroke="#E5B85C" strokeWidth="2" fill="#FFFFFF" />
+        <circle cx="75" cy="7.5" r="3.5" stroke="#E5B85C" strokeWidth="2" fill="#FFFFFF" />
 
-      <text x="43" y="32" fill="#FFFFFF" fontSize="6" fontFamily="Arial, sans-serif" fontWeight="bold">GND</text>
-      <text x="61" y="32" fill="#FFFFFF" fontSize="6" fontFamily="Arial, sans-serif" fontWeight="bold">VCC</text>
-      <text x="79" y="32" fill="#FFFFFF" fontSize="6" fontFamily="Arial, sans-serif" fontWeight="bold">SCL</text>
-      <text x="96" y="32" fill="#FFFFFF" fontSize="6" fontFamily="Arial, sans-serif" fontWeight="bold">SDA</text>
+        <text x="30" y="26" fill="#FFFFFF" fontSize="5" fontFamily="Arial, sans-serif" fontWeight="bold" textAnchor="middle">GND</text>
+        <text x="45" y="26" fill="#FFFFFF" fontSize="5" fontFamily="Arial, sans-serif" fontWeight="bold" textAnchor="middle">VCC</text>
+        <text x="60" y="26" fill="#FFFFFF" fontSize="5" fontFamily="Arial, sans-serif" fontWeight="bold" textAnchor="middle">SCL</text>
+        <text x="75" y="26" fill="#FFFFFF" fontSize="5" fontFamily="Arial, sans-serif" fontWeight="bold" textAnchor="middle">SDA</text>
 
-      {/* Screen area */}
-      <rect x="10" y="35" width="130" height="75" fill="#050505" rx="2" />
-      <rect x="11" y="36" width="128" height="73" fill="#111" rx="1" />
+        {/* Screen area */}
+        <rect x="8" y="30" width="107.5" height="65" fill="#050505" rx="2" />
+        <rect x="9" y="31" width="105.5" height="63" fill="#111" rx="1" />
 
-      <foreignObject x="11" y="40.5" width="128" height="64">
-        <canvas
-          ref={canvasRef}
-          width="128"
-          height="64"
-          style={{ width: '128px', height: '64px', imageRendering: 'pixelated', pointerEvents: 'none' }}
-        />
-      </foreignObject>
+        <foreignObject x="9" y="31" width="105.5" height="63">
+            <canvas
+            ref={canvasRef}
+            width="128"
+            height="64"
+            style={{ width: '100%', height: '100%', imageRendering: 'pixelated', pointerEvents: 'none' }}
+            />
+        </foreignObject>
 
-      <text x="75" y="130" fill="#FFFFFF" fontSize="8" textAnchor="middle" opacity="0.5">SSD1306 OLED</text>
-    </svg>
+        <text x={nativeW / 2} y={nativeH - 12} fill="#FFFFFF" fontSize="7" textAnchor="middle" opacity="0.5">SSD1306 OLED</text>
+        </svg>
+    </div>
   );
 };

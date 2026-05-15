@@ -2,38 +2,38 @@
     "type": "wokwi-rotary-encoder",
     "label": "Rotary Encoder",
     "group": "Inputs",
-    "w": 66,
-    "h": 50,
+    "w": 99,
+    "h": 75,
     "attrs": {},
     "pins": [
         {
             "id": "CLK",
-            "x": 5,
-            "y": 10,
+            "x": 7.5,
+            "y": 7.5,
             "type": "digital"
         },
         {
             "id": "DT",
-            "x": 5,
-            "y": 20,
+            "x": 7.5,
+            "y": 22.5,
             "type": "digital"
         },
         {
             "id": "SW",
-            "x": 5,
-            "y": 30,
+            "x": 7.5,
+            "y": 37.5,
             "type": "digital"
         },
         {
             "id": "VCC",
-            "x": 5,
-            "y": 40,
+            "x": 7.5,
+            "y": 52.5,
             "type": "power"
         },
         {
             "id": "GND",
-            "x": 5,
-            "y": 50,
+            "x": 7.5,
+            "y": 67.5,
             "type": "power"
         }
     ]

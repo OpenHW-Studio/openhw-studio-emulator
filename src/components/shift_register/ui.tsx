@@ -1,48 +1,59 @@
-// Shift Register UI Placeholder
 import * as React from 'react';
 
-// Bounding box for the blue selection ring.
-// x, y: offset from comp.x/comp.y (top-left corner of the visual area)
-// w, h: width and height of the visual area
-export const BOUNDS = { x: 0, y: 0, w: 60, h: 180 };
+export const BOUNDS = { x: 0, y: 0, w: 135, h: 45 };
 
 export const ShiftRegisterUI = (props: any) => {
-    const { id, x, y, rotation, attrs } = props;
+    const { rotation } = props;
 
-    return React.createElement('div', {
-        style: {
-            width: 60,
-            height: 180,
-            background: '#222',
-            borderRadius: 4,
-            border: '2px solid #444',
+    const nativeW = 180;
+    const nativeH = 60;
+    const scaleX = BOUNDS.w / nativeW;
+    const scaleY = BOUNDS.h / nativeH;
+
+    return (
+        <div style={{
+            pointerEvents: 'none',
+            width: BOUNDS.w,
+            height: BOUNDS.h,
             position: 'relative',
             transform: `rotate(${rotation || 0}deg)`
-        }
-    }, [
-        React.createElement('div', {
-            style: {
-                color: 'white',
-                fontSize: 12,
+        }}>
+            <div style={{
+                width: nativeW,
+                height: nativeH,
+                background: '#222',
+                borderRadius: 4,
+                border: '2px solid #444',
                 position: 'absolute',
-                top: 90,
-                left: -20,
-                transform: 'rotate(-90deg)',
-                whiteSpace: 'nowrap'
-            },
-            key: "label"
-        }, '74HC595 Shift Register'),
-        React.createElement('div', {
-            style: {
-                width: 6,
-                height: 6,
-                borderRadius: '50%',
-                background: '#666',
-                position: 'absolute',
-                top: 4,
-                left: 27
-            },
-            key: "notch"
-        })
-    ]);
+                top: 0,
+                left: 0,
+                transform: `scale(${scaleX}, ${scaleY})`,
+                transformOrigin: '0 0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxSizing: 'border-box'
+            }}>
+                <div style={{
+                    color: 'white',
+                    fontSize: 14,
+                    fontWeight: 'bold',
+                    fontFamily: 'monospace'
+                }}>
+                    74HC595
+                </div>
+                
+                {/* Notch */}
+                <div style={{
+                    width: 6,
+                    height: 12,
+                    borderRadius: '0 3px 3px 0',
+                    background: '#111',
+                    position: 'absolute',
+                    top: 24,
+                    left: 0
+                }} />
+            </div>
+        </div>
+    );
 };

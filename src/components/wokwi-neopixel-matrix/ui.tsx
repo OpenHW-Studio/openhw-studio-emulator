@@ -9,8 +9,8 @@ export const BOUNDS = (attrs: any) => {
     return {
         x: 0,
         y: 0,
-        w: Math.max(30, cols * 30),
-        h: Math.max(30, rows * 30)
+        w: Math.max(82, cols * 82),
+        h: Math.max(82, rows * 82)
     };
 };
 
@@ -21,8 +21,8 @@ export const NeopixelUI = ({ state, attrs, comp }: { state: any, attrs: any, com
     const cols = parseInt(attrs?.cols || '8', 10);
     const rows = parseInt(attrs?.rows || '8', 10);
 
-    const nativeW = Math.max(30, cols * 30);
-    const nativeH = Math.max(30, rows * 30);
+    const nativeW = Math.max(82, cols * 82);
+    const nativeH = Math.max(82, rows * 82);
     const targetW = comp?.w ?? nativeW;
     const targetH = comp?.h ?? nativeH;
     const scaleX = targetW / nativeW;

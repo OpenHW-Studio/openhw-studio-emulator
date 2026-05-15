@@ -3,13 +3,13 @@
     "label": "Ultrasonic Sensor",
     "description": "HC-SR04 ultrasonic distance sensor.",
     "group": "Sensors",
-    "w": 244.1, "h": 161.3,
+    "w": 258.75, "h": 171,
     "attrs": { "distance": "100" },
     "pins": [
-        { "id": "VCC",  "x": 99.5,  "y": 136.7, "type": "power",   "description": "5V Power" },
-        { "id": "TRIG", "x": 114.6, "y": 136.8, "type": "digital", "description": "Trigger Input" },
-        { "id": "ECHO", "x": 130.4, "y": 136.8, "type": "digital", "description": "Echo Output" },
-        { "id": "GND",  "x": 145.2, "y": 136.8, "type": "power",   "description": "Ground" }
+        { "id": "VCC",  "x": 106.875, "y": 136.7, "type": "power",   "description": "5V Power" },
+        { "id": "TRIG", "x": 121.875, "y": 136.7, "type": "digital", "description": "Trigger Input" },
+        { "id": "ECHO", "x": 136.875, "y": 136.7, "type": "digital", "description": "Echo Output" },
+        { "id": "GND",  "x": 151.875, "y": 136.7, "type": "power",   "description": "Ground" }
     ],
     "autowiring": {
         "connections": [

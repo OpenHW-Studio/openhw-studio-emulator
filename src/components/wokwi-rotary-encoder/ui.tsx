@@ -1,15 +1,23 @@
 import React from 'react';
 
+export const BOUNDS = { x: 0, y: 0, w: 99, h: 75 };
+
 export const RotaryEncoderUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning: boolean }) => {
     const rot = state?.rot || 0;
     const pressed = state?.sw || false;
     const lastAngle = React.useRef<number | null>(null);
 
+    const nativeW = 66;
+    const nativeH = 50;
+    const scaleX = BOUNDS.w / nativeW;
+    const scaleY = BOUNDS.h / nativeH;
+
     const handleRotate = (e: React.PointerEvent) => {
         if (!attrs.onInteract || lastAngle.current === null) return;
 
         const rect = e.currentTarget.getBoundingClientRect();
-        const cx = rect.left + (rect.width * (46 / 66)); // Match the knob center
+        // Scale the center coordinates as well
+        const cx = rect.left + (rect.width * (46 / 66)); 
         const cy = rect.top + rect.height / 2;
         const angle = Math.atan2(e.clientY - cy, e.clientX - cx) * (180 / Math.PI);
 
@@ -25,10 +33,15 @@ export const RotaryEncoderUI = ({ state, attrs, isRunning }: { state: any, attrs
     };
 
     return (
-        <div style={{ position: 'relative', width: 66, height: 50, cursor: isRunning ? 'pointer' : 'default' }}>
+        <div style={{ position: 'relative', width: BOUNDS.w, height: BOUNDS.h, cursor: isRunning ? 'pointer' : 'default' }}>
             <svg
-                width="66" height="50" viewBox="0 0 66 50"
-                style={{ pointerEvents: isRunning ? 'auto' : 'none' }}
+                width={nativeW} height={nativeH} viewBox="0 0 66 50"
+                style={{ 
+                    pointerEvents: isRunning ? 'auto' : 'none',
+                    display: 'block',
+                    transform: `scale(${scaleX}, ${scaleY})`,
+                    transformOrigin: '0 0'
+                }}
                 onPointerDown={(e) => {
                     if (!isRunning) return;
                     e.stopPropagation();
@@ -39,7 +52,7 @@ export const RotaryEncoderUI = ({ state, attrs, isRunning }: { state: any, attrs
                     const cy = rect.top + rect.height / 2;
                     const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
 
-                    if (dist < 8) { // Center button click
+                    if (dist < 8 * scaleX) { // Center button click (scaled threshold)
                         if (attrs.onInteract) attrs.onInteract('press');
                         (e.currentTarget as any).setPointerCapture(e.pointerId);
                     } else { // Knob rotation start
@@ -78,8 +91,8 @@ export const RotaryEncoderUI = ({ state, attrs, isRunning }: { state: any, attrs
                 {/* Pins */}
                 {['CLK', 'DT', 'SW', 'VCC', 'GND'].map((l, i) => (
                     <g key={l}>
-                        <circle cx="8" cy={10 + i * 10} r="2" fill="#ecf0f1" />
-                        <text x="12" y={11 + i * 10} fontSize="3" fill="white" style={{ fontWeight: 'bold' }}>{l}</text>
+                        <circle cx="5" cy={5 + i * 10} r="2" fill="#ecf0f1" />
+                        <text x="9" y={6 + i * 10} fontSize="3" fill="white" style={{ fontWeight: 'bold' }}>{l}</text>
                     </g>
                 ))}
             </svg>

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-export const BOUNDS = { x: 8, y: 32, w: 144, h: 192 };
+export const BOUNDS = { x: 0, y: 0, w: 240, h: 360 };
 
 export const ILI9341UI = ({ state }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -17,19 +17,15 @@ export const ILI9341UI = ({ state }) => {
     }, []);
 
     // ATOMIC INGEST: Convert RGB -> RGBA immediately when new data arrives
-    // This happens OUTSIDE the render loop, so the render loop always sees 
-    // a consistent, non-tearing frame.
     useEffect(() => {
         if (!state) return;
 
-        // Update heartbeat if worker is alive
         if (state.t) {
             lastHeartbeatRef.current = Date.now();
         }
 
         const rgbaBuf = rgbaBufferRef.current;
 
-        // Handle power-off or reset
         if (!state.powerOn || state.reset) {
             for (let i = 0; i < rgbaBuf.length; i += 4) {
                 rgbaBuf[i] = 0; rgbaBuf[i + 1] = 0; rgbaBuf[i + 2] = 0; rgbaBuf[i + 3] = 255;
@@ -37,21 +33,18 @@ export const ILI9341UI = ({ state }) => {
             return;
         }
 
-        // Convert the incoming RGB buffer (Uint8Array) to our local RGBA Ref
         const rgbBuf = state.buffer;
         if (rgbBuf && rgbBuf.length === 240 * 320 * 3) {
             for (let i = 0; i < 240 * 320; i++) {
                 const src = i * 3;
                 const dst = i * 4;
-                rgbaBuf[dst] = rgbBuf[src];     // R
-                rgbaBuf[dst + 1] = rgbBuf[src + 1]; // G
-                rgbaBuf[dst + 2] = rgbBuf[src + 2]; // B
-                // Alpha is already 255
+                rgbaBuf[dst] = rgbBuf[src];
+                rgbaBuf[dst + 1] = rgbBuf[src + 1];
+                rgbaBuf[dst + 2] = rgbBuf[src + 2];
             }
         }
     }, [state]);
 
-    // STABLE RENDER LOOP
     useEffect(() => {
         if (!canvasRef.current) return;
         const ctx = canvasRef.current.getContext('2d', { alpha: false });
@@ -63,13 +56,10 @@ export const ILI9341UI = ({ state }) => {
             const now = Date.now();
             const timeSinceHeartbeat = now - lastHeartbeatRef.current;
 
-            // HEARTBEAT / STOP DETECTION: 
-            // If the worker hasn't blinked for 600ms, clear to black.
             if (timeSinceHeartbeat > 600) {
                 ctx.fillStyle = '#000000';
                 ctx.fillRect(0, 0, 240, 320);
             } else {
-                // Atomic Draw: The rgbaBufferRef is always a complete frame
                 const imgData = new ImageData(rgbaBufferRef.current, 240, 320);
                 ctx.putImageData(imgData, 0, 0);
             }
@@ -79,10 +69,10 @@ export const ILI9341UI = ({ state }) => {
 
         render();
         return () => cancelAnimationFrame(animationId);
-    }, []); // Empty deps = Evergreen loop
+    }, []);
 
-    const w = 160;
-    const h = 240;
+    const w = 240;
+    const h = 360;
 
     return (
         <div style={{ width: w, height: h, position: 'relative' }}>
@@ -95,25 +85,25 @@ export const ILI9341UI = ({ state }) => {
             >
                 <g>
                     {/* PCB Background */}
-                    <rect x="0" y="0" width={w} height={h} fill="#a01a1e" rx="4" />
+                    <rect x="0" y="0" width={w} height={h} fill="#a01a1e" rx="6" />
 
                     {/* Mounting Holes */}
-                    <circle cx="10" cy="10" r="4.5" fill="#FFFFFF" />
-                    <circle cx={w - 10} cy="10" r="4.5" fill="#FFFFFF" />
-                    <circle cx="10" cy={h - 10} r="4.5" fill="#FFFFFF" />
-                    <circle cx={w - 10} cy={h - 10} r="4.5" fill="#FFFFFF" />
+                    <circle cx="15" cy="15" r="6.75" fill="#FFFFFF" />
+                    <circle cx={w - 15} cy="15" r="6.75" fill="#FFFFFF" />
+                    <circle cx="15" cy={h - 15} r="6.75" fill="#FFFFFF" />
+                    <circle cx={w - 15} cy={h - 15} r="6.75" fill="#FFFFFF" />
 
                     {/* Title Text */}
-                    <text x={w / 2} y="22" fill="#FFFFFF" fontSize="14" fontFamily="monospace" textAnchor="middle" fontWeight="bold">ILI9341</text>
+                    <text x={w / 2} y="33" fill="#FFFFFF" fontSize="21" fontFamily="monospace" textAnchor="middle" fontWeight="bold">ILI9341</text>
 
                     {/* Screen Bezel */}
-                    <rect x="5" y="29" width={w - 10} height={h - 42} fill="#F4E3EB" />
+                    <rect x="7.5" y="43.5" width={w - 15} height={h - 63} fill="#F4E3EB" />
 
                     {/* Screen Dark Area */}
-                    <rect x="8" y="32" width={w - 16} height={h - 48} fill="#000000" />
+                    <rect x="12" y="48" width={w - 24} height={h - 72} fill="#000000" />
 
                     {/* The Simulation Canvas */}
-                    <foreignObject x="8" y="32" width={w - 16} height={h - 48}>
+                    <foreignObject x="12" y="48" width={w - 24} height={h - 72}>
                         <canvas
                             ref={canvasRef}
                             width={240}
@@ -128,13 +118,12 @@ export const ILI9341UI = ({ state }) => {
                     </foreignObject>
 
                     {/* Flex Cable Connector */}
-                    <rect x={w / 2 - 40} y={h - 25} width="80" height="12" fill="#b06423" />
+                    <rect x={w / 2 - 60} y={h - 37.5} width="120" height="18" fill="#b06423" />
 
-                    {/* Pin Headers */}
-                    <rect x="36" y="231" width="88" height="8" fill="none" stroke="#FFFFFF" strokeWidth="0.5" opacity="0.5" />
-                    <rect x="38.5" y="233.5" width="3" height="3" fill="#FFFFFF" />
-                    {[50, 60, 70, 80, 90, 100, 110, 120].map((x, i) => (
-                        <circle key={i} cx={x} cy="235" r="1.5" fill="#FFFFFF" />
+                    {/* Pin Headers at 15px pitch */}
+                    <rect x="54" y="346.5" width="132" height="12" fill="none" stroke="#FFFFFF" strokeWidth="0.75" opacity="0.5" />
+                    {[60, 75, 90, 105, 120, 135, 150, 165, 180].map((x, i) => (
+                        <circle key={i} cx={x} cy="352.5" r="2.25" fill="#FFFFFF" />
                     ))}
                 </g>
             </svg>

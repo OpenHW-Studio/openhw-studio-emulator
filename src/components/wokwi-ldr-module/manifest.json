@@ -2,37 +2,37 @@
   "type": "wokwi-ldr-module",
   "label": "LDR Sensor Module (4-pin)",
   "group": "Sensors",
-  "w": 100,
-  "h": 40,
+  "w": 187.5,
+  "h": 75,
   "attrs": {},
   "contextMenuDuringRun": true,
   "contextMenuOnlyDuringRun": true,
   "pins": [
     {
       "id": "VCC",
-      "x": 100,
-      "y": 8,
+      "x": 187.5,
+      "y": 15,
       "type": "power",
       "description": "Positive power supply"
     },
     {
       "id": "GND",
-      "x": 100,
-      "y": 16,
+      "x": 187.5,
+      "y": 30,
       "type": "power",
       "description": "Ground"
     },
     {
       "id": "DO",
-      "x": 100,
-      "y": 24,
+      "x": 187.5,
+      "y": 45,
       "type": "output",
       "description": "Digital output"
     },
     {
       "id": "AO",
-      "x": 100,
-      "y": 32,
+      "x": 187.5,
+      "y": 60,
       "type": "analog",
       "description": "Analog output"
     }

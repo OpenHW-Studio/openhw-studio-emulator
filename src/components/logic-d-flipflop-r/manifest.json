@@ -10,14 +10,14 @@
         {
             "id": "D",
             "x": 0,
-            "y": 22,
+            "y": 25,
             "type": "digital",
             "description": "Data input"
         },
         {
             "id": "CLK",
             "x": 0,
-            "y": 58,
+            "y": 55,
             "type": "digital",
             "description": "Clock input (rising-edge triggered)"
         },
@@ -31,14 +31,14 @@
         {
             "id": "Q",
             "x": 90,
-            "y": 22,
+            "y": 25,
             "type": "digital",
             "description": "Output"
         },
         {
             "id": "Qbar",
             "x": 90,
-            "y": 58,
+            "y": 55,
             "type": "digital",
             "description": "Inverted output"
         }

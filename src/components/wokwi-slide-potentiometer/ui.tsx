@@ -1,9 +1,6 @@
 import React, { useRef, useLayoutEffect } from 'react';
 
 // Bounding box for the blue selection ring.
-// x, y: offset from comp.x/comp.y (top-left corner of the visual area)
-// w, h: width and height of the visual area
-// Bounding box for the blue selection ring.
 export const BOUNDS = { x: 0, y: 0, w: 205, h: 110 };
 
 export const SlidePotUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning: boolean }) => {

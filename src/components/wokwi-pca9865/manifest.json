@@ -2,8 +2,8 @@
     "type": "wokwi-pca9865",
     "label": "16-Channel PWM Module (PCA9865)",
     "group": "Actuators",
-    "w": 160,
-    "h": 80,
+    "w": 342.8,
+    "h": 171.4,
     "attrs": {
         "i2c_address": "0x40"
     },
@@ -11,37 +11,37 @@
         {
             "id": "GND",
             "x": 0,
-            "y": 15,
+            "y": 32.1,
             "type": "power"
         },
         {
             "id": "OE",
             "x": 0,
-            "y": 22,
+            "y": 47.1,
             "type": "digital"
         },
         {
             "id": "SCL",
             "x": 0,
-            "y": 29,
+            "y": 62.1,
             "type": "digital"
         },
         {
             "id": "SDA",
             "x": 0,
-            "y": 36,
+            "y": 77.1,
             "type": "digital"
         },
         {
             "id": "VCC",
             "x": 0,
-            "y": 43,
+            "y": 92.1,
             "type": "power"
         },
         {
             "id": "V+",
             "x": 0,
-            "y": 50,
+            "y": 107.1,
             "type": "power"
         },
         {

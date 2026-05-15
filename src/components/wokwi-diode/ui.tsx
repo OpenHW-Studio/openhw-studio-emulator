@@ -1,8 +1,10 @@
 import React from 'react';
 
+export const BOUNDS = { x: 0, y: 0, w: 30, h: 10 };
+
 export const DiodeUI = ({ state, attrs }: { state: any, attrs: any }) => {
     return (
-        <svg width="30" height="10" viewBox="0 0 30 10" xmlns="http://www.w3.org/2000/svg">
+        <svg width={BOUNDS.w} height={BOUNDS.h} viewBox="0 0 30 10" xmlns="http://www.w3.org/2000/svg">
             <line x1="0" y1="5" x2="30" y2="5" stroke="#7f8c8d" strokeWidth="1" />
 
             {/* Body */}

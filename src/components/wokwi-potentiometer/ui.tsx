@@ -3,7 +3,7 @@ import React, { useRef, useLayoutEffect } from 'react';
 // Bounding box for the blue selection ring.
 // x, y: offset from comp.x/comp.y (top-left corner of the visual area)
 // w, h: width and height of the visual area
-export const BOUNDS = { x: 0, y: 0, w: 75, h: 75 };
+export const BOUNDS = { x: 0, y: 0, w: 112.5, h: 112.5 };
 
 export const PotentiometerUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning: boolean }) => {
     const elRef = useRef<any>(null);
