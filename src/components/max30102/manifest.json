@@ -78,7 +78,8 @@
   "autocoding": {
       "libraries": ["MAX30105"],
       "arduino": {
-          "setup": "#include <Wire.h>\n#include \"MAX30105.h\"\n\nMAX30105 particleSensor;\n\nvoid setup() {\n  Serial.begin(9600);\n  if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) {\n    Serial.println(\"MAX30102 not found\");\n    while (1);\n  }\n  particleSensor.setup();\n}",
+          "globals": "#include <Wire.h>\n#include \"MAX30105.h\"\n\nMAX30105 particleSensor;",
+          "setup": "Serial.begin(9600);\nif (!particleSensor.begin(Wire, I2C_SPEED_FAST)) {\n  Serial.println(\"MAX30102 not found\");\n  while (1);\n}\nparticleSensor.setup();",
           "loop": "Serial.print(\" R:\"); Serial.print(particleSensor.getRed());\nSerial.print(\" IR:\"); Serial.print(particleSensor.getIR());\nSerial.println();\ndelay(100);"
       }
   }

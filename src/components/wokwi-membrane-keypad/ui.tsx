@@ -73,7 +73,7 @@ export const KeypadUI = ({ state, attrs, isRunning }: { state: any, attrs: any, 
                         <g
                             key={key}
                             style={{
-                                pointerEvents: 'auto', // Always allow visual press
+                                pointerEvents: isRunning ? 'auto' : 'none',
                                 cursor: isRunning ? 'pointer' : 'default',
                                 opacity: isRunning ? 1 : 0.8 // Visual hint if disabled logic-wise
                             }}

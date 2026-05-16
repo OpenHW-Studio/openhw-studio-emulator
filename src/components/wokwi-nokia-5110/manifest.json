@@ -30,7 +30,8 @@
     "autocoding": {
         "libraries": ["Adafruit PCD8544 Nokia 5110 LCD library", "Adafruit GFX Library"],
         "arduino": {
-            "setup": "#include <Adafruit_PCD8544.h>\n\nAdafruit_PCD8544 display = Adafruit_PCD8544(8, 10, 9);\n\nvoid setup() {\n  display.begin();\n  display.setContrast(50);\n  display.clearDisplay();\n  display.setTextSize(1);\n  display.setTextColor(BLACK);\n  display.setCursor(0,0);\n  display.println(\"OpenHW Studio\");\n  display.println(\"Nokia 5110\");\n  display.display();\n  delay(2000);\n}",
+            "globals": "#include <Adafruit_PCD8544.h>\n\nAdafruit_PCD8544 display = Adafruit_PCD8544(8, 10, 9);",
+            "setup": "display.begin();\ndisplay.setContrast(50);\ndisplay.clearDisplay();\ndisplay.setTextSize(1);\ndisplay.setTextColor(BLACK);\ndisplay.setCursor(0,0);\ndisplay.println(\"OpenHW Studio\");\ndisplay.println(\"Nokia 5110\");\ndisplay.display();\ndelay(2000);",
             "loop": "display.clearDisplay();\ndisplay.setCursor(0,0);\ndisplay.print(\"Timer: \");\ndisplay.print(millis()/1000);\ndisplay.println(\"s\");\ndisplay.display();\ndelay(500);"
         }
     }

@@ -1,4 +1,4 @@
-import React, { useRef, useLayoutEffect } from 'react';
+import React, { useRef, useLayoutEffect, useState, useEffect } from 'react';
 
 // Bounding box for the blue selection ring.
 // x, y: offset from comp.x/comp.y (top-left corner of the visual area)
@@ -13,12 +13,35 @@ export const PotentiometerUI = ({ state, attrs, isRunning }: { state: any, attrs
     const scaleX = BOUNDS.w / nativeW;
     const scaleY = BOUNDS.h / nativeH;
 
+    const isDraggingRef = useRef(false);
+
+    const { value: attrValue, onInteract, ...restAttrs } = attrs;
+    const simValue = state?.value ?? attrValue ?? 50;
+
+    useLayoutEffect(() => {
+        if (elRef.current && !isDraggingRef.current) {
+            elRef.current.value = simValue;
+        }
+    }, [simValue]);
+
+    useEffect(() => {
+        const handleGlobalUp = () => {
+            isDraggingRef.current = false;
+        };
+        window.addEventListener('pointerup', handleGlobalUp);
+        window.addEventListener('pointercancel', handleGlobalUp);
+        return () => {
+            window.removeEventListener('pointerup', handleGlobalUp);
+            window.removeEventListener('pointercancel', handleGlobalUp);
+        };
+    }, []);
+
     useLayoutEffect(() => {
         const el = elRef.current;
         if (!el) return;
 
         const handleInput = (e: any) => {
-            if (attrs.onInteract) {
+            if (onInteract) {
                 let val = undefined;
                 if (typeof e.detail === 'number') val = e.detail;
                 else if (e.detail && e.detail.value !== undefined) val = e.detail.value;
@@ -26,7 +49,7 @@ export const PotentiometerUI = ({ state, attrs, isRunning }: { state: any, attrs
                 else if (e.target && e.target.percent !== undefined) val = e.target.percent;
 
                 if (val !== undefined) {
-                    attrs.onInteract({ type: 'input', value: Number(val) });
+                    onInteract({ type: 'input', value: Number(val) });
                 }
             }
         };
@@ -37,7 +60,7 @@ export const PotentiometerUI = ({ state, attrs, isRunning }: { state: any, attrs
             el.removeEventListener('input', handleInput);
             el.removeEventListener('change', handleInput);
         };
-    }, [attrs.onInteract]);
+    }, [onInteract]);
 
     return (
         <div style={{ 
@@ -49,8 +72,7 @@ export const PotentiometerUI = ({ state, attrs, isRunning }: { state: any, attrs
         }}>
             {React.createElement('wokwi-potentiometer', {
                 ref: elRef,
-                value: state?.value ?? attrs?.value ?? 50,
-                ...attrs,
+                ...restAttrs,
                 style: { 
                     ...attrs.style, 
                     display: 'block',
@@ -58,11 +80,15 @@ export const PotentiometerUI = ({ state, attrs, isRunning }: { state: any, attrs
                     height: nativeH,
                     transform: `scale(${scaleX}, ${scaleY})`,
                     transformOrigin: '0 0',
-                    pointerEvents: isRunning ? 'auto' : 'none' 
+                    pointerEvents: isRunning ? 'auto' : 'none'
                 },
-                onMouseDown: (e: any) => e.stopPropagation(),
-                onPointerDown: (e: any) => e.stopPropagation(),
-                onDoubleClick: (e: any) => e.stopPropagation(),
+                onMouseDown: (e: any) => { if (isRunning) e.stopPropagation(); },
+                onPointerDown: (e: any) => {
+                    if (!isRunning) return;
+                    isDraggingRef.current = true;
+                    e.stopPropagation();
+                },
+                onDoubleClick: (e: any) => { if (isRunning) e.stopPropagation(); },
             })}
         </div>
     );
