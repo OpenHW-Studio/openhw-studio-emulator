@@ -1,0 +1,26 @@
+{
+    "type": "openhw-l293d",
+    "label": "Motor Driver (L293D)",
+    "group": "Actuators",
+    "w": 90,
+    "h": 150,
+    "attrs": {},
+    "pins": [
+        { "id": "EN1,2", "x": 15, "y": 15, "type": "digital" },
+        { "id": "IN1",    "x": 15, "y": 30, "type": "digital" },
+        { "id": "OUT1",   "x": 15, "y": 45, "type": "digital" },
+        { "id": "GND1",   "x": 15, "y": 60, "type": "power" },
+        { "id": "GND2",   "x": 15, "y": 75, "type": "power" },
+        { "id": "OUT2",   "x": 15, "y": 90, "type": "digital" },
+        { "id": "IN2",    "x": 15, "y": 105, "type": "digital" },
+        { "id": "VCC2",   "x": 15, "y": 120, "type": "power" },
+        { "id": "VCC1",   "x": 75, "y": 15, "type": "power" },
+        { "id": "IN4",    "x": 75, "y": 30, "type": "digital" },
+        { "id": "OUT4",   "x": 75, "y": 45, "type": "digital" },
+        { "id": "GND4",   "x": 75, "y": 60, "type": "power" },
+        { "id": "GND3",   "x": 75, "y": 75, "type": "power" },
+        { "id": "OUT3",   "x": 75, "y": 90, "type": "digital" },
+        { "id": "IN3",    "x": 75, "y": 105, "type": "digital" },
+        { "id": "EN3,4", "x": 75, "y": 120, "type": "digital" }
+    ]
+}

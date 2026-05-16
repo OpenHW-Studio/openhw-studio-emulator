@@ -1,0 +1,84 @@
+{
+  "type": "openhw-ili9341",
+  "label": "ILI9341 2.8\" TFT LCD",
+  "group": "Displays",
+  "w": 240,
+  "h": 360,
+  "pins": [
+    {
+      "id": "VCC",
+      "x": 60,
+      "y": 352.5,
+      "type": "power"
+    },
+    {
+      "id": "GND",
+      "x": 75,
+      "y": 352.5,
+      "type": "power"
+    },
+    {
+      "id": "CS",
+      "x": 90,
+      "y": 352.5,
+      "type": "digital"
+    },
+    {
+      "id": "RESET",
+      "x": 105,
+      "y": 352.5,
+      "type": "digital"
+    },
+    {
+      "id": "DC",
+      "x": 120,
+      "y": 352.5,
+      "type": "digital"
+    },
+    {
+      "id": "MOSI",
+      "x": 135,
+      "y": 352.5,
+      "type": "digital"
+    },
+    {
+      "id": "SCK",
+      "x": 150,
+      "y": 352.5,
+      "type": "digital"
+    },
+    {
+      "id": "LED",
+      "x": 165,
+      "y": 352.5,
+      "type": "digital"
+    },
+    {
+      "id": "MISO",
+      "x": 180,
+      "y": 352.5,
+      "type": "digital"
+    }
+  ],
+  "autowiring": {
+    "connections": [
+      { "from": "VCC", "to": "arduino:5V" },
+      { "from": "GND", "to": "arduino:GND" },
+      { "from": "SCK", "to": "arduino:SCK" },
+      { "from": "MOSI", "to": "arduino:MOSI" },
+      { "from": "MISO", "to": "arduino:MISO" },
+      { "from": "CS", "to": "arduino:10" },
+      { "from": "DC", "to": "arduino:9" },
+      { "from": "RESET", "to": "arduino:8" },
+      { "from": "LED", "to": "arduino:5V" }
+    ]
+  },
+  "autocoding": {
+    "libraries": ["Adafruit ILI9341", "Adafruit GFX Library"],
+    "arduino": {
+      "globals": "#include \"Adafruit_GFX.h\"\n#include \"Adafruit_ILI9341.h\"\n\n#define TFT_DC 9\n#define TFT_CS 10\n\nAdafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);",
+      "setup": "tft.begin();\ntft.setRotation(1);\ntft.fillScreen(ILI9341_BLACK);\ntft.setCursor(20, 100);\ntft.setTextColor(ILI9341_WHITE);\ntft.setTextSize(3);\ntft.println(\"OpenHW Studio\");\ntft.setCursor(20, 140);\ntft.setTextSize(2);\ntft.println(\"TFT ILI9341 Ready\");\ndelay(2000);",
+      "loop": "tft.fillRect(100, 180, 50, 20, ILI9341_BLACK);\ntft.setCursor(20, 180);\ntft.setTextSize(2);\ntft.print(\"Time: \");\ntft.print(millis()/1000);\ntft.println(\"s\");\ndelay(500);"
+    }
+  }
+}

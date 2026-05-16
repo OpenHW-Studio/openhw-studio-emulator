@@ -60,7 +60,7 @@ function openSimulator() {
     board: "none",
     components: [
       { id: "clk1", type: "logic-clock-generator", x: 200, y: 150, attrs: { frequency: "1", units: "Hz" } },
-      { id: "led1", type: "wokwi-led", x: 300, y: 150 }
+      { id: "led1", type: "openhw-led", x: 300, y: 150 }
     ],
     connections: [
       ["clk1:OUT", "led1:A", "green", []]

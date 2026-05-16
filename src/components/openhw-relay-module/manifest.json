@@ -1,0 +1,19 @@
+{
+    "type": "openhw-relay-module",
+    "label": "Relay Module",
+    "group": "Outputs",
+    "w": 200,
+    "h": 80,
+    "attrs": {
+        "state": "off",
+        "triggerLevel": "low"
+    },
+    "pins": [
+        { "id": "NO",  "x": 0,   "y": 25, "type": "passive", "description": "Normally Open terminal" },
+        { "id": "COM", "x": 0,   "y": 40, "type": "passive", "description": "Common terminal" },
+        { "id": "NC",  "x": 0,   "y": 55, "type": "passive", "description": "Normally Closed terminal" },
+        { "id": "IN",  "x": 187, "y": 25, "type": "input",   "description": "Control signal from Arduino" },
+        { "id": "GND", "x": 187, "y": 40, "type": "input",   "description": "Ground" },
+        { "id": "VCC", "x": 187, "y": 55, "type": "input",   "description": "Power Supply (5V)" }
+    ]
+}

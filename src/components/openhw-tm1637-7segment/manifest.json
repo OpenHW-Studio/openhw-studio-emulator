@@ -1,0 +1,36 @@
+{
+    "type": "openhw-tm1637-7segment",
+    "label": "TM1637 Display",
+    "group": "Outputs",
+    "w": 180,
+    "h": 75,
+    "attrs": {
+        "color": "red"
+    },
+    "pins": [
+        {
+            "id": "GND",
+            "x": 0,
+            "y": 15,
+            "type": "power"
+        },
+        {
+            "id": "VCC",
+            "x": 0,
+            "y": 30,
+            "type": "power"
+        },
+        {
+            "id": "DIO",
+            "x": 0,
+            "y": 45,
+            "type": "digital"
+        },
+        {
+            "id": "CLK",
+            "x": 0,
+            "y": 60,
+            "type": "digital"
+        }
+    ]
+}

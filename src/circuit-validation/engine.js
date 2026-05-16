@@ -494,14 +494,14 @@ export class FullCircuitValidator {
         const pinVoltage = this.getPinNumericVoltageLabel(pinId);
         if (pinVoltage !== null) return pinVoltage;
 
-        if (this.isType(component, 'wokwi-arduino-uno', 'mcu_uno')) {
+        if (this.isType(component, 'wokwi-arduino-uno', 'openhw-arduino-uno', 'mcu_uno')) {
             const pin = String(pinId || '').toUpperCase();
             if (/^(D?\d+|A\d+)$/.test(pin)) return 5.0; // Assume logic high for safety check
             if (pin === '5V' || pin === 'VCC') return 5.0;
             if (pin === '3V3') return 3.3;
         }
 
-        if (this.isType(component, 'wokwi-power-supply')) {
+        if (this.isType(component, 'wokwi-power-supply', 'openhw-power-supply')) {
             const configured = this.getComponentAttrNumber(component, 'voltage', 5.0);
             const normalizedPin = String(pinId || '').toLowerCase();
             if (normalizedPin === '5v' || normalizedPin === 'vcc') return configured;
@@ -515,29 +515,33 @@ export class FullCircuitValidator {
         return this.isType(
             component,
             'wokwi-resistor',
+            'openhw-resistor',
             'resistor',
             'wokwi-potentiometer',
+            'openhw-potentiometer',
             'wokwi-slide-potentiometer',
+            'openhw-slide-potentiometer',
             'potentiometer',
             'switch',
-            'wokwi-pushbutton'
+            'wokwi-pushbutton',
+            'openhw-pushbutton'
         );
     }
 
     getTraversalResistance(component) {
         if (!component) return 0;
 
-        if (this.isType(component, 'wokwi-resistor', 'resistor')) {
+        if (this.isType(component, 'wokwi-resistor', 'openhw-resistor', 'resistor')) {
             return Math.max(0, this.getComponentAttrNumber(component, 'value', 220));
         }
 
-        if (this.isType(component, 'wokwi-potentiometer', 'wokwi-slide-potentiometer', 'potentiometer')) {
+        if (this.isType(component, 'wokwi-potentiometer', 'openhw-potentiometer', 'wokwi-slide-potentiometer', 'openhw-slide-potentiometer', 'potentiometer')) {
             const normalizedType = this.normalizeType(component.type);
             const specResistance = this.componentSpecs[normalizedType]?.totalResistance || 10000;
             return Math.max(0, this.getComponentAttrNumber(component, 'value', specResistance));
         }
 
-        if (this.isType(component, 'switch', 'wokwi-pushbutton')) {
+        if (this.isType(component, 'switch', 'wokwi-pushbutton', 'openhw-pushbutton')) {
             return 0;
         }
 
@@ -659,7 +663,7 @@ export class FullCircuitValidator {
         const { componentId, pinId } = this.getNodeParts(nodeId);
         const component = this.getComponentById(componentId);
         if (!component) return false;
-        if (this.isType(component, 'wokwi-arduino-uno', 'mcu_uno')) {
+        if (this.isType(component, 'wokwi-arduino-uno', 'openhw-arduino-uno', 'mcu_uno')) {
             const pin = String(pinId || '').toUpperCase();
             const isPin = /^(D?\d+|A\d+)$/.test(pin);
             return isPin;
@@ -738,16 +742,16 @@ export class FullCircuitValidator {
 
         this.components.forEach(comp => {
             let current = 0;
-            if (this.isType(comp, 'wokwi-led')) current = 0.02;
-            if (this.isType(comp, 'wokwi-motor', 'wokwi-servo')) current = 0.2;
-            if (this.isType(comp, 'wokwi-neopixel')) current = (comp.attrs?.pixels || 16) * 0.02;
+            if (this.isType(comp, 'wokwi-led', 'openhw-led')) current = 0.02;
+            if (this.isType(comp, 'wokwi-motor', 'openhw-motor', 'wokwi-servo', 'openhw-servo')) current = 0.2;
+            if (this.isType(comp, 'wokwi-neopixel', 'openhw-neopixel')) current = (comp.attrs?.pixels || 16) * 0.02;
             
             if (current > 0) {
                 stats.totalCurrent += current;
                 stats.components.push({ id: comp.id, current: current * 1000 }); // mA
 
                 // Thermal Analysis
-                const voltage = this.isType(comp, 'wokwi-led') ? 2.0 : 5.0;
+                const voltage = this.isType(comp, 'wokwi-led', 'openhw-led') ? 2.0 : 5.0;
                 const powerWatts = voltage * current;
                 stats.thermal[comp.id] = {
                     power: powerWatts,

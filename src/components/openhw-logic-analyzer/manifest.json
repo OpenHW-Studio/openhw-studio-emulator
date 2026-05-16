@@ -1,0 +1,19 @@
+{
+    "type": "openhw-logic-analyzer",
+    "label": "8-Ch Logic Analyzer",
+    "group": "Debug",
+    "w": 150,
+    "h": 90,
+    "attrs": {},
+    "pins": [
+        { "id": "GND", "x": 15, "y": 90, "type": "power" },
+        { "id": "D0",  "x": 30, "y": 90, "type": "digital" },
+        { "id": "D1",  "x": 45, "y": 90, "type": "digital" },
+        { "id": "D2",  "x": 60, "y": 90, "type": "digital" },
+        { "id": "D3",  "x": 75, "y": 90, "type": "digital" },
+        { "id": "D4",  "x": 90, "y": 90, "type": "digital" },
+        { "id": "D5",  "x": 105, "y": 90, "type": "digital" },
+        { "id": "D6",  "x": 120, "y": 90, "type": "digital" },
+        { "id": "D7",  "x": 135, "y": 90, "type": "digital" }
+    ]
+}

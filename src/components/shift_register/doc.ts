@@ -79,7 +79,7 @@ function openSimulator() {
   var payload = {
     board: "arduino-uno",
     components: [
-      { id: "uno", type: "wokwi-arduino-uno", x: 0, y: 0 },
+      { id: "uno", type: "openhw-arduino-uno", x: 0, y: 0 },
       { id: "sr0", type: "shift_register", x: 300, y: 0 }
     ],
     connections: [

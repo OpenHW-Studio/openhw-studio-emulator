@@ -1,0 +1,154 @@
+{
+    "type": "openhw-cd74hc4067",
+    "label": "16-Channel Mux (CD74HC4067)",
+    "group": "Logic",
+    "w": 298.7,
+    "h": 179.2,
+    "attrs": {},
+    "pins": [
+        {
+            "id": "VCC",
+            "x": 268.8,
+            "y": 14.9,
+            "type": "power"
+        },
+        {
+            "id": "GND",
+            "x": 238.9,
+            "y": 14.9,
+            "type": "power"
+        },
+        {
+            "id": "EN",
+            "x": 209.1,
+            "y": 14.9,
+            "type": "digital"
+        },
+        {
+            "id": "S0",
+            "x": 164.3,
+            "y": 14.9,
+            "type": "digital"
+        },
+        {
+            "id": "S1",
+            "x": 134.4,
+            "y": 14.9,
+            "type": "digital"
+        },
+        {
+            "id": "S2",
+            "x": 104.5,
+            "y": 14.9,
+            "type": "digital"
+        },
+        {
+            "id": "S3",
+            "x": 74.7,
+            "y": 14.9,
+            "type": "digital"
+        },
+        {
+            "id": "SIG",
+            "x": 29.9,
+            "y": 14.9,
+            "type": "digital"
+        },
+        {
+            "id": "C0",
+            "x": 268.8,
+            "y": 164.3,
+            "type": "digital"
+        },
+        {
+            "id": "C1",
+            "x": 253.9,
+            "y": 164.3,
+            "type": "digital"
+        },
+        {
+            "id": "C2",
+            "x": 238.9,
+            "y": 164.3,
+            "type": "digital"
+        },
+        {
+            "id": "C3",
+            "x": 224,
+            "y": 164.3,
+            "type": "digital"
+        },
+        {
+            "id": "C4",
+            "x": 209.1,
+            "y": 164.3,
+            "type": "digital"
+        },
+        {
+            "id": "C5",
+            "x": 194.1,
+            "y": 164.3,
+            "type": "digital"
+        },
+        {
+            "id": "C6",
+            "x": 179.2,
+            "y": 164.3,
+            "type": "digital"
+        },
+        {
+            "id": "C7",
+            "x": 164.3,
+            "y": 164.3,
+            "type": "digital"
+        },
+        {
+            "id": "C8",
+            "x": 149.3,
+            "y": 164.3,
+            "type": "digital"
+        },
+        {
+            "id": "C9",
+            "x": 134.4,
+            "y": 164.3,
+            "type": "digital"
+        },
+        {
+            "id": "C10",
+            "x": 119.5,
+            "y": 164.3,
+            "type": "digital"
+        },
+        {
+            "id": "C11",
+            "x": 104.5,
+            "y": 164.3,
+            "type": "digital"
+        },
+        {
+            "id": "C12",
+            "x": 89.6,
+            "y": 164.3,
+            "type": "digital"
+        },
+        {
+            "id": "C13",
+            "x": 74.7,
+            "y": 164.3,
+            "type": "digital"
+        },
+        {
+            "id": "C14",
+            "x": 59.1,
+            "y": 165.1,
+            "type": "digital"
+        },
+        {
+            "id": "C15",
+            "x": 43.8,
+            "y": 164.6,
+            "type": "digital"
+        }
+    ]
+}

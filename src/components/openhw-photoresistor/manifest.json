@@ -1,0 +1,48 @@
+{
+    "type": "openhw-photoresistor",
+    "label": "Photoresistor (LDR)",
+    "description": "Light-dependent resistor. Resistance decreases with increasing light intensity.",
+    "group": "Sensors",
+    "w": 22.5,
+    "h": 22.5,
+    "attrs": {
+        "lux": "100",
+        "gamma": "0.7",
+        "r10": "10000",
+        "breadboard": {
+            "anchorPin": "p1"
+        }
+    },
+    "pins": [
+        {
+            "id": "p1",
+            "x": 3.75,
+            "y": 22.5,
+            "type": "passive"
+        },
+        {
+            "id": "p2",
+            "x": 18.75,
+            "y": 22.5,
+            "type": "passive"
+        }
+    ],
+    "autowiring": {
+        "connections": [
+            { "from": "p1", "to": "arduino:5V" },
+            { 
+                "from": "p2", 
+                "to": "arduino:A0|A1|A2|A3|A4|A5", 
+                "via": "openhw-resistor", 
+                "mode": "divider", 
+                "attrs": { "value": "10000", "dividerTarget": "arduino:GND" } 
+            }
+        ]
+    },
+    "autocoding": {
+        "arduino": {
+            "setup": "Serial.begin(9600);",
+            "loop": "int sensorValue = analogRead(arduino:A0|A1|A2|A3|A4|A5);\nSerial.print(\"Light Level: \");\nSerial.println(sensorValue);\ndelay(100);"
+        }
+    }
+}

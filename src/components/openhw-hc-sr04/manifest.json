@@ -1,0 +1,28 @@
+{
+    "type": "openhw-hc-sr04",
+    "label": "Ultrasonic Sensor",
+    "description": "HC-SR04 ultrasonic distance sensor.",
+    "group": "Sensors",
+    "w": 258.75, "h": 171,
+    "attrs": { "distance": "100" },
+    "pins": [
+        { "id": "VCC",  "x": 106.875, "y": 136.7, "type": "power",   "description": "5V Power" },
+        { "id": "TRIG", "x": 121.875, "y": 136.7, "type": "digital", "description": "Trigger Input" },
+        { "id": "ECHO", "x": 136.875, "y": 136.7, "type": "digital", "description": "Echo Output" },
+        { "id": "GND",  "x": 151.875, "y": 136.7, "type": "power",   "description": "Ground" }
+    ],
+    "autowiring": {
+        "connections": [
+            { "from": "VCC",  "to": "arduino:5V" },
+            { "from": "TRIG", "to": "arduino:9" },
+            { "from": "ECHO", "to": "arduino:10" },
+            { "from": "GND",  "to": "arduino:GND" }
+        ]
+    },
+    "autocoding": {
+        "arduino": {
+            "setup": "Serial.begin(9600);\npinMode(9, OUTPUT);\npinMode(10, INPUT);\nSerial.println(\"HC-SR04 Ready\");",
+            "loop": "digitalWrite(9, LOW);\ndelayMicroseconds(2);\ndigitalWrite(9, HIGH);\ndelayMicroseconds(10);\ndigitalWrite(9, LOW);\nlong dur = pulseIn(10, HIGH);\nfloat cm = dur / 58.2;\nfloat inch = dur / 148.0;\nSerial.print(\"Distance: \");\nSerial.print(cm, 1);\nSerial.print(\" cm | \");\nSerial.print(inch, 1);\nSerial.println(\" in\");\ndelay(500);"
+        }
+    }
+}

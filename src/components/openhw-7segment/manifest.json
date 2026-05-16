@@ -1,0 +1,93 @@
+{
+    "type": "openhw-7segment",
+    "label": "7-Segment Display",
+    "group": "Outputs",
+    "w": 386.3,
+    "h": 104,
+    "attrs": {
+        "color": "red",
+        "common": "cathode",
+        "digits": "4",
+        "colon": "1"
+    },
+    "pins": [
+        {
+            "id": "A",
+            "x": 0,
+            "y": 0,
+            "type": "digital"
+        },
+        {
+            "id": "B",
+            "x": 14.9,
+            "y": 0,
+            "type": "digital"
+        },
+        {
+            "id": "C",
+            "x": 29.7,
+            "y": 0,
+            "type": "digital"
+        },
+        {
+            "id": "D",
+            "x": 44.6,
+            "y": 0,
+            "type": "digital"
+        },
+        {
+            "id": "E",
+            "x": 59.4,
+            "y": 0,
+            "type": "digital"
+        },
+        {
+            "id": "F",
+            "x": 74.3,
+            "y": 0,
+            "type": "digital"
+        },
+        {
+            "id": "G",
+            "x": 89.2,
+            "y": 0,
+            "type": "digital"
+        },
+        {
+            "id": "DP",
+            "x": 104,
+            "y": 0,
+            "type": "digital"
+        },
+        {
+            "id": "DIG1",
+            "x": 0,
+            "y": 104,
+            "type": "digital"
+        },
+        {
+            "id": "DIG2",
+            "x": 14.9,
+            "y": 104,
+            "type": "digital"
+        },
+        {
+            "id": "DIG3",
+            "x": 29.7,
+            "y": 104,
+            "type": "digital"
+        },
+        {
+            "id": "DIG4",
+            "x": 44.6,
+            "y": 104,
+            "type": "digital"
+        },
+        {
+            "id": "COLON",
+            "x": 59.4,
+            "y": 104,
+            "type": "digital"
+        }
+    ]
+}
