@@ -1,0 +1,46 @@
+{
+    "type": "openhw-analog-joystick",
+    "label": "Analog Joystick",
+    "description": "2-axis analog joystick with push button",
+    "group": "Sensors",
+    "w": 84,
+    "h": 84,
+    "attrs": {},
+    "pins": [
+        {
+            "id": "GND",
+            "x": 10,
+            "y": 84,
+            "type": "power",
+            "description": "Ground"
+        },
+        {
+            "id": "5V",
+            "x": 25,
+            "y": 84,
+            "type": "power",
+            "description": "5V Power"
+        },
+        {
+            "id": "VRX",
+            "x": 40,
+            "y": 84,
+            "type": "analog",
+            "description": "X-axis output"
+        },
+        {
+            "id": "VRY",
+            "x": 55,
+            "y": 84,
+            "type": "analog",
+            "description": "Y-axis output"
+        },
+        {
+            "id": "SW",
+            "x": 70.1,
+            "y": 84,
+            "type": "digital",
+            "description": "Switch"
+        }
+    ]
+}

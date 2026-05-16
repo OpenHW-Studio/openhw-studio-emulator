@@ -1,0 +1,28 @@
+{
+    "type": "openhw-soil-moisture-sensor",
+    "label": "Soil Moisture",
+    "group": "Sensors",
+    "w": 256.7,
+    "h": 85.6,
+    "attrs": {},
+    "pins": [
+        {
+            "id": "GND",
+            "x": 0,
+            "y": 28.5,
+            "type": "power"
+        },
+        {
+            "id": "VCC",
+            "x": 0,
+            "y": 42.8,
+            "type": "power"
+        },
+        {
+            "id": "SIG",
+            "x": 0,
+            "y": 57,
+            "type": "digital"
+        }
+    ]
+}

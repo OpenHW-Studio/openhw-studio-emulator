@@ -1,0 +1,50 @@
+{
+    "type": "openhw-servo",
+    "label": "Servo Motor",
+    "description": "Hobby servo motor with precise angular position control (0–180°) via PWM signal. Operates at 5 V; signal pulse width of 1–2 ms controls the shaft angle.",
+    "group": "Actuators",
+    "w": 248.3,
+    "h": 180.6,
+    "attrs": {
+        "angle": "0"
+    },
+    "pins": [
+        {
+            "id": "GND",
+            "x": 11.5,
+            "y": 75,
+            "type": "power",
+            "description": "Ground"
+        },
+        {
+            "id": "V+",
+            "x": 11.5,
+            "y": 90,
+            "type": "power",
+            "description": "5V Power"
+        },
+        {
+            "id": "PWM",
+            "x": 11.5,
+            "y": 105,
+            "type": "digital",
+            "description": "PWM Input"
+        }
+    ],
+    "autowiring": {
+        "connections": [
+            { "from": "GND", "to": "arduino:GND" },
+            { "from": "V+",  "to": "powersupply:5V" },
+            { "from": "PWM", "to": "arduino:6" }
+        ],
+        "externalPower": true,
+        "externalVoltage": "5.0"
+    },
+    "autocoding": {
+        "arduino": {
+            "globals": "#include <Servo.h>\nServo myServo;",
+            "setup": "myServo.attach(${PWM});\nmyServo.write(0);\ndelay(500);",
+            "loop": "for (int pos = 0; pos <= 180; pos++) {\n  myServo.write(pos);\n  delay(10);\n}\nfor (int pos = 180; pos >= 0; pos--) {\n  myServo.write(pos);\n  delay(10);\n}"
+        }
+    }
+}

@@ -1,6 +1,6 @@
-const MCU_TYPES = ['wokwi-arduino-uno', 'mcu_uno'];
-const I2C_DEVICE_TYPES = ['wokwi-lcd2004-i2c', 'wokwi-ssd1306-oled', 'max30102'];
-const DRIVER_TYPES = ['wokwi-motor-driver', 'shift_register'];
+const MCU_TYPES = ['openhw-arduino-uno', 'mcu_uno'];
+const I2C_DEVICE_TYPES = ['openhw-lcd2004-i2c', 'openhw-ssd1306-oled', 'max30102'];
+const DRIVER_TYPES = ['openhw-motor-driver', 'shift_register'];
 
 function getPinId(nodeId) {
     return String(nodeId || '').split('.')[1] || '';
@@ -92,7 +92,7 @@ function hasI2CDeviceConnected(validator, mcu) {
 function getComponentLogicVoltage(validator, component) {
     if (!component) return null;
 
-    if (validator.isType(component, 'wokwi-arduino-uno')) return 5.0;
+    if (validator.isType(component, 'openhw-arduino-uno')) return 5.0;
     if (validator.isType(component, 'max30102')) return 3.3;
 
     const fromAttrs = Number(component?.attrs?.logicVoltage);
@@ -146,7 +146,7 @@ export function validateComponentLimits(validator) {
     const packageCurrentByMcu = new Map();
 
     validator.components.forEach(component => {
-        if (validator.isType(component, 'wokwi-led')) {
+        if (validator.isType(component, 'openhw-led')) {
             const anode = `${component.id}.A`;
             const cathode = `${component.id}.K`;
             if (!hasConnection(validator, anode) || !hasConnection(validator, cathode)) return;
@@ -161,7 +161,7 @@ export function validateComponentLimits(validator) {
 
             let va = validator.calculateVoltageAtNode(anode);
             let vk = validator.calculateVoltageAtNode(cathode);
-            const ledSpec = validator.componentSpecs['wokwi-led'];
+            const ledSpec = validator.componentSpecs['openhw-led'];
 
             // Handle Active-Low logic and worst-case states for digital pins:
             // We trace paths to find if any digital pins are reachable.
@@ -232,21 +232,21 @@ export function validateComponentLimits(validator) {
                 const nPinId = getPinId(neighbor);
                 const nPinType = getNodeType(neighborComp, nPinId);
 
-                if (validator.isType(neighborComp, 'wokwi-motor')) {
-                    loadCurrent = validator.componentSpecs['wokwi-motor'].typicalCurrentA;
+                if (validator.isType(neighborComp, 'openhw-motor')) {
+                    loadCurrent = validator.componentSpecs['openhw-motor'].typicalCurrentA;
                     validator.addError(
                         `🔥 [MCU ${component.id}] GPIO ${pinId} drives DC motor ${neighborComp.id} directly. Use a transistor or motor driver.`
                     );
-                } else if (validator.isType(neighborComp, 'wokwi-servo')) {
+                } else if (validator.isType(neighborComp, 'openhw-servo')) {
                     // Only warn if we are connected to a power pin. PWM signal is fine.
                     if (nPinType === 'power' || nPinId === 'V+' || nPinId === 'GND') {
-                        loadCurrent = validator.componentSpecs['wokwi-servo'].typicalCurrentA;
+                        loadCurrent = validator.componentSpecs['openhw-servo'].typicalCurrentA;
                         validator.addError(
                             `🔥 [MCU ${component.id}] GPIO ${pinId} is sourcing servo ${neighborComp.id} power directly. Provide external 5V rail.`
                         );
                     }
-                } else if (validator.isType(neighborComp, 'wokwi-buzzer')) {
-                    loadCurrent = validator.componentSpecs['wokwi-buzzer'].typicalCurrentA;
+                } else if (validator.isType(neighborComp, 'openhw-buzzer')) {
+                    loadCurrent = validator.componentSpecs['openhw-buzzer'].typicalCurrentA;
                 }
 
                 pinCurrent += loadCurrent;
@@ -277,7 +277,7 @@ export function validatePowerDissipation(validator) {
     console.log('🔍 Checking passive component power dissipation...');
 
     validator.components.forEach(component => {
-        if (!validator.isType(component, 'wokwi-resistor', 'wokwi-potentiometer', 'wokwi-slide-potentiometer')) {
+        if (!validator.isType(component, 'openhw-resistor', 'openhw-potentiometer', 'openhw-slide-potentiometer')) {
             return;
         }
 
@@ -293,9 +293,9 @@ export function validatePowerDissipation(validator) {
         const vDrop = Math.abs(vA - vB);
 
         let resistance = 0;
-        if (validator.isType(component, 'wokwi-resistor')) {
+        if (validator.isType(component, 'openhw-resistor')) {
             resistance = validator.getComponentAttrNumber(component, 'value', 220);
-        } else if (validator.isType(component, 'wokwi-potentiometer', 'wokwi-slide-potentiometer')) {
+        } else if (validator.isType(component, 'openhw-potentiometer', 'openhw-slide-potentiometer')) {
             resistance = validator.componentSpecs[validator.normalizeType(component.type)].totalResistance;
         }
 
@@ -316,7 +316,7 @@ export function validateReversePolarity(validator) {
     console.log('🔍 Checking polarized component orientation...');
 
     validator.components
-        .filter(component => validator.isType(component, 'wokwi-led'))
+        .filter(component => validator.isType(component, 'openhw-led'))
         .forEach(led => {
             const anodeNode = `${led.id}.A`;
             const cathodeNode = `${led.id}.K`;
@@ -338,7 +338,7 @@ export function validateReversePolarity(validator) {
             if (vk <= va) return;
 
             const reverseV = vk - va;
-            const ledSpec = validator.componentSpecs['wokwi-led'];
+            const ledSpec = validator.componentSpecs['openhw-led'];
             const vBreak = ledSpec.reverseBreakdownVoltage;
 
             if (reverseV >= vBreak) {
@@ -379,7 +379,7 @@ export function validateFloatingPins(validator) {
                     }
 
                     const currentComp = validator.getComponent(currentNode);
-                    if (currentComp && validator.isType(currentComp, 'wokwi-pushbutton')) {
+                    if (currentComp && validator.isType(currentComp, 'openhw-pushbutton')) {
                         continue;
                     }
 
@@ -395,7 +395,7 @@ export function validateFloatingPins(validator) {
                         const nextVisited = new Set(visited);
                         nextVisited.add(nextNode);
                         const nextComp = validator.getComponent(nextNode);
-                        const nextThroughSwitch = throughSwitch || validator.isType(nextComp, 'wokwi-pushbutton');
+                        const nextThroughSwitch = throughSwitch || validator.isType(nextComp, 'openhw-pushbutton');
 
                         queue.push([nextNode, nextThroughSwitch, nextVisited]);
                     }
@@ -460,7 +460,7 @@ export function validateI2CPullups(validator) {
 }export function validateSerialPinConflict(validator) {
     console.log('🔍 Checking Serial pin (D0/D1) conflicts...');
     validator.components
-        .filter(comp => validator.isType(comp, 'wokwi-arduino-uno'))
+        .filter(comp => validator.isType(comp, 'openhw-arduino-uno'))
         .forEach(uno => {
             ['0', '1'].forEach(pin => {
                 const node = `${uno.id}.${pin}`;
@@ -487,7 +487,7 @@ export function validateI2CDeviceWithoutMcu(validator) {
 export function validateLedFloatingPins(validator) {
     console.log('🔍 Checking for floating LED pins...');
     validator.components
-        .filter(comp => validator.isType(comp, 'wokwi-led'))
+        .filter(comp => validator.isType(comp, 'openhw-led'))
         .forEach(led => {
             const anode = `${led.id}.A`;
             const cathode = `${led.id}.K`;
@@ -506,7 +506,7 @@ export function validateLedFloatingPins(validator) {
 
 export function validateRp2040VoltageInputs(validator) {
     console.log('🔍 Checking RP2040 3.3V logic limits...');
-    const PICO_TYPES = ['wokwi-raspberry-pi-pico', 'wokwi-raspberry-pi-pico-w'];
+    const PICO_TYPES = ['openhw-pico', 'openhw-pico-w'];
     
     validator.components
         .filter(comp => validator.isType(comp, ...PICO_TYPES))
@@ -528,11 +528,8 @@ export function validateRp2040VoltageInputs(validator) {
 export function validateBuzzerResistor(validator) {
     console.log('🔍 Checking buzzer series resistance...');
     validator.components
-        .filter(comp => validator.isType(comp, 'wokwi-buzzer'))
+        .filter(comp => validator.isType(comp, 'openhw-buzzer'))
         .forEach(buzzer => {
-            const pin1 = `${buzzer.id}.1` || `${buzzer.id}.p1`; // depends on manifest
-            // In Wokwi buzzer is usually 2 terminals, pin 1 and 2 or + and -
-            // Let's assume typical pins from manifest if available or fallback
             const pins = getComponentPins(buzzer).map(p => p.id);
             if (pins.length < 2) return;
 
@@ -567,7 +564,7 @@ export function validateDuplicateI2CAddress(validator) {
 export function validatePotentiometer(validator) {
     console.log('🔍 Checking potentiometer wiring safety...');
     validator.components
-        .filter(comp => validator.isType(comp, 'wokwi-potentiometer', 'wokwi-slide-potentiometer'))
+        .filter(comp => validator.isType(comp, 'openhw-potentiometer', 'openhw-slide-potentiometer'))
         .forEach(pot => {
             const pins = (pot.pins || []).map(p => p.id);
             // Typically 1, 2 (wiper), 3
@@ -586,7 +583,7 @@ export function validatePotentiometer(validator) {
 export function validateDiodePolarity(validator) {
     console.log('🔍 Checking diode orientation...');
     validator.components
-        .filter(comp => validator.isType(comp, 'wokwi-diode'))
+        .filter(comp => validator.isType(comp, 'openhw-diode'))
         .forEach(diode => {
             const anode = `${diode.id}.A`;
             const cathode = `${diode.id}.K`;
@@ -607,14 +604,14 @@ export function validateTotalPowerBudget(validator) {
 
     validator.components.forEach(comp => {
         // Estimate current for common components
-        if (validator.isType(comp, 'wokwi-led')) totalCurrent += 0.02; // 20mA per LED
-        if (validator.isType(comp, 'wokwi-motor', 'wokwi-stepper-motor', 'wokwi-servo')) totalCurrent += 0.15; // ~150mA for a small motor
-        if (validator.isType(comp, 'wokwi-lcd1602-i2c', 'wokwi-lcd2004-i2c', 'wokwi-ssd1306-oled')) totalCurrent += 0.04; // 40mA
-        if (validator.isType(comp, 'wokwi-neopixel', 'wokwi-neopixel-matrix', 'wokwi-neopixel-ring')) {
+        if (validator.isType(comp, 'openhw-led')) totalCurrent += 0.02; // 20mA per LED
+        if (validator.isType(comp, 'openhw-motor', 'openhw-stepper-motor', 'openhw-servo')) totalCurrent += 0.15; // ~150mA for a small motor
+        if (validator.isType(comp, 'openhw-lcd1602-i2c', 'openhw-lcd2004-i2c', 'openhw-ssd1306-oled')) totalCurrent += 0.04; // 40mA
+        if (validator.isType(comp, 'openhw-neopixel', 'openhw-neopixel-matrix', 'openhw-neopixel-ring')) {
             const count = comp.attrs?.pixels || 16;
             totalCurrent += (count * 0.02); // 20mA per pixel
         }
-        if (validator.isType(comp, 'wokwi-buzzer')) totalCurrent += 0.03; // 30mA
+        if (validator.isType(comp, 'openhw-buzzer')) totalCurrent += 0.03; // 30mA
     });
 
     if (totalCurrent > MCU_REGULATOR_LIMIT) {
@@ -625,7 +622,7 @@ export function validateTotalPowerBudget(validator) {
 export function validateBatteryLife(validator) {
     console.log('🔍 Estimating battery life...');
     const stats = validator.calculatePowerStats();
-    const battery = validator.components.find(c => validator.isType(c, 'wokwi-battery'));
+    const battery = validator.components.find(c => validator.isType(c, 'openhw-battery'));
     
     if (battery) {
         const capacity = parseFloat(battery.attrs?.capacityMah || '2000');
@@ -666,8 +663,8 @@ export function validateDeadlocks(validator) {
 export function validateSignalIntegrity(validator) {
     console.log('🔍 Analyzing signal integrity...');
     // Check for high-speed signals crossing power lines or missing bypass caps
-    const hasMotor = validator.components.some(c => validator.isType(c, 'wokwi-motor', 'wokwi-servo'));
-    const hasDigitalDisplay = validator.components.some(c => validator.isType(c, 'wokwi-lcd1602-i2c', 'wokwi-oled'));
+    const hasMotor = validator.components.some(c => validator.isType(c, 'openhw-motor', 'openhw-servo'));
+    const hasDigitalDisplay = validator.components.some(c => validator.isType(c, 'openhw-lcd1602-i2c', 'openhw-lcd2004-i2c', 'openhw-ssd1306-oled'));
     
     if (hasMotor && hasDigitalDisplay) {
         validator.addError(`💡 [Signal] EMI Risk: Motors and digital displays detected. Ensure you use decoupling capacitors (0.1uF) to avoid I2C noise.`, 'warn');
@@ -724,8 +721,8 @@ export function validateRailConflicts(validator) {
 export function validateCrossComponentInteractions(validator) {
     console.log('🔍 Checking cross-component interaction risks...');
 
-    const highSurgeTypes = ['wokwi-motor', 'wokwi-servo', 'wokwi-stepper-motor'];
-    const sensitiveTypes = ['wokwi-ssd1306-oled', 'wokwi-lcd1602-i2c', 'wokwi-lcd2004-i2c', 'max30102'];
+    const highSurgeTypes = ['openhw-motor', 'openhw-servo', 'openhw-stepper-motor'];
+    const sensitiveTypes = ['openhw-ssd1306-oled', 'openhw-lcd1602-i2c', 'openhw-lcd2004-i2c', 'max30102'];
 
     const surgeComponents = validator.components.filter(component => validator.isType(component, ...highSurgeTypes));
     const sensitiveComponents = validator.components.filter(component => validator.isType(component, ...sensitiveTypes));

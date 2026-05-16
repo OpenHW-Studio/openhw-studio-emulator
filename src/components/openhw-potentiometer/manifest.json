@@ -1,0 +1,56 @@
+{
+    "type": "openhw-potentiometer",
+    "label": "Rotary Potentiometer",
+    "description": "Rotary potentiometer (variable resistor). Outputs an analog voltage proportional to the knob's rotation angle. Use with analogRead() on an Arduino analog pin.",
+    "group": "Sensors",
+    "w": 112.5,
+    "h": 112.5,
+    "attrs": {
+        "value": "50",
+        "breadboard": {
+            "anchorPin": "SIG"
+        }
+    },
+    "telemetry": {
+        "template": "value=${state.value}",
+        "criticalKeys": [
+            "state.value"
+        ]
+    },
+    "pins": [
+        {
+            "id": "1",
+            "x": 22.5,
+            "y": 102,
+            "type": "power",
+            "description": "GND"
+        },
+        {
+            "id": "SIG",
+            "x": 37.5,
+            "y": 102,
+            "type": "analog",
+            "description": "SIG"
+        },
+        {
+            "id": "2",
+            "x": 52.5,
+            "y": 102,
+            "type": "power",
+            "description": "VCC"
+        }
+    ],
+    "autowiring": {
+        "connections": [
+            { "from": "1",   "to": "arduino:GND" },
+            { "from": "SIG", "to": "arduino:A0" },
+            { "from": "2",   "to": "arduino:5V" }
+        ]
+    },
+    "autocoding": {
+        "arduino": {
+            "setup": "Serial.begin(9600);\n// Potentiometer connected to ${SIG}",
+            "loop": "int potVal = analogRead(${SIG});\nfloat voltage = potVal * (5.0 / 1023.0);\nSerial.print(\"Pot: \");\nSerial.print(potVal);\nSerial.print(\" | \");\nSerial.print(voltage, 2);\nSerial.println(\" V\");\ndelay(200);"
+        }
+    }
+}

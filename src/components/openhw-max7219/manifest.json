@@ -1,0 +1,46 @@
+{
+  "label": "MAX7219 Dot Matrix",
+  "type": "openhw-max7219",
+  "group": "Outputs",
+  "w": 180,
+  "h": 120,
+  "attrs": {
+    "color": "red"
+  },
+  "telemetry": {
+    "template": "intensity=${state.intensity}, isShutdown=${state.shutdown}, decodeMode=${state.decodeMode}",
+    "criticalKeys": [
+      "state.intensity",
+      "state.shutdown"
+    ]
+  },
+  "pins": [
+    { "id": "VCC", "x": 0, "y": 30, "type": "power" },
+    { "id": "GND", "x": 0, "y": 45, "type": "power" },
+    { "id": "DIN", "x": 0, "y": 60, "type": "input" },
+    { "id": "CS",  "x": 0, "y": 75, "type": "input" },
+    { "id": "CLK", "x": 0, "y": 90, "type": "input" },
+    { "id": "VCC_OUT", "x": 180, "y": 30, "type": "power" },
+    { "id": "GND_OUT", "x": 180, "y": 45, "type": "power" },
+    { "id": "DOUT",    "x": 180, "y": 60, "type": "output" },
+    { "id": "CS_OUT",  "x": 180, "y": 75, "type": "output" },
+    { "id": "CLK_OUT", "x": 180, "y": 90, "type": "output" }
+  ],
+  "autowiring": {
+    "connections": [
+      { "from": "VCC", "to": "arduino:5V" },
+      { "from": "GND", "to": "arduino:GND" },
+      { "from": "CLK", "to": "arduino:SCK" },
+      { "from": "DIN", "to": "arduino:MOSI" },
+      { "from": "CS", "to": "arduino:10" }
+    ]
+  },
+  "autocoding": {
+    "libraries": ["LedControl"],
+    "arduino": {
+      "globals": "#include <LedControl.h>\n\nLedControl lc = LedControl(11, 13, 10, 1);",
+      "setup": "lc.shutdown(0, false);\nlc.setIntensity(0, 8);\nlc.clearDisplay(0);\n// Welcome Message (H)\nlc.setRow(0,0,B01100110);\nlc.setRow(0,1,B01100110);\nlc.setRow(0,2,B01100110);\nlc.setRow(0,3,B01111110);\nlc.setRow(0,4,B01111110);\nlc.setRow(0,5,B01100110);\nlc.setRow(0,6,B01100110);\nlc.setRow(0,7,B01100110);\ndelay(2000);",
+      "loop": "// Dot Matrix ready for animation."
+    }
+  }
+}

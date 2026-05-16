@@ -73,7 +73,7 @@ export class DFlipFlopDsrLogic extends BaseComponent {
                 if (!inst.pins[compPin]) inst.pins[compPin] = { voltage: 0, mode: 'INPUT' };
                 inst.setPinVoltage(compPin, v);
 
-                if (inst.type === 'wokwi-resistor') {
+                if (inst.type === 'openhw-resistor') {
                     const otherPin = compPin === 'p1' ? 'p2' : 'p1';
                     inst.setPinVoltage(otherPin, v);
                     const forwardKey = `${compId}:${otherPin}`;

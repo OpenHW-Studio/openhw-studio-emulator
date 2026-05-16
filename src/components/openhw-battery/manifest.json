@@ -1,0 +1,27 @@
+{
+    "type": "openhw-battery",
+    "label": "Li-ion Battery",
+    "description": "3.7V rechargeable Lithium-ion battery. Simulates real-time discharge and voltage curves.",
+    "group": "Power",
+    "w": 120,
+    "h": 120,
+    "pins": [
+        {
+            "id": "VCC",
+            "label": "+",
+            "x": 0,
+            "y": 15
+        },
+        {
+            "id": "GND",
+            "label": "-",
+            "x": 0,
+            "y": 45
+        }
+    ],
+    "attrs": {
+        "capacityMah": "2000",
+        "currentChargeMah": "2000",
+        "nominalVoltage": "3.7"
+    }
+}

@@ -77,8 +77,8 @@ function openSimulator() {
     components: [
       { id: "dff1", type: "logic-d-flipflop", x: 300, y: 150 },
       { id: "clk1", type: "logic-clock-generator", x: 150, y: 170, attrs: { frequency: "1", units: "Hz" } },
-      { id: "sw1", type: "wokwi-pushbutton", x: 150, y: 100 },
-      { id: "ledq", type: "wokwi-led", x: 450, y: 100 }
+      { id: "sw1", type: "openhw-pushbutton", x: 150, y: 100 },
+      { id: "ledq", type: "openhw-led", x: 450, y: 100 }
     ],
     connections: [
       ["sw1:1", "dff1:D", "green", []],

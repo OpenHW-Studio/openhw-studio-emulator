@@ -1,0 +1,40 @@
+{
+    "type": "openhw-rotary-encoder",
+    "label": "Rotary Encoder",
+    "group": "Inputs",
+    "w": 99,
+    "h": 75,
+    "attrs": {},
+    "pins": [
+        {
+            "id": "CLK",
+            "x": 7.5,
+            "y": 7.5,
+            "type": "digital"
+        },
+        {
+            "id": "DT",
+            "x": 7.5,
+            "y": 22.5,
+            "type": "digital"
+        },
+        {
+            "id": "SW",
+            "x": 7.5,
+            "y": 37.5,
+            "type": "digital"
+        },
+        {
+            "id": "VCC",
+            "x": 7.5,
+            "y": 52.5,
+            "type": "power"
+        },
+        {
+            "id": "GND",
+            "x": 7.5,
+            "y": 67.5,
+            "type": "power"
+        }
+    ]
+}

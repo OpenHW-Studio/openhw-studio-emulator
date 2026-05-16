@@ -43,7 +43,7 @@ export class Mux2to1Logic extends BaseComponent {
                 if (!inst.pins[compPin]) inst.pins[compPin] = { voltage: 0, mode: 'INPUT' };
                 inst.setPinVoltage(compPin, voltage);
 
-                if (inst.type === 'wokwi-resistor') {
+                if (inst.type === 'openhw-resistor') {
                     const otherPin = compPin === 'p1' ? 'p2' : 'p1';
                     inst.setPinVoltage(otherPin, voltage);
                     const forwardKey = `${compId}:${otherPin}`;

@@ -1,0 +1,32 @@
+{
+    "type": "openhw-lcd1602",
+    "label": "LCD 16x2 (Parallel)",
+    "description": "16x2 Character LCD Display (Parallel)",
+    "group": "Displays",
+    "w": 315,
+    "h": 135,
+    "attrs": {
+        "color": "blue",
+        "breadboard": {
+            "anchorPin": "VSS"
+        }
+    },
+    "pins": [
+        { "id": "VSS", "x": 45, "y": 8, "type": "power", "description": "Ground (GND)" },
+        { "id": "VDD", "x": 60, "y": 8, "type": "power", "description": "Power (5V)" },
+        { "id": "V0", "x": 75, "y": 8, "type": "analog", "description": "Contrast" },
+        { "id": "RS", "x": 90, "y": 8, "type": "digital", "description": "Register Select" },
+        { "id": "RW", "x": 105, "y": 8, "type": "digital", "description": "Read/Write" },
+        { "id": "E", "x": 120, "y": 8, "type": "digital", "description": "Enable" },
+        { "id": "D0", "x": 135, "y": 8, "type": "digital", "description": "Data 0" },
+        { "id": "D1", "x": 150, "y": 8, "type": "digital", "description": "Data 1" },
+        { "id": "D2", "x": 165, "y": 8, "type": "digital", "description": "Data 2" },
+        { "id": "D3", "x": 180, "y": 8, "type": "digital", "description": "Data 3" },
+        { "id": "D4", "x": 195, "y": 8, "type": "digital", "description": "Data 4" },
+        { "id": "D5", "x": 210, "y": 8, "type": "digital", "description": "Data 5" },
+        { "id": "D6", "x": 225, "y": 8, "type": "digital", "description": "Data 6" },
+        { "id": "D7", "x": 240, "y": 8, "type": "digital", "description": "Data 7" },
+        { "id": "A", "x": 255, "y": 8, "type": "power", "description": "Backlight Anode (+)" },
+        { "id": "K", "x": 270, "y": 8, "type": "power", "description": "Backlight Cathode (-)" }
+    ]
+}

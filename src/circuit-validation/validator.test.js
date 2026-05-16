@@ -59,11 +59,11 @@ test('structured errors carry normalized metadata', () => {
 });
 
 test('component manifest schema validates representative manifests', () => {
-    const unoManifest = JSON.parse(readFileSync(new URL('../components/wokwi-arduino-uno/manifest.json', import.meta.url), 'utf8'));
+    const unoManifest = JSON.parse(readFileSync(new URL('../components/openhw-arduino-uno/manifest.json', import.meta.url), 'utf8'));
     const maxManifest = JSON.parse(readFileSync(new URL('../components/max30102/manifest.json', import.meta.url), 'utf8'));
 
     for (const [name, manifest] of [
-        ['wokwi-arduino-uno', unoManifest],
+        ['openhw-arduino-uno', unoManifest],
         ['max30102', maxManifest],
     ]) {
         const result = validateComponentManifest(manifest);

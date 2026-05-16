@@ -1,0 +1,38 @@
+{
+    "type": "openhw-nokia-5110",
+    "label": "Nokia 5110 Screen",
+    "group": "Displays",
+    "w": 200,
+    "h": 240,
+    "attrs": {},
+    "pins": [
+        { "id": "VCC", "x": 47.5, "y": 230, "type": "power" },
+        { "id": "GND", "x": 62.5, "y": 230, "type": "power" },
+        { "id": "SCE", "x": 77.5, "y": 230, "type": "digital" },
+        { "id": "RST", "x": 92.5, "y": 230, "type": "digital" },
+        { "id": "DC", "x": 107.5, "y": 230, "type": "digital" },
+        { "id": "DN", "x": 122.5, "y": 230, "type": "digital" },
+        { "id": "SCLK", "x": 137.5, "y": 230, "type": "digital" },
+        { "id": "LED", "x": 152.5, "y": 230, "type": "digital" }
+    ],
+    "autowiring": {
+        "connections": [
+            { "from": "VCC", "to": "arduino:3V3" },
+            { "from": "GND", "to": "arduino:GND" },
+            { "from": "SCLK", "to": "arduino:SCK" },
+            { "from": "DN", "to": "arduino:MOSI" },
+            { "from": "SCE", "to": "arduino:10" },
+            { "from": "RST", "to": "arduino:9" },
+            { "from": "DC", "to": "arduino:8" },
+            { "from": "LED", "to": "arduino:3V3" }
+        ]
+    },
+    "autocoding": {
+        "libraries": ["Adafruit PCD8544 Nokia 5110 LCD library", "Adafruit GFX Library"],
+        "arduino": {
+            "globals": "#include <Adafruit_PCD8544.h>\n\nAdafruit_PCD8544 display = Adafruit_PCD8544(8, 10, 9);",
+            "setup": "display.begin();\ndisplay.setContrast(50);\ndisplay.clearDisplay();\ndisplay.setTextSize(1);\ndisplay.setTextColor(BLACK);\ndisplay.setCursor(0,0);\ndisplay.println(\"OpenHW Studio\");\ndisplay.println(\"Nokia 5110\");\ndisplay.display();\ndelay(2000);",
+            "loop": "display.clearDisplay();\ndisplay.setCursor(0,0);\ndisplay.print(\"Timer: \");\ndisplay.print(millis()/1000);\ndisplay.println(\"s\");\ndisplay.display();\ndelay(500);"
+        }
+    }
+}

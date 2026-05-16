@@ -1,0 +1,18 @@
+{
+    "type": "openhw-nlsf595",
+    "label": "SPI LED Driver (NLSF595)",
+    "group": "Outputs",
+    "w": 128,
+    "h": 64,
+    "attrs": {},
+    "pins": [
+        { "id": "VCC",  "x": 11, "y": 11, "type": "power" },
+        { "id": "GND",  "x": 11, "y": 26, "type": "power" },
+        { "id": "MOSI", "x": 11, "y": 41, "type": "digital" },
+        { "id": "SCK",  "x": 11, "y": 56, "type": "digital" },
+        { "id": "CS",   "x": 26, "y": 56, "type": "digital" },
+        { "id": "R1",   "x": 118, "y": 11, "type": "digital" },
+        { "id": "G1",   "x": 118, "y": 26, "type": "digital" },
+        { "id": "B1",   "x": 118, "y": 41, "type": "digital" }
+    ]
+}

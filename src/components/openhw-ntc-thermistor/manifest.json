@@ -1,0 +1,42 @@
+{
+  "type": "openhw-ntc-thermistor",
+  "label": "NTC Thermistor Module",
+  "group": "Sensors",
+  "description": "An analog and digital temperature sensor module using an NTC thermistor and an LM393 comparator.",
+  "w": 92.3,
+  "h": 184.6,
+  "attrs": {
+    "temperature": "25",
+    "threshold": "512"
+  },
+  "pins": [
+    {
+      "id": "A0",
+      "x": 23.1,
+      "y": 176,
+      "type": "analog_output",
+      "description": "Analog output (Raw NTC voltage)"
+    },
+    {
+      "id": "D0",
+      "x": 38.1,
+      "y": 176,
+      "type": "digital_output",
+      "description": "Digital output (Active Low trigger)"
+    },
+    {
+      "id": "GND",
+      "x": 53.1,
+      "y": 176,
+      "type": "power",
+      "description": "Ground"
+    },
+    {
+      "id": "VCC",
+      "x": 68.1,
+      "y": 176,
+      "type": "power",
+      "description": "Voltage Input (3.3V - 5V typical)"
+    }
+  ]
+}
