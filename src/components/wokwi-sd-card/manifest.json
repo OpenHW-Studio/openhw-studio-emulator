@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-sd-card",
+    "type": "openhw-sd-card",
     "label": "MicroSD Card",
     "description": "SPI microSD card module with virtual storage backed by an in-memory filesystem and optional littlefs-wasm runtime.",
     "group": "Memory",

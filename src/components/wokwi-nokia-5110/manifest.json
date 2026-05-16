@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-nokia-5110",
+    "type": "openhw-nokia-5110",
     "label": "Nokia 5110 Screen",
     "group": "Displays",
     "w": 200,

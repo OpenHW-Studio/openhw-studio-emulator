@@ -1,5 +1,5 @@
 {
-  "type": "wokwi-ldr-module",
+  "type": "openhw-ldr-module",
   "label": "LDR Sensor Module (4-pin)",
   "group": "Sensors",
   "w": 187.5,

@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-tm1637-7segment",
+    "type": "openhw-tm1637-7segment",
     "label": "TM1637 Display",
     "group": "Outputs",
     "w": 180,
