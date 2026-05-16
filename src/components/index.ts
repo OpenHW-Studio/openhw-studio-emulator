@@ -57,19 +57,16 @@ export { default as logicMux2to1 } from './logic-mux-2to1';
 export { default as logicDFlipFlop } from './logic-d-flipflop';
 export { default as logicDFlipFlopR } from './logic-d-flipflop-r';
 export { default as logicDFlipFlopDsr } from './logic-d-flipflop-dsr';
-export { default as logicNotGate } from './logic-not-gate';
-export { default as logicBufferGate } from './logic-buffer-gate';
-export { default as logicAndGate } from './logic-and-gate';
-export { default as logicOrGate } from './logic-or-gate';
-export { default as logicNorGate } from './logic-nor-gate';
-export { default as logicNandGate } from './logic-nand-gate';
-export { default as logicXorGate } from './logic-xor-gate';
-export { default as logicXnorGate } from './logic-xnor-gate';
 export { default as logicClockGenerator } from './logic-clock-generator';
 export { default as logicIc74xx } from './logic-ic-74xx';
 export { default as wokwiArduinoMega } from './wokwi-arduino-mega';
 export { default as wokwiAttiny85 } from './wokwi-attiny85';
 export { default as wokwiHcSr04 } from './wokwi-hc-sr04';
+export { default as wokwiBmp180 } from './wokwi-bmp180';
+export { default as wokwiDs1307Rtc } from './wokwi-ds1307-rtc';
+export { default as wokwiMpu6050 } from './wokwi-mpu6050';
+export { default as wokwiNtcThermistor } from './wokwi-ntc-thermistor';
+export { default as wokwiRelayModule } from './wokwi-relay-module';
 
 export { FullCircuitValidator, analyzeCodeHardwareSync, ProtocolAnalyzer } from '../circuit-validation/index.js';
 
