@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-hc-sr04",
+    "type": "openhw-hc-sr04",
     "label": "Ultrasonic Sensor",
     "description": "HC-SR04 ultrasonic distance sensor.",
     "group": "Sensors",

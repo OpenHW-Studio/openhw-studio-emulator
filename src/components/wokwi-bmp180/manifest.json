@@ -1,5 +1,5 @@
 {
-  "type": "wokwi-bmp180-breakout",
+  "type": "openhw-bmp180-breakout",
   "label": "BMP180 Pressure Sensor Breakout",
   "group": "Sensors",
   "description": "A breakout board for the Bosch BMP180 digital pressure and temperature sensor.",

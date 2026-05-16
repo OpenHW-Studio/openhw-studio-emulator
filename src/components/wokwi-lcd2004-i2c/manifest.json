@@ -1,5 +1,5 @@
 {
-  "type": "wokwi-lcd2004-i2c",
+  "type": "openhw-lcd2004-i2c",
   "label": "LCD 2004 (I2C)",
   "group": "Displays",
   "w": 375,

@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-ssd1306-oled",
+    "type": "openhw-ssd1306-oled",
     "label": "SSD1306 OLED 128x64",
     "group": "Outputs",
     "w": 135,

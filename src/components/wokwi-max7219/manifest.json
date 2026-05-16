@@ -1,6 +1,6 @@
 {
   "label": "MAX7219 Dot Matrix",
-  "type": "wokwi-max7219",
+  "type": "openhw-max7219",
   "group": "Outputs",
   "w": 180,
   "h": 120,

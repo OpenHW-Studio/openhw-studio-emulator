@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-pca9865",
+    "type": "openhw-pca9865",
     "label": "16-Channel PWM Module (PCA9865)",
     "group": "Actuators",
     "w": 342.8,

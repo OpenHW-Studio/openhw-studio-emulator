@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-a4988",
+    "type": "openhw-a4988",
     "label": "A4988 Stepper Driver",
     "group": "Actuators",
     "w": 120,

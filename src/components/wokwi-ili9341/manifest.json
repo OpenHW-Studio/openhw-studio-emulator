@@ -1,5 +1,5 @@
 {
-  "type": "wokwi-ili9341",
+  "type": "openhw-ili9341",
   "label": "ILI9341 2.8\" TFT LCD",
   "group": "Displays",
   "w": 240,

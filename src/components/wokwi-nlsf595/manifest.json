@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-nlsf595",
+    "type": "openhw-nlsf595",
     "label": "SPI LED Driver (NLSF595)",
     "group": "Outputs",
     "w": 128,

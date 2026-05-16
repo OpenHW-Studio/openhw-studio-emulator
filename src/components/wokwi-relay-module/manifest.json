@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-relay-module",
+    "type": "openhw-relay-module",
     "label": "Relay Module",
     "group": "Outputs",
     "w": 200,

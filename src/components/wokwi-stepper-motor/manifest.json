@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-stepper-motor",
+    "type": "openhw-stepper-motor",
     "label": "Stepper Motor (Bipolar)",
     "group": "Actuators",
     "w": 75,
@@ -35,7 +35,7 @@
     ],
     "autowiring": {
         "helpers": [
-            { "type": "wokwi-a4988", "id": "driver" },
+            { "type": "openhw-a4988", "id": "driver" },
             { "type": "wokwi-power-supply", "id": "psu", "attrs": { "voltage": "12.0" } }
         ],
         "connections": [

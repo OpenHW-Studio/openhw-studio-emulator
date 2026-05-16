@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-l293d",
+    "type": "openhw-l293d",
     "label": "Motor Driver (L293D)",
     "group": "Actuators",
     "w": 90,

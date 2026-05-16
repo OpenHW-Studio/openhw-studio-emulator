@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-pca9685",
+    "type": "openhw-pca9685",
     "label": "Servo Pi HAT",
     "group": "Actuators",
     "w": 180,

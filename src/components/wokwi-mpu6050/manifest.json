@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-mpu6050",
+    "type": "openhw-mpu6050",
     "label": "MPU6050 IMU Sensor",
     "group": "Sensors",
     "w": 94.5,

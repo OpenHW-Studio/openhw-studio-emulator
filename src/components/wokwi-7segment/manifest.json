@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-7segment",
+    "type": "openhw-7segment",
     "label": "7-Segment Display",
     "group": "Outputs",
     "w": 386.3,
