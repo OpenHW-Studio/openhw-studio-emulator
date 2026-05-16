@@ -21,6 +21,7 @@ export { default as openhw7Segment } from './openhw-7segment';
 export { default as openhwIli9341 } from './openhw-ili9341';
 export { default as openhwLcd2004I2C } from './openhw-lcd2004-i2c';
 export { default as openhwLcd1602I2C } from './openhw-lcd1602-i2c';
+export { default as openhwLcd1602 } from './openhw-lcd1602';
 export { default as openhwLdrModule } from './openhw-ldr-module';
 export { default as max30102 } from './max30102';
 export { default as openhwSdCard } from './openhw-sd-card';
