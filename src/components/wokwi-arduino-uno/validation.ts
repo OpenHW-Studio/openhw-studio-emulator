@@ -74,32 +74,7 @@ export const validation: { rules: ComponentValidationRule[] } = {
 
                     if (!connections || connections.length === 0) return;
 
-                    let hasPullup = false;
-                    const queue: [string, Set<string>][] = [[pinNode, new Set([pinNode])]];
-
-                    while (queue.length > 0) {
-                        const [currentNode, visited] = queue.shift()!;
-
-                        if (currentNode.endsWith(".5V") || currentNode.endsWith(".3v3") || currentNode.endsWith(".vcc")) {
-                            hasPullup = true;
-                            break;
-                        }
-
-                        const neighbors = graph.get(currentNode) || [];
-                        for (const neighbor of neighbors) {
-                            if (!visited.has(neighbor)) {
-                                const newVisited = new Set(visited);
-                                newVisited.add(neighbor);
-
-                                const comp = validator?.getComponent(neighbor);
-                                if (comp && comp.type === "wokwi-resistor") {
-                                    queue.push([neighbor, newVisited]);
-                                }
-                            }
-                        }
-                    }
-
-                    if (!hasPullup) {
+                    if (!validator?.hasResistivePathToSupply(pinNode)) {
                         issues.push(createValidationIssue({
                             ruleId: 'arduino-uno-i2c-pullups',
                             severity: 'warn',

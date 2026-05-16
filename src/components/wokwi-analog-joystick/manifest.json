@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-analog-joystick",
+    "type": "openhw-analog-joystick",
     "label": "Analog Joystick",
     "description": "2-axis analog joystick with push button",
     "group": "Sensors",

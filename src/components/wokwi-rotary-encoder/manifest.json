@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-rotary-encoder",
+    "type": "openhw-rotary-encoder",
     "label": "Rotary Encoder",
     "group": "Inputs",
     "w": 99,

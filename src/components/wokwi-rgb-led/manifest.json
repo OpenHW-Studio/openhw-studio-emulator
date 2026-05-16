@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-rgb-led",
+    "type": "openhw-rgb-led",
     "label": "RGB LED (4-pin)",
     "group": "Outputs",
     "w": 64.2,

@@ -52,39 +52,6 @@ function hasConnection(validator, nodeId) {
     return (validator.getNeighbors(nodeId) || []).length > 0;
 }
 
-function hasResistivePathToSupply(validator, startNode) {
-    const queue = [[startNode, false, new Set([startNode])]];
-
-    while (queue.length > 0) {
-        const [currentNode, hasResistor, visited] = queue.shift();
-
-        if (validator.isSupplyNode(currentNode) && hasResistor) {
-            return true;
-        }
-
-        const neighbors = validator.getNeighbors(currentNode);
-        for (const neighbor of neighbors) {
-            if (visited.has(neighbor)) continue;
-
-            const nextVisited = new Set(visited);
-            nextVisited.add(neighbor);
-
-            const comp = validator.getComponent(neighbor);
-            if (validator.isType(comp, 'wokwi-resistor', 'resistor')) {
-                const otherNode = validator.getOtherTerminalNode(comp, neighbor);
-                if (otherNode && !nextVisited.has(otherNode)) {
-                    nextVisited.add(otherNode);
-                    queue.push([otherNode, true, nextVisited]);
-                }
-                continue;
-            }
-
-            queue.push([neighbor, hasResistor, nextVisited]);
-        }
-    }
-
-    return false;
-}
 
 function hasI2CDeviceConnected(validator, mcu) {
     const a4Node = `${mcu.id}.A4`;
@@ -104,6 +71,17 @@ function hasI2CDeviceConnected(validator, mcu) {
         for (const neighbor of neighbors) {
             if (visited.has(neighbor)) continue;
             visited.add(neighbor);
+
+            const neighborComp = validator.getComponent(neighbor);
+            if (validator.isResistiveTraversalComponent(neighborComp)) {
+                const otherNode = validator.getOtherTerminalNode(neighborComp, neighbor);
+                if (otherNode && !visited.has(otherNode)) {
+                    visited.add(otherNode);
+                    queue.push(otherNode);
+                }
+                continue;
+            }
+
             queue.push(neighbor);
         }
     }
@@ -251,16 +229,22 @@ export function validateComponentLimits(validator) {
                 }
 
                 let loadCurrent = 0;
+                const nPinId = getPinId(neighbor);
+                const nPinType = getNodeType(neighborComp, nPinId);
+
                 if (validator.isType(neighborComp, 'wokwi-motor')) {
                     loadCurrent = validator.componentSpecs['wokwi-motor'].typicalCurrentA;
                     validator.addError(
                         `🔥 [MCU ${component.id}] GPIO ${pinId} drives DC motor ${neighborComp.id} directly. Use a transistor or motor driver.`
                     );
                 } else if (validator.isType(neighborComp, 'wokwi-servo')) {
-                    loadCurrent = validator.componentSpecs['wokwi-servo'].typicalCurrentA;
-                    validator.addError(
-                        `🔥 [MCU ${component.id}] GPIO ${pinId} is sourcing servo ${neighborComp.id} power directly. Provide external 5V rail.`
-                    );
+                    // Only warn if we are connected to a power pin. PWM signal is fine.
+                    if (nPinType === 'power' || nPinId === 'V+' || nPinId === 'GND') {
+                        loadCurrent = validator.componentSpecs['wokwi-servo'].typicalCurrentA;
+                        validator.addError(
+                            `🔥 [MCU ${component.id}] GPIO ${pinId} is sourcing servo ${neighborComp.id} power directly. Provide external 5V rail.`
+                        );
+                    }
                 } else if (validator.isType(neighborComp, 'wokwi-buzzer')) {
                     loadCurrent = validator.componentSpecs['wokwi-buzzer'].typicalCurrentA;
                 }
@@ -465,11 +449,11 @@ export function validateI2CPullups(validator) {
             if (!hasConnection(validator, sdaNode) || !hasConnection(validator, sclNode)) return;
             if (!hasI2CDeviceConnected(validator, mcu)) return;
 
-            if (!hasResistivePathToSupply(validator, sdaNode)) {
+            if (!validator.hasResistivePathToSupply(sdaNode)) {
                 validator.addError(`⚠️ [I2C ${mcu.id}] SDA missing pull-up. Fix: Add 4.7k I2C pull-up resistors.`);
             }
 
-            if (!hasResistivePathToSupply(validator, sclNode)) {
+            if (!validator.hasResistivePathToSupply(sclNode)) {
                 validator.addError(`⚠️ [I2C ${mcu.id}] SCL missing pull-up. Fix: Add 4.7k I2C pull-up resistors.`);
             }
         });
@@ -636,15 +620,6 @@ export function validateTotalPowerBudget(validator) {
     if (totalCurrent > MCU_REGULATOR_LIMIT) {
         validator.addError(`⚠️ Power Budget Warning: Total estimated current is ${(totalCurrent * 1000).toFixed(0)}mA. This exceeds the standard 500mA regulator limit. Consider an external power supply.`);
     }
-}
-export function validateThermalLimits(validator) {
-    console.log('🔍 Checking thermal limits...');
-    const stats = validator.calculatePowerStats();
-    Object.entries(stats.thermal).forEach(([compId, data]) => {
-        if (data.estimatedTemp > 75) {
-            validator.addError(`⚠️ [${compId}] Thermal Warning: Component is dissipating ${data.power.toFixed(2)}W. Estimated temp: ${data.estimatedTemp.toFixed(1)}°C. Consider a heatsink.`);
-        }
-    });
 }
 
 export function validateBatteryLife(validator) {

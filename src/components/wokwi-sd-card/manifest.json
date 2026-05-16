@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-sd-card",
+    "type": "openhw-sd-card",
     "label": "MicroSD Card",
     "description": "SPI microSD card module with virtual storage backed by an in-memory filesystem and optional littlefs-wasm runtime.",
     "group": "Memory",
@@ -76,7 +76,8 @@
     "autocoding": {
         "libraries": ["SD"],
         "arduino": {
-            "setup": "#include <SPI.h>\n#include <SD.h>\n\nvoid setup() {\n  Serial.begin(9600);\n  while (!Serial);\n  Serial.print(\"Initializing SD card...\");\n  if (!SD.begin(10)) {\n    Serial.println(\"initialization failed!\");\n    return;\n  }\n  Serial.println(\"initialization done.\");\n}",
+            "globals": "#include <SPI.h>\n#include <SD.h>",
+            "setup": "Serial.begin(9600);\nwhile (!Serial);\nSerial.print(\"Initializing SD card...\");\nif (!SD.begin(10)) {\n  Serial.println(\"initialization failed!\");\n  return;\n}\nSerial.println(\"initialization done.\");",
             "loop": "// SD Card ready for datalogging."
         }
     }

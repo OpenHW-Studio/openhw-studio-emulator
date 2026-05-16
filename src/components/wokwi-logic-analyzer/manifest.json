@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-logic-analyzer",
+    "type": "openhw-logic-analyzer",
     "label": "8-Ch Logic Analyzer",
     "group": "Debug",
     "w": 150,

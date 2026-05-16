@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-membrane-keypad",
+    "type": "openhw-membrane-keypad",
     "label": "Membrane Keypad (4x4)",
     "description": "Standard 4x4 membrane keypad matrix. Connect rows to output pins and columns to input pullup pins to scan for key presses.",
     "group": "Inputs",
@@ -78,7 +78,8 @@
     "autocoding": {
         "libraries": ["Keypad"],
         "arduino": {
-            "setup": "#include <Keypad.h>\n\nconst byte ROWS = 4;\nconst byte COLS = 4;\nchar keys[ROWS][COLS] = {\n  {'1','2','3','A'},\n  {'4','5','6','B'},\n  {'7','8','9','C'},\n  {'*','0','#','D'}\n};\nbyte rowPins[ROWS] = {9, 8, 7, 6};\nbyte colPins[COLS] = {5, 4, 3, 2};\n\nKeypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);\n\nvoid setup() {\n  Serial.begin(9600);\n}",
+            "globals": "#include <Keypad.h>\n\nconst byte ROWS = 4;\nconst byte COLS = 4;\nchar keys[ROWS][COLS] = {\n  {'1','2','3','A'},\n  {'4','5','6','B'},\n  {'7','8','9','C'},\n  {'*','0','#','D'}\n};\nbyte rowPins[ROWS] = {9, 8, 7, 6};\nbyte colPins[COLS] = {5, 4, 3, 2};\n\nKeypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);",
+            "setup": "Serial.begin(9600);",
             "loop": "char key = keypad.getKey();\nif (key) {\n  Serial.print(\"Key Pressed: \");\n  Serial.println(key);\n}"
         }
     }

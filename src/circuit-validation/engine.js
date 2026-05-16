@@ -49,12 +49,16 @@ export class FullCircuitValidator {
             graph.get(nodeA).push(nodeB);
             graph.get(nodeB).push(nodeA);
         };
-        connections.forEach(conn => addEdge(conn.from, conn.to));
+        connections.forEach(conn => {
+            const from = String(conn.from || '').replace(':', '.');
+            const to = String(conn.to || '').replace(':', '.');
+            addEdge(from, to);
+        });
         return graph;
     }
 
     getComponent(nodeId) {
-        const [compId] = nodeId.split(".");
+        const [compId] = String(nodeId || '').split(/[\.:]/);
         return this.components.find(c => c.id === compId);
     }
 
@@ -191,7 +195,7 @@ export class FullCircuitValidator {
     }
 
     getComponentIdFromNode(nodeId) {
-        return String(nodeId || '').split('.')[0] || '';
+        return String(nodeId || '').split(/[\.:]/)[0] || '';
     }
 
     getDirtyComponentIds(previousFingerprint, nextFingerprint) {
@@ -395,7 +399,7 @@ export class FullCircuitValidator {
     }
 
     getNodeParts(nodeId) {
-        const [componentId, pinId] = String(nodeId || '').split('.');
+        const [componentId, pinId] = String(nodeId || '').split(/[\.:]/);
         return { componentId, pinId };
     }
 
@@ -419,6 +423,18 @@ export class FullCircuitValidator {
         return ['5v', '3v3', '3.3v', 'vcc', 'vin', '12v'].includes(normalized);
     }
 
+    hasResistivePathToSupply(startNode) {
+        const sources = this.collectVoltageSources(startNode);
+        // A valid pull-up/down path must either:
+        // 1. Go through a resistor (resistance > 0) and reach a supply (voltage > 0).
+        // 2. Be directly connected to a REAL supply node (resistance 0, but isSupplyNode is true).
+        return sources.some(s => {
+            if (s.voltage <= 0) return false;
+            if (s.resistance > 0) return true;
+            return this.isSupplyNode(s.nodeId);
+        });
+    }
+
     getComponentAttrNumber(component, attrName, fallbackValue = 0) {
         const raw = component?.attrs?.[attrName] ?? component?.[attrName];
         const parsed = Number(raw);
@@ -426,8 +442,13 @@ export class FullCircuitValidator {
     }
 
     getTwoTerminalPins(component) {
-        const pins = component?.pins || component?.manifest?.pins || [];
-        return pins.map(p => p.id);
+        if (!component) return [];
+        let pins = component.pins || component.manifest?.pins;
+        if (!pins) {
+            const def = this.getComponentDefinition(component);
+            pins = def?.pins || def?.manifest?.pins;
+        }
+        return (pins || []).map(p => p.id);
     }
 
     getOtherTerminalNode(component, nodeId) {
@@ -554,32 +575,30 @@ export class FullCircuitValidator {
 
             const neighbors = this.getNeighbors(current.nodeId);
             for (const neighbor of neighbors) {
-                const nextNode = neighbor;
-                const nextResistance = current.resistance;
-                const previousResistance = bestResistance.get(nextNode);
-
-                if (previousResistance === undefined || nextResistance + epsilon < previousResistance) {
-                    bestResistance.set(nextNode, nextResistance);
-                    queue.push({ nodeId: nextNode, resistance: nextResistance });
-                }
-
                 const neighborComponent = this.getComponent(neighbor);
-                if (!this.isResistiveTraversalComponent(neighborComponent)) {
-                    continue;
+                const isResistive = this.isResistiveTraversalComponent(neighborComponent);
+                
+                // Normal node-to-node connection
+                const nextResistance = current.resistance;
+                const previousResistance = bestResistance.get(neighbor);
+                if (previousResistance === undefined || nextResistance + epsilon < previousResistance) {
+                    bestResistance.set(neighbor, nextResistance);
+                    queue.push({ nodeId: neighbor, resistance: nextResistance });
                 }
 
-                const otherTerminalNode = this.getOtherTerminalNode(neighborComponent, neighbor);
-                if (!otherTerminalNode) {
-                    continue;
-                }
+                if (isResistive) {
+                    const otherTerminalNode = this.getOtherTerminalNode(neighborComponent, neighbor);
+                    if (otherTerminalNode) {
+                        const addedResistance = this.getTraversalResistance(neighborComponent);
+                        const terminalResistance = current.resistance + addedResistance;
+                        const terminalBest = bestResistance.get(otherTerminalNode);
+                        
 
-                const addedResistance = this.getTraversalResistance(neighborComponent);
-                const terminalResistance = current.resistance + addedResistance;
-                const terminalBest = bestResistance.get(otherTerminalNode);
-
-                if (terminalBest === undefined || terminalResistance + epsilon < terminalBest) {
-                    bestResistance.set(otherTerminalNode, terminalResistance);
-                    queue.push({ nodeId: otherTerminalNode, resistance: terminalResistance });
+                        if (terminalBest === undefined || terminalResistance + epsilon < terminalBest) {
+                            bestResistance.set(otherTerminalNode, terminalResistance);
+                            queue.push({ nodeId: otherTerminalNode, resistance: terminalResistance });
+                        }
+                    }
                 }
             }
         }
@@ -925,6 +944,7 @@ export class FullCircuitValidator {
             runtimePhase: String(options.runtimePhase || 'compile-time'),
             runtimeState: options.runtimeState && typeof options.runtimeState === 'object' ? options.runtimeState : null,
             includeTemporalValidation: options.includeTemporalValidation === true,
+            debug: options.debug === true || options.verbose === true,
         };
     }
 
@@ -1186,6 +1206,8 @@ export class FullCircuitValidator {
     runValidation(options = {}) {
         this.resetValidationState();
         const validationOptions = this.getDefaultValidationOptions(options);
+        this.options = validationOptions; // Store for access in other methods
+
         const fingerprint = this.computeCircuitFingerprint();
         const cacheKey = validationOptions.cacheKey || `${fingerprint}|${validationOptions.profileName}|${validationOptions.minimumSeverity}|${validationOptions.includeExpensive}`;
         const incrementalStore = this.getIncrementalStore();
@@ -1290,8 +1312,12 @@ export class FullCircuitValidator {
             }, validationOptions.cacheMaxEntries);
         }
 
-        if (passed) {
+        if (this.errors.length === 0) {
             console.log("\n✅ ALL CHECKS PASSED: Circuit is safe for code execution.");
+            return true;
+        } else if (passed) {
+            console.log(`\n⚠️ VALIDATION PASSED WITH ${this.errors.length} WARNINGS:`);
+            this.errors.forEach(err => console.log(err));
             return true;
         } else {
             console.log("\n🛑 VALIDATION FAILED:");

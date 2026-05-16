@@ -284,4 +284,74 @@ export const validationCases = [
             ],
         },
     },
+    {
+        name: 'colon_separator_resilience',
+        expectPass: false,
+        expectMessageIncludes: 'FATAL SHORT CIRCUIT',
+        project: {
+            components: [
+                makeUno('uno_colon'),
+            ],
+            connections: [
+                { from: 'uno_colon:5V', to: 'uno_colon:gnd' },
+            ],
+        },
+    },
+    {
+        name: 'valid_servo_wiring',
+        expectPass: true,
+        project: {
+            components: [
+                makeUno('uno1'),
+                makePowerSupply('psu', 5),
+                { id: 'wokwi_servo_1', type: 'wokwi-servo', pins: [
+                    { id: 'GND', type: 'power' },
+                    { id: 'V+', type: 'power' },
+                    { id: 'PWM', type: 'digital' }
+                ]}
+            ],
+            connections: [
+                { from: 'psu.gnd', to: 'uno1.gnd' },
+                { from: 'wokwi_servo_1.GND', to: 'uno1.gnd' },
+                { from: 'wokwi_servo_1.V+', to: 'psu.5V' },
+                { from: 'wokwi_servo_1.PWM', to: 'uno1.6' }
+            ],
+        },
+    },
+    {
+        name: 'valid_i2c_pullup',
+        expectPass: true,
+        project: {
+            components: [
+                makeUno('uno1'),
+                { 
+                    id: 'oled', 
+                    type: 'wokwi-ssd1306-oled',
+                    pins: [{id: 'GND'}, {id: 'VCC'}, {id: 'SCL'}, {id: 'SDA'}]
+                },
+                { 
+                    id: 'r1', 
+                    type: 'wokwi-resistor', 
+                    attrs: { value: '4700' },
+                    pins: [{id: 'p1'}, {id: 'p2'}]
+                },
+                { 
+                    id: 'r2', 
+                    type: 'wokwi-resistor', 
+                    attrs: { value: '4700' },
+                    pins: [{id: 'p1'}, {id: 'p2'}]
+                }
+            ],
+            connections: [
+                { from: 'uno1.A4', to: 'oled.SDA' },
+                { from: 'uno1.A5', to: 'oled.SCL' },
+                { from: 'uno1.A4', to: 'r1.p1' },
+                { from: 'r1.p2', to: 'uno1.5V' },
+                { from: 'uno1.A5', to: 'r2.p1' },
+                { from: 'r2.p2', to: 'uno1.5V' },
+                { from: 'uno1.GND', to: 'oled.GND' },
+                { from: 'uno1.5V', to: 'oled.VCC' }
+            ]
+        }
+    }
 ];

@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-soil-moisture-sensor",
+    "type": "openhw-soil-moisture-sensor",
     "label": "Soil Moisture",
     "group": "Sensors",
     "w": 256.7,

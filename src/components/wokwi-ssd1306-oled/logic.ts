@@ -36,6 +36,7 @@ export class SSD1306Logic extends BaseComponent {
 
   private vramDirty = false;
   private stateUpdateCount = 0;
+  private lastUpdateCycle = 0;
   private cycleCount = 0;
 
   constructor(id: string, manifest: any) {
@@ -61,10 +62,17 @@ export class SSD1306Logic extends BaseComponent {
   }
 
   update(cpuCycles: number) {
-    this.cycleCount += cpuCycles;
+    if (this.lastUpdateCycle === 0) {
+      this.lastUpdateCycle = cpuCycles;
+      return;
+    }
+    const delta = cpuCycles - this.lastUpdateCycle;
+    this.lastUpdateCycle = cpuCycles;
+
+    this.cycleCount += delta;
     // 60FPS update (16ms @ 16MHz ~= 266666 cycles)
     if (this.cycleCount >= 266666) {
-      this.cycleCount = 0;
+      this.cycleCount %= 266666;
       if (this.vramDirty) {
         this.vramDirty = false;
         this.stateUpdateCount += 1;

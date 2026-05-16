@@ -144,6 +144,7 @@ export const JoystickUI = ({ state, attrs, isRunning, comp }: { state: any, attr
                     display: 'block', 
                     overflow: 'visible', 
                     cursor: isRunning ? 'pointer' : 'default', 
+                    pointerEvents: isRunning ? 'auto' : 'none',
                     touchAction: 'none'
                 }}
                 onMouseDown={e => isRunning && e.stopPropagation()}
