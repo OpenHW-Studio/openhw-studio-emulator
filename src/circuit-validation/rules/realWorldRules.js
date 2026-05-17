@@ -1,5 +1,15 @@
 const MCU_TYPES = ['openhw-arduino-uno', 'mcu_uno'];
-const I2C_DEVICE_TYPES = ['openhw-lcd2004-i2c', 'openhw-ssd1306-oled', 'max30102'];
+const I2C_DEVICE_TYPES = [
+    'openhw-lcd1602-i2c',
+    'openhw-lcd2004-i2c',
+    'openhw-ssd1306-oled',
+    'openhw-mpu6050',
+    'openhw-ds1307-rtc',
+    'openhw-pca9685',
+    'openhw-pca9865',
+    'openhw-bmp180-breakout',
+    'max30102'
+];
 const DRIVER_TYPES = ['openhw-motor-driver', 'shift_register'];
 
 function getPinId(nodeId) {
@@ -550,11 +560,41 @@ export function validateDuplicateI2CAddress(validator) {
     validator.components
         .filter(comp => validator.isType(comp, ...I2C_DEVICE_TYPES))
         .forEach(comp => {
-            // This is a simplified check assuming types have default addresses
-            // A real check would look at 'address' attribute if supported
-            const addr = comp.attrs?.i2cAddress || comp.type; 
+            let addr = comp.attrs?.i2cAddress || comp.attrs?.i2c_address;
+            if (!addr) {
+                if (validator.isType(comp, 'openhw-mpu6050')) {
+                    const adoNeighbors = validator.getNeighbors?.(`${comp.id}.ADO`) || [];
+                    const isHigh = adoNeighbors.some(n => n.includes('5V') || n.includes('3V3') || n.includes('VCC') || n.includes('VIN') || n.includes('3.3V') || n.includes('5.0V'));
+                    addr = isHigh ? '0x69' : '0x68';
+                } else if (validator.isType(comp, 'openhw-ssd1306-oled')) {
+                    addr = '0x3C';
+                } else if (validator.isType(comp, 'openhw-lcd1602-i2c', 'openhw-lcd2004-i2c')) {
+                    addr = '0x27';
+                } else if (validator.isType(comp, 'openhw-ds1307-rtc')) {
+                    addr = '0x68';
+                } else if (validator.isType(comp, 'openhw-pca9685', 'openhw-pca9865')) {
+                    addr = '0x40';
+                } else if (validator.isType(comp, 'openhw-bmp180-breakout')) {
+                    addr = '0x77';
+                } else if (validator.isType(comp, 'max30102')) {
+                    addr = '0x57';
+                } else {
+                    addr = comp.type;
+                }
+            } else {
+                if (typeof addr === 'number') {
+                    addr = `0x${addr.toString(16).toUpperCase()}`;
+                } else if (typeof addr === 'string') {
+                    if (!addr.startsWith('0x') && !isNaN(addr)) {
+                        addr = `0x${parseInt(addr, 10).toString(16).toUpperCase()}`;
+                    } else {
+                        addr = addr.toUpperCase();
+                    }
+                }
+            }
+
             if (addressMap.has(addr)) {
-                validator.addError(`⚠️ [I2C] Potential address conflict between ${comp.id} and ${addressMap.get(addr)}. Fix: Change I2C address attribute.`);
+                validator.addError(`⚠️ [I2C] Potential address conflict between ${comp.id} and ${addressMap.get(addr)} (both configured to ${addr}). Fix: Change I2C address attribute.`);
             } else {
                 addressMap.set(addr, comp.id);
             }

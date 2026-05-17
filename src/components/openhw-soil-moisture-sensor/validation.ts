@@ -10,31 +10,56 @@ export const validation: { rules: ComponentValidationRule[] } = {
             priority: 10,
             description: 'Warn when sensor power, ground, or signal pins are disconnected.',
             check: (component: any, graph: Map<string, string[]>, validator: any) => {
-                const pins = (component.pins || []).map((p: any) => p.id);
+                const pins = validator.getComponentPins(component);
                 const vcc = pins.find((p: string) => p.includes('VCC') || p.includes('5V') || p.includes('V+'));
                 const gnd = pins.find((p: string) => p.includes('GND'));
                 const sigPins = pins.filter((p: string) => p.includes('SIG') || p.includes('OUT') || p.includes('AO') || p.includes('DO'));
 
-                if (vcc && validator.getNeighbors(`${component.id}.${vcc}`).length === 0) {
-                    return createValidationIssue({
-                        ruleId: 'soil-moisture-sensor-connection-check',
-                        severity: 'warn',
-                        message: `⚠️ [${component.type} ${component.id}] Power is not connected.`,
-                        compIds: [component.id],
-                        remediation: 'Connect the sensor power pin to the supply rail.',
-                        autoFix: true,
-                    });
+                if (vcc) {
+                    const node = `${component.id}.${vcc}`;
+                    if (validator.getNeighbors(node).length === 0) {
+                        return createValidationIssue({
+                            ruleId: 'soil-moisture-sensor-connection-check',
+                            severity: 'warn',
+                            message: `⚠️ [${component.type} ${component.id}] Power is not connected.`,
+                            compIds: [component.id],
+                            remediation: 'Connect the sensor power pin to the supply rail.',
+                            autoFix: true,
+                        });
+                    } else if (!validator.hasResistivePathToSupply(node)) {
+                        return createValidationIssue({
+                            ruleId: 'soil-moisture-sensor-connection-check',
+                            severity: 'warn',
+                            message: `⚠️ [${component.type} ${component.id}] Power is connected but does not reach a valid power supply rail.`,
+                            compIds: [component.id],
+                            remediation: 'Ensure power path connects to a 3.3V/5V power source.',
+                        });
+                    }
                 }
 
-                if (gnd && validator.getNeighbors(`${component.id}.${gnd}`).length === 0) {
-                    return createValidationIssue({
-                        ruleId: 'soil-moisture-sensor-connection-check',
-                        severity: 'warn',
-                        message: `⚠️ [${component.type} ${component.id}] Ground is not connected.`,
-                        compIds: [component.id],
-                        remediation: 'Connect the sensor ground pin to the common ground rail.',
-                        autoFix: true,
-                    });
+                if (gnd) {
+                    const node = `${component.id}.${gnd}`;
+                    if (validator.getNeighbors(node).length === 0) {
+                        return createValidationIssue({
+                            ruleId: 'soil-moisture-sensor-connection-check',
+                            severity: 'warn',
+                            message: `⚠️ [${component.type} ${component.id}] Ground is not connected.`,
+                            compIds: [component.id],
+                            remediation: 'Connect the sensor ground pin to the common ground rail.',
+                            autoFix: true,
+                        });
+                    } else {
+                        const gndSources = validator.collectVoltageSources(node);
+                        if (!gndSources.some((s: any) => s.voltage === 0)) {
+                            return createValidationIssue({
+                                ruleId: 'soil-moisture-sensor-connection-check',
+                                severity: 'warn',
+                                message: `⚠️ [${component.type} ${component.id}] Ground is connected but does not reach a valid ground rail (GND).`,
+                                compIds: [component.id],
+                                remediation: 'Ensure ground path connects to a valid ground rail.',
+                            });
+                        }
+                    }
                 }
                 
                 const connectedSigs = sigPins.filter(p => validator.getNeighbors(`${component.id}.${p}`).length > 0);

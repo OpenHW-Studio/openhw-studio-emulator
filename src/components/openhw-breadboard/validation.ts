@@ -1,25 +1,31 @@
 export const validation = {
     rules: [
         {
-            name: "Legacy Validation Wrap",
+            name: "Standard Power Check",
             check: (component: any, graph: any, validator: any) => {
-                const connectedPins = new Set();
-                const connections = validator.connections || [];
-                connections.forEach((w: any) => {
-                    if (w.from.startsWith(component.id + '.')) connectedPins.add(w.from.split('.')[1]);
-                    if (w.to.startsWith(component.id + '.')) connectedPins.add(w.to.split('.')[1]);
-                });
-
-                // Check for Power/GND/Data from legacy logic (simplified translation)
-                const pins = (component.pins || []).map((p:any) => p.id);
-                const vcc = pins.find((p:any) => p.includes('VCC') || p.includes('5V') || p.includes('3V3'));
+                const pins = validator.getComponentPins(component);
+                const vcc = pins.find((p:any) => p.includes('VCC') || p.includes('5V') || p.includes('3V3') || p.includes('V+'));
                 const gnd = pins.find((p:any) => p.includes('GND'));
                 
-                if (vcc && validator.getNeighbors(component.id + '.' + vcc).length === 0) {
-                    return '⚠️ [' + component.type + ' ' + component.id + '] Power is not connected.';
+                if (vcc) {
+                    const node = `${component.id}.${vcc}`;
+                    if (validator.getNeighbors(node).length === 0) {
+                        return '⚠️ [' + component.type + ' ' + component.id + '] Power is not connected.';
+                    } else if (!validator.hasResistivePathToSupply(node)) {
+                        return '⚠️ [' + component.type + ' ' + component.id + '] Power is connected but does not reach a valid power supply rail.';
+                    }
                 }
-                if (gnd && validator.getNeighbors(component.id + '.' + gnd).length === 0) {
-                    return '⚠️ [' + component.type + ' ' + component.id + '] Ground is not connected.';
+
+                if (gnd) {
+                    const node = `${component.id}.${gnd}`;
+                    if (validator.getNeighbors(node).length === 0) {
+                        return '⚠️ [' + component.type + ' ' + component.id + '] Ground is not connected.';
+                    } else {
+                        const gndSources = validator.collectVoltageSources(node);
+                        if (!gndSources.some((s: any) => s.voltage === 0)) {
+                            return '⚠️ [' + component.type + ' ' + component.id + '] Ground is connected but does not reach a valid ground rail (GND).';
+                        }
+                    }
                 }
                 
                 return null;

@@ -102,6 +102,13 @@ export class MAX30102Logic extends BaseComponent {
         this.regs[REG_LED1_PA] = this.redAmp;
         this.regs[REG_LED2_PA] = this.irAmp;
 
+        const addrAttr = manifest.attrs?.i2cAddress || manifest.attrs?.i2c_address;
+        if (addrAttr) {
+            this.i2cAddr = (typeof addrAttr === 'number') ? addrAttr : parseInt(addrAttr, 16);
+        } else {
+            this.i2cAddr = I2C_ADDR;
+        }
+
         this.state = {
             redLedOn:  false,
             irLedOn:   false,
@@ -117,8 +124,7 @@ export class MAX30102Logic extends BaseComponent {
     // ─────────────────────────────────────────────────────────────────
 
     onI2CStart(addr: number, read: boolean): boolean {
-        if (addr !== I2C_ADDR) return false;
-        this.i2cAddr       = addr;
+        if (addr !== this.i2cAddr) return false;
         this.i2cReadMode   = read;
         this.i2cWritePhase = 0;
         if (read && this.i2cRegPtr < 0) this.i2cRegPtr = 0; // default to 0 on bare read

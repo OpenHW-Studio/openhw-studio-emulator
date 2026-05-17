@@ -44,8 +44,18 @@ export class SSD1306Logic extends BaseComponent {
     this.vram = new Array(1024).fill(0);
 
     // Safely extract I2C address from manifest attributes or use default
-    const i2cAttr = manifest.attrs?.i2cAddress;
-    this.i2cAddress = (typeof i2cAttr === 'number') ? i2cAttr : (i2cAttr?.default ?? 0x3C);
+    const i2cAttr = manifest.attrs?.i2cAddress ?? manifest.attrs?.i2c_address;
+    if (i2cAttr !== undefined && i2cAttr !== null) {
+      if (typeof i2cAttr === 'number') {
+        this.i2cAddress = i2cAttr;
+      } else if (typeof i2cAttr === 'object' && i2cAttr.default !== undefined) {
+        this.i2cAddress = (typeof i2cAttr.default === 'number') ? i2cAttr.default : parseInt(i2cAttr.default, 16);
+      } else if (typeof i2cAttr === 'string') {
+        this.i2cAddress = parseInt(i2cAttr, 16);
+      }
+    } else {
+      this.i2cAddress = 0x3C;
+    }
 
     this.state = {
       vram: [...this.vram],

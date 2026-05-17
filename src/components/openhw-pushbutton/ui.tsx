@@ -80,15 +80,14 @@ export const PushbuttonUI = ({ state, attrs, isRunning }: { state: any, attrs: a
                     position: 'relative',
                     width: nativeW,
                     height: nativeH,
-                    transition: 'transform 0.05s cubic-bezier(0.4, 0, 0.2, 1), filter 0.05s',
-                    transform: `scale(${scaleX}, ${scaleY}) ${pressed ? 'scale(0.92)' : ''}`,
+                    transform: `scale(${scaleX}, ${scaleY})`,
                     transformOrigin: '0 0',
-                    filter: pressed ? 'brightness(0.8) drop-shadow(0 0 3px rgba(0,0,0,0.5))' : 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))',
                     cursor: 'pointer',
                     pointerEvents: isRunning ? 'auto' : 'none'
                 }}>
                 {React.createElement('wokwi-pushbutton', {
                     style: { pointerEvents: 'none', display: 'block', width: nativeW, height: nativeH },
+                    pressed: pressed ? '1' : undefined,
                     ...attrs
                 })}
             </div>

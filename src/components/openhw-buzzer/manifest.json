@@ -5,7 +5,10 @@
     "group": "Outputs",
     "w": 36,
     "h": 47.6,
-    "attrs": {},
+    "attrs": {
+        "volume": "50",
+        "frequency": "440"
+    },
     "pins": [
         {
             "id": "1",

@@ -41,11 +41,16 @@ export class BMP180Logic extends BaseComponent {
     private registerPointer: number = 0;
     private lastCommand:     number = CMD_TEMP;
     private powered:         boolean = false;
+    private i2cAddress:      number = 0x77;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
         this.temperature = parseFloat(manifest.attrs?.temperature ?? '25');
         this.pressure    = parseFloat(manifest.attrs?.pressure    ?? '101325');
+        const addrAttr   = manifest.attrs?.i2cAddress || manifest.attrs?.i2c_address;
+        if (addrAttr) {
+            this.i2cAddress = (typeof addrAttr === 'number') ? addrAttr : parseInt(addrAttr, 16);
+        }
 
         this.state = {
             temperature: this.temperature,
@@ -79,7 +84,7 @@ export class BMP180Logic extends BaseComponent {
 
     onI2CStart(address: number, read: boolean): boolean {
         const addr7 = (address > 0x7F) ? (address >> 1) : address;
-        this.selected = (addr7 === BMP180_ADDRESS);
+        this.selected = (addr7 === this.i2cAddress);
         return this.selected;
     }
 

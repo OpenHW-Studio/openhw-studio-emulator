@@ -13,15 +13,19 @@ export class Lcd1602I2CLogic extends BaseComponent {
     private halfByte = 0;
     private isNibble = false;
     private lastByte = 0;
+    private i2cAddress = 0x27;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
         this.state = { lines: [...this.linesData], illuminated: this.backlight };
+        const addrAttr = manifest.attrs?.i2cAddress || manifest.attrs?.i2c_address;
+        if (addrAttr) {
+            this.i2cAddress = (typeof addrAttr === 'number') ? addrAttr : parseInt(addrAttr, 16);
+        }
     }
 
     onI2CStart(addr: number, isRead: boolean) {
-        // Default PCF8574 I2C address is usually 0x27
-        if (addr === 0x27) return true; 
+        if (addr === this.i2cAddress) return true; 
         return false;
     }
 
@@ -104,6 +108,7 @@ export class Lcd1602I2CLogic extends BaseComponent {
     onCustomTelemetry() {
         const textContent = this.linesData.map(l => l.trimEnd()).join("\n").trimEnd();
         this.setCustomTelemetry({
+            i2cAddress: `0x${this.i2cAddress.toString(16).toUpperCase()}`,
             textContent: textContent || "<empty>",
             backlight: this.backlight,
             lineCount: 2,

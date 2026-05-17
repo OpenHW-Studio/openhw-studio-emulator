@@ -5,6 +5,7 @@
   "w": 375,
   "h": 225,
   "attrs": {
+    "i2cAddress": "0x27",
     "color": "blue",
     "pins": "i2c"
   },

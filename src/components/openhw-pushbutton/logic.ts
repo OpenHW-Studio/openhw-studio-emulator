@@ -9,7 +9,7 @@ export class PushbuttonLogic extends BaseComponent {
         this.state = { pressed: false };
     }
 
-    getMnaPins() { return ['1', '2']; }
+    getMnaPins() { return ['1l', '2l']; }
     getConductance() { return this.state.pressed ? 1000 : 1e-9; }
 
     onEvent(event: string) {
@@ -20,8 +20,6 @@ export class PushbuttonLogic extends BaseComponent {
                 this.lastPressedState = true;
                 this.stateChanged = true;
             }
-            this.setPinVoltage('1', 0); // Ground the pin
-            this.setPinVoltage('2', 0);
         } else if (event === 'release') {
             this.setState({ pressed: false });
             this.lastPressedState = false;

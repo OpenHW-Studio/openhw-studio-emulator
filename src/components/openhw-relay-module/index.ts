@@ -2,7 +2,7 @@ import manifest from './manifest.json';
 import { RelayModuleUI, RelayModuleContextMenu, BOUNDS } from './ui';
 import { RelayModuleLogic } from './logic';
 import { validation } from './validation';
-import docHtml from './doc/index.html?raw';
+const docHtml = '';
 
 export default {
     manifest,

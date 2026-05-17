@@ -31,12 +31,19 @@ export class FullCircuitValidator {
 
         this.componentSpecs = {
             'wokwi-resistor': { maxPowerW: 0.25 },
+            'openhw-resistor': { maxPowerW: 0.25 },
             'wokwi-potentiometer': { maxPowerW: 0.25, totalResistance: 10000 },
+            'openhw-potentiometer': { maxPowerW: 0.25, totalResistance: 10000 },
             'wokwi-slide-potentiometer': { maxPowerW: 0.25, totalResistance: 10000 },
+            'openhw-slide-potentiometer': { maxPowerW: 0.25, totalResistance: 10000 },
             'wokwi-led': { forwardVoltage: 2.0, maxCurrentA: 0.02, reverseBreakdownVoltage: 5.0 },
+            'openhw-led': { forwardVoltage: 2.0, maxCurrentA: 0.02, reverseBreakdownVoltage: 5.0 },
             'wokwi-buzzer': { typicalCurrentA: 0.03 },
+            'openhw-buzzer': { typicalCurrentA: 0.03 },
             'wokwi-motor': { typicalCurrentA: 0.25 },
+            'openhw-motor': { typicalCurrentA: 0.25 },
             'wokwi-servo': { typicalCurrentA: 0.5 },
+            'openhw-servo': { typicalCurrentA: 0.5 },
         };
     }
 
@@ -441,7 +448,7 @@ export class FullCircuitValidator {
         return Number.isFinite(parsed) ? parsed : fallbackValue;
     }
 
-    getTwoTerminalPins(component) {
+    getComponentPins(component) {
         if (!component) return [];
         let pins = component.pins || component.manifest?.pins;
         if (!pins) {
@@ -449,6 +456,10 @@ export class FullCircuitValidator {
             pins = def?.pins || def?.manifest?.pins;
         }
         return (pins || []).map(p => p.id);
+    }
+
+    getTwoTerminalPins(component) {
+        return this.getComponentPins(component);
     }
 
     getOtherTerminalNode(component, nodeId) {

@@ -6,6 +6,7 @@
     "w": 315,
     "h": 135,
     "attrs": {
+        "i2cAddress": "0x27",
         "color": "blue",
         "breadboard": {
             "anchorPin": "GND"
