@@ -37,20 +37,20 @@ class SlidePotLogic {
 }
 
 const components = [
-    { id: 'wokwi-arduino-uno_4', type: 'wokwi-arduino-uno', attrs: {} },
-    { id: 'wokwi-slide-potentiometer_6', type: 'wokwi-slide-potentiometer', attrs: { value: "71" } }
+    { id: 'openhw-arduino-uno_4', type: 'openhw-arduino-uno', attrs: {} },
+    { id: 'openhw-slide-potentiometer_6', type: 'openhw-slide-potentiometer', attrs: { value: "71" } }
 ];
 
 const wires = [
-    { from: 'wokwi-slide-potentiometer_6:VCC', to: 'wokwi-arduino-uno_4:5V' },
-    { from: 'wokwi-slide-potentiometer_6:GND', to: 'wokwi-arduino-uno_4:gnd_2' },
-    { from: 'wokwi-slide-potentiometer_6:SIG', to: 'wokwi-arduino-uno_4:A0' },
-    { from: 'wokwi-servo_8:V+', to: 'wokwi-arduino-uno_4:5V' },
-    { from: 'wokwi-servo_8:PWM', to: 'wokwi-arduino-uno_4:9' },
-    { from: 'wokwi-servo_8:GND', to: 'wokwi-arduino-uno_4:gnd_1' }
+    { from: 'openhw-slide-potentiometer_6:VCC', to: 'openhw-arduino-uno_4:5V' },
+    { from: 'openhw-slide-potentiometer_6:GND', to: 'openhw-arduino-uno_4:gnd_2' },
+    { from: 'openhw-slide-potentiometer_6:SIG', to: 'openhw-arduino-uno_4:A0' },
+    { from: 'openhw-servo_8:V+', to: 'openhw-arduino-uno_4:5V' },
+    { from: 'openhw-servo_8:PWM', to: 'openhw-arduino-uno_4:9' },
+    { from: 'openhw-servo_8:GND', to: 'openhw-arduino-uno_4:gnd_1' }
 ];
 
-const inst = new SlidePotLogic('wokwi-slide-potentiometer_6');
+const inst = new SlidePotLogic('openhw-slide-potentiometer_6');
 inst.state.value = 71;
 inst.update(wires);
 
@@ -72,7 +72,7 @@ wires.forEach(w => {
         const targetStr = isFromArduino ? w.to : w.from;
         const [compId, compPin] = targetStr.split(':');
         isArduinoPinLogs.push(`Found Arduino pinpoint mathing A0. Target: ${compId}:${compPin}`);
-        if (compId === 'wokwi-slide-potentiometer_6') {
+        if (compId === 'openhw-slide-potentiometer_6') {
             const v = inst.getPinVoltage('SIG');
             if (v > voltage) voltage = v;
         }

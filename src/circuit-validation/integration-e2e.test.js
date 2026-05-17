@@ -14,7 +14,7 @@ describe('Autofix integration (CLI + MCP controller)', () => {
     if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
 
     const project = {
-      components: [ { id: 'board', type: 'wokwi-board' }, { id: 'led1', type: 'LED' } ],
+      components: [ { id: 'board', type: 'openhw-board' }, { id: 'led1', type: 'LED' } ],
       connections: []
     };
 
@@ -37,7 +37,7 @@ describe('Autofix integration (CLI + MCP controller)', () => {
     if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
 
     const project = {
-      components: [ { id: 'board', type: 'wokwi-board' }, { id: 'led1', type: 'LED' } ],
+      components: [ { id: 'board', type: 'openhw-board' }, { id: 'led1', type: 'LED' } ],
       connections: []
     };
 
@@ -60,7 +60,7 @@ describe('Autofix integration (CLI + MCP controller)', () => {
     if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
 
     const project = {
-      components: [ { id: 'board', type: 'wokwi-board' } ],
+      components: [ { id: 'board', type: 'openhw-board' } ],
       connections: []
     };
 
@@ -99,7 +99,7 @@ describe('Autofix integration (CLI + MCP controller)', () => {
     assert.ok(typeof fn === 'function');
 
     const project = {
-      components: [ { id: 'board', type: 'wokwi-board' }, { id: 'led1', type: 'LED' } ],
+      components: [ { id: 'board', type: 'openhw-board' }, { id: 'led1', type: 'LED' } ],
       connections: []
     };
 
@@ -176,7 +176,7 @@ describe('Autofix integration (CLI + MCP controller)', () => {
     
     const project = {
       components: [
-        { id: 'board', type: 'wokwi-board' },
+        { id: 'board', type: 'openhw-board' },
         { id: 'mpu6050', type: 'MPU6050' }
       ],
       connections: [
@@ -199,7 +199,7 @@ describe('Autofix integration (CLI + MCP controller)', () => {
     
     const project = {
       components: [
-        { id: 'board', type: 'wokwi-board' },
+        { id: 'board', type: 'openhw-board' },
         { id: 'led1', type: 'LED' }
       ],
       connections: [
@@ -215,7 +215,7 @@ describe('Autofix integration (CLI + MCP controller)', () => {
     assert.ok(typeof result === 'object', 'Result should be an object');
     assert.ok(result.applied, 'LED resistor autofix should be applied');
 
-    const insertedRes = (result.components || []).find((c) => c.type === 'wokwi-resistor');
+    const insertedRes = (result.components || []).find((c) => c.type === 'openhw-resistor');
     assert.ok(insertedRes, 'Expected inserted resistor component');
 
     const rewired = (result.connections || []).filter((w) =>
@@ -245,7 +245,7 @@ describe('Autofix integration (CLI + MCP controller)', () => {
     assert.ok(typeof recommendSeriesTermination === 'function', 'recommendSeriesTermination should be a function');
     
     const mockComponents = [
-      { id: 'board', type: 'wokwi-board' },
+      { id: 'board', type: 'openhw-board' },
       { id: 'spi_flash', type: 'SPI_FLASH', frequency: '50MHz' }
     ];
     
@@ -270,7 +270,7 @@ describe('Autofix integration (CLI + MCP controller)', () => {
     assert.ok(diffPairs.length >= 1, 'expected to detect at least one differential pair');
 
     const mismatchComponents = [
-      { id: 'board', type: 'wokwi-board', x: 0, y: 0 },
+      { id: 'board', type: 'openhw-board', x: 0, y: 0 },
       { id: 'usb', type: 'USB_CONN', x: 140, y: 5 },
       { id: 'phy', type: 'USB_PHY', x: 420, y: 40 },
     ];

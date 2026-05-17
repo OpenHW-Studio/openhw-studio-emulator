@@ -15,7 +15,7 @@ async function run() {
   // Minimal mock project: board + LED with no ground connection
   const project = {
     components: [
-      { id: 'board', type: 'wokwi-board' },
+      { id: 'board', type: 'openhw-board' },
       { id: 'led1', type: 'LED' }
     ],
     connections: []

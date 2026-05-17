@@ -3,12 +3,12 @@ export function validateShortCircuits(validator) {
     const powerNodes = [];
 
     validator.components.forEach(component => {
-        if (validator.isType(component, 'wokwi-arduino-uno', 'mcu_uno')) {
+        if (validator.isType(component, 'openhw-arduino-uno', 'mcu_uno')) {
             powerNodes.push(`${component.id}.5V`);
             return;
         }
 
-        if (validator.isType(component, 'wokwi-power-supply')) {
+        if (validator.isType(component, 'openhw-power-supply')) {
             powerNodes.push(`${component.id}.5V`);
         }
     });
@@ -37,14 +37,14 @@ export function validateShortCircuits(validator) {
                     }
 
                     let addedResistance = 0;
-                    if (validator.isType(comp, 'resistor', 'wokwi-resistor')) {
+                    if (validator.isType(comp, 'resistor', 'openhw-resistor')) {
                         addedResistance = validator.getComponentAttrNumber(comp, 'value', 0);
                         const nextNode = validator.getOtherTerminalNode(comp, neighbor);
                         if (nextNode) {
                             queue.push([nextNode, newVisited, resistance + addedResistance]);
                             continue;
                         }
-                    } else if (validator.isType(comp, 'potentiometer', 'wokwi-potentiometer', 'wokwi-slide-potentiometer', 'switch', 'wokwi-pushbutton')) {
+                    } else if (validator.isType(comp, 'potentiometer', 'openhw-potentiometer', 'openhw-slide-potentiometer', 'switch', 'openhw-pushbutton')) {
                         const nextNode = validator.getOtherTerminalNode(comp, neighbor);
                         if (nextNode) {
                             queue.push([nextNode, newVisited, resistance]);
@@ -52,7 +52,7 @@ export function validateShortCircuits(validator) {
                         }
                     }
 
-                    if (validator.isType(comp, 'wokwi-led', 'wokwi-motor', 'wokwi-servo', 'wokwi-buzzer')) continue;
+                    if (validator.isType(comp, 'openhw-led', 'openhw-motor', 'openhw-servo', 'openhw-buzzer')) continue;
 
                     queue.push([neighbor, newVisited, resistance + addedResistance]);
                 }

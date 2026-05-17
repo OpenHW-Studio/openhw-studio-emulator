@@ -12,7 +12,7 @@ describe('WebUI E2E: backend autofix controller (mocked request/response)', () =
 
     // Simulate WebUI client POSTing /api/autofix
     const project = { 
-      components: [ { id: 'board', type: 'wokwi-board' }, { id: 'led1', type: 'LED' } ], 
+      components: [ { id: 'board', type: 'openhw-board' }, { id: 'led1', type: 'LED' } ], 
       connections: [] 
     };
     const issue = { message: 'missing_ground_connection', compIds: ['led1'] };

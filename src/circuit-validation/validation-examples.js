@@ -39,23 +39,23 @@ export function formatValidationError(error) {
 }
 
 function makeUno(id) {
-    return { id, type: 'wokwi-arduino-uno', pins: UNO_PINS };
+    return { id, type: 'openhw-arduino-uno', pins: UNO_PINS };
 }
 
 function makeLed(id) {
-    return { id, type: 'wokwi-led', pins: LED_PINS };
+    return { id, type: 'openhw-led', pins: LED_PINS };
 }
 
 function makeResistor(id, value = '220') {
-    return { id, type: 'wokwi-resistor', pins: RES_PINS, attrs: { value } };
+    return { id, type: 'openhw-resistor', pins: RES_PINS, attrs: { value } };
 }
 
 function makePowerSupply(id, voltage = 5) {
-    return { id, type: 'wokwi-power-supply', pins: POWER_SUPPLY_PINS, attrs: { voltage } };
+    return { id, type: 'openhw-power-supply', pins: POWER_SUPPLY_PINS, attrs: { voltage } };
 }
 
 function makePushbutton(id) {
-    return { id, type: 'wokwi-pushbutton', pins: PUSHBUTTON_PINS };
+    return { id, type: 'openhw-pushbutton', pins: PUSHBUTTON_PINS };
 }
 
 function makeDemoSensor(id, severity = 'warn') {
@@ -141,12 +141,12 @@ export const validationCases = [
         expectMessageIncludes: 'Unsupported pin-to-pin drive',
         project: {
             components: [
-                makeUno('wokwi-arduino-uno_2'),
-                makeLed('wokwi-led_4'),
+                makeUno('openhw-arduino-uno_2'),
+                makeLed('openhw-led_4'),
             ],
             connections: [
-                { from: 'wokwi-arduino-uno_2.13', to: 'wokwi-led_4.A' },
-                { from: 'wokwi-led_4.K', to: 'wokwi-arduino-uno_2.10' },
+                { from: 'openhw-arduino-uno_2.13', to: 'openhw-led_4.A' },
+                { from: 'openhw-led_4.K', to: 'openhw-arduino-uno_2.10' },
             ],
         },
     },
@@ -238,7 +238,7 @@ export const validationCases = [
             components: [
                 {
                     id: 'pb_1',
-                    type: 'wokwi-pushbutton',
+                    type: 'openhw-pushbutton',
                     pins: PUSHBUTTON_PINS,
                     validation: {
                         rules: [
