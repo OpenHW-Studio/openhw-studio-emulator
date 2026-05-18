@@ -656,7 +656,13 @@ export class BaseComponent {
             }
         }
 
-        const idleMs = Math.max(0, Date.now() - Number(this.telemetryRuntime.lastStateChangeAtMs || Date.now()));
+        const lastActivityMs = Math.max(
+            Number(this.telemetryRuntime.lastStateChangeAtMs || 0),
+            Number(this.telemetryRuntime.lastIoAtMs || 0),
+            Number(this.telemetryRuntime.lastEventAtMs || 0),
+            Number(this.telemetryRuntime.createdAtMs || 0)
+        );
+        const idleMs = Math.max(0, Date.now() - lastActivityMs);
         if (this.telemetryRuntime.updateCount > 40 && idleMs > 8000) {
             addFinding('warn', `State has been stable for ${Math.round(idleMs)}ms while updates continue.`);
         }

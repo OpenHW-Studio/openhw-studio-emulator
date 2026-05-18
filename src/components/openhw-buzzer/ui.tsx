@@ -23,72 +23,86 @@ export const BuzzerUI = ({ state, attrs }: { state: any, attrs: any }) => {
     // The actual frequency to play: dynamic frequency from logic (if valid) else fallback to attr.
     const activeFreq = dynamicFreq > 0 ? dynamicFreq : freqAttr;
 
-    // Start/stop oscillator
+    // Initialize persistent oscillator and gain nodes once on mount
     useEffect(() => {
-        if (!isBuzzing || volumeAttr <= 0) {
-            if (oscRef.current) {
-                try {
-                    oscRef.current.stop();
-                    oscRef.current.disconnect();
-                } catch (e) {}
-                oscRef.current = null;
-            }
-            return;
-        }
+        let activeOsc: OscillatorNode | null = null;
+        let activeGain: GainNode | null = null;
 
         try {
             if (!audioCtx) {
                 const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
                 if (AudioContextClass) {
-                    audioCtx = new AudioContextClass();
+                    audioCtx = new AudioContextClass({ latencyHint: 'interactive' });
                 }
             }
 
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
+            if (audioCtx) {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume().catch(() => {});
+                }
 
-            if (audioCtx && !oscRef.current) {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
+                // Create persistent low-latency oscillator and gain nodes
+                activeOsc = audioCtx.createOscillator();
+                activeGain = audioCtx.createGain();
 
-                osc.type = 'square'; // Buzzers produce square waves
-                osc.frequency.setValueAtTime(activeFreq, audioCtx.currentTime);
+                activeOsc.type = 'square';
+                activeOsc.frequency.setValueAtTime(activeFreq, audioCtx.currentTime);
 
-                // Convert volume percentage (0-100) to pleasant gain level (max 0.3)
-                const vol = Math.max(0, Math.min(100, volumeAttr)) / 100;
-                gain.gain.setValueAtTime(vol * 0.3, audioCtx.currentTime);
+                // Set initial gain/volume to 0 (silent)
+                activeGain.gain.setValueAtTime(0, audioCtx.currentTime);
 
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
+                activeOsc.connect(activeGain);
+                activeGain.connect(audioCtx.destination);
+                activeOsc.start();
 
-                oscRef.current = osc;
-                gainRef.current = gain;
+                oscRef.current = activeOsc;
+                gainRef.current = activeGain;
             }
         } catch (err) {
-            console.warn('Web Audio API not allowed or supported:', err);
+            console.warn('Low-latency Web Audio API initialization failed:', err);
         }
 
         return () => {
-            if (oscRef.current) {
+            if (activeOsc) {
                 try {
-                    oscRef.current.stop();
-                    oscRef.current.disconnect();
+                    activeOsc.stop();
+                    activeOsc.disconnect();
                 } catch (e) {}
-                oscRef.current = null;
             }
+            if (activeGain) {
+                try {
+                    activeGain.disconnect();
+                } catch (e) {}
+            }
+            oscRef.current = null;
+            gainRef.current = null;
         };
-    }, [isBuzzing, volumeAttr > 0]);
+    }, []); // Run once on mount
 
-    // Update frequency and volume on the fly
+    // Modulate gain (volume) and frequency dynamically on changes
     useEffect(() => {
-        if (oscRef.current && gainRef.current && audioCtx) {
-            oscRef.current.frequency.setValueAtTime(activeFreq, audioCtx.currentTime);
-            const vol = Math.max(0, Math.min(100, volumeAttr)) / 100;
-            gainRef.current.gain.setValueAtTime(vol * 0.3, audioCtx.currentTime);
+        if (!oscRef.current || !gainRef.current || !audioCtx) return;
+
+        try {
+            if (audioCtx.state === 'suspended' && isBuzzing) {
+                audioCtx.resume().catch(() => {});
+            }
+
+            // Update frequency
+            if (activeFreq > 0) {
+                oscRef.current.frequency.setValueAtTime(activeFreq, audioCtx.currentTime);
+            }
+
+            // Instantly transition gain between active volume and silent (0)
+            const targetVol = isBuzzing && volumeAttr > 0
+                ? (Math.max(0, Math.min(100, volumeAttr)) / 100) * 0.3
+                : 0;
+
+            gainRef.current.gain.setValueAtTime(targetVol, audioCtx.currentTime);
+        } catch (err) {
+            console.warn('Error modulating Web Audio parameters:', err);
         }
-    }, [activeFreq, volumeAttr]);
+    }, [isBuzzing, activeFreq, volumeAttr]);
 
     return (
         <div style={{ 

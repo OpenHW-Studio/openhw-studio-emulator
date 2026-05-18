@@ -413,7 +413,7 @@ export function validateFloatingPins(validator) {
 
                 if (!hasStablePath && hasSwitchOnlyPath) {
                     validator.addError(
-                        `👻 [MCU ${mcu.id}] Floating input on D${pinId}: only path to rail is through a pushbutton. Add pull-up or pull-down resistor.`
+                        `[MCU ${mcu.id}] Floating input on D${pinId}: only path to rail is through a pushbutton. Add pull-up or pull-down resistor.`
                     );
                 }
             });
