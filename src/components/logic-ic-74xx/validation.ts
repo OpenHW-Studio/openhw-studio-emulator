@@ -23,6 +23,15 @@ export const validation: { rules: ComponentValidationRule[] } = {
                         autoFix: true,
                     });
                 }
+                if (!validator.hasResistivePathToSupply(vcc)) {
+                    return createValidationIssue({
+                        ruleId: 'logic-ic-74xx-power-input-check',
+                        severity: 'warn',
+                        message: `⚠️ [74xx IC ${component.id}] Power (VCC) is connected but does not reach a valid power supply rail.`,
+                        compIds: [component.id],
+                        remediation: 'Ensure VCC path connects to a 5V/3.3V power source.',
+                    });
+                }
 
                 if (validator.getNeighbors(gnd).length === 0) {
                     return createValidationIssue({
@@ -34,10 +43,20 @@ export const validation: { rules: ComponentValidationRule[] } = {
                         autoFix: true,
                     });
                 }
+                const gndSources = validator.collectVoltageSources(gnd);
+                if (!gndSources.some((s: any) => s.voltage === 0)) {
+                    return createValidationIssue({
+                        ruleId: 'logic-ic-74xx-power-input-check',
+                        severity: 'warn',
+                        message: `⚠️ [74xx IC ${component.id}] Ground (GND) is connected but does not reach a valid ground rail (GND).`,
+                        compIds: [component.id],
+                        remediation: 'Ensure GND path connects to a valid ground rail.',
+                    });
+                }
 
-                const pins = (component.pins || []).map((p: any) => p.id);
+                const pins = validator.getComponentPins(component);
                 const inputPins = pins.filter((p: string) => p.includes('IN') || /^[ABCD]\d?$/.test(p));
-                const floatingInputs = inputPins.filter(p => validator.getNeighbors(`${component.id}.${p}`).length === 0);
+                const floatingInputs = inputPins.filter((p: string) => validator.getNeighbors(`${component.id}.${p}`).length === 0);
 
                 if (floatingInputs.length > 0) {
                     return createValidationIssue({

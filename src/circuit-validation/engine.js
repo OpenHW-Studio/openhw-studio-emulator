@@ -31,12 +31,19 @@ export class FullCircuitValidator {
 
         this.componentSpecs = {
             'wokwi-resistor': { maxPowerW: 0.25 },
+            'openhw-resistor': { maxPowerW: 0.25 },
             'wokwi-potentiometer': { maxPowerW: 0.25, totalResistance: 10000 },
+            'openhw-potentiometer': { maxPowerW: 0.25, totalResistance: 10000 },
             'wokwi-slide-potentiometer': { maxPowerW: 0.25, totalResistance: 10000 },
+            'openhw-slide-potentiometer': { maxPowerW: 0.25, totalResistance: 10000 },
             'wokwi-led': { forwardVoltage: 2.0, maxCurrentA: 0.02, reverseBreakdownVoltage: 5.0 },
+            'openhw-led': { forwardVoltage: 2.0, maxCurrentA: 0.02, reverseBreakdownVoltage: 5.0 },
             'wokwi-buzzer': { typicalCurrentA: 0.03 },
+            'openhw-buzzer': { typicalCurrentA: 0.03 },
             'wokwi-motor': { typicalCurrentA: 0.25 },
+            'openhw-motor': { typicalCurrentA: 0.25 },
             'wokwi-servo': { typicalCurrentA: 0.5 },
+            'openhw-servo': { typicalCurrentA: 0.5 },
         };
     }
 
@@ -318,13 +325,15 @@ export class FullCircuitValidator {
             return null;
         }
 
+        let result = null;
+
         if (typeof entry === 'string') {
             const parsed = this.parseLegacyErrorString(entry);
             const severity = this.normalizeSeverity(parsed.severity || defaults.severity || defaults.type || 'error');
             const compIds = this.normalizeCompIds(parsed.compIds.length ? parsed.compIds : defaults.compIds);
             const inferred = inferValidationRemediation(parsed, null);
 
-            return {
+            result = {
                 id: defaults.id || defaults.ruleId || null,
                 ruleId: defaults.ruleId || defaults.id || null,
                 severity,
@@ -339,9 +348,7 @@ export class FullCircuitValidator {
                 confidence: this.inferIssueConfidence({ ...parsed, ...defaults }, severity),
                 details: defaults.details || null,
             };
-        }
-
-        if (typeof entry === 'object') {
+        } else if (typeof entry === 'object') {
             const compIds = this.normalizeCompIds(
                 entry.compIds || entry.compId || defaults.compIds || defaults.componentId
             );
@@ -351,7 +358,7 @@ export class FullCircuitValidator {
             const message = String(entry.message || entry.text || defaults.message || '').trim();
             const inferred = inferValidationRemediation({ ...entry, message }, null);
 
-            return {
+            result = {
                 id: entry.id || defaults.id || defaults.ruleId || null,
                 ruleId: entry.ruleId || defaults.ruleId || entry.id || null,
                 severity,
@@ -370,7 +377,16 @@ export class FullCircuitValidator {
             };
         }
 
-        return null;
+        if (result) {
+            if (result.message) {
+                result.message = result.message.replace(/^[🔥⚠️👻💡🔴🟡]\s*/u, '');
+            }
+            if (result.remediation) {
+                result.remediation = result.remediation.replace(/^[🔥⚠️👻💡🔴🟡]\s*/u, '');
+            }
+        }
+
+        return result;
     }
 
     recordError(entry, defaults = {}) {
@@ -441,7 +457,7 @@ export class FullCircuitValidator {
         return Number.isFinite(parsed) ? parsed : fallbackValue;
     }
 
-    getTwoTerminalPins(component) {
+    getComponentPins(component) {
         if (!component) return [];
         let pins = component.pins || component.manifest?.pins;
         if (!pins) {
@@ -449,6 +465,10 @@ export class FullCircuitValidator {
             pins = def?.pins || def?.manifest?.pins;
         }
         return (pins || []).map(p => p.id);
+    }
+
+    getTwoTerminalPins(component) {
+        return this.getComponentPins(component);
     }
 
     getOtherTerminalNode(component, nodeId) {

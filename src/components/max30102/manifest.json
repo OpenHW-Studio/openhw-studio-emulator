@@ -5,6 +5,7 @@
     "w": 198,
     "h": 158.4,
     "attrs": {
+        "i2cAddress": "0x57",
         "redLed": {
             "label": "Red LED (660nm)",
             "type": "number",

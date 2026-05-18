@@ -24,7 +24,7 @@ export class LEDLogic extends BaseComponent {
 
             const [compId] = node.split(':');
             const comp = allComponentsInstances.find((c) => c.id === compId);
-            if (comp?.type === 'openhw-resistor') {
+            if (comp?.type === 'openhw-resistor' || comp?.type === 'wokwi-resistor') {
                 return true;
             }
         }

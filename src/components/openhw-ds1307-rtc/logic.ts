@@ -22,12 +22,18 @@ export class DS1307RTCLogic extends BaseComponent {
     private baseDate: Date;
     private registerPointer: number = 0;
     private powered: boolean = false;
+    private i2cAddress: number = 0x68;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
         const dt = manifest.attrs?.datetime ?? '2024-01-01T00:00:00';
         this.baseDate = new Date(dt);
         this.startTime = Date.now();
+
+        const addrAttr = manifest.attrs?.i2cAddress || manifest.attrs?.i2c_address;
+        if (addrAttr) {
+            this.i2cAddress = (typeof addrAttr === 'number') ? addrAttr : parseInt(addrAttr, 16);
+        }
 
         this.state = {
             powered:  false,
@@ -63,7 +69,7 @@ export class DS1307RTCLogic extends BaseComponent {
     // I2C interface
     onI2CStart(address: number, read: boolean): boolean {
         const addr7 = (address > 0x7F) ? (address >> 1) : address;
-        this.selected = (addr7 === DS1307_ADDRESS);
+        this.selected = (addr7 === this.i2cAddress);
         this.expectingRegister = !read;
         return this.selected;
     }

@@ -5,6 +5,7 @@
     "w": 180,
     "h": 150,
     "attrs": {
+        "i2cAddress": "0x40",
         "i2c_address": "0x40"
     },
     "pins": [

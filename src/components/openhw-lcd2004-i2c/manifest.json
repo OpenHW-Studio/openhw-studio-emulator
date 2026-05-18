@@ -5,6 +5,7 @@
   "w": 375,
   "h": 225,
   "attrs": {
+    "i2cAddress": "0x27",
     "color": "blue",
     "pins": "i2c"
   },
@@ -44,5 +45,13 @@
             "type": "input",
             "description": "I2C Clock"
         }
-    ]
+    ],
+    "autocoding": {
+        "libraries": ["LiquidCrystal I2C"],
+        "arduino": {
+            "globals": "#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\nLiquidCrystal_I2C lcd(0x27, 20, 4);",
+            "setup": "lcd.init();\nlcd.backlight();\nlcd.setCursor(0, 0);\nlcd.print(\"OpenHW Studio!\");",
+            "loop": "unsigned long t = millis() / 1000;\nlcd.setCursor(0, 1);\nlcd.print(\"Timer: \");\nlcd.print(t);\nlcd.print(\" s   \");\ndelay(500);"
+        }
+    }
 }

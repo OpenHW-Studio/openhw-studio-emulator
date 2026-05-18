@@ -6,7 +6,10 @@
     "w": 248.3,
     "h": 180.6,
     "attrs": {
-        "angle": "0"
+        "angle": "0",
+        "color": "white",
+        "horn-color": "white",
+        "hornColor": "white"
     },
     "pins": [
         {

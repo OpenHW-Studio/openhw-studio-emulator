@@ -4,7 +4,7 @@
     "group": "Outputs",
     "w": 135,
     "h": 120,
-    "attrs": { "breadboard": { "anchorPin": "GND" } },
+    "attrs": { "i2cAddress": "0x3C", "breadboard": { "anchorPin": "GND" } },
     "telemetry": {
         "template": "vramDirty=${state.vramDirty}, updateCount=${state.updateCount}, i2cBytes=${state.i2cBytes}",
         "criticalKeys": ["state.vramDirty", "state.updateCount"]

@@ -9,11 +9,15 @@ export const validation: { rules: ComponentValidationRule[] } = {
             severity: 'warn',
             priority: 10,
             description: 'Warn when the pushbutton is not connected at all.',
-            check: (component: any, graph: Map<string, string[]>) => {
-                const p1 = graph.get(`${component.id}.1l`);
-                const p2 = graph.get(`${component.id}.2l`);
+            check: (component: any, graph: Map<string, string[]>, validator: any) => {
+                const pins = validator.getComponentPins(component);
+                
+                const isConnected = pins.some((p: string) => {
+                    const edges = graph.get(`${component.id}.${p}`);
+                    return edges && edges.length > 0;
+                });
 
-                if ((!p1 || p1.length === 0) && (!p2 || p2.length === 0)) {
+                if (!isConnected) {
                     return createValidationIssue({
                         ruleId: 'pushbutton-floating-input-check',
                         severity: 'warn',

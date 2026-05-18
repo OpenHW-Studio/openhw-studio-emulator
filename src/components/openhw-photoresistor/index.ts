@@ -1,7 +1,7 @@
 import manifest from './manifest.json';
 import { PhotoresistorLogic } from './logic';
 import { PhotoresistorUI, BOUNDS } from './ui';
-import docHtml from './doc/index.html?raw';
+const docHtml = '';
 
 export default {
     manifest,

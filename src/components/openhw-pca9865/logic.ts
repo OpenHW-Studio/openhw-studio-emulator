@@ -13,8 +13,9 @@ export class PCA9865Logic extends BaseComponent {
     constructor(id: string, manifest: any) {
         super(id, manifest);
         this.state = {};
-        if (manifest.attrs?.i2c_address) {
-            this.i2cAddress = parseInt(manifest.attrs.i2c_address, 16);
+        const addrAttr = manifest.attrs?.i2cAddress || manifest.attrs?.i2c_address;
+        if (addrAttr) {
+            this.i2cAddress = (typeof addrAttr === 'number') ? addrAttr : parseInt(addrAttr, 16);
         }
     }
 

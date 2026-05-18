@@ -1,0 +1,27 @@
+{
+    "type": "openhw-simulation-monitor",
+    "label": "Simulation Monitor",
+    "description": "Advanced real-time performance diagnostic instrument. Tracks worker CPU load, simulation speed, time drift, execution jitter, frame skips, and UI canvas FPS reflection.",
+    "group": "Sensor",
+    "w": 135,
+    "h": 130,
+    "attrs": {},
+    "pins": [
+        { "id": "VCC", "x": 15, "y": 130, "type": "power", "description": "Power (3.3V / 5V)" },
+        { "id": "GND", "x": 50, "y": 130, "type": "power", "description": "Ground" },
+        { "id": "TX", "x": 85, "y": 130, "type": "digital", "description": "Telemetry TX" },
+        { "id": "RX", "x": 120, "y": 130, "type": "digital", "description": "Telemetry RX" }
+    ],
+    "autowiring": {
+        "connections": [
+            { "from": "VCC", "to": "arduino:5V" },
+            { "from": "GND", "to": "arduino:GND" }
+        ]
+    },
+    "autocoding": {
+        "arduino": {
+            "setup": "// Simulation Monitor active: real-time telemetry streaming enabled via Deep Silicon bus.",
+            "loop": ""
+        }
+    }
+}

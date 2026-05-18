@@ -77,6 +77,7 @@ export { default as logicIc74xx } from './logic-ic-74xx';
 export { default as openhwArduinoMega } from './openhw-arduino-mega';
 export { default as openhwAttiny85 } from './openhw-attiny85';
 export { default as openhwHcSr04 } from './openhw-hc-sr04';
+export { default as openhwSimulationMonitor } from './openhw-simulation-monitor';
 
 export { FullCircuitValidator, analyzeCodeHardwareSync, ProtocolAnalyzer, runUnifiedValidation } from '../circuit-validation/index.js';
 

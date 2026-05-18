@@ -4,7 +4,9 @@
   "group": "Basic",
   "w": 495,
   "h": 295,
-  "attrs": {},
+  "attrs": {
+    "color": "white"
+  },
   "pins": [
     {
       "id": "top_gnd_1",

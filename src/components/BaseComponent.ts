@@ -18,6 +18,7 @@ export class BaseComponent {
     state: any;
     stateChanged: boolean;
     telemetryEnabled: boolean = false;
+    deepSiliconEnabled: boolean = false;
 
     private telemetryManifest: TelemetryManifestConfig | null = null;
     private telemetryRuntime = {
@@ -39,6 +40,10 @@ export class BaseComponent {
             spiTransactions: 0,
             spiBytes: 0,
             uartBytes: 0,
+            pwmCount: 0,
+            oneWireCount: 0,
+            pioCount: 0,
+            i2sCount: 0,
             recentI2c: [] as number[],
             recentSpi: [] as number[],
         },
@@ -245,6 +250,11 @@ export class BaseComponent {
                 hook,
                 () => {
                     this.telemetryRuntime.lastIoAtMs = Date.now();
+                    const h = hook.toLowerCase();
+                    if (h.includes('pwm')) this.telemetryRuntime.io.pwmCount++;
+                    else if (h.includes('onewire')) this.telemetryRuntime.io.oneWireCount++;
+                    else if (h.includes('pio')) this.telemetryRuntime.io.pioCount++;
+                    else if (h.includes('i2s')) this.telemetryRuntime.io.i2sCount++;
                 },
                 () => {
                     this.observeStateMutation(hook, undefined, false);
@@ -421,7 +431,9 @@ export class BaseComponent {
 
     private safeSerializeState(): string {
         try {
-            return JSON.stringify(this.normalizeStateForTelemetry(this.state));
+            const cleanState = { ...this.state };
+            delete (cleanState as any).vHistory;
+            return JSON.stringify(this.normalizeStateForTelemetry(cleanState));
         } catch {
             return '{}';
         }
@@ -644,7 +656,13 @@ export class BaseComponent {
             }
         }
 
-        const idleMs = Math.max(0, Date.now() - Number(this.telemetryRuntime.lastStateChangeAtMs || Date.now()));
+        const lastActivityMs = Math.max(
+            Number(this.telemetryRuntime.lastStateChangeAtMs || 0),
+            Number(this.telemetryRuntime.lastIoAtMs || 0),
+            Number(this.telemetryRuntime.lastEventAtMs || 0),
+            Number(this.telemetryRuntime.createdAtMs || 0)
+        );
+        const idleMs = Math.max(0, Date.now() - lastActivityMs);
         if (this.telemetryRuntime.updateCount > 40 && idleMs > 8000) {
             addFinding('warn', `State has been stable for ${Math.round(idleMs)}ms while updates continue.`);
         }
@@ -838,7 +856,28 @@ export class BaseComponent {
     }
 
     getSyncState() {
-        return this.state;
+        const analogVoltages: Record<string, number> = {};
+        if (this.pins) {
+            for (const pinId of Object.keys(this.pins)) {
+                if (this.pins[pinId] && typeof this.pins[pinId].voltage === 'number') {
+                    analogVoltages[pinId] = this.pins[pinId].voltage;
+                }
+            }
+        }
+
+        return {
+            ...this.state,
+            pins: { ...this.telemetryRuntime.pinLogicLevels },
+            pinToggles: { ...this.telemetryRuntime.pinToggles },
+            analogVoltages,
+            i2cTraffic: [...this.telemetryRuntime.io.recentI2c],
+            spiTraffic: [...this.telemetryRuntime.io.recentSpi],
+            serialBytes: this.telemetryRuntime.io.uartBytes,
+            pwmTraffic: this.telemetryRuntime.io.pwmCount,
+            oneWireTraffic: this.telemetryRuntime.io.oneWireCount,
+            pioTraffic: this.telemetryRuntime.io.pioCount,
+            i2sTraffic: this.telemetryRuntime.io.i2sCount,
+        };
     }
 
     getRawMetrics() {
@@ -852,14 +891,17 @@ export class BaseComponent {
         };
     }
 
-    getDeltaMetrics() {
+    getDeltaMetrics(watchedParams?: string[]) {
         const full = this.getRawMetrics();
         
         // Stabilize metrics for comparison (remove volatile timing fields)
         const stableMetrics = { ...full.metrics };
-        if (stableMetrics.lifecycle) {
-            stableMetrics.lifecycle = { ...stableMetrics.lifecycle };
-            delete (stableMetrics.lifecycle as any).idleMs;
+        delete (stableMetrics as any).updateFreq;
+        delete (stableMetrics as any).timing;
+
+        if (stableMetrics.stateStability) {
+            stableMetrics.stateStability = { ...stableMetrics.stateStability };
+            delete (stableMetrics.stateStability as any).idleMs;
         }
         if (stableMetrics.ioThroughput) {
             stableMetrics.ioThroughput = { ...stableMetrics.ioThroughput };
@@ -870,7 +912,22 @@ export class BaseComponent {
             delete (stableMetrics.interactionAudit as any).lastEventAtMs;
         }
 
-        const currentJson = JSON.stringify(stableMetrics);
+        const fullSyncState = this.getSyncState();
+        let stableState: any = {};
+        const activeParams = Array.isArray(watchedParams) && watchedParams.length > 0 ? watchedParams : ['all'];
+
+        if (activeParams.includes('all')) {
+            stableState = { ...fullSyncState };
+            delete (stableState as any).vHistory; // Exclude rolling history buffer from fingerprinting!
+        } else {
+            for (const param of activeParams) {
+                if (param in fullSyncState) {
+                    stableState[param] = fullSyncState[param];
+                }
+            }
+        }
+
+        const currentJson = JSON.stringify({ state: stableState, metrics: stableMetrics });
         if (currentJson === this.lastReportedJson) {
             return {
                 id: this.id,
@@ -882,11 +939,38 @@ export class BaseComponent {
                 capturedAt: full.capturedAt
             };
         }
+
+        let mutationSummary = '[DELTA] State/Metrics updated';
+        if (this.lastReportedJson) {
+            try {
+                const oldObj = JSON.parse(this.lastReportedJson);
+                const oldState = oldObj?.state || {};
+                const changedParams: string[] = [];
+                for (const key in stableState) {
+                    if (stableState[key] !== oldState[key]) {
+                        let oldVal = oldState[key];
+                        let newVal = stableState[key];
+                        if (typeof newVal === 'number') {
+                            oldVal = typeof oldVal === 'number' ? Number(oldVal).toFixed(2) : oldVal;
+                            newVal = Number(newVal).toFixed(2);
+                        }
+                        changedParams.push(`${key} (${oldVal} → ${newVal})`);
+                    }
+                }
+                if (changedParams.length > 0) {
+                    mutationSummary = `[DELTA] Mutated: ${changedParams.join(', ')}`;
+                }
+            } catch (e) {
+                // Keep default summary
+            }
+        }
+
         this.lastReportedJson = currentJson;
         return {
             ...full,
             state: this.getSyncState(),
-            delta: true
+            delta: true,
+            deltaSummary: mutationSummary
         };
     }
 }
