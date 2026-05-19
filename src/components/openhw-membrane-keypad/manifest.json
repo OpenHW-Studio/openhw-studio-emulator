@@ -78,9 +78,9 @@
     "autocoding": {
         "libraries": ["Keypad"],
         "arduino": {
-            "globals": "#include <Keypad.h>\n\nconst byte ROWS = 4;\nconst byte COLS = 4;\nchar keys[ROWS][COLS] = {\n  {'1','2','3','A'},\n  {'4','5','6','B'},\n  {'7','8','9','C'},\n  {'*','0','#','D'}\n};\nbyte rowPins[ROWS] = {9, 8, 7, 6};\nbyte colPins[COLS] = {5, 4, 3, 2};\n\nKeypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);",
+            "globals": "#include <Keypad.h>\n\nconst byte ROWS_${COMP_SUFFIX} = 4;\nconst byte COLS_${COMP_SUFFIX} = 4;\nchar keys_${COMP_SUFFIX}[ROWS_${COMP_SUFFIX}][COLS_${COMP_SUFFIX}] = {\n  {'1','2','3','A'},\n  {'4','5','6','B'},\n  {'7','8','9','C'},\n  {'*','0','#','D'}\n};\nbyte rowPins_${COMP_SUFFIX}[ROWS_${COMP_SUFFIX}] = {${R1}, ${R2}, ${R3}, ${R4}};\nbyte colPins_${COMP_SUFFIX}[COLS_${COMP_SUFFIX}] = {${C1}, ${C2}, ${C3}, ${C4}};\n\nKeypad keypad_${COMP_SUFFIX} = Keypad(makeKeymap(keys_${COMP_SUFFIX}), rowPins_${COMP_SUFFIX}, colPins_${COMP_SUFFIX}, ROWS_${COMP_SUFFIX}, COLS_${COMP_SUFFIX});",
             "setup": "Serial.begin(9600);",
-            "loop": "char key = keypad.getKey();\nif (key) {\n  Serial.print(\"Key Pressed: \");\n  Serial.println(key);\n}"
+            "loop": "char key_${COMP_SUFFIX} = keypad_${COMP_SUFFIX}.getKey();\nif (key_${COMP_SUFFIX}) {\n  Serial.print(\"Key Pressed: \");\n  Serial.println(key_${COMP_SUFFIX});\n}"
         }
     }
 }

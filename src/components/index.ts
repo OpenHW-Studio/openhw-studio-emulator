@@ -70,6 +70,9 @@ export { default as openhwArduinoMega } from './openhw-arduino-mega';
 export { default as openhwAttiny85 } from './openhw-attiny85';
 export { default as openhwHcSr04 } from './openhw-hc-sr04';
 export { default as openhwSimulationMonitor } from './openhw-simulation-monitor';
+export { default as openhwDs18b20 } from './openhw-ds18b20';
+export { default as openhwIrReceiver } from './openhw-ir-receiver';
+export { default as openhwMfrc522 } from './openhw-mfrc522';
 
 export { FullCircuitValidator, analyzeCodeHardwareSync, ProtocolAnalyzer, runUnifiedValidation } from '../circuit-validation/index.js';
 

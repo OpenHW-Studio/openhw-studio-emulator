@@ -51,14 +51,16 @@
             { "from": "helper:driver:GND_LOGIC", "to": "arduino:GND" },
             { "from": "helper:driver:VMOT",      "to": "helper:psu:5V" },
             { "from": "helper:driver:GND_MOT",   "to": "helper:psu:GND" },
-            { "from": "helper:driver:RESET",     "to": "helper:driver:SLEEP" }
+            { "from": "helper:driver:RESET",     "to": "arduino:5V" },
+            { "from": "helper:driver:SLEEP",     "to": "arduino:5V" }
         ]
     },
     "autocoding": {
         "libraries": ["AccelStepper"],
         "arduino": {
-            "setup": "// Stepper setup with A4988 (Step=8, Dir=9)\n#include <AccelStepper.h>\nAccelStepper stepper(AccelStepper::DRIVER, 8, 9);\n\nvoid setup() {\n  stepper.setMaxSpeed(1000);\n  stepper.setAcceleration(500);\n}",
-            "loop": "if (stepper.distanceToGo() == 0) {\n  stepper.moveTo(-stepper.currentPosition());\n  delay(1000);\n}\nstepper.run();"
+            "globals": "// Stepper setup with A4988 (Step=${helper:driver:STEP}, Dir=${helper:driver:DIR})\n#include <AccelStepper.h>\nAccelStepper stepper_${COMP_SUFFIX}(AccelStepper::DRIVER, ${helper:driver:STEP}, ${helper:driver:DIR});",
+            "setup": "pinMode(${helper:driver:ENABLE}, OUTPUT);\n  digitalWrite(${helper:driver:ENABLE}, LOW);\n  stepper_${COMP_SUFFIX}.setMaxSpeed(1000);\n  stepper_${COMP_SUFFIX}.setAcceleration(500);",
+            "loop": "if (stepper_${COMP_SUFFIX}.distanceToGo() == 0) {\n  stepper_${COMP_SUFFIX}.moveTo(-stepper_${COMP_SUFFIX}.currentPosition());\n  delay(1000);\n}\nstepper_${COMP_SUFFIX}.run();"
         }
     }
 }

@@ -30,9 +30,9 @@
     "autocoding": {
         "libraries": ["Adafruit PCD8544 Nokia 5110 LCD library", "Adafruit GFX Library"],
         "arduino": {
-            "globals": "#include <Adafruit_PCD8544.h>\n\nAdafruit_PCD8544 display = Adafruit_PCD8544(8, 10, 9);",
-            "setup": "display.begin();\ndisplay.setContrast(50);\ndisplay.clearDisplay();\ndisplay.setTextSize(1);\ndisplay.setTextColor(BLACK);\ndisplay.setCursor(0,0);\ndisplay.println(\"OpenHW Studio\");\ndisplay.println(\"Nokia 5110\");\ndisplay.display();\ndelay(2000);",
-            "loop": "display.clearDisplay();\ndisplay.setCursor(0,0);\ndisplay.print(\"Timer: \");\ndisplay.print(millis()/1000);\ndisplay.println(\"s\");\ndisplay.display();\ndelay(500);"
+            "globals": "#include <Adafruit_PCD8544.h>\n\nAdafruit_PCD8544 display_${COMP_SUFFIX} = Adafruit_PCD8544(${DC}, ${SCE}, ${RST});",
+            "setup": "display_${COMP_SUFFIX}.begin();\ndisplay_${COMP_SUFFIX}.setContrast(50);\ndisplay_${COMP_SUFFIX}.clearDisplay();\ndisplay_${COMP_SUFFIX}.setTextSize(1);\ndisplay_${COMP_SUFFIX}.setTextColor(BLACK);\ndisplay_${COMP_SUFFIX}.setCursor(0,0);\ndisplay_${COMP_SUFFIX}.println(\"OpenHW Studio\");\ndisplay_${COMP_SUFFIX}.println(\"Nokia 5110\");\ndisplay_${COMP_SUFFIX}.display();\ndelay(2000);",
+            "loop": "display_${COMP_SUFFIX}.clearDisplay();\ndisplay_${COMP_SUFFIX}.setCursor(0,0);\ndisplay_${COMP_SUFFIX}.print(\"Timer: \");\ndisplay_${COMP_SUFFIX}.print(millis()/1000);\ndisplay_${COMP_SUFFIX}.println(\"s\");\ndisplay_${COMP_SUFFIX}.display();\ndelay(500);"
         }
     }
 }

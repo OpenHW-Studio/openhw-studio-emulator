@@ -76,9 +76,9 @@
   "autocoding": {
     "libraries": ["Adafruit ILI9341", "Adafruit GFX Library"],
     "arduino": {
-      "globals": "#include \"Adafruit_GFX.h\"\n#include \"Adafruit_ILI9341.h\"\n\n#define TFT_DC 9\n#define TFT_CS 10\n\nAdafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);",
-      "setup": "tft.begin();\ntft.setRotation(1);\ntft.fillScreen(ILI9341_BLACK);\ntft.setCursor(20, 100);\ntft.setTextColor(ILI9341_WHITE);\ntft.setTextSize(3);\ntft.println(\"OpenHW Studio\");\ntft.setCursor(20, 140);\ntft.setTextSize(2);\ntft.println(\"TFT ILI9341 Ready\");\ndelay(2000);",
-      "loop": "tft.fillRect(100, 180, 50, 20, ILI9341_BLACK);\ntft.setCursor(20, 180);\ntft.setTextSize(2);\ntft.print(\"Time: \");\ntft.print(millis()/1000);\ntft.println(\"s\");\ndelay(500);"
+      "globals": "#include \"Adafruit_GFX.h\"\n#include \"Adafruit_ILI9341.h\"\n\n#define TFT_DC_${COMP_SUFFIX} ${DC}\n#define TFT_CS_${COMP_SUFFIX} ${CS}\n\nAdafruit_ILI9341 tft_${COMP_SUFFIX} = Adafruit_ILI9341(TFT_CS_${COMP_SUFFIX}, TFT_DC_${COMP_SUFFIX});",
+      "setup": "tft_${COMP_SUFFIX}.begin();\ntft_${COMP_SUFFIX}.setRotation(1);\ntft_${COMP_SUFFIX}.fillScreen(ILI9341_BLACK);\ntft_${COMP_SUFFIX}.setCursor(20, 100);\ntft_${COMP_SUFFIX}.setTextColor(ILI9341_WHITE);\ntft_${COMP_SUFFIX}.setTextSize(3);\ntft_${COMP_SUFFIX}.println(\"OpenHW Studio\");\ntft_${COMP_SUFFIX}.setCursor(20, 140);\ntft_${COMP_SUFFIX}.setTextSize(2);\ntft_${COMP_SUFFIX}.println(\"TFT ILI9341 Ready\");\ndelay(2000);",
+      "loop": "tft_${COMP_SUFFIX}.fillRect(100, 180, 50, 20, ILI9341_BLACK);\ntft_${COMP_SUFFIX}.setCursor(20, 180);\ntft_${COMP_SUFFIX}.setTextSize(2);\ntft_${COMP_SUFFIX}.print(\"Time: \");\ntft_${COMP_SUFFIX}.print(millis()/1000);\ntft_${COMP_SUFFIX}.println(\"s\");\ndelay(500);"
     }
   }
 }

@@ -46,9 +46,9 @@
     "autocoding": {
         "libraries": ["Adafruit SSD1306", "Adafruit GFX Library"],
         "arduino": {
-            "globals": "#include <Wire.h>\n#include <Adafruit_GFX.h>\n#include <Adafruit_SSD1306.h>\nAdafruit_SSD1306 display(128, 64, &Wire, -1);",
-            "setup": "display.begin(SSD1306_SWITCHCAPVCC, 0x3C);\ndisplay.clearDisplay();\ndisplay.setTextSize(2);\ndisplay.setTextColor(SSD1306_WHITE);\ndisplay.setCursor(8, 20);\ndisplay.println(\"OpenHW!\");\ndisplay.display();\ndelay(2000);",
-            "loop": "unsigned long t = millis() / 1000;\ndisplay.clearDisplay();\ndisplay.setTextSize(1);\ndisplay.setCursor(0, 0);\ndisplay.println(\"Welcome to OpenHW!\");\ndisplay.setTextSize(2);\ndisplay.setCursor(20, 30);\ndisplay.print(t);\ndisplay.print(\" s\");\ndisplay.display();\ndelay(500);"
+            "globals": "#include <Wire.h>\n#include <Adafruit_GFX.h>\n#include <Adafruit_SSD1306.h>\nAdafruit_SSD1306 display_${COMP_SUFFIX}(128, 64, &Wire, -1);",
+            "setup": "display_${COMP_SUFFIX}.begin(SSD1306_SWITCHCAPVCC, 0x3C);\ndisplay_${COMP_SUFFIX}.clearDisplay();\ndisplay_${COMP_SUFFIX}.setTextSize(2);\ndisplay_${COMP_SUFFIX}.setTextColor(SSD1306_WHITE);\ndisplay_${COMP_SUFFIX}.setCursor(8, 20);\ndisplay_${COMP_SUFFIX}.println(\"OpenHW!\");\ndisplay_${COMP_SUFFIX}.display();\ndelay(2000);",
+            "loop": "unsigned long t_${COMP_SUFFIX} = millis() / 1000;\ndisplay_${COMP_SUFFIX}.clearDisplay();\ndisplay_${COMP_SUFFIX}.setTextSize(1);\ndisplay_${COMP_SUFFIX}.setCursor(0, 0);\ndisplay_${COMP_SUFFIX}.println(\"Welcome to OpenHW!\");\ndisplay_${COMP_SUFFIX}.setTextSize(2);\ndisplay_${COMP_SUFFIX}.setCursor(20, 30);\ndisplay_${COMP_SUFFIX}.print(t_${COMP_SUFFIX});\ndisplay_${COMP_SUFFIX}.print(\" s\");\ndisplay_${COMP_SUFFIX}.display();\ndelay(500);"
         }
     }
 }

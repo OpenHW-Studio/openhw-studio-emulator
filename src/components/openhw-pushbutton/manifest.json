@@ -21,7 +21,7 @@
     "autocoding": {
         "arduino": {
             "setup": "Serial.begin(9600);\npinMode(${1l}, INPUT_PULLUP);\nSerial.println(\"Push Button Ready\");",
-            "loop": "bool pressed = (digitalRead(${1l}) == LOW);\nSerial.print(\"Button: \");\nSerial.println(pressed ? \"PRESSED\" : \"released\");\ndelay(100);"
+            "loop": "bool pressed_${COMP_SUFFIX} = (digitalRead(${1l}) == LOW);\nSerial.print(\"Button: \");\nSerial.println(pressed_${COMP_SUFFIX} ? \"PRESSED\" : \"released\");\ndelay(100);"
         }
     }
 }
