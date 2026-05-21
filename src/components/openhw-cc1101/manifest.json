@@ -1,0 +1,48 @@
+{
+  "type": "openhw-cc1101",
+  "label": "CC1101",
+  "group": "Network",
+  "description": "Sub-GHz RF Transceiver module.",
+  "w": 240,
+  "h": 114,
+  "attrs": {
+    "magicInterop": "false"
+  },
+  "telemetry": {
+    "template": "State=${state.state}, Freq=${state.frequency}, Mod=${state.modulation}",
+    "criticalKeys": [
+      "state.state",
+      "state.frequency",
+      "state.modulation"
+    ]
+  },
+  "pins": [
+    { "id": "VCC",  "x": 110, "y": 120, "type": "power",   "description": "3.3V Power" },
+    { "id": "GND",  "x": 65,  "y": 120, "type": "power",   "description": "Ground" },
+    { "id": "MOSI", "x": 110, "y": 165, "type": "digital", "description": "SPI MOSI" },
+    { "id": "SCK",  "x": 65,  "y": 165, "type": "digital", "description": "SPI Clock" },
+    { "id": "MISO", "x": 110, "y": 210, "type": "digital", "description": "SPI MISO" },
+    { "id": "GDO2", "x": 65,  "y": 210, "type": "digital", "description": "General Digital Output 2" },
+    { "id": "GDO0", "x": 110, "y": 255, "type": "digital", "description": "General Digital Output 0" },
+    { "id": "CSN",  "x": 65,  "y": 255, "type": "digital", "description": "SPI Chip Select" }
+  ],
+  "autowiring": {
+    "connections": [
+      { "from": "VCC",  "to": "arduino:3.3V", "color": "red" },
+      { "from": "GND",  "to": "arduino:GND",  "color": "black" },
+      { "from": "CSN",  "to": "arduino:10",   "color": "yellow" },
+      { "from": "MOSI", "to": "arduino:11",   "color": "blue" },
+      { "from": "MISO", "to": "arduino:12",   "color": "green" },
+      { "from": "SCK",  "to": "arduino:13",   "color": "purple" },
+      { "from": "GDO0", "to": "arduino:2",    "color": "orange" }
+    ]
+  },
+  "autocoding": {
+    "libraries": ["ELECHOUSE_CC1101"],
+    "arduino": {
+      "globals": "#include <ELECHOUSE_CC1101_SRC_DRV.h>\n",
+      "setup": "ELECHOUSE_cc1101.Init();\nELECHOUSE_cc1101.setCCMode(1);\nELECHOUSE_cc1101.setModulation(0);\nELECHOUSE_cc1101.setMHZ(433.92);\nELECHOUSE_cc1101.setSyncMode(2);\nELECHOUSE_cc1101.Crc(1);",
+      "loop": "byte buffer[] = {0x48, 0x65, 0x6C, 0x6C, 0x6F}; // \"Hello\"\nELECHOUSE_cc1101.SendData(buffer, 5);\ndelay(1000);"
+    }
+  }
+}

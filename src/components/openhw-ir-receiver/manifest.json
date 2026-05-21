@@ -1,0 +1,57 @@
+{
+  "type": "openhw-ir-receiver",
+  "label": "IR Receiver",
+  "group": "Sensors",
+  "description": "38 kHz infrared demodulator. Receives NEC protocol IR signals from a virtual remote control and outputs a clean digital signal.",
+  "w": 70,
+  "h": 105,
+  "attrs": {
+    "frequency": "38"
+  },
+  "telemetry": {
+    "template": "Powered=${state.powered}, Transmitting=${state.transmitting}, LastButton=${state.lastButton}, LastHEX=${state.lastValue}",
+    "criticalKeys": [
+      "state.powered",
+      "state.transmitting",
+      "state.lastButton"
+    ]
+  },
+  "pins": [
+    {
+      "id": "GND",
+      "x": 23.1,
+      "y": 101.5,
+      "type": "power",
+      "description": "Ground (G)"
+    },
+    {
+      "id": "VCC",
+      "x": 33.6,
+      "y": 101.5,
+      "type": "power",
+      "description": "Power Supply 3.3V / 5V (V)"
+    },
+    {
+      "id": "OUT",
+      "x": 44.1,
+      "y": 101.5,
+      "type": "digital",
+      "description": "Digital Signal Output (R - Active LOW)"
+    }
+  ],
+  "autowiring": {
+    "connections": [
+      { "from": "GND", "to": "arduino:GND", "color": "black" },
+      { "from": "VCC", "to": "arduino:5V", "color": "red" },
+      { "from": "OUT", "to": "arduino:11", "color": "green" }
+    ]
+  },
+  "autocoding": {
+    "libraries": ["IRremote"],
+    "arduino": {
+      "globals": "#include <IRremote.h>\n\nconst int RECV_PIN_${COMP_SUFFIX} = ${OUT};\nIRrecv irrecv_${COMP_SUFFIX}(RECV_PIN_${COMP_SUFFIX});\ndecode_results results_${COMP_SUFFIX};",
+      "setup": "irrecv_${COMP_SUFFIX}.enableIRIn();\nSerial.println(\"IR Receiver Ready\");",
+      "loop": "if (irrecv_${COMP_SUFFIX}.decode(&results_${COMP_SUFFIX})) {\n  Serial.print(\"IR Code: 0x\");\n  Serial.println(results_${COMP_SUFFIX}.value, HEX);\n  irrecv_${COMP_SUFFIX}.resume();\n}\ndelay(100);"
+    }
+  }
+}

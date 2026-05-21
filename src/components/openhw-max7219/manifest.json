@@ -38,8 +38,8 @@
   "autocoding": {
     "libraries": ["LedControl"],
     "arduino": {
-      "globals": "#include <LedControl.h>\n\nLedControl lc = LedControl(11, 13, 10, 1);",
-      "setup": "lc.shutdown(0, false);\nlc.setIntensity(0, 8);\nlc.clearDisplay(0);\n// Welcome Message (H)\nlc.setRow(0,0,B01100110);\nlc.setRow(0,1,B01100110);\nlc.setRow(0,2,B01100110);\nlc.setRow(0,3,B01111110);\nlc.setRow(0,4,B01111110);\nlc.setRow(0,5,B01100110);\nlc.setRow(0,6,B01100110);\nlc.setRow(0,7,B01100110);\ndelay(2000);",
+      "globals": "#include <LedControl.h>\n\nLedControl lc_${COMP_SUFFIX} = LedControl(${DIN}, ${CLK}, ${CS}, 1);",
+      "setup": "lc_${COMP_SUFFIX}.shutdown(0, false);\nlc_${COMP_SUFFIX}.setIntensity(0, 8);\nlc_${COMP_SUFFIX}.clearDisplay(0);\n// Welcome Message (H)\nlc_${COMP_SUFFIX}.setRow(0,0,B01100110);\nlc_${COMP_SUFFIX}.setRow(0,1,B01100110);\nlc_${COMP_SUFFIX}.setRow(0,2,B01100110);\nlc_${COMP_SUFFIX}.setRow(0,3,B01111110);\nlc_${COMP_SUFFIX}.setRow(0,4,B01111110);\nlc_${COMP_SUFFIX}.setRow(0,5,B01100110);\nlc_${COMP_SUFFIX}.setRow(0,6,B01100110);\nlc_${COMP_SUFFIX}.setRow(0,7,B01100110);\ndelay(2000);",
       "loop": "// Dot Matrix ready for animation."
     }
   }

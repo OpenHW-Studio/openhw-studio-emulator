@@ -1,0 +1,42 @@
+{
+  "type": "openhw-pcm5102",
+  "name": "I2S Audio DAC (PCM5102)",
+  "author": "Velxio",
+  "version": "1.0.0",
+  "group": "Audio",
+  "description": "High-quality I2S stereo audio DAC decoder",
+  "tags": ["audio", "i2s", "dac", "sound", "pcm5102"],
+  "pins": [
+    { "id": "VCC", "name": "VCC", "description": "Power (3.3V to 5V)", "x": 5, "y": 60 },
+    { "id": "GND", "name": "GND", "description": "Ground", "x": 10, "y": 60 },
+    { "id": "FLT", "name": "FLT", "description": "Filter select", "x": 15, "y": 60 },
+    { "id": "DMP", "name": "DMP", "description": "De-emphasis control", "x": 20, "y": 60 },
+    { "id": "XMT", "name": "XMT", "description": "Soft mute control", "x": 25, "y": 60 },
+    { "id": "FMT", "name": "FMT", "description": "Audio format", "x": 30, "y": 60 },
+    { "id": "SCK", "name": "SCK", "description": "System clock", "x": 35, "y": 60 },
+    { "id": "BCK", "name": "BCK", "description": "Bit clock input", "x": 40, "y": 60 },
+    { "id": "DIN", "name": "DIN", "description": "Serial data input", "x": 45, "y": 60 },
+    { "id": "LCK", "name": "LCK", "description": "Word select / Left-Right clock", "x": 50, "y": 60 },
+    { "id": "OUTL", "name": "OUTL", "description": "Analog output Left", "x": 55, "y": 60 },
+    { "id": "OUTR", "name": "OUTR", "description": "Analog output Right", "x": 60, "y": 60 }
+  ],
+  "state": {
+    "i2sBitsPerFrame": 16,
+    "lastLeftSample": 0,
+    "lastRightSample": 0,
+    "peakAmplitude": 0,
+    "i2sAudioChunk": null
+  },
+  "defaultAttrs": {},
+  "autowire": {
+    "groups": {
+      "i2s": [
+        { "pin": "VCC", "function": "vcc" },
+        { "pin": "GND", "function": "gnd" },
+        { "pin": "BCK", "function": "sck" },
+        { "pin": "DIN", "function": "mosi" },
+        { "pin": "LCK", "function": "cs" }
+      ]
+    }
+  }
+}

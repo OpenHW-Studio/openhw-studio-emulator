@@ -1,0 +1,57 @@
+{
+  "type": "openhw-ds18b20",
+  "label": "DS18B20 Temperature Sensor",
+  "group": "Sensors",
+  "description": "1-Wire digital temperature sensor (DS18B20) breakout board. Measures temperature from -55°C to +125°C.",
+  "w": 50,
+  "h": 100,
+  "attrs": {
+    "temperature": "25",
+    "resolution": "12"
+  },
+  "telemetry": {
+    "template": "Temp=${state.temperature}°C, Raw=${state.rawValue}, Connected=${state.connected}",
+    "criticalKeys": [
+      "state.temperature",
+      "state.connected"
+    ]
+  },
+  "pins": [
+    {
+      "id": "GND",
+      "x": 10.0,
+      "y": 87.5,
+      "type": "power",
+      "description": "Ground"
+    },
+    {
+      "id": "DQ",
+      "x": 25.0,
+      "y": 87.5,
+      "type": "bidirectional",
+      "description": "Digital DQ Data line (1-Wire)"
+    },
+    {
+      "id": "VCC",
+      "x": 40.0,
+      "y": 87.5,
+      "type": "power",
+      "description": "Voltage Input (3V - 5.5V)"
+    }
+  ],
+  "autowiring": {
+    "connections": [
+      { "from": "GND", "to": "arduino:GND", "color": "black" },
+      { "from": "VCC", "to": "arduino:5V", "color": "red" },
+      { "from": "DQ",  "to": "arduino:2", "color": "yellow" }
+    ]
+  },
+  "autocoding": {
+    "libraries": ["OneWire", "DallasTemperature"],
+    "arduino": {
+      "globals": "#include <OneWire.h>\n#include <DallasTemperature.h>\n\n#define ONE_WIRE_BUS_${COMP_SUFFIX} ${DQ}\nOneWire oneWire_${COMP_SUFFIX}(ONE_WIRE_BUS_${COMP_SUFFIX});\nDallasTemperature sensors_${COMP_SUFFIX}(&oneWire_${COMP_SUFFIX});",
+      "setup": "sensors_${COMP_SUFFIX}.begin();",
+      "loop": "sensors_${COMP_SUFFIX}.requestTemperatures();\nfloat temp_${COMP_SUFFIX} = sensors_${COMP_SUFFIX}.getTempCByIndex(0);\nSerial.print(\"DS18B20 Temp: \");\nSerial.print(temp_${COMP_SUFFIX});\nSerial.println(\" C\");\ndelay(1000);"
+    }
+  }
+}

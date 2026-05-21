@@ -1,0 +1,49 @@
+{
+  "type": "openhw-mfrc522",
+  "label": "MFRC522 RFID Reader",
+  "group": "Sensors",
+  "description": "SPI-based RFID reader operating at 13.56 MHz. Reads Mifare Classic 1K cards and key fobs.",
+  "w": 156,
+  "h": 120,
+  "attrs": {
+    "cardUID": "DE AD BE EF",
+    "cardPresent": "false"
+  },
+  "telemetry": {
+    "template": "Powered=${state.powered}, CardPresent=${state.cardPresent}, UID=${state.cardUID}",
+    "criticalKeys": [
+      "state.powered",
+      "state.cardPresent",
+      "state.cardUID"
+    ]
+  },
+  "pins": [
+    { "id": "3V3",  "x": 8, "y": 18,  "type": "power",   "description": "Power Supply (3.3V ONLY)" },
+    { "id": "RST",  "x": 8, "y": 30,  "type": "digital", "description": "Reset Pin" },
+    { "id": "GND",  "x": 8, "y": 42,  "type": "power",   "description": "Ground" },
+    { "id": "IRQ",  "x": 8, "y": 54,  "type": "digital", "description": "Interrupt Request (optional)" },
+    { "id": "MISO", "x": 8, "y": 66,  "type": "digital", "description": "SPI MISO" },
+    { "id": "MOSI", "x": 8, "y": 78,  "type": "digital", "description": "SPI MOSI" },
+    { "id": "SCK",  "x": 8, "y": 90,  "type": "digital", "description": "SPI Clock" },
+    { "id": "SDA",  "x": 8, "y": 102, "type": "digital", "description": "SPI Chip Select (SS/SDA)" }
+  ],
+  "autowiring": {
+    "connections": [
+      { "from": "3V3",  "to": "arduino:3.3V", "color": "red" },
+      { "from": "GND",  "to": "arduino:GND", "color": "black" },
+      { "from": "RST",  "to": "arduino:9", "color": "orange" },
+      { "from": "SDA",  "to": "arduino:10", "color": "yellow" },
+      { "from": "MOSI", "to": "arduino:11", "color": "blue" },
+      { "from": "MISO", "to": "arduino:12", "color": "green" },
+      { "from": "SCK",  "to": "arduino:13", "color": "purple" }
+    ]
+  },
+  "autocoding": {
+    "libraries": ["MFRC522"],
+    "arduino": {
+      "globals": "#include <SPI.h>\n#include <MFRC522.h>\n\n#define RST_PIN_${COMP_SUFFIX} ${RST}\n#define SS_PIN_${COMP_SUFFIX} ${SDA}\nMFRC522 mfrc522_${COMP_SUFFIX}(SS_PIN_${COMP_SUFFIX}, RST_PIN_${COMP_SUFFIX});",
+      "setup": "SPI.begin();\nmfrc522_${COMP_SUFFIX}.PCD_Init();\nSerial.println(\"MFRC522 RFID Ready\");",
+      "loop": "if (mfrc522_${COMP_SUFFIX}.PICC_IsNewCardPresent() && mfrc522_${COMP_SUFFIX}.PICC_ReadCardSerial()) {\n  Serial.print(\"RFID UID:\");\n  for (byte i = 0; i < mfrc522_${COMP_SUFFIX}.uid.size; i++) {\n    Serial.print(mfrc522_${COMP_SUFFIX}.uid.uidByte[i] < 0x10 ? \" 0\" : \" \");\n    Serial.print(mfrc522_${COMP_SUFFIX}.uid.uidByte[i], HEX);\n  }\n  Serial.println();\n  mfrc522_${COMP_SUFFIX}.PICC_HaltA();\n}\ndelay(200);"
+    }
+  }
+}

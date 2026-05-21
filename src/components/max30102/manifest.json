@@ -79,9 +79,9 @@
   "autocoding": {
       "libraries": ["MAX30105"],
       "arduino": {
-          "globals": "#include <Wire.h>\n#include \"MAX30105.h\"\n\nMAX30105 particleSensor;",
-          "setup": "Serial.begin(9600);\nif (!particleSensor.begin(Wire, I2C_SPEED_FAST)) {\n  Serial.println(\"MAX30102 not found\");\n  while (1);\n}\nparticleSensor.setup();",
-          "loop": "Serial.print(\" R:\"); Serial.print(particleSensor.getRed());\nSerial.print(\" IR:\"); Serial.print(particleSensor.getIR());\nSerial.println();\ndelay(100);"
+          "globals": "#include <Wire.h>\n#include \"MAX30105.h\"\n\nMAX30105 particleSensor_${COMP_SUFFIX};",
+          "setup": "Serial.begin(9600);\nif (!particleSensor_${COMP_SUFFIX}.begin(Wire, I2C_SPEED_FAST)) {\n  Serial.println(\"MAX30102 not found\");\n  while (1);\n}\nparticleSensor_${COMP_SUFFIX}.setup();",
+          "loop": "Serial.print(\" R:\"); Serial.print(particleSensor_${COMP_SUFFIX}.getRed());\nSerial.print(\" IR:\"); Serial.print(particleSensor_${COMP_SUFFIX}.getIR());\nSerial.println();\ndelay(100);"
       }
   }
 }

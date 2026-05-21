@@ -1,8 +1,7 @@
 import { BaseComponent } from '../BaseComponent';
+import { SPIProtocol } from '../../protocol-handlers/index';
 
-export class ILI9341Logic extends BaseComponent {
-    private dcHigh = false;
-    private csHigh = true;
+export class ILI9341Logic extends SPIProtocol {
     private currentCommand = 0;
 
     // Windowing 
@@ -33,7 +32,12 @@ export class ILI9341Logic extends BaseComponent {
         this.state = { buffer: this.vram, powerOn: true, t: Date.now() };
     }
 
-    update(cpuCycles: number) {
+    private get dcHigh(): boolean {
+        return this.getPinVoltage('DC') > 2.5;
+    }
+
+    update(cpuCycles: number, currentWires: any[], instances: BaseComponent[]) {
+        super.update(cpuCycles, currentWires, instances);
         const now = Date.now();
 
         // Power Sensing: If VCC pin is low, we are powered off
@@ -56,38 +60,82 @@ export class ILI9341Logic extends BaseComponent {
             this.vramDirty = false;
             this.stateChanged = true;
         }
-    }
 
-    onPinStateChange(pinId: string, isHigh: boolean) {
-        if (pinId === 'DC') this.dcHigh = isHigh;
-        else if (pinId === 'CS') {
-            this.csHigh = isHigh;
-            if (isHigh) {
-                this.params = [];
-                this.secondByte = false;
+        // DMA Bypass Optimization for Displays
+        const dmaAddress = parseInt(this.attrs?.dmaAddress || this.state?.dmaAddress || '0', 16);
+        
+        const hasLogicAnalyzer = this.isLogicAnalyzerAttached(instances);
+        if (hasLogicAnalyzer) {
+            this.state.dmaBypassDisabled = true;
+            return; // Skip DMA polling and fallback to bit-banging
+        }
+        
+        if (dmaAddress > 0 && this.powerOn) {
+            const runner = (this as any)._runner;
+            if (runner && runner.readDirectMemory && runner.getSimulatedTimeMs) {
+                const nowMs = runner.getSimulatedTimeMs();
+                // Polling at 60Hz
+                if (!this.lastSync || (nowMs - this.lastSync) > 16) {
+                    this.lastSync = nowMs;
+                    // VRAM is 240 * 320 * 2 = 153,600 bytes (RGB565).
+                    // Wait, our internal vram is 240*320*3 (RGB888) = 230,400 bytes.
+                    // The DMA buffer in RP2040 is RGB565.
+                    const dmaData = runner.readDirectMemory(dmaAddress, 240 * 320 * 2);
+                    if (dmaData) {
+                        for (let i = 0; i < 240 * 320; i++) {
+                            const dmaIdx = i * 2;
+                            // MSB first usually for ILI9341 SPI
+                            const high = dmaData[dmaIdx];
+                            const low = dmaData[dmaIdx + 1];
+                            const full = (high << 8) | low;
+
+                            const r = ((full >> 11) & 0x1f) << 3;
+                            const g = ((full >> 5) & 0x3f) << 2;
+                            const b = (full & 0x1f) << 3;
+
+                            const idx = i * 3;
+                            this.vram[idx] = r;
+                            this.vram[idx + 1] = g;
+                            this.vram[idx + 2] = b;
+                        }
+                        this.vramDirty = false; // We already processed it
+                        this.stateChanged = true;
+                    }
+                }
             }
         }
-        else if (pinId === 'RESET' && !isHigh) {
+    }
+
+    onPinStateChange(pinId: string, isHigh: boolean, cycles: number) {
+        super.onPinStateChange(pinId, isHigh, cycles);
+        if (pinId === 'RESET' && !isHigh) {
             this.vram.fill(0);
             this.vramDirty = true;
         }
     }
+    
+    onCSAssert(): void {
+        this.params = [];
+        this.secondByte = false;
+    }
 
-    onSPIByte(data: number) {
-        if (this.csHigh || !this.powerOn) return 0xFF;
+    onSPIByteReceived(byte: number, byteIndex: number): void {
+        const dmaAddress = parseInt(this.attrs?.dmaAddress || this.state?.dmaAddress || '0', 16);
+        if (dmaAddress > 0 && !this.state.dmaBypassDisabled) return; // Bypass normal SPI processing if DMA active
+        
+        if (!this.powerOn) return;
 
         if (!this.dcHigh) {
-            this.currentCommand = data;
+            this.currentCommand = byte;
             this.params = [];
             this.secondByte = false;
-            if (data === 0x2C) { // RAMWR
+            if (byte === 0x2C) { // RAMWR
                 this.currentX = this.colStart;
                 this.currentY = this.rowStart;
             }
         } else {
-            this.handleDataByte(data);
+            this.handleDataByte(byte);
         }
-        return 0x00;
     }
 
     private handleDataByte(data: number) {
