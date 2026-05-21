@@ -1,8 +1,7 @@
 import { BaseComponent } from '../BaseComponent';
+import { SPIProtocol } from '../../protocol-handlers/index';
 
-export class ILI9341Logic extends BaseComponent {
-    private dcHigh = false;
-    private csHigh = true;
+export class ILI9341Logic extends SPIProtocol {
     private currentCommand = 0;
 
     // Windowing 
@@ -33,7 +32,12 @@ export class ILI9341Logic extends BaseComponent {
         this.state = { buffer: this.vram, powerOn: true, t: Date.now() };
     }
 
-    update(cpuCycles: number) {
+    private get dcHigh(): boolean {
+        return this.getPinVoltage('DC') > 2.5;
+    }
+
+    update(cpuCycles: number, currentWires: any[], instances: BaseComponent[]) {
+        super.update(cpuCycles, currentWires, instances);
         const now = Date.now();
 
         // Power Sensing: If VCC pin is low, we are powered off
@@ -58,36 +62,33 @@ export class ILI9341Logic extends BaseComponent {
         }
     }
 
-    onPinStateChange(pinId: string, isHigh: boolean) {
-        if (pinId === 'DC') this.dcHigh = isHigh;
-        else if (pinId === 'CS') {
-            this.csHigh = isHigh;
-            if (isHigh) {
-                this.params = [];
-                this.secondByte = false;
-            }
-        }
-        else if (pinId === 'RESET' && !isHigh) {
+    onPinStateChange(pinId: string, isHigh: boolean, cycles: number) {
+        super.onPinStateChange(pinId, isHigh, cycles);
+        if (pinId === 'RESET' && !isHigh) {
             this.vram.fill(0);
             this.vramDirty = true;
         }
     }
+    
+    onCSAssert(): void {
+        this.params = [];
+        this.secondByte = false;
+    }
 
-    onSPIByte(data: number) {
-        if (this.csHigh || !this.powerOn) return 0xFF;
+    onSPIByteReceived(byte: number, byteIndex: number): void {
+        if (!this.powerOn) return;
 
         if (!this.dcHigh) {
-            this.currentCommand = data;
+            this.currentCommand = byte;
             this.params = [];
             this.secondByte = false;
-            if (data === 0x2C) { // RAMWR
+            if (byte === 0x2C) { // RAMWR
                 this.currentX = this.colStart;
                 this.currentY = this.rowStart;
             }
         } else {
-            this.handleDataByte(data);
+            this.handleDataByte(byte);
         }
-        return 0x00;
     }
 
     private handleDataByte(data: number) {

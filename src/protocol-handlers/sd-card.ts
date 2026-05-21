@@ -1,18 +1,20 @@
-import { BaseComponent } from '../BaseComponent';
-import { SPIProtocol } from '../../protocol-handlers/index';
+import { BaseComponent, SPIProtocol } from '@openhw/emulator';
 
-const LITTLEFS_MODULE_NAME = 'littlefs';
 const SD_BLOCK_SIZE = 512;
 const SD_DATA_TOKEN = 0xfe;
 
+// Re-define LittleFsVolume interface
 type LittleFsVolume = {
     mount: () => number;
     unmount: () => number;
     format: () => number;
     formatAndMount: () => number;
+    mkdir: (path: string) => boolean;
     writeFile: (path: string, data: Uint8Array) => boolean;
     destroy: () => void;
 };
+
+const LITTLEFS_MODULE_NAME = 'littlefs';
 
 function toUint8Array(data: any, encoder: TextEncoder): Uint8Array {
     if (data instanceof Uint8Array) return data;
@@ -22,11 +24,12 @@ function toUint8Array(data: any, encoder: TextEncoder): Uint8Array {
     return encoder.encode(String(data ?? ''));
 }
 
-async function tryLoadLittleFsModule(): Promise<any | null> {
+async function tryLoadLittleFsFactory(): Promise<((options?: any) => Promise<any>) | null> {
     try {
-        const modName = LITTLEFS_MODULE_NAME;
-        return await import(/* @vite-ignore */ modName);
-    } catch {
+        const mod = await import(/* @vite-ignore */ LITTLEFS_MODULE_NAME);
+        const candidate = (mod as any)?.default ?? mod;
+        return typeof candidate === 'function' ? candidate : null;
+    } catch (e) {
         return null;
     }
 }
@@ -100,30 +103,67 @@ function createLittleFsVolume(
     };
 
     const writeFile = (path: string, data: Uint8Array) => {
-        if (typeof cwrapWrite !== 'function' || typeof littlefs._malloc !== 'function' || typeof littlefs._free !== 'function') {
+        if (typeof cwrapWrite !== 'function') {
+            return false;
+        }
+
+        const hasMalloc = typeof littlefs._malloc === 'function' && typeof littlefs._free === 'function';
+        const hasStack = typeof littlefs.stackAlloc === 'function'
+            && typeof littlefs.stackSave === 'function'
+            && typeof littlefs.stackRestore === 'function';
+        if (!hasMalloc && !hasStack) {
             return false;
         }
 
         let ptr = 0;
+        let stackTop: number | null = null;
+        let usedStack = false;
         try {
             const size = data.length;
-            ptr = Number(littlefs._malloc(Math.max(size, 1)));
+            if (hasMalloc) {
+                ptr = Number(littlefs._malloc(Math.max(size, 1)));
+            } else {
+                stackTop = Number(littlefs.stackSave());
+                ptr = Number(littlefs.stackAlloc(Math.max(size, 1)));
+                usedStack = true;
+            }
             if (!Number.isFinite(ptr) || ptr <= 0) return false;
             if (size > 0) {
                 littlefs.HEAPU8.set(data, ptr);
             }
             cwrapWrite(lfs, path, ptr, size);
             return true;
-        } catch {
+        } catch (e) {
             return false;
         } finally {
-            if (ptr > 0) {
+            if (hasMalloc && ptr > 0) {
                 try {
                     littlefs._free(ptr);
-                } catch {
+                } catch (e) {
                     // ignore
                 }
             }
+            if (usedStack && stackTop !== null) {
+                try {
+                    littlefs.stackRestore(stackTop);
+                } catch (e) {
+                    // ignore
+                }
+            }
+        }
+    };
+
+    const mkdir = (path: string) => {
+        if (typeof littlefs._lfs_mkdir !== 'function') {
+            return false;
+        }
+
+        try {
+            const rc = Number(littlefs._lfs_mkdir(lfs, path));
+            // littlefs returns -17 for EEXIST.
+            return rc === 0 || rc === -17;
+        } catch (e) {
+            return false;
         }
     };
 
@@ -133,7 +173,7 @@ function createLittleFsVolume(
                 littlefs._free(lfs);
                 littlefs._free(config);
             }
-        } catch {
+        } catch (e) {
             // ignore
         }
 
@@ -141,7 +181,7 @@ function createLittleFsVolume(
             tablePointers.forEach((ptr) => {
                 try {
                     littlefs.removeFunction(ptr);
-                } catch {
+                } catch (e) {
                     // ignore
                 }
             });
@@ -153,6 +193,7 @@ function createLittleFsVolume(
         unmount,
         format,
         formatAndMount,
+        mkdir,
         writeFile,
         destroy,
     };
@@ -160,7 +201,6 @@ function createLittleFsVolume(
 
 export class SDCardLogic extends SPIProtocol {
     private powered = false;
-    private csHigh = true;
     private mounted = true;
     private appCmdPending = false;
     private responseQueue: number[] = [];
@@ -197,6 +237,7 @@ export class SDCardLogic extends SPIProtocol {
         this.writeShadowFile('/README.TXT', this.textEncoder.encode('OpenHW virtual SD card\n'));
 
         this.state = {
+            ...this.state,
             mounted: this.mounted,
             powered: false,
             selected: false,
@@ -216,7 +257,7 @@ export class SDCardLogic extends SPIProtocol {
             lastReadPreview: '',
         };
 
-        void this.initLittleFs();
+        void this.initLittleFsBackend();
     }
 
     private normalizePath(pathLike: string): string {
@@ -242,42 +283,6 @@ export class SDCardLogic extends SPIProtocol {
     private writeShadowFile(path: string, bytes: Uint8Array) {
         this.files.set(this.normalizePath(path), new Uint8Array(bytes));
         this.updateFsCounters();
-    }
-
-    private async initLittleFs() {
-        const mod = await tryLoadLittleFsModule();
-        const factory = mod?.default || mod;
-        if (typeof factory !== 'function') {
-            return;
-        }
-
-        try {
-            const littlefs = await factory({});
-            const volume = createLittleFsVolume(littlefs, this.storage, this.blockSize, this.blockCount);
-            if (!volume) {
-                return;
-            }
-
-            const rc = volume.formatAndMount();
-            if (rc < 0) {
-                volume.destroy();
-                return;
-            }
-
-            this.littleFsVolume = volume;
-            this.backendName = 'littlefs-wasm';
-            this.littleFsReady = true;
-
-            this.files.forEach((data, path) => {
-                volume.writeFile(path, data);
-            });
-
-            this.state.backend = this.backendName;
-            this.state.fsReady = true;
-            this.stateChanged = true;
-        } catch {
-            // Keep memory backend when wasm init fails.
-        }
     }
 
     private refreshPowerState() {
@@ -308,7 +313,6 @@ export class SDCardLogic extends SPIProtocol {
 
     private queueResponse(bytes: number[]) {
         this.responseQueue.push(...bytes.map((v) => v & 0xff));
-        this.stateChanged = true;
     }
 
     private emitResponseByte() {
@@ -357,6 +361,7 @@ export class SDCardLogic extends SPIProtocol {
         this.storage.set(Uint8Array.from(payload), start);
         this.writeState = null;
 
+        // Data accepted token (0bXXX00101), then one ready byte.
         this.queueResponse([0x05, 0xff]);
         this.state.lastOp = 'write-block';
         this.stateChanged = true;
@@ -422,6 +427,7 @@ export class SDCardLogic extends SPIProtocol {
         }
 
         if (command === 58) {
+            // OCR with CCS bit set (SDHC-compatible addressing for simulator simplicity).
             this.queueResponse([0x00, 0x40, 0x00, 0x00, 0x00]);
             return;
         }
@@ -450,7 +456,40 @@ export class SDCardLogic extends SPIProtocol {
             return;
         }
 
+        // Generic "accepted" for unsupported commands.
         this.queueResponse([0x00]);
+    }
+
+    private async initLittleFsBackend() {
+        const factory = await tryLoadLittleFsFactory();
+        if (!factory) return;
+
+        try {
+            const littlefs = await factory({});
+            const volume = createLittleFsVolume(littlefs, this.storage, this.blockSize, this.blockCount);
+            if (!volume) return;
+
+            const rc = volume.formatAndMount();
+            if (rc < 0) {
+                volume.destroy();
+                return;
+            }
+
+            this.littleFsVolume = volume;
+            this.backendName = 'littlefs-wasm';
+            this.littleFsReady = true;
+
+            // Mirror known files into the mounted littlefs volume.
+            this.files.forEach((data, path) => {
+                volume.writeFile(path, data);
+            });
+
+            this.state.backend = this.backendName;
+            this.state.fsReady = this.littleFsReady;
+            this.stateChanged = true;
+        } catch (e) {
+            // Keep memory backend if module init fails.
+        }
     }
 
     private formatCard() {
@@ -464,7 +503,7 @@ export class SDCardLogic extends SPIProtocol {
                 this.files.forEach((data, path) => {
                     this.littleFsVolume!.writeFile(path, data);
                 });
-            } catch {
+            } catch (e) {
                 // keep shadow storage as fallback
             }
         }
@@ -507,63 +546,19 @@ export class SDCardLogic extends SPIProtocol {
         return new Uint8Array(found);
     }
 
+    onCSAssert() {
+        this.commandFrame = [];
+        this.writeState = null;
+    }
+
     onPinStateChange(pinId: string, isHigh: boolean, cycles: number) {
         super.onPinStateChange(pinId, isHigh, cycles);
+
         const pin = String(pinId || '').toUpperCase();
-        if (pin === 'CS') {
-            this.csHigh = isHigh;
-            this.state.selected = !this.csHigh;
-            if (this.csHigh) {
-                this.commandFrame = [];
-                this.writeState = null;
-            }
-            this.stateChanged = true;
-            return;
-        }
 
         if (pin === 'VCC' || pin === 'GND') {
             this.refreshPowerState();
         }
-    }
-
-    onSPIByteExchange(value: number, index: number) {
-        this.refreshPowerState();
-
-        if (!this.mounted || !this.powered || this.csHigh) {
-            return 0xff;
-        }
-
-        const byte = value & 0xff;
-        this.lastActivityAt = Date.now();
-        this.bytesIn += 1;
-        this.state.bytesIn = this.bytesIn;
-
-        if (this.responseQueue.length > 0) {
-            return this.emitResponseByte();
-        }
-
-        if (this.writeState) {
-            this.handleWriteByte(byte);
-            return this.emitResponseByte();
-        }
-
-        if (this.commandFrame.length === 0) {
-            if ((byte & 0xc0) === 0x40) {
-                this.commandFrame.push(byte);
-            } else if (byte === 0x9f) {
-                this.queueResponse([0x53, 0x44, 0x30]);
-            }
-            return this.emitResponseByte();
-        }
-
-        this.commandFrame.push(byte);
-        if (this.commandFrame.length >= 6) {
-            const frame = this.commandFrame.slice(0, 6);
-            this.commandFrame = [];
-            this.handleCommandFrame(frame);
-        }
-
-        return this.emitResponseByte();
     }
 
     onEvent(event: any) {
@@ -608,6 +603,47 @@ export class SDCardLogic extends SPIProtocol {
         }
     }
 
+    onSPIByteExchange(value: number, index: number) {
+        this.refreshPowerState();
+
+        if (!this.mounted || !this.powered || !this.state.csActive) {
+            return 0xff;
+        }
+
+        const byte = value & 0xff;
+        this.lastActivityAt = Date.now();
+        this.bytesIn += 1;
+        this.state.bytesIn = this.bytesIn;
+
+        if (this.responseQueue.length > 0) {
+            return this.emitResponseByte();
+        }
+
+        if (this.writeState) {
+            this.handleWriteByte(byte);
+            return this.emitResponseByte();
+        }
+
+        if (this.commandFrame.length === 0) {
+            if ((byte & 0xc0) === 0x40) {
+                this.commandFrame.push(byte);
+            } else if (byte === 0x9f) {
+                // Legacy SPI probe compatibility.
+                this.queueResponse([0x53, 0x44, 0x30]);
+            }
+            return this.emitResponseByte();
+        }
+
+        this.commandFrame.push(byte);
+        if (this.commandFrame.length >= 6) {
+            const frame = this.commandFrame.slice(0, 6);
+            this.commandFrame = [];
+            this.handleCommandFrame(frame);
+        }
+
+        return this.emitResponseByte();
+    }
+
     update() {
         this.refreshPowerState();
 
@@ -617,9 +653,9 @@ export class SDCardLogic extends SPIProtocol {
             this.stateChanged = true;
         }
 
-        const filesCount = this.files.size;
-        if (this.state.fileCount !== filesCount) {
-            this.state.fileCount = filesCount;
+        const fileCount = this.files.size;
+        if (this.state.fileCount !== fileCount) {
+            this.state.fileCount = fileCount;
             this.stateChanged = true;
         }
 

@@ -1,5 +1,6 @@
 // Export everything from the emulator components package so the frontend can import it
 export { BaseComponent } from './BaseComponent';
+export * from '../protocol-handlers/index.ts';
 export { default as openhwLed } from './openhw-led';
 export { default as openhwArduinoUno } from './openhw-arduino-uno';
 export { default as openhwPico } from './openhw-pico/index.ts';

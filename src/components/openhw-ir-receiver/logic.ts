@@ -1,4 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
+import { PulseProtocol } from '../../protocol-handlers/index';
 
 // IR Receiver (e.g. VS1838B)
 // Demodulates 38 kHz infrared signals and outputs active-LOW digital pulses.
@@ -28,10 +29,9 @@ const NEC_CODES: Record<string, number> = {
     '0':     0xE0E08877,
 };
 
-export class IRReceiverLogic extends BaseComponent {
+export class IRReceiverLogic extends PulseProtocol {
     private frequency: number = 38; // kHz
     private transmitting: boolean = false;
-    private transmitEndCycle: number = 0;
     private lastButton: string = '';
     private lastValue: number = 0;
 
@@ -39,6 +39,7 @@ export class IRReceiverLogic extends BaseComponent {
         super(id, manifest);
         this.frequency = parseInt(manifest.attrs?.frequency ?? '38', 10);
         this.state = {
+            ...this.state,
             powered: false,
             transmitting: false,
             lastButton: '',
@@ -54,8 +55,9 @@ export class IRReceiverLogic extends BaseComponent {
                 this.lastButton = btn;
                 this.lastValue = code;
                 this.transmitting = true;
-                // Keep the transmitting LED lit and pin LOW for ~200ms (assuming 16MHz CPU = 3.2M cycles)
-                this.transmitEndCycle = (this as any).lastCpuCycles + 3200000;
+                
+                // Keep the transmitting LED lit and pin LOW for ~200ms
+                this.sendPulse('OUT', false, 200000, 5.0);
 
                 this.setState({
                     powered: true,
@@ -68,7 +70,8 @@ export class IRReceiverLogic extends BaseComponent {
     }
 
     update(cpuCycles: number, currentWires: any[], allComponentsInstances: BaseComponent[]) {
-        (this as any).lastCpuCycles = cpuCycles;
+        super.update(cpuCycles, currentWires, allComponentsInstances);
+        
         const vcc = this.getPinVoltage('VCC');
         const isPowered = vcc > 2.5;
 
@@ -81,13 +84,10 @@ export class IRReceiverLogic extends BaseComponent {
         }
 
         if (this.transmitting) {
-            if (cpuCycles >= this.transmitEndCycle) {
+            // Check if pulse has ended (pin returned to 5.0V idle)
+            if (this.getPinVoltage('OUT') > 2.5) {
                 this.transmitting = false;
-                this.setPinVoltage('OUT', 5.0); // Return to idle HIGH
                 this.setState({ powered: true, transmitting: false });
-            } else {
-                // Active LOW during burst
-                this.setPinVoltage('OUT', 0.0);
             }
         } else {
             // Idle state is HIGH
