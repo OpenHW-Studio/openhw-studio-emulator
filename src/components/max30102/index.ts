@@ -1,25 +1,32 @@
 import manifest from './manifest.json';
-import fs from 'node:fs';
 import { MAX30102UI, MAX30102ContextMenu, BOUNDS } from './ui';
 import { MAX30102Logic } from './logic';
 import { validation } from './validation';
+
+let _nodeFs: any = null;
+try {
+    if (typeof process !== 'undefined' && process.versions && process.versions.node) {
+        // @ts-ignore
+        _nodeFs = eval("require('node:fs')");
+    }
+} catch (e) {}
 const docHtml = '';
 
 let uiRaw = '';
 let logicRaw = '';
 let validationRaw = '';
 try {
-    uiRaw = fs.readFileSync(new URL('./ui.tsx', import.meta.url), 'utf8');
+    uiRaw = _nodeFs?.readFileSync(new URL('./ui.tsx', import.meta.url), 'utf8');
 } catch (e) {
     uiRaw = '';
 }
 try {
-    logicRaw = fs.readFileSync(new URL('./logic.ts', import.meta.url), 'utf8');
+    logicRaw = _nodeFs?.readFileSync(new URL('./logic.ts', import.meta.url), 'utf8');
 } catch (e) {
     logicRaw = '';
 }
 try {
-    validationRaw = fs.readFileSync(new URL('./validation.ts', import.meta.url), 'utf8');
+    validationRaw = _nodeFs?.readFileSync(new URL('./validation.ts', import.meta.url), 'utf8');
 } catch (e) {
     validationRaw = '';
 }
