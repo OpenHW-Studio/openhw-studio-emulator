@@ -1,4 +1,4 @@
-import { BaseComponent } from '@openhw/emulator';
+import { BaseComponent } from '../components/BaseComponent';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SPI Protocol — Advanced Base Class

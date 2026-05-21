@@ -3,10 +3,26 @@ import manifest from './manifest.json';
 import { LEDLogic } from './logic';
 import { LEDUI, BOUNDS } from './ui';
 const docHtml = '';
+import fs from 'node:fs';
 
-import uiRaw from './ui.tsx?raw';
-import logicRaw from './logic.ts?raw';
-import validationRaw from './validation.ts?raw';
+let uiRaw = '';
+let logicRaw = '';
+let validationRaw = '';
+try {
+    uiRaw = fs.readFileSync(new URL('./ui.tsx', import.meta.url), 'utf8');
+} catch (e) {
+    uiRaw = '';
+}
+try {
+    logicRaw = fs.readFileSync(new URL('./logic.ts', import.meta.url), 'utf8');
+} catch (e) {
+    logicRaw = '';
+}
+try {
+    validationRaw = fs.readFileSync(new URL('./validation.ts', import.meta.url), 'utf8');
+} catch (e) {
+    validationRaw = '';
+}
 
 export default {
     manifest,

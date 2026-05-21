@@ -1,4 +1,4 @@
-import { BaseComponent } from '@openhw/emulator';
+import { BaseComponent } from '../components/BaseComponent';
 
 export class I2CProtocol extends BaseComponent {
     private readonly address: number;

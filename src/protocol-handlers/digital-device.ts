@@ -1,4 +1,4 @@
-import { BaseComponent } from '@openhw/emulator';
+import { BaseComponent } from '../components/BaseComponent';
 
 export class DigitalProtocol extends BaseComponent {
     private pinHistory: Record<string, boolean> = {};

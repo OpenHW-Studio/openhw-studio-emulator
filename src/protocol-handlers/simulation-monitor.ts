@@ -1,4 +1,4 @@
-import { BaseComponent } from '@openhw/emulator';
+import { BaseComponent } from '../components/BaseComponent';
 
 export class SimulationMonitorLogic extends BaseComponent {
     private simStartTime: number = 0;

@@ -1,4 +1,4 @@
-import { BaseComponent } from '@openhw/emulator';
+import { BaseComponent } from '../components/BaseComponent';
 
 /**
  * PulseProtocol — Abstraction for devices relying on precise pulse timing.

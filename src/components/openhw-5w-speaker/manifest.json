@@ -1,0 +1,18 @@
+{
+  "type": "openhw-5w-speaker",
+  "name": "5W Audio Speaker",
+  "author": "Velxio",
+  "version": "1.0.0",
+  "group": "Audio",
+  "description": "5 Watt Analog Speaker with Web Audio playback",
+  "tags": ["audio", "speaker", "sound", "analog", "5w"],
+  "pins": [
+    { "id": "IN+", "name": "IN+", "description": "Positive Audio Input", "x": 30, "y": 80 },
+    { "id": "IN-", "name": "IN-", "description": "Negative Audio Input", "x": 50, "y": 80 }
+  ],
+  "state": {},
+  "defaultAttrs": {},
+  "autowire": {
+    "groups": {}
+  }
+}

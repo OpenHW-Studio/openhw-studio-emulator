@@ -1,4 +1,4 @@
-import { BaseComponent } from '@openhw/emulator';
+import { BaseComponent } from '../components/BaseComponent';
 import { DigitalProtocol } from './digital-device.ts';
 
 function gateVoltage(isHigh: boolean): number {

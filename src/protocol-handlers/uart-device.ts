@@ -1,4 +1,4 @@
-import { BaseComponent } from '@openhw/emulator';
+import { BaseComponent } from '../components/BaseComponent';
 
 export class UARTProtocol extends BaseComponent {
     protected rxBuffer: number[] = [];

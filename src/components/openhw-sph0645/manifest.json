@@ -1,0 +1,35 @@
+{
+  "type": "openhw-sph0645",
+  "name": "I2S MEMS Microphone (SPH0645)",
+  "author": "Velxio",
+  "version": "1.0.0",
+  "group": "Audio",
+  "description": "Adafruit I2S MEMS Microphone Breakout",
+  "tags": ["audio", "i2s", "mic", "microphone", "sph0645", "adafruit"],
+  "pins": [
+    { "id": "VDD", "name": "VDD", "description": "Power (1.8V to 3.3V)", "x": 10, "y": 60 },
+    { "id": "GND", "name": "GND", "description": "Ground", "x": 18, "y": 60 },
+    { "id": "BCLK", "name": "BCLK", "description": "Serial Data Clock", "x": 26, "y": 60 },
+    { "id": "LRCL", "name": "LRCL", "description": "Word Select / Left-Right Clock", "x": 34, "y": 60 },
+    { "id": "DOUT", "name": "DOUT", "description": "Serial Data Output", "x": 42, "y": 60 },
+    { "id": "SEL", "name": "SEL", "description": "Left/Right Channel Select", "x": 50, "y": 60 }
+  ],
+  "state": {
+    "liveMicEnabled": true,
+    "micBuffer": null,
+    "bufferIndex": 0,
+    "peakAmplitude": 0
+  },
+  "defaultAttrs": {},
+  "autowire": {
+    "groups": {
+      "i2s": [
+        { "pin": "VDD", "function": "vcc" },
+        { "pin": "GND", "function": "gnd" },
+        { "pin": "SCK", "function": "sck" },
+        { "pin": "SD", "function": "miso" },
+        { "pin": "WS", "function": "cs" }
+      ]
+    }
+  }
+}

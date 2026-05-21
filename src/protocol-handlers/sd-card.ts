@@ -1,4 +1,5 @@
-import { BaseComponent, SPIProtocol } from '@openhw/emulator';
+import { BaseComponent } from '../components/BaseComponent';
+import { SPIProtocol } from './spi-device';
 
 const SD_BLOCK_SIZE = 512;
 const SD_DATA_TOKEN = 0xfe;

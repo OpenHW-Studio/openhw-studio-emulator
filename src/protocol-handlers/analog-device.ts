@@ -1,4 +1,4 @@
-import { BaseComponent } from '@openhw/emulator';
+import { BaseComponent } from '../components/BaseComponent';
 
 export class AnalogProtocol extends BaseComponent {
     private readonly windowSize: number;

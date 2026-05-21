@@ -1,4 +1,4 @@
-import { BaseComponent } from '@openhw/emulator';
+import { BaseComponent } from '../components/BaseComponent';
 
 export interface PWMMeta {
     frequencyHz: number;
@@ -81,14 +81,31 @@ export class PWMProtocol extends BaseComponent {
                 const dutyCycle = this.recentSamples.reduce((a, b) => a + b.dutyCycle, 0) / this.windowSize;
                 const periodUs = this.recentSamples.reduce((a, b) => a + b.periodUs, 0) / this.windowSize;
 
-                this.state.pwmFrequencyHz = avgFreq;
-                this.state.pwmDutyCycle = dutyCycle;
-                this.state.pwmPulseUs = avgPulse;
-                this.state.pwmPeriodUs = periodUs;
-                this.state.pwmPin = pinId;
-                this.stateChanged = true;
-
-                this.onPWMSignal(pinId, avgFreq, dutyCycle, avgPulse);
+                // Throttling Logic for Fast PWM UI Updates
+                const lastFreq = Number(this.state.pwmFrequencyHz || 0);
+                const lastDuty = Number(this.state.pwmDutyCycle || 0);
+                
+                // Only force update if there's a significant change (>2% duty cycle or >5% freq)
+                const freqChanged = Math.abs(avgFreq - lastFreq) / (lastFreq || 1) > 0.05;
+                const dutyChanged = Math.abs(dutyCycle - lastDuty) > 0.02;
+                
+                // Or if enough time has passed (throttle to 60Hz / 16ms)
+                const runner = (this as any)._runner;
+                const nowMs = runner?.getSimulatedTimeMs ? runner.getSimulatedTimeMs() : Date.now();
+                const lastUpdate = (this as any)._lastPwmUpdateMs || 0;
+                const timePassed = (nowMs - lastUpdate) > 16;
+                
+                if (freqChanged || dutyChanged || timePassed) {
+                    this.state.pwmFrequencyHz = avgFreq;
+                    this.state.pwmDutyCycle = dutyCycle;
+                    this.state.pwmPulseUs = avgPulse;
+                    this.state.pwmPeriodUs = periodUs;
+                    this.state.pwmPin = pinId;
+                    this.stateChanged = true;
+                    (this as any)._lastPwmUpdateMs = nowMs;
+    
+                    this.onPWMSignal(pinId, avgFreq, dutyCycle, avgPulse);
+                }
             }
         }
     }

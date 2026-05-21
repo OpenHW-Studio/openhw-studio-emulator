@@ -1,4 +1,4 @@
-import { BaseComponent } from '@openhw/emulator';
+import { BaseComponent } from '../components/BaseComponent';
 
 /**
  * TwoWireProtocol — Abstraction for generic 2-wire serial interfaces (CLK/DIO).

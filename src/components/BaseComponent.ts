@@ -488,6 +488,10 @@ export class BaseComponent {
         // Override in subclasses
     }
 
+    protected isLogicAnalyzerAttached(allInstances: BaseComponent[]): boolean {
+        return allInstances.some(inst => inst.manifest?.type === 'openhw-logic-analyzer' || inst.type === 'openhw-logic-analyzer');
+    }
+
     onEvent(event: any) {
         // Override in subclasses to handle UI interactions
     }

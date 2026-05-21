@@ -1,4 +1,4 @@
-import { BaseComponent } from '@openhw/emulator';
+import { BaseComponent } from '../components/BaseComponent';
 
 export class NeoPixelProtocol extends BaseComponent {
     private lastCycle = 0;
@@ -21,9 +21,53 @@ export class NeoPixelProtocol extends BaseComponent {
     onNeoPixelFrame(pixels: number[]): void {
         // Subclasses override
     }
+    
+    update(cpuCycles: number, currentWires: any[], instances: BaseComponent[]) {
+        super.update(cpuCycles, currentWires, instances);
+        
+        // DMA Bypass Optimization for NeoPixels
+        const dmaAddress = parseInt(this.attrs?.dmaAddress || this.state?.dmaAddress || '0', 16);
+        const numLeds = parseInt(this.attrs?.numLeds || this.state?.numLeds || '64', 10);
+        
+        const hasLogicAnalyzer = this.isLogicAnalyzerAttached(instances);
+        if (hasLogicAnalyzer) {
+            this.state.dmaBypassDisabled = true;
+            return; // Skip DMA polling and fallback to bit-banging
+        }
+        
+        if (dmaAddress > 0) {
+            // Polling at roughly 60Hz (assuming update is called frequently)
+            const runner = (this as any)._runner;
+            if (runner && runner.readDirectMemory && runner.getSimulatedTimeMs) {
+                const nowMs = runner.getSimulatedTimeMs();
+                // 16ms = ~60Hz
+                if (!this.lastCycle || (nowMs - this.lastCycle) > 16) {
+                    this.lastCycle = nowMs;
+                    // Read numLeds * 3 bytes from memory
+                    const dmaData = runner.readDirectMemory(dmaAddress, numLeds * 3);
+                    if (dmaData) {
+                        const pixels = [];
+                        for (let i = 0; i < dmaData.length; i += 3) {
+                            const g = dmaData[i] || 0;
+                            const r = dmaData[i + 1] || 0;
+                            const b = dmaData[i + 2] || 0;
+                            pixels.push((r << 16) | (g << 8) | b);
+                        }
+                        this.state.pixels = pixels;
+                        this.stateChanged = true;
+                        this.onNeoPixelFrame(pixels);
+                    }
+                }
+            }
+        }
+    }
 
     onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number): void {
         super.onPinStateChange(pinId, isHigh, cpuCycles);
+
+        // Skip bit-banging if DMA is configured
+        const dmaAddress = parseInt(this.attrs?.dmaAddress || this.state?.dmaAddress || '0', 16);
+        if (dmaAddress > 0 && !this.state.dmaBypassDisabled) return;
 
         if (pinId === this.getNeoPixelPinName()) {
             const elapsed = cpuCycles - this.lastCycle;

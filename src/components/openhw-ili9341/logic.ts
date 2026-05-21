@@ -60,6 +60,50 @@ export class ILI9341Logic extends SPIProtocol {
             this.vramDirty = false;
             this.stateChanged = true;
         }
+
+        // DMA Bypass Optimization for Displays
+        const dmaAddress = parseInt(this.attrs?.dmaAddress || this.state?.dmaAddress || '0', 16);
+        
+        const hasLogicAnalyzer = this.isLogicAnalyzerAttached(instances);
+        if (hasLogicAnalyzer) {
+            this.state.dmaBypassDisabled = true;
+            return; // Skip DMA polling and fallback to bit-banging
+        }
+        
+        if (dmaAddress > 0 && this.powerOn) {
+            const runner = (this as any)._runner;
+            if (runner && runner.readDirectMemory && runner.getSimulatedTimeMs) {
+                const nowMs = runner.getSimulatedTimeMs();
+                // Polling at 60Hz
+                if (!this.lastSync || (nowMs - this.lastSync) > 16) {
+                    this.lastSync = nowMs;
+                    // VRAM is 240 * 320 * 2 = 153,600 bytes (RGB565).
+                    // Wait, our internal vram is 240*320*3 (RGB888) = 230,400 bytes.
+                    // The DMA buffer in RP2040 is RGB565.
+                    const dmaData = runner.readDirectMemory(dmaAddress, 240 * 320 * 2);
+                    if (dmaData) {
+                        for (let i = 0; i < 240 * 320; i++) {
+                            const dmaIdx = i * 2;
+                            // MSB first usually for ILI9341 SPI
+                            const high = dmaData[dmaIdx];
+                            const low = dmaData[dmaIdx + 1];
+                            const full = (high << 8) | low;
+
+                            const r = ((full >> 11) & 0x1f) << 3;
+                            const g = ((full >> 5) & 0x3f) << 2;
+                            const b = (full & 0x1f) << 3;
+
+                            const idx = i * 3;
+                            this.vram[idx] = r;
+                            this.vram[idx + 1] = g;
+                            this.vram[idx + 2] = b;
+                        }
+                        this.vramDirty = false; // We already processed it
+                        this.stateChanged = true;
+                    }
+                }
+            }
+        }
     }
 
     onPinStateChange(pinId: string, isHigh: boolean, cycles: number) {
@@ -76,6 +120,9 @@ export class ILI9341Logic extends SPIProtocol {
     }
 
     onSPIByteReceived(byte: number, byteIndex: number): void {
+        const dmaAddress = parseInt(this.attrs?.dmaAddress || this.state?.dmaAddress || '0', 16);
+        if (dmaAddress > 0 && !this.state.dmaBypassDisabled) return; // Bypass normal SPI processing if DMA active
+        
         if (!this.powerOn) return;
 
         if (!this.dcHigh) {

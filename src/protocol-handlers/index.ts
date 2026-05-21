@@ -10,6 +10,7 @@ export { HD44780Controller } from './hd44780-controller.ts';
 export { PulseProtocol } from './pulse-device.ts';
 export { NeoPixelProtocol } from './neopixel-device.ts';
 export { TwoWireProtocol } from './twowire-device.ts';
+export { RadioEnvironment, type RadioNode, type RadioPacket } from './radio-environment.ts';
 
 // Re-export old logic components for backward compatibility
 export { NotGateLogic, TwoInputGateLogic, AndGateLogic, NandGateLogic, NorGateLogic, XorGateLogic } from './gates.ts';
