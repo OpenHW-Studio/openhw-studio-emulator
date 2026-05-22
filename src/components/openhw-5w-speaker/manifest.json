@@ -1,18 +1,31 @@
 {
   "type": "openhw-5w-speaker",
-  "name": "5W Audio Speaker",
-  "author": "Velxio",
-  "version": "1.0.0",
+  "label": "5W Audio Speaker",
   "group": "Audio",
   "description": "5 Watt Analog Speaker with Web Audio playback",
+  "w": 80,
+  "h": 90,
   "tags": ["audio", "speaker", "sound", "analog", "5w"],
   "pins": [
-    { "id": "IN+", "name": "IN+", "description": "Positive Audio Input", "x": 30, "y": 80 },
-    { "id": "IN-", "name": "IN-", "description": "Negative Audio Input", "x": 50, "y": 80 }
+    { "id": "IN+", "description": "Positive Audio Input", "x": 30, "y": 80 },
+    { "id": "IN-", "description": "Negative Audio Input", "x": 50, "y": 80 }
   ],
   "state": {},
   "defaultAttrs": {},
-  "autowire": {
-    "groups": {}
+  "telemetry": {
+    "template": "Playing: ${state.isPlaying}",
+    "criticalKeys": ["state.isPlaying"]
+  },
+  "autowiring": {
+    "connections": [
+      { "from": "IN+", "to": "openhw-max98357:OUT+" },
+      { "from": "IN-", "to": "openhw-max98357:OUT-" }
+    ]
+  },
+  "autocoding": {
+    "arduino": {
+      "setup": "// Speaker driven by MAX98357 DAC\\n",
+      "loop": "// Audio handled by MAX98357 DAC\\n"
+    }
   }
 }

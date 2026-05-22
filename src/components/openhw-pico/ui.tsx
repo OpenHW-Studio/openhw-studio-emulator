@@ -102,7 +102,7 @@ const picoSvgMarkup = `<svg xmlns="http://www.w3.org/2000/svg" height="200" view
 </svg>
 `;
 
-export const BOUNDS = { x: 0, y: 0, w: 79, h: 200 };
+export const BOUNDS = { x: 0, y: 0, w: 124, h: 314 };
 
 export const PicoUI = ({ state, attrs, isRunning }: { state: any; attrs: any; isRunning?: boolean }) => {
 	const [isResetPressed, setIsResetPressed] = useState(false);

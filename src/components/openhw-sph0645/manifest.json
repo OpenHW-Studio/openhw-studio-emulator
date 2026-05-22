@@ -1,18 +1,18 @@
 {
   "type": "openhw-sph0645",
-  "name": "I2S MEMS Microphone (SPH0645)",
-  "author": "Velxio",
-  "version": "1.0.0",
+  "label": "I2S MEMS Microphone (SPH0645)",
   "group": "Audio",
-  "description": "Adafruit I2S MEMS Microphone Breakout",
-  "tags": ["audio", "i2s", "mic", "microphone", "sph0645", "adafruit"],
+  "description": "I2S Digital Bottom Port Microphone",
+  "w": 60,
+  "h": 70,
+  "tags": ["audio", "i2s", "mic", "microphone", "sph0645"],
   "pins": [
-    { "id": "VDD", "name": "VDD", "description": "Power (1.8V to 3.3V)", "x": 10, "y": 60 },
-    { "id": "GND", "name": "GND", "description": "Ground", "x": 18, "y": 60 },
-    { "id": "BCLK", "name": "BCLK", "description": "Serial Data Clock", "x": 26, "y": 60 },
-    { "id": "LRCL", "name": "LRCL", "description": "Word Select / Left-Right Clock", "x": 34, "y": 60 },
-    { "id": "DOUT", "name": "DOUT", "description": "Serial Data Output", "x": 42, "y": 60 },
-    { "id": "SEL", "name": "SEL", "description": "Left/Right Channel Select", "x": 50, "y": 60 }
+    { "id": "3V", "description": "Power (1.62V to 3.6V)", "x": 10, "y": 60 },
+    { "id": "GND", "description": "Ground", "x": 18, "y": 60 },
+    { "id": "BCLK", "description": "Bit Clock", "x": 26, "y": 60 },
+    { "id": "DOUT", "description": "Serial Data Output", "x": 34, "y": 60 },
+    { "id": "LRCL", "description": "Left/Right Clock", "x": 42, "y": 60 },
+    { "id": "SEL", "description": "Channel Select", "x": 50, "y": 60 }
   ],
   "state": {
     "liveMicEnabled": true,
@@ -21,15 +21,26 @@
     "peakAmplitude": 0
   },
   "defaultAttrs": {},
-  "autowire": {
-    "groups": {
-      "i2s": [
-        { "pin": "VDD", "function": "vcc" },
-        { "pin": "GND", "function": "gnd" },
-        { "pin": "SCK", "function": "sck" },
-        { "pin": "SD", "function": "miso" },
-        { "pin": "WS", "function": "cs" }
-      ]
+  "telemetry": {
+    "template": "Live=${state.liveMicEnabled}, Peak=${state.peakAmplitude}",
+    "criticalKeys": ["state.liveMicEnabled", "state.peakAmplitude"]
+  },
+  "autowiring": {
+    "connections": [
+      { "from": "VDD", "to": "arduino:3V3", "color": "red" },
+      { "from": "GND", "to": "arduino:GND", "color": "black" },
+      { "from": "SEL", "to": "arduino:GND", "color": "black" },
+      { "from": "LRCL", "to": "arduino:25", "color": "yellow" },
+      { "from": "BCLK", "to": "arduino:26", "color": "green" },
+      { "from": "DOUT", "to": "arduino:22", "color": "blue" }
+    ]
+  },
+  "autocoding": {
+    "libraries": ["I2S", "SD"],
+    "arduino": {
+      "globals": "#include <I2S.h>\\n#include <SD.h>\\nFile audioFile;\\n",
+      "setup": "Serial.begin(9600);\\nI2S.setBCLK(${BCLK});\\nI2S.setDATA(${DOUT});\\nI2S.begin(I2S_PHILIPS_MODE, 44100, 32);\\nSD.begin(5);\\naudioFile = SD.open(\\\"/rec.wav\\\", FILE_WRITE);",
+      "loop": "int32_t sample = 0;\\nI2S.read();\\nsample = I2S.read();\\nif(audioFile) audioFile.write((uint8_t*)&sample, 4);"
     }
   }
 }

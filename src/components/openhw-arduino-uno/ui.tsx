@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 // Bounding box for the board UI.
 // x, y: offset from comp.x/comp.y (top-left corner of the visual area)
 // w, h: width and height of the visual area
-export const BOUNDS = { x: 0, y: 0, w: 311, h: 228 };
+export const BOUNDS = { x: 0, y: 0, w: 425, h: 320 };
 
 export const UnoUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning?: boolean }) => {
     const [isResetPressed, setIsResetPressed] = useState(false);
@@ -14,8 +14,8 @@ export const UnoUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isR
 
     const nativeW = 311;
     const nativeH = 228;
-    const scaleX = BOUNDS.w / nativeW;
-    const scaleY = BOUNDS.h / nativeH;
+    const scaleX = 1.5544;
+    const scaleY = 1.5544;
 
     const handleResetPress = (e: React.PointerEvent) => {
         if (!isRunning) return;

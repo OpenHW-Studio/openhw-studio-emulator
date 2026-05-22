@@ -60,7 +60,7 @@
         "arduino": {
             "globals": "// Stepper setup with A4988 (Step=${helper:driver:STEP}, Dir=${helper:driver:DIR})\n#include <AccelStepper.h>\nAccelStepper stepper_${COMP_SUFFIX}(AccelStepper::DRIVER, ${helper:driver:STEP}, ${helper:driver:DIR});",
             "setup": "pinMode(${helper:driver:ENABLE}, OUTPUT);\n  digitalWrite(${helper:driver:ENABLE}, LOW);\n  stepper_${COMP_SUFFIX}.setMaxSpeed(1000);\n  stepper_${COMP_SUFFIX}.setAcceleration(500);",
-            "loop": "if (stepper_${COMP_SUFFIX}.distanceToGo() == 0) {\n  stepper_${COMP_SUFFIX}.moveTo(-stepper_${COMP_SUFFIX}.currentPosition());\n  delay(1000);\n}\nstepper_${COMP_SUFFIX}.run();"
+            "loop": "if (stepper_${COMP_SUFFIX}.distanceToGo() == 0) {\n  if (stepper_${COMP_SUFFIX}.currentPosition() == 0) {\n    stepper_${COMP_SUFFIX}.moveTo(200);\n  } else {\n    stepper_${COMP_SUFFIX}.moveTo(0);\n  }\n  delay(1000);\n}\nstepper_${COMP_SUFFIX}.run();"
         }
     }
 }

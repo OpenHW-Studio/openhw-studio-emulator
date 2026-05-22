@@ -1,74 +1,21 @@
 {
     "type": "openhw-attiny85",
-    "label": "ATtiny85 (Digispark)",
-    "description": "ATtiny85 microcontroller on a Digispark-style board. 6 I/O pins, 8 KB flash, 512B SRAM. Powered via USB or VIN.",
+    "label": "ATtiny85 Board",
+    "description": "A minimal breakout board for the ATtiny85 microcontroller.",
     "group": "Boards",
-    "w": 120,
-    "h": 100,
-    "attrs": {},
+    "w": 120, "h": 110,
     "pins": [
-        {
-            "id": "P5",
-            "description": "P5 / RESET / A0",
-            "x": 108,
-            "y": 16,
-            "type": "digital"
-        },
-        {
-            "id": "P4",
-            "description": "P4 / A2",
-            "x": 108,
-            "y": 30,
-            "type": "digital"
-        },
-        {
-            "id": "P3",
-            "description": "P3 / A3 / USB+",
-            "x": 108,
-            "y": 44,
-            "type": "digital"
-        },
-        {
-            "id": "P2",
-            "description": "P2 / A1 / SCK",
-            "x": 108,
-            "y": 58,
-            "type": "digital"
-        },
-        {
-            "id": "P1",
-            "description": "P1 / LED / MISO / PWM",
-            "x": 108,
-            "y": 72,
-            "type": "digital"
-        },
-        {
-            "id": "P0",
-            "description": "P0 / AREF / MOSI / PWM",
-            "x": 108,
-            "y": 86,
-            "type": "digital"
-        },
-        {
-            "id": "5V",
-            "description": "5V",
-            "x": 34,
-            "y": 88,
-            "type": "power"
-        },
-        {
-            "id": "GND",
-            "description": "GND",
-            "x": 56,
-            "y": 88,
-            "type": "power"
-        },
-        {
-            "id": "VIN",
-            "description": "VIN",
-            "x": 78,
-            "y": 88,
-            "type": "power"
-        }
-    ]
+        { "id": "P5", "x": 108, "y": 16, "type": "digital", "description": "PB5 / RESET" },
+        { "id": "P4", "x": 108, "y": 31, "type": "digital", "description": "PB4 / A2" },
+        { "id": "P3", "x": 108, "y": 46, "type": "digital", "description": "PB3 / A3" },
+        { "id": "P2", "x": 108, "y": 61, "type": "digital", "description": "PB2 / A1" },
+        { "id": "P1", "x": 108, "y": 76, "type": "digital", "description": "PB1" },
+        { "id": "P0", "x": 108, "y": 91, "type": "digital", "description": "PB0" },
+        { "id": "5V",  "x": 34, "y": 93, "type": "power", "description": "5V Power" },
+        { "id": "GND", "x": 56, "y": 93, "type": "power", "description": "Ground" },
+        { "id": "VIN", "x": 78, "y": 93, "type": "power", "description": "Voltage In" }
+    ],
+    "autowiring": {
+        "connections": []
+    }
 }
