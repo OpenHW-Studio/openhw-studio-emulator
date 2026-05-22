@@ -1,0 +1,104 @@
+{
+    "type": "openhw-ePaperDisplay",
+    "label": "2.9\" e-Paper Display (beta)",
+    "group": "Displays",
+    "w": 220,
+    "h": 90,
+    "attrs": {
+        "breadboard": {
+            "anchorPin": "GND"
+        }
+    },
+    "telemetry": {
+        "template": "vramDirty=${state.vramDirty}, powerOn=${state.powerOn}",
+        "criticalKeys": [
+            "state.vramDirty"
+        ]
+    },
+    "pins": [
+        {
+            "id": "VCC",
+            "x": 10,
+            "y": 20,
+            "type": "power"
+        },
+        {
+            "id": "GND",
+            "x": 10,
+            "y": 27,
+            "type": "power"
+        },
+        {
+            "id": "DIN",
+            "x": 10,
+            "y": 34,
+            "type": "input"
+        },
+        {
+            "id": "CLK",
+            "x": 10,
+            "y": 41,
+            "type": "input"
+        },
+        {
+            "id": "CS",
+            "x": 10,
+            "y": 48,
+            "type": "input"
+        },
+        {
+            "id": "DC",
+            "x": 10,
+            "y": 55,
+            "type": "input"
+        },
+        {
+            "id": "RST",
+            "x": 10,
+            "y": 62,
+            "type": "input"
+        },
+        {
+            "id": "BUSY",
+            "x": 10,
+            "y": 69,
+            "type": "output"
+        }
+    ],
+    "autowiring": {
+        "connections": [
+            {
+                "from": "VCC",
+                "to": "arduino:3V3"
+            },
+            {
+                "from": "GND",
+                "to": "arduino:GND"
+            },
+            {
+                "from": "DIN",
+                "to": "arduino:11"
+            },
+            {
+                "from": "CLK",
+                "to": "arduino:13"
+            },
+            {
+                "from": "CS",
+                "to": "arduino:10"
+            },
+            {
+                "from": "DC",
+                "to": "arduino:9"
+            },
+            {
+                "from": "RST",
+                "to": "arduino:8"
+            },
+            {
+                "from": "BUSY",
+                "to": "arduino:7"
+            }
+        ]
+    }
+}

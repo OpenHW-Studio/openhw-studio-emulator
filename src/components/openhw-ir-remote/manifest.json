@@ -1,0 +1,9 @@
+{
+    "type": "openhw-ir-remote",
+    "label": "IR Remote",
+    "description": "38KHz infrared remote with 21 function keys.",
+    "group": "Inputs",
+    "w": 130, "h": 310,
+    "attrs": {},
+    "telemetry": { "template": "command=${state.lastCommand}", "criticalKeys": ["state.lastCommand"] }
+}

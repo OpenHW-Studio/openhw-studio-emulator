@@ -1,0 +1,98 @@
+{
+  "type": "openhw-ili9341-touch",
+  "label": "ILI9341 2.8\" Touch Screen LCD",
+  "group": "Displays",
+  "w": 240,
+  "h": 360,
+  "pins": [
+    {
+      "id": "VCC",
+      "x": 45,
+      "y": 352.5,
+      "type": "power"
+    },
+    {
+      "id": "GND",
+      "x": 60,
+      "y": 352.5,
+      "type": "power"
+    },
+    {
+      "id": "CS",
+      "x": 75,
+      "y": 352.5,
+      "type": "digital"
+    },
+    {
+      "id": "RESET",
+      "x": 90,
+      "y": 352.5,
+      "type": "digital"
+    },
+    {
+      "id": "DC",
+      "x": 105,
+      "y": 352.5,
+      "type": "digital"
+    },
+    {
+      "id": "MOSI",
+      "x": 120,
+      "y": 352.5,
+      "type": "digital"
+    },
+    {
+      "id": "SCK",
+      "x": 135,
+      "y": 352.5,
+      "type": "digital"
+    },
+    {
+      "id": "LED",
+      "x": 150,
+      "y": 352.5,
+      "type": "digital"
+    },
+    {
+      "id": "MISO",
+      "x": 165,
+      "y": 352.5,
+      "type": "digital"
+    },
+    {
+      "id": "SCL",
+      "x": 180,
+      "y": 352.5,
+      "type": "digital"
+    },
+    {
+      "id": "SDA",
+      "x": 195,
+      "y": 352.5,
+      "type": "bidirectional"
+    }
+  ],
+  "autowiring": {
+    "connections": [
+      { "from": "VCC", "to": "arduino:5V" },
+      { "from": "GND", "to": "arduino:GND" },
+      { "from": "SCK", "to": "arduino:SCK" },
+      { "from": "MOSI", "to": "arduino:MOSI" },
+      { "from": "MISO", "to": "arduino:MISO" },
+      { "from": "CS", "to": "arduino:10" },
+      { "from": "DC", "to": "arduino:9" },
+      { "from": "RESET", "to": "arduino:8" },
+      { "from": "LED", "to": "arduino:5V" },
+      { "from": "SCL", "to": "arduino:A5" },
+      { "from": "SDA", "to": "arduino:A4" }
+    ]
+  },
+  "autocoding": {
+    "libraries": ["Adafruit ILI9341", "Adafruit GFX Library", "Wire", "Adafruit FT6206 Library"],
+    "arduino": {
+      "globals": "#include \"Adafruit_GFX.h\"\n#include \"Adafruit_ILI9341.h\"\n#include <Wire.h>\n#include <Adafruit_FT6206.h>\n\n#define TFT_DC 9\n#define TFT_CS 10\n\nAdafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);\nAdafruit_FT6206 ctp = Adafruit_FT6206();",
+      "setup": "tft.begin();\ntft.setRotation(1);\ntft.fillScreen(ILI9341_BLACK);\nif (! ctp.begin(40)) {\n  tft.println(\"Touch init failed\");\n}\ntft.setCursor(20, 100);\ntft.setTextColor(ILI9341_WHITE);\ntft.setTextSize(3);\ntft.println(\"OpenHW Studio\");\ntft.setCursor(20, 140);\ntft.setTextSize(2);\ntft.println(\"TFT Touch Ready\");\ndelay(2000);\ntft.fillScreen(ILI9341_BLACK);",
+      "loop": "if (ctp.touched()) {\n  TS_Point p = ctp.getPoint();\n  p.x = map(p.x, 0, 240, 240, 0);\n  p.y = map(p.y, 0, 320, 320, 0);\n  tft.fillCircle(p.y, p.x, 2, ILI9341_WHITE);\n}\ndelay(10);"
+    }
+  }
+}
