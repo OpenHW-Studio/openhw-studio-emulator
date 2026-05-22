@@ -1,0 +1,38 @@
+{
+    "type": "wokwi-raindrop-pad",
+    "label": "Rain Sensor Pad",
+    "description": "Raindrop sensing pad — resistive PCB that detects water. Wire AOUT to the Raindrop Module's PAD+ pin.",
+    "group": "Sensors",
+    "w": 247,
+    "h": 167,
+    "attrs": {},
+    "pins": [
+        {
+            "id": "AOUT",
+            "label": "AOUT",
+            "type": "analog",
+            "description": "Analog signal output (wire to Raindrop Module PAD+)",
+            "x": 240,
+            "y": 78
+        },
+        {
+            "id": "GND",
+            "label": "GND",
+            "type": "power",
+            "description": "Ground",
+            "x": 240,
+            "y": 90
+        }
+    ],
+    "autocoding": {
+        "arduino": {
+            "setup": "// Raindrop Pad — connect AOUT to Raindrop Module PAD+\n// No direct GPIO connection needed for the pad itself.\nSerial.println(\"Raindrop Pad connected.\");",
+            "loop": "// Read is done by the Raindrop Module AO pin\ndelay(1000);"
+        }
+    },
+    "autowiring": {
+        "connections": [
+            { "from": "GND", "to": "esp32:GND" }
+        ]
+    }
+}
