@@ -50,7 +50,7 @@
     "autocoding": {
         "arduino": {
             "setup": "Serial.begin(9600);\n// Potentiometer connected to ${SIG}",
-            "loop": "int potVal = analogRead(${SIG});\nfloat voltage = potVal * (5.0 / 1023.0);\nSerial.print(\"Pot: \");\nSerial.print(potVal);\nSerial.print(\" | \");\nSerial.print(voltage, 2);\nSerial.println(\" V\");\ndelay(200);"
+            "loop": "int potVal_${COMP_SUFFIX} = analogRead(${SIG});\nfloat voltage_${COMP_SUFFIX} = potVal_${COMP_SUFFIX} * (5.0 / 1023.0);\nSerial.print(\"Pot: \");\nSerial.print(potVal_${COMP_SUFFIX});\nSerial.print(\" | \");\nSerial.print(voltage_${COMP_SUFFIX}, 2);\nSerial.println(\" V\");\ndelay(200);"
         }
     }
 }

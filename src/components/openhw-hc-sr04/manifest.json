@@ -21,8 +21,8 @@
     },
     "autocoding": {
         "arduino": {
-            "setup": "Serial.begin(9600);\npinMode(9, OUTPUT);\npinMode(10, INPUT);\nSerial.println(\"HC-SR04 Ready\");",
-            "loop": "digitalWrite(9, LOW);\ndelayMicroseconds(2);\ndigitalWrite(9, HIGH);\ndelayMicroseconds(10);\ndigitalWrite(9, LOW);\nlong dur = pulseIn(10, HIGH);\nfloat cm = dur / 58.2;\nfloat inch = dur / 148.0;\nSerial.print(\"Distance: \");\nSerial.print(cm, 1);\nSerial.print(\" cm | \");\nSerial.print(inch, 1);\nSerial.println(\" in\");\ndelay(500);"
+            "setup": "Serial.begin(9600);\npinMode(${TRIG}, OUTPUT);\npinMode(${ECHO}, INPUT);\nSerial.println(\"HC-SR04 Ready\");",
+            "loop": "digitalWrite(${TRIG}, LOW);\ndelayMicroseconds(2);\ndigitalWrite(${TRIG}, HIGH);\ndelayMicroseconds(10);\ndigitalWrite(${TRIG}, LOW);\nlong dur_${COMP_SUFFIX} = pulseIn(${ECHO}, HIGH);\nfloat cm_${COMP_SUFFIX} = dur_${COMP_SUFFIX} / 58.2;\nfloat inch_${COMP_SUFFIX} = dur_${COMP_SUFFIX} / 148.0;\nSerial.print(\"Distance: \");\nSerial.print(cm_${COMP_SUFFIX}, 1);\nSerial.print(\" cm | \");\nSerial.print(inch_${COMP_SUFFIX}, 1);\nSerial.println(\" in\");\ndelay(500);"
         }
     }
 }

@@ -1,0 +1,49 @@
+{
+  "type": "openhw-nrf24l01",
+  "label": "nRF24L01+",
+  "group": "Network",
+  "description": "2.4GHz RF Transceiver module.",
+  "w": 250,
+  "h": 100,
+  "attrs": {
+    "magicInterop": "false"
+  },
+  "telemetry": {
+    "template": "Mode=${state.mode}, Freq=${state.frequency}, RX=${state.rxQueueSize}, TX=${state.txQueueSize}",
+    "criticalKeys": [
+      "state.mode",
+      "state.frequency",
+      "state.rxQueueSize",
+      "state.txQueueSize"
+    ]
+  },
+  "pins": [
+    { "id": "VCC",  "x": 100, "y": 95,  "type": "power",   "description": "3.3V Power" },
+    { "id": "GND",  "x": 60,  "y": 95,  "type": "power",   "description": "Ground" },
+    { "id": "CE",   "x": 100, "y": 165, "type": "digital", "description": "Chip Enable" },
+    { "id": "CSN",  "x": 60,  "y": 165, "type": "digital", "description": "SPI Chip Select" },
+    { "id": "SCK",  "x": 100, "y": 235, "type": "digital", "description": "SPI Clock" },
+    { "id": "MOSI", "x": 60,  "y": 235, "type": "digital", "description": "SPI MOSI" },
+    { "id": "MISO", "x": 100, "y": 305, "type": "digital", "description": "SPI MISO" },
+    { "id": "IRQ",  "x": 60,  "y": 305, "type": "digital", "description": "Interrupt Request" }
+  ],
+  "autowiring": {
+    "connections": [
+      { "from": "VCC",  "to": "arduino:3.3V", "color": "red" },
+      { "from": "GND",  "to": "arduino:GND",  "color": "black" },
+      { "from": "CE",   "to": "arduino:9",    "color": "orange" },
+      { "from": "CSN",  "to": "arduino:10",   "color": "yellow" },
+      { "from": "MOSI", "to": "arduino:11",   "color": "blue" },
+      { "from": "MISO", "to": "arduino:12",   "color": "green" },
+      { "from": "SCK",  "to": "arduino:13",   "color": "purple" }
+    ]
+  },
+  "autocoding": {
+    "libraries": ["RF24"],
+    "arduino": {
+      "globals": "#include <SPI.h>\n#include <nRF24L01.h>\n#include <RF24.h>\n\nRF24 radio_${COMP_SUFFIX}(${CE}, ${CSN});\nconst byte address_${COMP_SUFFIX}[6] = \"00001\";",
+      "setup": "radio_${COMP_SUFFIX}.begin();\nradio_${COMP_SUFFIX}.openWritingPipe(address_${COMP_SUFFIX});\nradio_${COMP_SUFFIX}.setPALevel(RF24_PA_MIN);\nradio_${COMP_SUFFIX}.stopListening();",
+      "loop": "const char text_${COMP_SUFFIX}[] = \"Hello World\";\nradio_${COMP_SUFFIX}.write(&text_${COMP_SUFFIX}, sizeof(text_${COMP_SUFFIX}));\ndelay(1000);"
+    }
+  }
+}

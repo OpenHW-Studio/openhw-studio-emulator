@@ -29,8 +29,8 @@
     },
     "autocoding": {
         "arduino": {
-            "setup": "// Motor Control Setup\nvoid setup() {\n  pinMode([[helper:driver:ENA|ENB]], OUTPUT);\n  pinMode([[helper:driver:IN1|IN3]], OUTPUT);\n  pinMode([[helper:driver:IN2|IN4]], OUTPUT);\n  analogWrite([[helper:driver:ENA|ENB]], 200);\n}",
-            "loop": "void loop() {\n  digitalWrite([[helper:driver:IN1|IN3]], HIGH); digitalWrite([[helper:driver:IN2|IN4]], LOW);\n  delay(2000);\n  digitalWrite([[helper:driver:IN1|IN3]], LOW); digitalWrite([[helper:driver:IN2|IN4]], LOW);\n  delay(500);\n}"
+            "setup": "pinMode(${helper:driver:ENA|ENB}, OUTPUT);\n  pinMode(${helper:driver:IN1|IN3}, OUTPUT);\n  pinMode(${helper:driver:IN2|IN4}, OUTPUT);\n  analogWrite(${helper:driver:ENA|ENB}, 200);",
+            "loop": "digitalWrite(${helper:driver:IN1|IN3}, HIGH); digitalWrite(${helper:driver:IN2|IN4}, LOW);\n  delay(2000);\n  digitalWrite(${helper:driver:IN1|IN3}, LOW); digitalWrite(${helper:driver:IN2|IN4}, LOW);\n  delay(500);"
         }
     }
 }

@@ -31,6 +31,7 @@ export interface ComponentManifestPin {
     y?: number;
     type?: string;
     description?: string;
+    exit?: 'left' | 'right' | 'top' | 'bottom';
 }
 
 export interface ComponentManifest {

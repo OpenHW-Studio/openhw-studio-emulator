@@ -46,8 +46,9 @@
     },
     "autocoding": {
         "arduino": {
-            "setup": "#define PIN_R arduino:9|6|3\n#define PIN_G arduino:10|5|11\n#define PIN_B arduino:11|3|6\n\nvoid setup() {\n  pinMode(PIN_R, OUTPUT);\n  pinMode(PIN_G, OUTPUT);\n  pinMode(PIN_B, OUTPUT);\n}",
-            "loop": "void loop() {\n  // Red\n  analogWrite(PIN_R, 255);\n  analogWrite(PIN_G, 0);\n  analogWrite(PIN_B, 0);\n  delay(500);\n\n  // Green\n  analogWrite(PIN_R, 0);\n  analogWrite(PIN_G, 255);\n  analogWrite(PIN_B, 0);\n  delay(500);\n\n  // Blue\n  analogWrite(PIN_R, 0);\n  analogWrite(PIN_G, 0);\n  analogWrite(PIN_B, 255);\n  delay(500);\n}"
+            "globals": "#define PIN_R_${COMP_SUFFIX} ${R}\n#define PIN_G_${COMP_SUFFIX} ${G}\n#define PIN_B_${COMP_SUFFIX} ${B}",
+            "setup": "pinMode(PIN_R_${COMP_SUFFIX}, OUTPUT);\n  pinMode(PIN_G_${COMP_SUFFIX}, OUTPUT);\n  pinMode(PIN_B_${COMP_SUFFIX}, OUTPUT);",
+            "loop": "// Red\n  analogWrite(PIN_R_${COMP_SUFFIX}, 255);\n  analogWrite(PIN_G_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_B_${COMP_SUFFIX}, 0);\n  delay(500);\n\n  // Green\n  analogWrite(PIN_R_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_G_${COMP_SUFFIX}, 255);\n  analogWrite(PIN_B_${COMP_SUFFIX}, 0);\n  delay(500);\n\n  // Blue\n  analogWrite(PIN_R_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_G_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_B_${COMP_SUFFIX}, 255);\n  delay(500);"
         }
     }
 }

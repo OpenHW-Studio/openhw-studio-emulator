@@ -1,66 +1,64 @@
 import { BaseComponent } from '../BaseComponent';
+import { SPIProtocol } from '../../protocol-handlers/index';
 
-export class MAX7219Logic extends BaseComponent {
-    private shiftRegister: number = 0;
-    private bitsReceived: number = 0;
+// MAX7219 — 8×8 LED Matrix / 7-Segment Driver (SPI, active-LOW CS / LOAD)
+//
+// SPI framing:
+//   16-bit per frame: [ADDR 8-bit] [DATA 8-bit]
+//   CS (LOAD) is normally active-LOW, data latches on CS rising edge.
+//   Supports daisy-chaining (DOUT = MISO passthrough).
+//
+// Key registers:
+//   0x01–0x08: Row data
+//   0x09: Decode mode
+//   0x0A: Intensity
+//   0x0B: Scan limit
+//   0x0C: Shutdown (0=off, 1=normal)
+//   0x0F: Display test
+
+export class MAX7219Logic extends SPIProtocol {
     private matrixData: number[] = new Array(8).fill(0);
-    private shutdown: boolean = true;
+    private shutdown = true;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
-        this.state = {
-            matrix: [...this.matrixData],
-            active: false
-        };
+        this.state = { ...this.state, matrix: [...this.matrixData], active: false };
     }
 
-    onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number) {
-        const voltageOut = isHigh ? 5.0 : 0.0;
+    // MAX7219 uses CS/LOAD active-LOW, latches on CS rising edge (deassert)
+    onCSDeassert(meta: any): void {
+        const frame = meta.frame;
+        if (frame.length < 2) return;
 
-        // Passthrough signals for daisy-chaining
-        if (pinId === 'CS') this.setPinVoltage('CS_OUT', voltageOut);
-        if (pinId === 'CLK') this.setPinVoltage('CLK_OUT', voltageOut);
-
-        if (pinId === 'CLK') {
-            if (isHigh) {
-                // Rising Edge: Clock data IN
-                const din = this.getPinVoltage('DIN') > 2.5 ? 1 : 0;
-                this.shiftRegister = ((this.shiftRegister << 1) | din) & 0xFFFF;
-                this.bitsReceived++;
-            } else {
-                // Falling Edge: Clock data OUT to DOUT for the next module in chain
-                const doutBit = (this.shiftRegister >> 15) & 1;
-                this.setPinVoltage('DOUT', doutBit ? 5.0 : 0.0);
-            }
+        // MAX7219 is 16-bit per command (address + data)
+        for (let i = 0; i + 1 < frame.length; i += 2) {
+            const address = frame[i] & 0x0F;
+            const value   = frame[i + 1] & 0xFF;
+            this._execute(address, value);
         }
 
-        // Latch data on CS (LOAD) rising edge
-        if (pinId === 'CS' && isHigh) {
-            this.executeCommand(this.shiftRegister);
-            this.bitsReceived = 0; 
-        }
+        // Daisy-chain passthrough
+        this.setPinVoltage('DOUT', 0.0);
     }
 
-    private executeCommand(data: number) {
-        const address = (data >> 8) & 0x0F;
-        const value = data & 0xFF;
-
+    private _execute(address: number, value: number) {
         if (address >= 0x01 && address <= 0x08) {
             this.matrixData[address - 1] = value;
         } else if (address === 0x0C) {
             this.shutdown = (value === 0);
         } else if (address === 0x0F) {
-            if (value) this.matrixData.fill(0xFF);
-            else this.matrixData.fill(0); 
+            this.matrixData.fill(value ? 0xFF : 0);
         }
-
-        this.setState({ 
-            matrix: [...this.matrixData],
-            active: !this.shutdown
-        });
+        this.setState({ matrix: [...this.matrixData], active: !this.shutdown });
     }
 
-    getSyncState() {
-        return { ...this.state };
+    // Passthrough clock & CS to daisy-chain output
+    onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number) {
+        super.onPinStateChange(pinId, isHigh, cpuCycles);
+        const v = isHigh ? 5.0 : 0.0;
+        if (pinId === 'CS')  this.setPinVoltage('CS_OUT', v);
+        if (pinId === 'CLK') this.setPinVoltage('CLK_OUT', v);
     }
+
+    getSyncState() { return { ...this.state }; }
 }

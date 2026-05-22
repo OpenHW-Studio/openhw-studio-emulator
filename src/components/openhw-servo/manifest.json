@@ -44,10 +44,11 @@
         "externalVoltage": "5.0"
     },
     "autocoding": {
+        "libraries": ["Servo"],
         "arduino": {
-            "globals": "#include <Servo.h>\nServo myServo;",
-            "setup": "myServo.attach(${PWM});\nmyServo.write(0);\ndelay(500);",
-            "loop": "for (int pos = 0; pos <= 180; pos++) {\n  myServo.write(pos);\n  delay(10);\n}\nfor (int pos = 180; pos >= 0; pos--) {\n  myServo.write(pos);\n  delay(10);\n}"
+            "globals": "#include <Servo.h>\nServo myServo_${COMP_SUFFIX};",
+            "setup": "myServo_${COMP_SUFFIX}.attach(${PWM});\nmyServo_${COMP_SUFFIX}.write(0);\ndelay(500);",
+            "loop": "for (int pos_${COMP_SUFFIX} = 0; pos_${COMP_SUFFIX} <= 180; pos_${COMP_SUFFIX}++) {\n  myServo_${COMP_SUFFIX}.write(pos_${COMP_SUFFIX});\n  delay(10);\n}\nfor (int pos_${COMP_SUFFIX} = 180; pos_${COMP_SUFFIX} >= 0; pos_${COMP_SUFFIX}--) {\n  myServo_${COMP_SUFFIX}.write(pos_${COMP_SUFFIX});\n  delay(10);\n}"
         }
     }
 }

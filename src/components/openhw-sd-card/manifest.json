@@ -77,7 +77,7 @@
         "libraries": ["SD"],
         "arduino": {
             "globals": "#include <SPI.h>\n#include <SD.h>",
-            "setup": "Serial.begin(9600);\nwhile (!Serial);\nSerial.print(\"Initializing SD card...\");\nif (!SD.begin(10)) {\n  Serial.println(\"initialization failed!\");\n  return;\n}\nSerial.println(\"initialization done.\");",
+            "setup": "Serial.begin(9600);\nwhile (!Serial);\nSerial.print(\"Initializing SD card...\");\nif (!SD.begin(${CS})) {\n  Serial.println(\"initialization failed!\");\n  return;\n}\nSerial.println(\"initialization done.\");",
             "loop": "// SD Card ready for datalogging."
         }
     }

@@ -42,7 +42,7 @@
     "autocoding": {
         "arduino": {
             "setup": "Serial.begin(9600);",
-            "loop": "const float BETA = 3950;\nint analogValue = analogRead(arduino:A0|A1|A2|A3|A4|A5);\nfloat celsius = 1 / (log(1 / (1023. / analogValue - 1)) / BETA + 1.0 / 298.15) - 273.15;\nSerial.print(\"Temperature: \");\nSerial.print(celsius);\nSerial.println(\" ℃\");\ndelay(500);"
+            "loop": "const float BETA_${COMP_SUFFIX} = 3950;\nint analogValue_${COMP_SUFFIX} = analogRead(${p2});\nfloat celsius_${COMP_SUFFIX} = 1 / (log(1 / (1023. / analogValue_${COMP_SUFFIX} - 1)) / BETA_${COMP_SUFFIX} + 1.0 / 298.15) - 273.15;\nSerial.print(\"Temperature: \");\nSerial.print(celsius_${COMP_SUFFIX});\nSerial.println(\" ℃\");\ndelay(500);"
         }
     }
 }

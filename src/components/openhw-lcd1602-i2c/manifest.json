@@ -45,9 +45,9 @@
     "autocoding": {
         "libraries": ["LiquidCrystal I2C"],
         "arduino": {
-            "globals": "#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\nLiquidCrystal_I2C lcd(0x27, 16, 2);",
-            "setup": "lcd.init();\nlcd.backlight();\nlcd.setCursor(0, 0);\nlcd.print(\"OpenHW Studio!\");",
-            "loop": "unsigned long t = millis() / 1000;\nlcd.setCursor(0, 1);\nlcd.print(\"Timer: \");\nlcd.print(t);\nlcd.print(\" s   \");\ndelay(500);"
+            "globals": "#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\nLiquidCrystal_I2C lcd_${COMP_SUFFIX}(0x27, 16, 2);",
+            "setup": "lcd_${COMP_SUFFIX}.init();\nlcd_${COMP_SUFFIX}.backlight();\nlcd_${COMP_SUFFIX}.setCursor(0, 0);\nlcd_${COMP_SUFFIX}.print(\"OpenHW Studio!\");",
+            "loop": "unsigned long t_${COMP_SUFFIX} = millis() / 1000;\nlcd_${COMP_SUFFIX}.setCursor(0, 1);\nlcd_${COMP_SUFFIX}.print(\"Timer: \");\nlcd_${COMP_SUFFIX}.print(t_${COMP_SUFFIX});\nlcd_${COMP_SUFFIX}.print(\" s   \");\ndelay(500);"
         }
     }
 }

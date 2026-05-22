@@ -1,12 +1,7 @@
 import { BaseComponent } from '../BaseComponent';
+import { I2CProtocol } from '../../protocol-handlers/index';
 
-export class PCA9865Logic extends BaseComponent {
-    private sdaLast = true;
-    private sclLast = true;
-    private i2cState = 'IDLE';
-    private bitCount = 0;
-    private curByte = 0;
-    private regAddr = 0;
+export class PCA9865Logic extends I2CProtocol {
     private pwmRegs = new Uint8Array(256);
     private i2cAddress = 0x40;
 
@@ -19,58 +14,24 @@ export class PCA9865Logic extends BaseComponent {
         }
     }
 
-    onPinStateChange(pinId: string, isHigh: boolean) {
-        // Assume mapping to either primary or right header
-        let sda = this.getPinVoltage('SDA') > 2.5;
-        if (pinId === 'SDA_R') sda = this.getPinVoltage('SDA_R') > 2.5;
-
-        let scl = this.getPinVoltage('SCL') > 2.5;
-        if (pinId === 'SCL_R') scl = this.getPinVoltage('SCL_R') > 2.5;
-
-        // I2C START condition
-        if ((pinId.startsWith('SDA')) && !sda && this.sdaLast && scl) {
-            this.i2cState = 'RECV_ADDR';
-            this.bitCount = 0;
-            this.curByte = 0;
-        }
-        // I2C STOP condition
-        else if ((pinId.startsWith('SDA')) && sda && !this.sdaLast && scl) {
-            this.i2cState = 'IDLE';
-        }
-
-        // I2C Clock rising edge data sensing
-        if ((pinId.startsWith('SCL')) && scl && !this.sclLast && this.i2cState !== 'IDLE') {
-            if (this.bitCount < 8) {
-                this.curByte = (this.curByte << 1) | (sda ? 1 : 0);
-                this.bitCount++;
-            } else {
-                // 9th bit: ACK. We process the byte here
-                this.processI2CByte(this.curByte);
-                this.bitCount = 0;
-                this.curByte = 0;
-            }
-        }
-
-        if (pinId.startsWith('SDA')) this.sdaLast = sda;
-        if (pinId.startsWith('SCL')) this.sclLast = scl;
+    onI2CStart(address: number, read: boolean): boolean {
+        const addr7 = (address > 0x7F) ? (address >> 1) : address;
+        return addr7 === this.i2cAddress;
     }
 
-    private processI2CByte(byte: number) {
-        if (this.i2cState === 'RECV_ADDR') {
-            const addr = byte >> 1;
-            if (addr === this.i2cAddress) {
-                this.i2cState = 'RECV_REG';
-            } else {
-                this.i2cState = 'IDLE';
-            }
-        } else if (this.i2cState === 'RECV_REG') {
-            this.regAddr = byte;
-            this.i2cState = 'RECV_DATA';
-        } else if (this.i2cState === 'RECV_DATA') {
-            this.pwmRegs[this.regAddr] = byte;
-            this.updatePWMOutputs();
-            this.regAddr++;
+    onI2CWriteRegister(reg: number, data: number[]): void {
+        for (let i = 0; i < data.length; i++) {
+            this.pwmRegs[(reg + i) & 0xFF] = data[i];
         }
+        this.updatePWMOutputs();
+    }
+
+    onI2CReadRequest(reg: number, count: number): number[] {
+        const result: number[] = [];
+        for (let i = 0; i < count; i++) {
+            result.push(this.pwmRegs[(reg + i) & 0xFF]);
+        }
+        return result;
     }
 
     private updatePWMOutputs() {

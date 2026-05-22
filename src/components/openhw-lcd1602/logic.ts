@@ -1,16 +1,8 @@
 import { BaseComponent } from '../BaseComponent';
+import { HD44780Controller } from '../../protocol-handlers/hd44780-controller';
 
 export class Lcd1602Logic extends BaseComponent {
-    private backlight = true;
-    private mode4bit = true;
-    private cursorX = 0;
-    private cursorY = 0;
-    private linesData: string[] = [
-        "                ", 
-        "                "
-    ];
-    private halfByte = 0;
-    private isNibble = false;
+    private hd44780 = new HD44780Controller(2, 16);
     private pinStates: Record<string, boolean> = {
         rs: false, rw: false, e: false,
         d0: false, d1: false, d2: false, d3: false,
@@ -20,7 +12,7 @@ export class Lcd1602Logic extends BaseComponent {
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
-        this.state = { lines: [...this.linesData], illuminated: this.backlight };
+        this.state = { ...this.hd44780.getState() };
     }
 
     onPinStateChange(pinId: string, isHigh: boolean, _cpuCycles: number): void {
@@ -28,79 +20,38 @@ export class Lcd1602Logic extends BaseComponent {
         const wasHigh = this.pinStates[pin];
         this.pinStates[pin] = isHigh;
 
+        // Backlight is driven by the A (anode) pin
         if (pin === 'a') {
-            if (this.backlight !== isHigh) {
-                this.backlight = isHigh;
-                this.stateChanged = true;
-                this.updateState();
+            if (this.hd44780.backlight !== isHigh) {
+                this.hd44780.backlight = isHigh;
+                this.hd44780.stateChanged = true;
             }
-            return;
         }
 
-        // Falling edge of E latches data
+        // Falling edge of E latches the data nibble
         if (pin === 'e' && wasHigh && !isHigh) {
-            const d4 = this.pinStates.d4 ? 1 : 0;
-            const d5 = this.pinStates.d5 ? 1 : 0;
-            const d6 = this.pinStates.d6 ? 1 : 0;
-            const d7 = this.pinStates.d7 ? 1 : 0;
-            const dataNibble = (d7 << 7) | (d6 << 6) | (d5 << 5) | (d4 << 4);
-
-            const rs = this.pinStates.rs;
-
-            if (!this.isNibble) {
-                this.halfByte = dataNibble;
-                this.isNibble = true;
-            } else {
-                const fullByte = this.halfByte | (dataNibble >> 4);
-                this.isNibble = false;
-                this.processLCDCommand(rs, fullByte);
-            }
-            this.updateState();
+            this.hd44780.feedParallelNibble(
+                this.pinStates.rs,
+                this.pinStates.d4,
+                this.pinStates.d5,
+                this.pinStates.d6,
+                this.pinStates.d7,
+            );
         }
-    }
 
-    processLCDCommand(rs: boolean, data: number) {
-        if (!rs) {
-            if (data === 0x01) { // Clear display
-                this.linesData = ["                ", "                "];
-                this.cursorX = 0;
-                this.cursorY = 0;
-            } else if (data === 0x02 || data === 0x03) { // Return home
-                this.cursorX = 0;
-                this.cursorY = 0;
-            } else if ((data & 0xF0) === 0x20) { // 4-bit mode
-                this.mode4bit = true;
-            } else if ((data & 0xF0) === 0x30) { // 8-bit mode
-                this.mode4bit = false;
-                this.isNibble = false;
-            } else if ((data & 0x80) === 0x80) { 
-                const addr = data & 0x7F;
-                if (addr >= 0x00 && addr < 0x10) { this.cursorY = 0; this.cursorX = addr; }
-                else if (addr >= 0x40 && addr < 0x50) { this.cursorY = 1; this.cursorX = addr - 0x40; }
-            }
-        } else {
-            if (this.cursorY < 2 && this.cursorX < 16) {
-                const lineArray = this.linesData[this.cursorY].split("");
-                lineArray[this.cursorX] = String.fromCharCode(data);
-                this.linesData[this.cursorY] = lineArray.join("");
-                this.cursorX++;
-            }
+        if (this.hd44780.stateChanged) {
+            this.setState({ ...this.hd44780.getState() });
+            this.hd44780.clearChanged();
         }
-        this.stateChanged = true;
-    }
-
-    updateState() {
-        this.state.lines = [...this.linesData];
-        this.state.illuminated = this.backlight;
     }
 
     update(cpuCycles: number, wires: any, allComponents: any) {}
 
     onCustomTelemetry() {
-        const textContent = this.linesData.map(l => l.trimEnd()).join("\n").trimEnd();
+        const textContent = this.hd44780.getLines().map(l => l.trimEnd()).join('\n').trimEnd();
         this.setCustomTelemetry({
-            textContent: textContent || "<empty>",
-            backlight: this.backlight,
+            textContent: textContent || '<empty>',
+            backlight: this.hd44780.getBacklight(),
             lineCount: 2,
             charsPerLine: 16,
         });

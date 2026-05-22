@@ -1,116 +1,33 @@
 import { BaseComponent } from '../BaseComponent';
+import { I2CProtocol } from '../../protocol-handlers/index';
+import { HD44780Controller } from '../../protocol-handlers/hd44780-controller';
 
-export class Lcd1602I2CLogic extends BaseComponent {
-    private backlight = true;
-    private mode4bit = false;
-    private cursorX = 0;
-    private cursorY = 0;
-    // 2 lines of 16 spaces
-    private linesData: string[] = [
-        "                ", 
-        "                "
-    ];
-    private halfByte = 0;
-    private isNibble = false;
+export class Lcd1602I2CLogic extends I2CProtocol {
+    private hd44780 = new HD44780Controller(2, 16);
     private lastByte = 0;
-    private i2cAddress = 0x27;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
-        this.state = { lines: [...this.linesData], illuminated: this.backlight };
-        const addrAttr = manifest.attrs?.i2cAddress || manifest.attrs?.i2c_address;
-        if (addrAttr) {
-            this.i2cAddress = (typeof addrAttr === 'number') ? addrAttr : parseInt(addrAttr, 16);
-        }
-    }
-
-    onI2CStart(addr: number, isRead: boolean) {
-        if (addr === this.i2cAddress) return true; 
-        return false;
+        this.state = { ...this.state, ...this.hd44780.getState() };
     }
 
     onI2CByte(addr: number, value: number) {
-        const rs = (value & 0x01) !== 0; 
-        const rw = (value & 0x02) !== 0; 
-        const en = (value & 0x04) !== 0; 
-        const bl = (value & 0x08) !== 0; 
-
-        const lastEn = (this.lastByte & 0x04) !== 0;
-
-        // Command latches on EN falling edge
-        if (lastEn && !en && !rw) {
-            const dataNibble = (value & 0xF0);
-
-            if (!this.mode4bit) {
-                this.processLCDCommand(rs, dataNibble);
-            } else {
-                if (!this.isNibble) {
-                    this.halfByte = dataNibble;
-                    this.isNibble = true;
-                } else {
-                    const fullByte = this.halfByte | (dataNibble >> 4);
-                    this.isNibble = false;
-                    this.processLCDCommand(rs, fullByte);
-                }
-            }
+        this.lastByte = this.hd44780.feedI2CByte(value, this.lastByte);
+        if (this.hd44780.stateChanged) {
+            this.setState({ ...this.state, ...this.hd44780.getState() });
+            this.hd44780.clearChanged();
         }
-
-        if (this.backlight !== bl) {
-            this.backlight = bl;
-            this.stateChanged = true;
-        }
-
-        this.lastByte = value;
-        this.updateState();
         return true;
-    }
-
-    processLCDCommand(rs: boolean, data: number) {
-        if (!rs) {
-            // Command
-            if (data === 0x01) { // Clear display
-                this.linesData = ["                ", "                "];
-                this.cursorX = 0;
-                this.cursorY = 0;
-            } else if (data === 0x02 || data === 0x03) { // Return home
-                this.cursorX = 0;
-                this.cursorY = 0;
-            } else if ((data & 0xF0) === 0x20) { // 4-bit mode
-                this.mode4bit = true;
-            } else if ((data & 0xF0) === 0x30) { // 8-bit mode
-                this.mode4bit = false;
-                this.isNibble = false;
-            } else if ((data & 0x80) === 0x80) { 
-                // Set DDRAM address (Memory map for 16x2 LCD)
-                const addr = data & 0x7F;
-                if (addr >= 0x00 && addr < 0x10) { this.cursorY = 0; this.cursorX = addr; } // Row 1
-                else if (addr >= 0x40 && addr < 0x50) { this.cursorY = 1; this.cursorX = addr - 0x40; } // Row 2
-            }
-        } else {
-            // Data
-            if (this.cursorY < 2 && this.cursorX < 16) {
-                const lineArray = this.linesData[this.cursorY].split("");
-                lineArray[this.cursorX] = String.fromCharCode(data);
-                this.linesData[this.cursorY] = lineArray.join("");
-                this.cursorX++;
-            }
-        }
-        this.stateChanged = true;
-    }
-
-    updateState() {
-        this.state.lines = [...this.linesData];
-        this.state.illuminated = this.backlight;
     }
 
     update(cpuCycles: number, wires: any, allComponents: any) {}
 
     onCustomTelemetry() {
-        const textContent = this.linesData.map(l => l.trimEnd()).join("\n").trimEnd();
+        const textContent = this.hd44780.getLines().map(l => l.trimEnd()).join('\n').trimEnd();
         this.setCustomTelemetry({
             i2cAddress: `0x${this.i2cAddress.toString(16).toUpperCase()}`,
-            textContent: textContent || "<empty>",
-            backlight: this.backlight,
+            textContent: textContent || '<empty>',
+            backlight: this.hd44780.getBacklight(),
             lineCount: 2,
             charsPerLine: 16,
         });
