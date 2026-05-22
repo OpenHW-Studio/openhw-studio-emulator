@@ -5,6 +5,12 @@ export class Logic extends I2SProtocol {
         super(id, manifest);
     }
 
+    onCustomTelemetry() {
+        this.setCustomTelemetry({
+            bitsPerFrame: this.state.i2sBitsPerFrame || 16
+        });
+    }
+
     override onI2SFrame(channel: 0 | 1, sample: number, bitsPerFrame: number): void {
         super.onI2SFrame(channel, sample, bitsPerFrame);
         

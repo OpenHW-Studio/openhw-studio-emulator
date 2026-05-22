@@ -41,9 +41,9 @@
   "autocoding": {
     "libraries": ["RF24"],
     "arduino": {
-      "globals": "#include <SPI.h>\n#include <nRF24L01.h>\n#include <RF24.h>\n\nRF24 radio_${COMP_SUFFIX}(${CE}, ${CSN});\nconst byte address_${COMP_SUFFIX}[6] = \"00001\";",
-      "setup": "radio_${COMP_SUFFIX}.begin();\nradio_${COMP_SUFFIX}.openWritingPipe(address_${COMP_SUFFIX});\nradio_${COMP_SUFFIX}.setPALevel(RF24_PA_MIN);\nradio_${COMP_SUFFIX}.stopListening();",
-      "loop": "const char text_${COMP_SUFFIX}[] = \"Hello World\";\nradio_${COMP_SUFFIX}.write(&text_${COMP_SUFFIX}, sizeof(text_${COMP_SUFFIX}));\ndelay(1000);"
+      "globals": "#include <SPI.h>\\n#include <nRF24L01.h>\\n#include <RF24.h>\\n\\nRF24 radio_${COMP_SUFFIX}(${CE}, ${CSN});\\nconst byte address_${COMP_SUFFIX}[6] = \\\"00001\\\";",
+      "setup": "Serial.begin(9600);\\nradio_${COMP_SUFFIX}.begin();\\nradio_${COMP_SUFFIX}.openWritingPipe(address_${COMP_SUFFIX});\\nradio_${COMP_SUFFIX}.openReadingPipe(1, address_${COMP_SUFFIX});\\nradio_${COMP_SUFFIX}.setPALevel(RF24_PA_MIN);",
+      "loop": "// Sweep channels to scan\\nfor (int i=0; i<128; i++) {\\n  radio_${COMP_SUFFIX}.setChannel(i);\\n  radio_${COMP_SUFFIX}.startListening();\\n  delayMicroseconds(128);\\n  radio_${COMP_SUFFIX}.stopListening();\\n  if (radio_${COMP_SUFFIX}.testCarrier()) {\\n    Serial.print(\\\"Carrier detected on channel \\\"); Serial.println(i);\\n  }\\n}\\n\\n// Transmit data\\nconst char text_${COMP_SUFFIX}[] = \\\"Hello World\\\";\\nradio_${COMP_SUFFIX}.stopListening();\\nradio_${COMP_SUFFIX}.write(&text_${COMP_SUFFIX}, sizeof(text_${COMP_SUFFIX}));\\nSerial.print(\\\"Transmitted data: \\\"); Serial.println(text_${COMP_SUFFIX});\\n\\n// Receive data\\nradio_${COMP_SUFFIX}.startListening();\\ndelay(100);\\nif (radio_${COMP_SUFFIX}.available()) {\\n  char rxBuf[32] = {0};\\n  radio_${COMP_SUFFIX}.read(&rxBuf, sizeof(rxBuf));\\n  Serial.print(\\\"Received: \\\"); Serial.println(rxBuf);\\n}\\ndelay(1000);"
     }
   }
 }

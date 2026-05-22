@@ -12,6 +12,13 @@ export class Logic extends BaseComponent {
         this.setPinVoltage('SD', 0);
     }
 
+    onCustomTelemetry() {
+        this.setCustomTelemetry({
+            liveMicEnabled: this.state.liveMicEnabled ? "Yes" : "No",
+            peakAmplitude: Number(this.state.peakAmplitude || 0).toFixed(3)
+        });
+    }
+
     override onPinStateChange(pinId: string, isHigh: boolean, cycles: number): void {
         const pin = pinId.toUpperCase();
         

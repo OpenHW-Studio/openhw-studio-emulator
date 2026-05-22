@@ -40,9 +40,9 @@
   "autocoding": {
     "libraries": ["ELECHOUSE_CC1101"],
     "arduino": {
-      "globals": "#include <ELECHOUSE_CC1101_SRC_DRV.h>\n",
-      "setup": "ELECHOUSE_cc1101.Init();\nELECHOUSE_cc1101.setCCMode(1);\nELECHOUSE_cc1101.setModulation(0);\nELECHOUSE_cc1101.setMHZ(433.92);\nELECHOUSE_cc1101.setSyncMode(2);\nELECHOUSE_cc1101.Crc(1);",
-      "loop": "byte buffer[] = {0x48, 0x65, 0x6C, 0x6C, 0x6F}; // \"Hello\"\nELECHOUSE_cc1101.SendData(buffer, 5);\ndelay(1000);"
+      "globals": "#include <ELECHOUSE_CC1101_SRC_DRV.h>\\n",
+      "setup": "Serial.begin(9600);\\nELECHOUSE_cc1101.Init();\\nELECHOUSE_cc1101.setCCMode(1);\\nELECHOUSE_cc1101.setModulation(0);\\nELECHOUSE_cc1101.setMHZ(433.92);\\nELECHOUSE_cc1101.setSyncMode(2);\\nELECHOUSE_cc1101.Crc(1);",
+      "loop": "byte buffer[] = {0x48, 0x65, 0x6C, 0x6C, 0x6F}; // \\\"Hello\\\"\\nELECHOUSE_cc1101.SendData(buffer, 5);\\nSerial.println(\\\"Transmitting: Hello\\\");\\ndelay(1000);\\nif (ELECHOUSE_cc1101.CheckReceiveFlag()) {\\n  byte rxBuffer[61] = {0};\\n  int len = ELECHOUSE_cc1101.ReceiveData(rxBuffer);\\n  rxBuffer[len] = '\\\\0';\\n  Serial.print(\\\"Received: \\\");\\n  Serial.println((char*)rxBuffer);\\n}\\ndelay(1000);"
     }
   }
 }

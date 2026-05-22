@@ -1,21 +1,21 @@
 {
   "type": "openhw-max98357",
-  "name": "I2S Amplifier (MAX98357A)",
-  "author": "Velxio",
-  "version": "1.0.0",
+  "label": "MAX98357 I2S Amp",
   "group": "Audio",
-  "description": "I2S Audio Amplifier (Class D) Decoder",
-  "tags": ["audio", "i2s", "amplifier", "sound", "max98357"],
+  "description": "I2S 3W Class D Amplifier",
+  "w": 90,
+  "h": 70,
+  "tags": ["audio", "i2s", "amplifier", "amp", "max98357"],
   "pins": [
-    { "id": "VIN", "name": "VIN", "description": "Power (2.5V to 5.5V)", "x": 10, "y": 60 },
-    { "id": "GND", "name": "GND", "description": "Ground", "x": 18, "y": 60 },
-    { "id": "SD", "name": "SD", "description": "Shutdown and Channel Select", "x": 26, "y": 60 },
-    { "id": "GAIN", "name": "GAIN", "description": "Gain select", "x": 34, "y": 60 },
-    { "id": "DIN", "name": "DIN", "description": "I2S Serial Data", "x": 42, "y": 60 },
-    { "id": "BCLK", "name": "BCLK", "description": "I2S Bit Clock", "x": 50, "y": 60 },
-    { "id": "LRC", "name": "LRC", "description": "I2S Word Select", "x": 58, "y": 60 },
-    { "id": "OUT+", "name": "OUT+", "description": "Positive Speaker Output", "x": 66, "y": 60 },
-    { "id": "OUT-", "name": "OUT-", "description": "Negative Speaker Output", "x": 74, "y": 60 }
+    { "id": "LRC", "description": "Left/Right Clock", "x": 10, "y": 60 },
+    { "id": "BCLK", "description": "Bit Clock", "x": 18, "y": 60 },
+    { "id": "DIN", "description": "Data In", "x": 26, "y": 60 },
+    { "id": "GAIN", "description": "Gain Select", "x": 34, "y": 60 },
+    { "id": "SD", "description": "Shutdown / Channel Select", "x": 42, "y": 60 },
+    { "id": "GND", "description": "Ground", "x": 50, "y": 60 },
+    { "id": "VIN", "description": "Power (2.5V-5.5V)", "x": 58, "y": 60 },
+    { "id": "OUT+", "description": "Positive Speaker Output", "x": 66, "y": 60 },
+    { "id": "OUT-", "description": "Negative Speaker Output", "x": 74, "y": 60 }
   ],
   "state": {
     "i2sBitsPerFrame": 16,
@@ -25,15 +25,25 @@
     "i2sAudioChunk": null
   },
   "defaultAttrs": {},
-  "autowire": {
-    "groups": {
-      "i2s": [
-        { "pin": "VIN", "function": "vcc" },
-        { "pin": "GND", "function": "gnd" },
-        { "pin": "BCLK", "function": "sck" },
-        { "pin": "DIN", "function": "mosi" },
-        { "pin": "LRC", "function": "cs" }
-      ]
+  "telemetry": {
+    "template": "BitsPerFrame=${state.i2sBitsPerFrame}",
+    "criticalKeys": ["state.i2sBitsPerFrame"]
+  },
+  "autowiring": {
+    "connections": [
+      { "from": "VIN", "to": "arduino:5V", "color": "red" },
+      { "from": "GND", "to": "arduino:GND", "color": "black" },
+      { "from": "LRC", "to": "arduino:25", "color": "yellow" },
+      { "from": "BCLK", "to": "arduino:26", "color": "green" },
+      { "from": "DIN", "to": "arduino:22", "color": "blue" }
+    ]
+  },
+  "autocoding": {
+    "libraries": ["I2S", "SD"],
+    "arduino": {
+      "globals": "#include <I2S.h>\\n#include <SD.h>\\nFile audioFile;\\n",
+      "setup": "Serial.begin(9600);\\nI2S.setBCLK(${BCLK});\\nI2S.setDATA(${DIN});\\nI2S.begin(I2S_PHILIPS_MODE, 44100, 16);\\nSD.begin(5);\\naudioFile = SD.open(\\\"/rec.wav\\\");",
+      "loop": "if (audioFile && audioFile.available()) {\\n  int16_t sample = 0;\\n  audioFile.read((uint8_t*)&sample, 2);\\n  I2S.write(sample);\\n  I2S.write(sample);\\n}"
     }
   }
 }

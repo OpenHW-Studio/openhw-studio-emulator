@@ -50,7 +50,7 @@
     "libraries": ["OneWire", "DallasTemperature"],
     "arduino": {
       "globals": "#include <OneWire.h>\n#include <DallasTemperature.h>\n\n#define ONE_WIRE_BUS_${COMP_SUFFIX} ${DQ}\nOneWire oneWire_${COMP_SUFFIX}(ONE_WIRE_BUS_${COMP_SUFFIX});\nDallasTemperature sensors_${COMP_SUFFIX}(&oneWire_${COMP_SUFFIX});",
-      "setup": "sensors_${COMP_SUFFIX}.begin();",
+      "setup": "Serial.begin(9600);\\nsensors_${COMP_SUFFIX}.begin();",
       "loop": "sensors_${COMP_SUFFIX}.requestTemperatures();\nfloat temp_${COMP_SUFFIX} = sensors_${COMP_SUFFIX}.getTempCByIndex(0);\nSerial.print(\"DS18B20 Temp: \");\nSerial.print(temp_${COMP_SUFFIX});\nSerial.println(\" C\");\ndelay(1000);"
     }
   }

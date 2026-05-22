@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 120, h: 100 };
+export const BOUNDS = { x: 0, y: 0, w: 120, h: 110 };
 
 export const ATtiny85UI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning?: boolean }) => {
     const ledOn = state?.ledActive ? true : false;
@@ -10,7 +10,7 @@ export const ATtiny85UI = ({ state, attrs, isRunning }: { state: any, attrs: any
         <div style={{
             position: 'relative',
             width: 120,
-            height: 100,
+            height: 110,
             backgroundColor: '#004a80',
             borderRadius: '6px',
             border: '1px solid #003a60',
@@ -71,7 +71,7 @@ export const ATtiny85UI = ({ state, attrs, isRunning }: { state: any, attrs: any
             {/* Right Pins (P5 at top, P0 at bottom) - Center X: 108 */}
             {[5, 4, 3, 2, 1, 0].map((p, i) => {
                 const centerX = 108;
-                const centerY = 16 + i * 14;
+                const centerY = 16 + i * 15;
                 return (
                     <React.Fragment key={p}>
                         {/* Visual Pad (10x10) */}
@@ -84,10 +84,10 @@ export const ATtiny85UI = ({ state, attrs, isRunning }: { state: any, attrs: any
                 );
             })}
 
-            {/* Bottom Pins (5V, GND, VIN) - Center Y: 88 */}
+            {/* Bottom Pins (5V, GND, VIN) - Center Y: 93 */}
             {['5V', 'GND', 'VIN'].map((label, i) => {
                 const centerX = 34 + i * 22;
-                const centerY = 88;
+                const centerY = 93;
                 return (
                     <React.Fragment key={label}>
                         {/* Visual Pad (10x10) */}

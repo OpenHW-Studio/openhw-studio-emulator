@@ -102,7 +102,7 @@ const picoSvgMarkup = `<svg xmlns="http://www.w3.org/2000/svg" height="200" view
 </svg>
 `;
 
-export const BOUNDS = { x: 0, y: 0, w: 79, h: 200 };
+export const BOUNDS = { x: 0, y: 0, w: 124, h: 314 };
 
 const attrAsString = (value: any, fallback = '') => {
   if (typeof value === 'string') return value;
@@ -135,12 +135,24 @@ export const PicoWUI = ({ state, attrs, isRunning }: { state: any; attrs: any; i
     setIsResetPressed(false);
   };
 
+  const nativeW = 79;
+  const nativeH = 200;
+  const scaleX = BOUNDS.w / nativeW;
+  const scaleY = BOUNDS.h / nativeH;
+
   return (
-    <div style={{ position: 'relative', width: 79, height: 200 }}>
-      <div
-        style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
-        dangerouslySetInnerHTML={{ __html: picoSvgMarkup }}
-      />
+    <div style={{ position: 'relative', width: BOUNDS.w, height: BOUNDS.h, overflow: 'visible' }}>
+      <div style={{
+        width: nativeW,
+        height: nativeH,
+        transform: `scale(${scaleX}, ${scaleY})`,
+        transformOrigin: '0 0',
+        position: 'relative'
+      }}>
+        <div
+          style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
+          dangerouslySetInnerHTML={{ __html: picoSvgMarkup }}
+        />
 
       <div
         style={{
@@ -228,6 +240,7 @@ export const PicoWUI = ({ state, attrs, isRunning }: { state: any; attrs: any; i
         }}
         title="Reset Pico W"
       />
+    </div>
     </div>
   );
 };

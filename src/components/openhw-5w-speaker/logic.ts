@@ -9,6 +9,12 @@ export class Logic extends BaseComponent {
         };
     }
 
+    onCustomTelemetry() {
+        this.setCustomTelemetry({
+            isPlaying: this.state.audioChunk ? "Yes" : "No"
+        });
+    }
+
     override update(cycles: number, wires: any[], components: BaseComponent[]): void {
         super.update(cycles, wires, components);
 
