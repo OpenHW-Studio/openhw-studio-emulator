@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIR Motion Sensor (HC-SR501) - Comprehensive Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f7f9fc;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #1a365d;
+            border-bottom: 3px solid #e2e8f0;
+            padding-bottom: 15px;
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #2b6cb0;
+            margin-top: 40px;
+            font-size: 1.8em;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+        h3 {
+            color: #4a5568;
+            margin-top: 25px;
+        }
+        p {
+            font-size: 1.1em;
+            color: #4a5568;
+        }
+        .hero-img {
+            display: block;
+            margin: 30px auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .infobox {
+            background-color: #ebf8ff;
+            border-left: 5px solid #3182ce;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .infobox h4 {
+            margin-top: 0;
+            color: #2b6cb0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 1.1em;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #f7fafc;
+            color: #4a5568;
+        }
+        pre {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 1.05em;
+        }
+        .pin-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: white;
+        }
+        .pin-vcc { background-color: #e53e3e; }
+        .pin-out { background-color: #3182ce; }
+        .pin-gnd { background-color: #000000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PIR Motion Sensor (HC-SR501)</h1>
+        
+        <p>The <strong>Passive Infrared (PIR) Sensor</strong> is an electronic sensor that measures infrared (IR) light radiating from objects in its field of view. They are most often used in PIR-based motion detectors such as burglar alarms, automated lighting systems, and robotics.</p>
+
+        <img src="./pir_sensor.png" alt="PIR Sensor Diagram" class="hero-img" />
+
+        <h2>How It Works</h2>
+        <p>Everything with a temperature above absolute zero emits heat energy in the form of infrared radiation. Human bodies emit a significant amount of IR.</p>
+        <p>A PIR sensor consists of two main parts:</p>
+        <ol>
+            <li><strong>The Pyroelectric Sensor:</strong> A special crystal element that generates energy when exposed to heat (infrared). The sensor is split into two halves so it can detect <i>motion</i> (a change in temperature) rather than just ambient heat levels. If one half sees a sudden increase in IR radiation compared to the other half, the output swings HIGH.</li>
+            <li><strong>The Fresnel Lens:</strong> The white dome covering the sensor isn't just for protection! It focuses infrared light from multiple angles onto the pyroelectric crystal, vastly expanding the sensor's field of view and detection range (typically up to 7 meters).</li>
+        </ol>
+
+        <h2>Hardware Pinout</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Pin</th>
+                    <th>Color Code</th>
+                    <th>Function</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="pin-tag pin-vcc">VCC</span></td>
+                    <td>Red</td>
+                    <td>Power input. Connect to Arduino 5V (accepts 5V to 20V depending on the module).</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-out">OUT</span></td>
+                    <td>Yellow / Blue</td>
+                    <td>Digital signal output. Rises to <strong>3.3V (HIGH)</strong> when motion is detected, and drops to <strong>0V (LOW)</strong> when no motion is detected.</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-gnd">GND</span></td>
+                    <td>Black</td>
+                    <td>Common ground connection.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Using the Emulator</h2>
+        <div class="infobox">
+            <h4>💡 Simulation Testing</h4>
+            <p>To simulate human motion in your OpenHW Studio circuit:</p>
+            <ol>
+                <li>Start your simulation (<code>npm run dev</code> backend).</li>
+                <li><strong>Click directly on the white dome</strong> of the PIR sensor in the grid.</li>
+                <li>The sensor's internal red LED will light up, and the <code>OUT</code> pin will immediately go HIGH to trigger your Arduino code.</li>
+            </ol>
+        </div>
+
+        <h2>Arduino Code Exampe</h2>
+        <p>Reading a PIR sensor is exactly the same as reading a simple pushbutton. Because it outputs a clear digital signal, you just need to use <code>digitalRead()</code>.</p>
+        
+        <pre><code>// Define the pin connections
+const int pirPin = 2;     // The digital pin connected to the PIR sensor's OUT pin
+const int ledPin = 13;    // The built-in LED on most Arduinos
+
+int motionState = LOW;    // Variable to track the current motion state
+int val = 0;              // Variable to read the pin status
+
+void setup() {
+  pinMode(pirPin, INPUT);     // Declare the PIR sensor as an INPUT
+  pinMode(ledPin, OUTPUT);    // Declare the LED as an OUTPUT
+  
+  Serial.begin(9600);         // Start serial communication at 9600 bps
+  Serial.println("System Ready. Waiting for motion...");
+}
+
+void loop() {
+  val = digitalRead(pirPin);  // Read the current state of the sensor
+
+  if (val == HIGH) {          // If the OUT pin is HIGH (motion detected)
+    digitalWrite(ledPin, HIGH);  // Turn the LED ON
+
+    if (motionState == LOW) {
+      // We only want to print once when the motion starts
+      Serial.println("🚨 Motion detected!");
+      motionState = HIGH;        // Update the state
+    }
+  } 
+  else {                      // If the OUT pin is LOW (no motion)
+    digitalWrite(ledPin, LOW);   // Turn the LED OFF
+
+    if (motionState == HIGH) {
+      // We only want to print once when the motion stops
+      Serial.println("Coast is clear.");
+      motionState = LOW;         // Update the state
+    }
+  }
+
+  // Small delay to prevent bouncing/jittering
+  delay(100);
+}</code></pre>
+
+    </div>
+</body>
+</html>
