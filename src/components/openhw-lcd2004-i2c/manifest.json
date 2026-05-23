@@ -53,5 +53,13 @@
             "setup": "lcd_${COMP_SUFFIX}.init();\nlcd_${COMP_SUFFIX}.backlight();\nlcd_${COMP_SUFFIX}.setCursor(0, 0);\nlcd_${COMP_SUFFIX}.print(\"OpenHW Studio!\");",
             "loop": "unsigned long t_${COMP_SUFFIX} = millis() / 1000;\nlcd_${COMP_SUFFIX}.setCursor(0, 1);\nlcd_${COMP_SUFFIX}.print(\"Timer: \");\nlcd_${COMP_SUFFIX}.print(t_${COMP_SUFFIX});\nlcd_${COMP_SUFFIX}.print(\" s   \");\ndelay(500);"
         }
+    },
+    "autowiring": {
+      "connections": [
+        { "from": "GND", "to": "arduino:GND" },
+        { "from": "VCC", "to": "arduino:5V" },
+        { "from": "SDA", "to": "arduino:A4", "i2c": true },
+        { "from": "SCL", "to": "arduino:A5", "i2c": true }
+      ]
     }
 }

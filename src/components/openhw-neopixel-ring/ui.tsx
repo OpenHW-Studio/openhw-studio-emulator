@@ -1,20 +1,33 @@
 import React from 'react';
 
 // Bounding box for the blue selection ring.
-export const BOUNDS = { x: 0, y: 0, w: 60, h: 60 };
+export const BOUNDS = (attrs: any) => {
+    const pixels = parseInt(attrs?.pixels || '16', 10);
+    const radius = Math.max(10, (pixels * 9) / (2 * Math.PI));
+    const size = radius * 2 + 15;
+    // Offset so the bottom of the bounds sits exactly at y=60 (where pins are fixed)
+    // and horizontally centered around x=30.
+    return { x: 30 - size / 2, y: 60 - size, w: size, h: size };
+};
 
 export const NeopixelRingUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const pixels = parseInt(attrs?.pixels || '16', 10);
-    const radius = 22.5;
-    const center = 30;
+    // Calculate radius to keep consistent LED spacing (~9px per LED circumference)
+    const radius = Math.max(10, (pixels * 9) / (2 * Math.PI));
+    const size = radius * 2 + 15;
+    const center = size / 2;
+    
+    // Position SVG absolutely so it overflows its default container and aligns with BOUNDS
+    const leftOffset = 30 - size / 2;
+    const topOffset = 60 - size;
 
     return (
         <svg 
-            width="100%" 
-            height="100%" 
-            viewBox="0 0 60 60" 
+            width={size} 
+            height={size} 
+            viewBox={`0 0 ${size} ${size}`} 
             xmlns="http://www.w3.org/2000/svg"
-            style={{ display: 'block' }}
+            style={{ display: 'block', position: 'absolute', left: leftOffset, top: topOffset }}
         >
             <circle cx={center} cy={center} r={radius} fill="none" stroke="#222" strokeWidth="4.5" />
 

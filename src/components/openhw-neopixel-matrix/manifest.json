@@ -3,8 +3,8 @@
     "label": "WS2812B RGB LED",
     "description": "WS2812B addressable RGB LED (NeoPixel). Each pixel is individually controllable via a single-wire data protocol. Chain multiple pixels from one digital pin.",
     "group": "Outputs",
-    "w": 82,
-    "h": 82,
+    "w": 30,
+    "h": 30,
     "attrs": {
         "rows": "1",
         "cols": "1"
@@ -19,25 +19,47 @@
     },
     "pins": [
         {
-            "id": "DIN",
-            "x": 0,
-            "y": 26,
-            "type": "digital",
-            "description": "Data In"
-        },
-        {
             "id": "VCC",
             "x": 0,
-            "y": 11,
+            "y": 0,
             "type": "power",
             "description": "5V Power"
         },
         {
+            "id": "DIN",
+            "x": 0,
+            "y": 10,
+            "type": "digital",
+            "description": "Data In"
+        },
+        {
             "id": "GND",
             "x": 0,
-            "y": 41,
+            "y": 20,
             "type": "power",
             "description": "Ground"
+        },
+        {
+            "id": "DOUT",
+            "x": 0,
+            "y": 30,
+            "type": "digital",
+            "description": "Data Out"
         }
-    ]
+    ],
+    "autowiring": {
+      "connections": [
+        { "from": "GND", "to": "arduino:GND" },
+        { "from": "VCC", "to": "arduino:5V" },
+        { "from": "DIN", "to": "arduino:6" }
+      ]
+    },
+    "autocoding": {
+      "libraries": ["FastLED"],
+      "arduino": {
+        "globals": "#include <FastLED.h>\n#define NUM_LEDS_${COMP_SUFFIX} 64\nCRGB leds_${COMP_SUFFIX}[NUM_LEDS_${COMP_SUFFIX}];",
+        "setup": "FastLED.addLeds<NEOPIXEL, 6>(leds_${COMP_SUFFIX}, NUM_LEDS_${COMP_SUFFIX});",
+        "loop": "fill_solid(leds_${COMP_SUFFIX}, NUM_LEDS_${COMP_SUFFIX}, CRGB::Blue);\nFastLED.show();\ndelay(500);\nfill_solid(leds_${COMP_SUFFIX}, NUM_LEDS_${COMP_SUFFIX}, CRGB::Black);\nFastLED.show();\ndelay(500);"
+      }
+    }
 }

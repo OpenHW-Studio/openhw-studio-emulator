@@ -77,4 +77,10 @@ export class L293DLogic extends BaseComponent {
 
         this.stateChanged = true;
     }
+
+    onCustomTelemetry() {
+        this.setCustomTelemetry({
+            active: (this.getPinVoltage('EN1,2') > 2.5 || this.getPinVoltage('EN3,4') > 2.5) ? "Yes" : "No"
+        });
+    }
 }

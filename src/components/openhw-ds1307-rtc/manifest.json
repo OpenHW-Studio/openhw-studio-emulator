@@ -22,5 +22,25 @@
         { "id": "SDA", "x": 19.5, "y": 60, "type": "bidirectional", "description": "I2C Data" },
         { "id": "VCC", "x": 19.5, "y": 75, "type": "input", "description": "Power (5V)" },
         { "id": "GND", "x": 19.5, "y": 90, "type": "input", "description": "Ground" }
-    ]
+    ],
+    "telemetry": {
+      "template": "Time=${state.time}, Running=${state.running}",
+      "criticalKeys": ["state.time"]
+    },
+    "autowiring": {
+      "connections": [
+        { "from": "GND", "to": "arduino:GND" },
+        { "from": "VCC", "to": "arduino:5V" },
+        { "from": "SDA", "to": "arduino:A4", "i2c": true },
+        { "from": "SCL", "to": "arduino:A5", "i2c": true }
+      ]
+    },
+    "autocoding": {
+      "libraries": ["RTClib"],
+      "arduino": {
+        "globals": "#include <Wire.h>\n#include <RTClib.h>\nRTC_DS1307 rtc_${COMP_SUFFIX};",
+        "setup": "if (!rtc_${COMP_SUFFIX}.begin()) {\n  Serial.println(\"Couldn't find RTC\");\n  while (1);\n}\nif (!rtc_${COMP_SUFFIX}.isrunning()) {\n  rtc_${COMP_SUFFIX}.adjust(DateTime(F(__DATE__), F(__TIME__)));\n}",
+        "loop": "DateTime now_${COMP_SUFFIX} = rtc_${COMP_SUFFIX}.now();\nSerial.print(now_${COMP_SUFFIX}.year(), DEC);\nSerial.print('/');\nSerial.print(now_${COMP_SUFFIX}.month(), DEC);\nSerial.print('/');\nSerial.println(now_${COMP_SUFFIX}.day(), DEC);\ndelay(1000);"
+      }
+    }
 }

@@ -28,5 +28,33 @@
         { "id": "D7", "x": 240, "y": 8, "type": "digital", "description": "Data 7" },
         { "id": "A", "x": 255, "y": 8, "type": "power", "description": "Backlight Anode (+)" },
         { "id": "K", "x": 270, "y": 8, "type": "power", "description": "Backlight Cathode (-)" }
-    ]
+    ],
+    "telemetry": {
+      "template": "Cursor=(${state.cursorX},${state.cursorY}), Lines=${state.lines.length}",
+      "criticalKeys": ["state.cursorX", "state.cursorY"]
+    },
+    "autowiring": {
+      "connections": [
+        { "from": "VSS", "to": "arduino:GND" },
+        { "from": "VDD", "to": "arduino:5V" },
+        { "from": "V0", "to": "arduino:GND" },
+        { "from": "RS", "to": "arduino:12" },
+        { "from": "RW", "to": "arduino:GND" },
+        { "from": "E", "to": "arduino:11" },
+        { "from": "D4", "to": "arduino:5" },
+        { "from": "D5", "to": "arduino:4" },
+        { "from": "D6", "to": "arduino:3" },
+        { "from": "D7", "to": "arduino:2" },
+        { "from": "A", "to": "arduino:5V" },
+        { "from": "K", "to": "arduino:GND" }
+      ]
+    },
+    "autocoding": {
+      "libraries": ["LiquidCrystal"],
+      "arduino": {
+        "globals": "#include <LiquidCrystal.h>\nLiquidCrystal lcd_${COMP_SUFFIX}(12, 11, 5, 4, 3, 2);",
+        "setup": "lcd_${COMP_SUFFIX}.begin(16, 2);\nlcd_${COMP_SUFFIX}.print(\"Hello World!\");",
+        "loop": "lcd_${COMP_SUFFIX}.setCursor(0, 1);\nlcd_${COMP_SUFFIX}.print(millis() / 1000);"
+      }
+    }
 }

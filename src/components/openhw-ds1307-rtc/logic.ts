@@ -83,4 +83,11 @@ export class DS1307RTCLogic extends I2CProtocol {
         }
         return result;
     }
+
+    onCustomTelemetry() {
+        this.setCustomTelemetry({
+            time: this.state.display,
+            running: this.state.powered ? "Yes" : "No"
+        });
+    }
 }

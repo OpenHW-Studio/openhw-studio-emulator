@@ -89,5 +89,30 @@
             "y": 104,
             "type": "digital"
         }
-    ]
+    ],
+    "telemetry": {
+      "template": "Segments=(${state.a},${state.b},${state.c},${state.d},${state.e},${state.f},${state.g})",
+      "criticalKeys": ["state.a", "state.b", "state.c"]
+    },
+    "autowiring": {
+      "connections": [
+        { "from": "COM", "to": "arduino:GND" },
+        { "from": "A", "to": "arduino:2" },
+        { "from": "B", "to": "arduino:3" },
+        { "from": "C", "to": "arduino:4" },
+        { "from": "D", "to": "arduino:5" },
+        { "from": "E", "to": "arduino:6" },
+        { "from": "F", "to": "arduino:7" },
+        { "from": "G", "to": "arduino:8" },
+        { "from": "DP", "to": "arduino:9" }
+      ]
+    },
+    "autocoding": {
+      "libraries": [],
+      "arduino": {
+        "globals": "int pins_${COMP_SUFFIX}[] = {2, 3, 4, 5, 6, 7, 8, 9};",
+        "setup": "for(int i=0; i<8; i++) pinMode(pins_${COMP_SUFFIX}[i], OUTPUT);",
+        "loop": "for(int i=0; i<8; i++) digitalWrite(pins_${COMP_SUFFIX}[i], HIGH);\ndelay(500);\nfor(int i=0; i<8; i++) digitalWrite(pins_${COMP_SUFFIX}[i], LOW);\ndelay(500);"
+      }
+    }
 }

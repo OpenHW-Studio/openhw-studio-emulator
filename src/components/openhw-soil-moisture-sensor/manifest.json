@@ -24,5 +24,24 @@
             "y": 57,
             "type": "digital"
         }
-    ]
+    ],
+    "telemetry": {
+      "template": "Moisture=${state.moisture}%",
+      "criticalKeys": ["state.moisture"]
+    },
+    "autowiring": {
+      "connections": [
+        { "from": "GND", "to": "arduino:GND" },
+        { "from": "VCC", "to": "arduino:5V" },
+        { "from": "SIG", "to": "arduino:A0" }
+      ]
+    },
+    "autocoding": {
+      "libraries": [],
+      "arduino": {
+        "globals": "const int sensorPin_${COMP_SUFFIX} = A0;",
+        "setup": "Serial.begin(9600);",
+        "loop": "int val_${COMP_SUFFIX} = analogRead(sensorPin_${COMP_SUFFIX});\nSerial.print(\"Moisture: \");\nSerial.println(val_${COMP_SUFFIX});\ndelay(1000);"
+      }
+    }
 }
