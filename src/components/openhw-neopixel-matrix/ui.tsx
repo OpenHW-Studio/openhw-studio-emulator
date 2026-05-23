@@ -33,9 +33,9 @@ export const NeopixelUI = ({ state, attrs, comp }: { state: any, attrs: any, com
                 state.pixels.forEach((rgb: number, index: number) => {
                     const r_idx = Math.floor(index / cols);
                     const c_idx = index % cols;
-                    const r = ((rgb >> 16) & 0xff) / 255;
-                    const g = ((rgb >> 8) & 0xff) / 255;
-                    const b = (rgb & 0xff) / 255;
+                    const r = (rgb >> 16) & 0xff;
+                    const g = (rgb >> 8) & 0xff;
+                    const b = rgb & 0xff;
                     el.setPixel(r_idx, c_idx, { r, g, b });
                 });
             }
