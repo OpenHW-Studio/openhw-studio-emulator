@@ -38,8 +38,8 @@
     },
     "autocoding": {
         "arduino": {
-            "setup": "pinMode(5,OUTPUT); pinMode(6,OUTPUT); pinMode(7,OUTPUT);\npinMode(3,OUTPUT); pinMode(4,OUTPUT); pinMode(2,OUTPUT);\nanalogWrite(5, 200);\nanalogWrite(3, 200);",
-            "loop": "digitalWrite(6,HIGH); digitalWrite(7,LOW); delay(2000);\ndigitalWrite(6,LOW); digitalWrite(7,LOW); delay(500);\ndigitalWrite(6,LOW); digitalWrite(7,HIGH); delay(2000);\ndigitalWrite(6,LOW); digitalWrite(7,LOW); delay(500);"
+            "setup": "pinMode(${ENA},OUTPUT); pinMode(${IN1},OUTPUT); pinMode(${IN2},OUTPUT);\npinMode(${ENB},OUTPUT); pinMode(${IN3},OUTPUT); pinMode(${IN4},OUTPUT);\nanalogWrite(${ENA}, 200);\nanalogWrite(${ENB}, 200);",
+            "loop": "digitalWrite(${IN1},HIGH); digitalWrite(${IN2},LOW); delay(2000);\ndigitalWrite(${IN1},LOW); digitalWrite(${IN2},LOW); delay(500);\ndigitalWrite(${IN1},LOW); digitalWrite(${IN2},HIGH); delay(2000);\ndigitalWrite(${IN1},LOW); digitalWrite(${IN2},LOW); delay(500);"
         }
     }
 }

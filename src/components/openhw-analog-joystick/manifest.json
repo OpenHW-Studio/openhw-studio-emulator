@@ -42,5 +42,26 @@
             "type": "digital",
             "description": "Switch"
         }
-    ]
+    ],
+    "telemetry": {
+      "template": "X=${state.x}, Y=${state.y}, Pressed=${state.pressed}",
+      "criticalKeys": ["state.x", "state.y"]
+    },
+    "autowiring": {
+      "connections": [
+        { "from": "GND", "to": "arduino:GND" },
+        { "from": "5V", "to": "arduino:5V" },
+        { "from": "VRX", "to": "arduino:A0" },
+        { "from": "VRY", "to": "arduino:A1" },
+        { "from": "SW", "to": "arduino:2" }
+      ]
+    },
+    "autocoding": {
+      "libraries": [],
+      "arduino": {
+        "globals": "const int xPin_${COMP_SUFFIX} = A0;\nconst int yPin_${COMP_SUFFIX} = A1;\nconst int swPin_${COMP_SUFFIX} = 2;",
+        "setup": "pinMode(swPin_${COMP_SUFFIX}, INPUT_PULLUP);\nSerial.begin(9600);",
+        "loop": "Serial.print(\"X: \"); Serial.print(analogRead(xPin_${COMP_SUFFIX}));\nSerial.print(\" Y: \"); Serial.print(analogRead(yPin_${COMP_SUFFIX}));\nSerial.print(\" SW: \"); Serial.println(digitalRead(swPin_${COMP_SUFFIX}));\ndelay(500);"
+      }
+    }
 }

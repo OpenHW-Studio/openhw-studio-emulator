@@ -10,11 +10,11 @@ export const validation: { rules: ComponentValidationRule[] } = {
             priority: 10,
             description: 'Warn when a buzzer is connected without isolation or a series resistor.',
             check: (component: any, graph: Map<string, string[]>, validator: any) => {
-                const pins = (component.pins || []).map((p: any) => p.id);
+                const pins = validator.getTwoTerminalPins(component);
                 const pin1 = pins.length > 0 ? `${component.id}.${pins[0]}` : null;
                 const pin2 = pins.length > 1 ? `${component.id}.${pins[1]}` : null;
 
-                if (!pin1 || (validator.getNeighbors(pin1).length === 0 && (!pin2 || validator.getNeighbors(pin2).length === 0))) {
+                if (!pin1 || !pin2 || (validator.getNeighbors(pin1).length === 0 && validator.getNeighbors(pin2).length === 0)) {
                     return createValidationIssue({
                         ruleId: 'buzzer-series-resistor',
                         severity: 'warn',
@@ -23,10 +23,10 @@ export const validation: { rules: ComponentValidationRule[] } = {
                     });
                 }
 
+                const sources = validator.collectVoltageSources(pin1);
                 const res = validator.findSeriesResistance(pin1);
                 if (res === 0) {
-                    const neighbors = validator.getNeighbors(pin1);
-                    const isMcu = neighbors.some((n: string) => n.includes('arduino') || n.includes('pico'));
+                    const isMcu = sources.some((s: any) => s.nodeId.includes('arduino') || s.nodeId.includes('pico') || s.nodeId.includes('uno'));
                     if (isMcu) {
                         return createValidationIssue({
                             ruleId: 'buzzer-series-resistor',

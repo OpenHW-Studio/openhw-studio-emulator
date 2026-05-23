@@ -22,5 +22,27 @@
         { "id": "OUT3",   "x": 75, "y": 90, "type": "digital" },
         { "id": "IN3",    "x": 75, "y": 105, "type": "digital" },
         { "id": "EN3,4", "x": 75, "y": 120, "type": "digital" }
-    ]
+    ],
+    "telemetry": {
+      "template": "Active=${state.active}",
+      "criticalKeys": ["state.active"]
+    },
+    "autowiring": {
+      "connections": [
+        { "from": "GND1", "to": "arduino:GND" },
+        { "from": "VCC1", "to": "arduino:5V" },
+        { "from": "VCC2", "to": "arduino:5V" },
+        { "from": "EN1,2", "to": "arduino:9" },
+        { "from": "IN1", "to": "arduino:8" },
+        { "from": "IN2", "to": "arduino:7" }
+      ]
+    },
+    "autocoding": {
+      "libraries": [],
+      "arduino": {
+        "globals": "const int enA_${COMP_SUFFIX} = 9;\nconst int in1_${COMP_SUFFIX} = 8;\nconst int in2_${COMP_SUFFIX} = 7;",
+        "setup": "pinMode(enA_${COMP_SUFFIX}, OUTPUT);\npinMode(in1_${COMP_SUFFIX}, OUTPUT);\npinMode(in2_${COMP_SUFFIX}, OUTPUT);",
+        "loop": "digitalWrite(in1_${COMP_SUFFIX}, HIGH);\ndigitalWrite(in2_${COMP_SUFFIX}, LOW);\nanalogWrite(enA_${COMP_SUFFIX}, 200);\ndelay(2000);\ndigitalWrite(in1_${COMP_SUFFIX}, LOW);\ndigitalWrite(in2_${COMP_SUFFIX}, HIGH);\nanalogWrite(enA_${COMP_SUFFIX}, 200);\ndelay(2000);"
+      }
+    }
 }

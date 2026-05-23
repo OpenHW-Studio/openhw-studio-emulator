@@ -4,7 +4,9 @@
   "group": "Basic",
   "w": 270,
   "h": 195,
-  "attrs": {},
+  "attrs": {
+    "color": "white"
+  },
   "pins": [
     {
       "id": "1e",

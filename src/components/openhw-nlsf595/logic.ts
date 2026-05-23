@@ -1,36 +1,36 @@
 import { BaseComponent } from '../BaseComponent';
+import { SPIProtocol } from '../../protocol-handlers/index';
 
-export class NLSF595Logic extends BaseComponent {
-    private shiftRegister = 0;
+// NLSF595 — Serial-to-Parallel Shift Register (SPI compatible)
+// 
+// Operates via standard SPI modes (write-only).
+// Data is shifted in on SCK rising edge (while CS is LOW).
+// Outputs are latched on CS rising edge (deassert).
+
+export class NLSF595Logic extends SPIProtocol {
     private latchRegister = 0;
-    private sckPinLast = false;
-    private csPinLast = true;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
         this.state = { r: 0, g: 0, b: 0 };
     }
 
-    onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number) {
-        const mosi = this.getPinVoltage('MOSI') > 2.5;
+    getCSPinName(): string { return 'CS'; }
 
-        if (pinId === 'SCK') {
-            const cs = this.getPinVoltage('CS') > 2.5;
-            // Shift on rising edge of SCK if CS is LOW (active low shift)
-            if (isHigh && !this.sckPinLast && !cs) {
-                this.shiftRegister = ((this.shiftRegister << 1) | (mosi ? 1 : 0)) & 0xFFFFFF; // 24-bit max for safety
-            }
-            this.sckPinLast = isHigh;
+    onCSDeassert(meta: any) {
+        // Frame contains the bytes shifted in during this CS window
+        const frame: number[] = meta.frame;
+        if (frame.length === 0) return;
+
+        // Shift register behavior: the last bytes clocked in are kept.
+        // We'll extract up to 3 bytes (24 bits) for safety.
+        let latch = 0;
+        for (let i = Math.max(0, frame.length - 3); i < frame.length; i++) {
+            latch = ((latch << 8) | (frame[i] & 0xFF)) & 0xFFFFFF;
         }
 
-        if (pinId === 'CS') {
-            // Latch on rising edge of CS
-            if (isHigh && !this.csPinLast) {
-                this.latchRegister = this.shiftRegister;
-                this.updateOutputs();
-            }
-            this.csPinLast = isHigh;
-        }
+        this.latchRegister = latch;
+        this.updateOutputs();
     }
 
     private updateOutputs() {
@@ -47,10 +47,16 @@ export class NLSF595Logic extends BaseComponent {
         this.state.r = rVal > 2.5 ? 255 : 0;
         this.state.g = gVal > 2.5 ? 255 : 0;
         this.state.b = bVal > 2.5 ? 255 : 0;
-
-        // Wait, if it's PWM or 8-bit color logic, usually SPI drivers like WS2812 take 24 bits.
-        // NLSF595 is just a shift register, so it outputs digital High/Low.
-        // What if user shifts an 8-bit value where 0, 1, 2 are R, G, B?
+        
         this.stateChanged = true;
+    }
+
+    onCustomTelemetry() {
+        this.setCustomTelemetry({
+            latchRegisterHex: `0x${this.latchRegister.toString(16).padStart(6, '0')}`,
+            rOutput: this.state.r > 0 ? "HIGH" : "LOW",
+            gOutput: this.state.g > 0 ? "HIGH" : "LOW",
+            bOutput: this.state.b > 0 ? "HIGH" : "LOW",
+        });
     }
 }

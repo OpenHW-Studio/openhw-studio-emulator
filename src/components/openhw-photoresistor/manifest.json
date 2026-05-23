@@ -42,7 +42,7 @@
     "autocoding": {
         "arduino": {
             "setup": "Serial.begin(9600);",
-            "loop": "int sensorValue = analogRead(arduino:A0|A1|A2|A3|A4|A5);\nSerial.print(\"Light Level: \");\nSerial.println(sensorValue);\ndelay(100);"
+            "loop": "int sensorValue_${COMP_SUFFIX} = analogRead(${p2});\nSerial.print(\"Light Level: \");\nSerial.println(sensorValue_${COMP_SUFFIX});\ndelay(100);"
         }
     }
 }

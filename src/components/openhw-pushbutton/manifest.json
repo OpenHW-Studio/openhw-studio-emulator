@@ -4,22 +4,24 @@
     "description": "Momentary tactile push button.",
     "group": "Basic",
     "w": 68, "h": 44,
-    "attrs": { "breadboard": { "anchorPin": "1", "ravine": true } },
+    "attrs": { "color": "green", "breadboard": { "anchorPin": "1l", "ravine": true } },
     "telemetry": { "template": "pressed=${state.pressed}", "criticalKeys": ["state.pressed"] },
     "pins": [
-        { "id": "1", "x": 0,  "y": 10, "type": "passive", "description": "Terminal 1" },
-        { "id": "2", "x": 60, "y": 10, "type": "passive", "description": "Terminal 2" }
+        { "id": "1l", "x": 0,  "y": 10, "type": "passive", "description": "Terminal 1L" },
+        { "id": "2l", "x": 0, "y": 34, "type": "passive", "description": "Terminal 2L" },
+        { "id": "1r", "x": 68, "y": 10, "type": "passive", "description": "Terminal 1R" },
+        { "id": "2r", "x": 68, "y": 34, "type": "passive", "description": "Terminal 2R" }
     ],
     "autowiring": {
         "connections": [
-            { "from": "1", "to": "arduino:2" },
-            { "from": "2", "to": "arduino:GND" }
+            { "from": "1l", "to": "arduino:2" },
+            { "from": "2l", "to": "arduino:GND" }
         ]
     },
     "autocoding": {
         "arduino": {
-            "setup": "Serial.begin(9600);\npinMode(${1}, INPUT_PULLUP);\nSerial.println(\"Push Button Ready\");",
-            "loop": "bool pressed = (digitalRead(${1}) == LOW);\nSerial.print(\"Button: \");\nSerial.println(pressed ? \"PRESSED\" : \"released\");\ndelay(100);"
+            "setup": "Serial.begin(9600);\npinMode(${1l}, INPUT_PULLUP);\nSerial.println(\"Push Button Ready\");",
+            "loop": "bool pressed_${COMP_SUFFIX} = (digitalRead(${1l}) == LOW);\nSerial.print(\"Button: \");\nSerial.println(pressed_${COMP_SUFFIX} ? \"PRESSED\" : \"released\");\ndelay(100);"
         }
     }
 }

@@ -1,5 +1,6 @@
 // Export everything from the emulator components package so the frontend can import it
 export { BaseComponent } from './BaseComponent';
+export * from '../protocol-handlers/index.ts';
 export { default as openhwLed } from './openhw-led';
 export { default as openhwArduinoUno } from './openhw-arduino-uno';
 export { default as openhwPico } from './openhw-pico';
@@ -63,6 +64,12 @@ export { default as openhwStm32BluePill } from './openhw-stm32-bluepill';
 export { default as openhwDipswitch8 } from './openhw-dipswitch-8';
 export { default as openhwPushbutton6mm } from './openhw-pushbutton-6mm';
 export { default as openhwSlideswitchSpdt } from './openhw-slideswitch-spdt';
+export { default as openhwRelayModule } from './openhw-relay-module';
+export { default as openhwPcm5102 } from './openhw-pcm5102';
+export { default as openhwMax98357 } from './openhw-max98357';
+export { default as openhwInmp441 } from './openhw-inmp441';
+export { default as openhwSph0645 } from './openhw-sph0645';
+export { default as openhw5wSpeaker } from './openhw-5w-speaker';
 export { default as logicMux2to1 } from './logic-mux-2to1';
 export { default as logicDFlipFlop } from './logic-d-flipflop';
 export { default as logicDFlipFlopR } from './logic-d-flipflop-r';
@@ -80,7 +87,12 @@ export { default as logicIc74xx } from './logic-ic-74xx';
 export { default as openhwArduinoMega } from './openhw-arduino-mega';
 export { default as openhwAttiny85 } from './openhw-attiny85';
 export { default as openhwHcSr04 } from './openhw-hc-sr04';
+export { default as openhwSimulationMonitor } from './openhw-simulation-monitor';
+export { default as openhwDs18b20 } from './openhw-ds18b20';
+export { default as openhwIrReceiver } from './openhw-ir-receiver';
+export { default as openhwMfrc522 } from './openhw-mfrc522';
+export { nrf24l01 as openhwNrf24l01 } from './openhw-nrf24l01';
+export { cc1101 as openhwCc1101 } from './openhw-cc1101';
 
 export { FullCircuitValidator, analyzeCodeHardwareSync, ProtocolAnalyzer, runUnifiedValidation } from '../circuit-validation/index.js';
-
 

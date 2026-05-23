@@ -3,7 +3,7 @@ import { Lcd1602Logic } from './logic';
 import { Lcd1602UI, BOUNDS } from './ui';
 import { validation } from './validation';
 // @ts-ignore
-import doc from './doc/index.html?raw';
+const doc = '';
 
 export default {
     manifest,

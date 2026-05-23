@@ -1,9 +1,8 @@
 import { BaseComponent } from '../BaseComponent';
+import { I2CProtocol } from '../../protocol-handlers/index';
 
-export class SSD1306Logic extends BaseComponent {
+export class SSD1306Logic extends I2CProtocol {
   private vram: number[];
-  private i2cAddress = 0x3C;
-  private isAddressed = false;
 
   private awaitingControlByte = true;
   private isDataMode = false;
@@ -43,11 +42,10 @@ export class SSD1306Logic extends BaseComponent {
     super(id, manifest);
     this.vram = new Array(1024).fill(0);
 
-    // Safely extract I2C address from manifest attributes or use default
-    const i2cAttr = manifest.attrs?.i2cAddress;
-    this.i2cAddress = (typeof i2cAttr === 'number') ? i2cAttr : (i2cAttr?.default ?? 0x3C);
+
 
     this.state = {
+      ...this.state,
       vram: [...this.vram],
       invert: false,
       allOn: false,
@@ -92,19 +90,8 @@ export class SSD1306Logic extends BaseComponent {
     }
   }
 
-  onI2CStart(addr: number, read: boolean) {
-    if (addr === this.i2cAddress) {
-      if (read) return false; // SSD1306 doesn't usually support reads in basic simulations
-      this.isAddressed = true;
-      this.awaitingControlByte = true;
-      return true;
-    }
-    this.isAddressed = false;
-    return false;
-  }
-
   onI2CByte(addr: number, data: number) {
-    if (!this.isAddressed) return false;
+    super.onI2CByte(addr, data);
 
     if (this.awaitingControlByte) {
       this.isDataMode = (data & 0x40) !== 0;
@@ -126,7 +113,8 @@ export class SSD1306Logic extends BaseComponent {
   }
 
   onI2CStop() {
-    this.isAddressed = false;
+    super.onI2CStop();
+    this.awaitingControlByte = true;
   }
 
   private writeVram(data: number) {

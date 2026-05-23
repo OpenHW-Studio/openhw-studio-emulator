@@ -1,50 +1,45 @@
 import { BaseComponent } from '../BaseComponent';
+import { PWMProtocol } from '../../protocol-handlers/index';
 
-export class ServoLogic extends BaseComponent {
-    private lastHighCycle = 0;
-    private targetAngle = -1; // -1 indicates uninitialized target
+// Servo motor driven by standard RC PWM signal
+//   Pulse width 544µs  → 0°
+//   Pulse width 2400µs → 180°
+//   Frequency: typically 50Hz (20ms period)
+//
+// The PWMProtocol base class handles:
+//   - Debouncing / jitter filtering over a 4-sample rolling window
+//   - Calling onPWMSignal() once a stable signal is detected
+
+export class ServoLogic extends PWMProtocol {
+    private targetAngle = -1;
     private lastUpdateCycle = 0;
-    private pulseWidthUs = 0;
-    private pwmFrequencyHz = 0;
-    private lastRisingEdgeCycle = 0;
+
+    // Min/max pulse widths for SG90 / standard servos
+    private static readonly MIN_US = 544;
+    private static readonly MAX_US = 2400;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
-        this.state = { angle: 0 };
+        this.state = { ...this.state, angle: 0 };
     }
 
-    onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number) {
-        super.onPinStateChange(pinId, isHigh, cpuCycles);
-        if (pinId === 'PWM') {
-            if (isHigh) {
-                if (this.lastRisingEdgeCycle > 0 && cpuCycles > this.lastRisingEdgeCycle) {
-                    const periodUs = (cpuCycles - this.lastRisingEdgeCycle) / 16;
-                    if (periodUs > 0) {
-                        this.pwmFrequencyHz = 1_000_000 / periodUs;
-                    }
-                }
-                this.lastRisingEdgeCycle = cpuCycles;
-                this.lastHighCycle = cpuCycles;
-            } else {
-                if (this.lastHighCycle > 0) {
-                    const elapsedCycles = cpuCycles - this.lastHighCycle;
-                    const us = elapsedCycles / 16;
-                    this.pulseWidthUs = us;
+    // Override: tell PWMProtocol which pins to monitor
+    getPWMPinNames(): string[] {
+        return ['PWM', 'SIG', 'SIGNAL', 'IN', 'S'];
+    }
 
-                    let angle = (us - 544) * 180 / (2400 - 544);
-                    angle = Math.max(0, Math.min(180, angle));
-
-                    this.targetAngle = angle;
-                }
-            }
-        }
+    // Called by PWMProtocol when a stable, debounced PWM signal is measured
+    onPWMSignal(pinId: string, frequencyHz: number, dutyCycle: number, pulseUs: number): void {
+        let angle = (pulseUs - ServoLogic.MIN_US) * 180 / (ServoLogic.MAX_US - ServoLogic.MIN_US);
+        angle = Math.max(0, Math.min(180, angle));
+        this.targetAngle = angle;
     }
 
     onCustomTelemetry() {
         const target = this.targetAngle >= 0 ? this.targetAngle : this.state.angle;
         this.setCustomTelemetry({
-            pulseWidthUs: this.pulseWidthUs,
-            frequencyHz: Number(this.pwmFrequencyHz.toFixed(3)),
+            pulseWidthUs: this.state.pwmPulseUs,
+            frequencyHz: Number((this.state.pwmFrequencyHz || 0).toFixed(3)),
             targetAngle: Number(target.toFixed(2)),
             distanceToTarget: Number(Math.abs(this.state.angle - target).toFixed(2)),
         });
@@ -55,10 +50,7 @@ export class ServoLogic extends BaseComponent {
 
         if (this.lastUpdateCycle === 0) {
             this.lastUpdateCycle = cpuCycles;
-            // Initialize target to starting angle to prevent jumping to 0 if no PWM received yet
-            if (this.targetAngle === -1) {
-                this.targetAngle = this.state.angle || 0;
-            }
+            if (this.targetAngle === -1) this.targetAngle = this.state.angle || 0;
             return;
         }
 
@@ -66,9 +58,8 @@ export class ServoLogic extends BaseComponent {
         this.lastUpdateCycle = cpuCycles;
 
         if (Math.abs(this.state.angle - this.targetAngle) > 0.1) {
-            // Smoothly move the servo to simulate physical motor speed
-            // Standard servo is 60 degrees / 0.15s (400 deg / sec). At 16MHz, 1s = 16,000,000 cycles
-            const maxMovement = 400 * (elapsedCycles / 16000000);
+            // Standard servo speed: ~400°/sec. At 16MHz, 1s = 16,000,000 cycles
+            const maxMovement = 400 * (elapsedCycles / 16_000_000);
 
             if (this.state.angle < this.targetAngle) {
                 this.state.angle = Math.min(this.targetAngle, this.state.angle + maxMovement);

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MFRC522 RFID Reader</title>
+<style>* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f1117; color: #c9d1d9; line-height: 1.7; padding: 56px 72px; max-width: 1060px; margin: 0 auto; }
+h1 { font-size: 40px; font-weight: 800; color: #ffffff; margin-bottom: 14px; letter-spacing: -0.5px; }
+.subtitle { font-size: 16px; color: #8b949e; margin-bottom: 36px; border-bottom: 1px solid #21262d; padding-bottom: 28px; max-width: 760px; line-height: 1.8; }
+.preview-card { display: flex; gap: 44px; align-items: center; background: #161b22; border: 1px solid #21262d; border-radius: 14px; padding: 36px 40px; margin-bottom: 44px; }
+.preview-svg-col { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.preview-svg-label { font-size: 12px; color: #8b949e; margin-top: 8px; }
+.preview-text { flex: 1; }
+.preview-text p { color: #8b949e; font-size: 15px; margin-bottom: 16px; line-height: 1.8; }
+.preview-text p strong { color: #e6edf3; font-weight: 600; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.tag { border: 1px solid #30363d; color: #8b949e; font-size: 13px; padding: 4px 14px; border-radius: 20px; }
+h2 { font-size: 22px; font-weight: 700; color: #e6edf3; margin: 44px 0 16px; padding-bottom: 10px; border-bottom: 1px solid #21262d; }
+p.section-desc { color: #8b949e; font-size: 15px; margin-bottom: 14px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 12px; }
+th { background: #161b22; color: #8b949e; padding: 12px 16px; text-align: left; border: 1px solid #21262d; font-weight: 600; font-size: 13px; }
+td { padding: 12px 16px; border: 1px solid #21262d; color: #c9d1d9; vertical-align: top; }
+tr:nth-child(even) td { background: #0d1117; }
+.try-section { background: #161b22; border: 1px solid #21262d; border-radius: 14px; padding: 32px 40px; margin: 44px 0; }
+.try-section h3 { font-size: 20px; font-weight: 700; color: #ffffff; margin-bottom: 12px; }
+.try-section .try-desc { color: #8b949e; font-size: 15px; margin-bottom: 22px; line-height: 1.8; }
+.circuit-box { background: #0d1117; border: 1px solid #21262d; border-radius: 10px; padding: 28px 20px; margin-bottom: 22px; display: flex; align-items: center; justify-content: center; min-height: 160px; }
+.try-btn { display: inline-flex; align-items: center; gap: 10px; background: #1f6feb; color: #fff; border: none; padding: 12px 28px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.try-btn:hover { background: #388bfd; }
+.code-block { background: #161b22; border: 1px solid #21262d; border-radius: 8px; padding: 22px 26px; font-family: 'Courier New', monospace; font-size: 13px; color: #e6edf3; overflow-x: auto; position: relative; margin-bottom: 12px; line-height: 1.7; }
+.copy-btn { position: absolute; top: 12px; right: 12px; background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 4px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; }
+.copy-btn:hover { color: #e6edf3; }
+.kw { color: #ff7b72; } .cm { color: #484f58; font-style: italic; } .str { color: #a5d6ff; } .num { color: #79c0ff; } .fn { color: #d2a8ff; }
+.note { background: #0d1117; border-left: 3px solid #2ea043; padding: 14px 18px; border-radius: 0 8px 8px 0; font-size: 14px; color: #8b949e; margin-top: 16px; line-height: 1.7; }
+.warn { background: #0d1117; border-left: 3px solid #f85149; padding: 14px 18px; border-radius: 0 8px 8px 0; font-size: 14px; color: #f85149; margin-bottom: 16px; }
+code { font-family: monospace; background: #161b22; padding: 2px 7px; border-radius: 4px; color: #79c0ff; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<h1>MFRC522 RFID Reader</h1>
+<p class="subtitle">SPI-based RFID reader operating at 13.56 MHz. Reads Mifare Classic 1K cards and key fobs and returns a unique 4 or 7-byte UID. Use with the MFRC522 Arduino library.</p>
+
+<div class="preview-card">
+  <div class="preview-svg-col">
+    <svg width="220" height="169" viewBox="0 0 156 120" style="font-family: sans-serif;">
+      <rect x="0" y="0" width="156" height="120" rx="4" fill="#0d47a1" />
+      <rect x="0" y="0" width="156" height="120" rx="4" fill="none" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1" />
+      <circle cx="10" cy="10" r="3.5" fill="#0f172a" stroke="#d1d5db" stroke-width="1"/>
+      <circle cx="146" cy="10" r="3.5" fill="#0f172a" stroke="#d1d5db" stroke-width="1"/>
+      <circle cx="10" cy="110" r="3.5" fill="#0f172a" stroke="#d1d5db" stroke-width="1"/>
+      <circle cx="146" cy="110" r="3.5" fill="#0f172a" stroke="#d1d5db" stroke-width="1"/>
+      
+      <circle cx="8" cy="18" r="2.5" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" />
+      <circle cx="8" cy="30" r="2.5" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" />
+      <circle cx="8" cy="42" r="2.5" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" />
+      <circle cx="8" cy="54" r="2.5" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" />
+      <circle cx="8" cy="66" r="2.5" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" />
+      <circle cx="8" cy="78" r="2.5" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" />
+      <circle cx="8" cy="90" r="2.5" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" />
+      <circle cx="8" cy="102" r="2.5" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" />
+      
+      <g fill="#ffffff" font-size="7.5" font-weight="bold" text-anchor="start">
+          <text x="16" y="20.5">3V3</text>
+          <text x="16" y="32.5">RST</text>
+          <text x="16" y="44.5">GND</text>
+          <text x="16" y="56.5">IRQ</text>
+          <text x="16" y="68.5">MISO</text>
+          <text x="16" y="80.5">MOSI</text>
+          <text x="16" y="92.5">SCK</text>
+          <text x="16" y="104.5">SDA</text>
+      </g>
+      
+      <g fill="none" stroke="#2a64b5" stroke-width="1.5">
+          <rect x="71" y="16" width="74" height="88" rx="8" />
+          <rect x="75" y="20" width="66" height="80" rx="6" />
+          <rect x="79" y="24" width="58" height="72" rx="4" />
+          <rect x="83" y="28" width="50" height="64" rx="2" />
+          <rect x="87" y="32" width="42" height="56" rx="1" />
+      </g>
+      
+      <text x="150" y="60" transform="rotate(-90 150 60)" text-anchor="middle" font-size="8" fill="#ffffff" font-weight="bold">RFID-RC522</text>
+      <text x="108" y="12" text-anchor="middle" font-size="6" fill="#ffffff">13.56 MHz</text>
+      
+      <rect x="40" y="46" width="28" height="28" rx="1.5" fill="#1e1e1e" />
+      <path d="M 39 50 v 20 m 30 -20 v 20 m -25 -5 h 20 m -20 30 h 20" stroke="#888" stroke-width="1.5" stroke-dasharray="1, 1.5"/>
+      <circle cx="43" cy="49" r="1" fill="#333" />
+      <text x="54" y="59" text-anchor="middle" font-size="4.5" fill="#aaa">MFRC522</text>
+      <text x="54" y="66" text-anchor="middle" font-size="3.5" fill="#888">NXP</text>
+      <text x="54" y="43" text-anchor="middle" font-size="4.5" fill="#ffffff">U1</text>
+      
+      <rect x="45" y="22" width="18" height="8" rx="4" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1" />
+      <text x="54" y="27.5" text-anchor="middle" font-size="3.5" fill="#475569">27.120</text>
+      <rect x="49" y="30" width="1.5" height="4" fill="#94a3b8" />
+      <rect x="57" y="30" width="1.5" height="4" fill="#94a3b8" />
+      <text x="40" y="27" text-anchor="end" font-size="4.5" fill="#ffffff">X1</text>
+      
+      <rect x="42" y="82" width="6" height="3" fill="#111" />
+      <rect x="52" y="82" width="6" height="3" fill="#111" />
+      <rect x="62" y="82" width="6" height="3" fill="#111" />
+      <text x="45" y="89" text-anchor="middle" font-size="3.5" fill="#ffffff">C1</text>
+      <text x="55" y="89" text-anchor="middle" font-size="3.5" fill="#ffffff">R1</text>
+      <text x="65" y="89" text-anchor="middle" font-size="3.5" fill="#ffffff">R2</text>
+      
+      <rect x="60" y="23" width="4" height="6" fill="#ef4444" stroke="#7f1d1d" stroke-width="0.5" />
+      <circle cx="62" cy="26" r="1" fill="#fca5a5" />
+      <text x="62" y="20" text-anchor="middle" font-size="4" fill="#fff">D1</text>
+    </svg>
+    <span class="preview-svg-label">PCB Module</span>
+  </div>
+  <div class="preview-text">
+    <p>The MFRC522 communicates over <strong>SPI</strong> and reads the unique UID from Mifare Classic RFID cards and key fobs. Each card has a different UID that your sketch can use to grant or deny access.</p>
+    <p>In OpenHW Studio, right-click the component during simulation to configure card presence and edit the UID. A glowing ripple indicates when a card is actively being detected.</p>
+    <div class="tags"><span class="tag">SPI Interface</span><span class="tag">13.56 MHz</span><span class="tag">Mifare Classic</span><span class="tag">UID Reader</span></div>
+  </div>
+</div>
+
+<h2>Pin Reference</h2>
+<table>
+  <tr><th>Pin</th><th>Type</th><th>Description</th></tr>
+  <tr><td>3V3</td><td>Input</td><td>Power — 3.3V ONLY. Connecting to 5V will damage the chip.</td></tr>
+<tr><td>GND</td><td>Input</td><td>Ground. Connect to Arduino GND.</td></tr>
+<tr><td>RST</td><td>Input</td><td>Reset. Connect to digital pin D9.</td></tr>
+<tr><td>MISO</td><td>Output</td><td>SPI Master In Slave Out. Connect to D12.</td></tr>
+<tr><td>MOSI</td><td>Input</td><td>SPI Master Out Slave In. Connect to D11.</td></tr>
+<tr><td>SCK</td><td>Input</td><td>SPI Clock. Connect to D13.</td></tr>
+<tr><td>SDA</td><td>Input</td><td>SPI Chip Select. Connect to D10.</td></tr>
+
+</table>
+
+<h2>Attributes</h2>
+<table>
+  <tr><th>Attribute</th><th>Default</th><th>Description</th></tr>
+  <tr><td><code>cardUID</code></td><td><code>DE AD BE EF</code></td><td>The UID returned when a card is presented. Space-separated hex bytes.</td></tr>
+<tr><td><code>cardPresent</code></td><td><code>false</code></td><td>Toggle card presence during simulation via context menu.</td></tr>
+
+</table>
+
+<div class="try-section">
+  <h3>&#9658; Try it in the Simulator</h3>
+  <p class="try-desc">MFRC522 fully wired via the SPI bus (D9–D13). Right-click the module during simulation to present a card — the UID prints to the Serial Monitor.</p>
+  <div class="circuit-box">
+    <svg width="520" height="150" viewBox="0 0 520 150">
+      <g transform="translate(8,10)">
+        <rect x="0" y="0" width="130" height="130" rx="5" fill="#1a5276" stroke="#0d3d60" stroke-width="1.5"/>
+        <rect x="12" y="0" width="106" height="6" rx="1" fill="#111" stroke="#333" stroke-width="0.4"/>
+        <circle cx="16" cy="3" r="1.2" fill="#bbb"/><circle cx="22" cy="3" r="1.2" fill="#bbb"/><circle cx="28" cy="3" r="1.2" fill="#bbb"/><circle cx="34" cy="3" r="1.2" fill="#bbb"/><circle cx="40" cy="3" r="1.2" fill="#bbb"/><circle cx="46" cy="3" r="1.2" fill="#bbb"/><circle cx="52" cy="3" r="1.2" fill="#bbb"/><circle cx="58" cy="3" r="1.2" fill="#bbb"/><circle cx="64" cy="3" r="1.2" fill="#bbb"/><circle cx="70" cy="3" r="1.2" fill="#bbb"/><circle cx="76" cy="3" r="1.2" fill="#bbb"/><circle cx="82" cy="3" r="1.2" fill="#bbb"/><circle cx="88" cy="3" r="1.2" fill="#bbb"/><circle cx="94" cy="3" r="1.2" fill="#bbb"/><circle cx="108" cy="3" r="1.2" fill="#bbb"/><circle cx="114" cy="3" r="1.2" fill="#bbb"/>
+        <text x="65" y="12" text-anchor="middle" font-size="3.5" fill="#5d9cca" font-family="monospace">DIGITAL (PWM ~)</text>
+        <circle cx="25" cy="48" r="10" fill="none" stroke="#1a6b9a" stroke-width="1.5"/>
+        <text x="25" y="53" text-anchor="middle" font-size="4" fill="#1a6b9a" font-family="sans-serif" font-weight="bold">UNO</text>
+        
+        <circle cx="132" cy="35" r="2.5" fill="#f6ad55"/><text x="136" y="39" font-size="5.5" fill="#f6ad55" font-family="sans-serif">3.3V</text>
+        <circle cx="132" cy="50" r="2.5" fill="#888"/><text x="136" y="54" font-size="5.5" fill="#888" font-family="sans-serif">GND</text>
+        <circle cx="132" cy="63" r="2.5" fill="#e07b39"/><text x="136" y="67" font-size="5.5" fill="#e07b39" font-family="sans-serif">D9</text>
+        <circle cx="132" cy="76" r="2.5" fill="#f6d55c"/><text x="136" y="80" font-size="5.5" fill="#f6d55c" font-family="sans-serif">D10</text>
+        <circle cx="132" cy="89" r="2.5" fill="#63b3ed"/><text x="136" y="93" font-size="5.5" fill="#63b3ed" font-family="sans-serif">D11</text>
+        <circle cx="132" cy="102" r="2.5" fill="#2ecc71"/><text x="136" y="106" font-size="5.5" fill="#2ecc71" font-family="sans-serif">D12</text>
+        <circle cx="132" cy="115" r="2.5" fill="#9b59b6"/><text x="136" y="119" font-size="5.5" fill="#9b59b6" font-family="sans-serif">D13</text>
+      </g>
+
+      <path d="M 152 45 L 200 45 L 200 25 L 345 25" fill="none" stroke="#f6ad55" stroke-width="1.5"/>
+      <path d="M 152 60 L 220 60 L 220 46 L 345 46" fill="none" stroke="#888" stroke-width="1.5"/>
+      <path d="M 152 73 L 240 73 L 240 35.5 L 345 35.5" fill="none" stroke="#e07b39" stroke-width="1.5"/>
+      <path d="M 152 86 L 260 86 L 260 96 L 345 96" fill="none" stroke="#f6d55c" stroke-width="1.5"/>
+      <path d="M 152 99 L 280 99 L 280 76.5 L 345 76.5" fill="none" stroke="#63b3ed" stroke-width="1.5"/>
+      <path d="M 152 112 L 300 112 L 300 66 L 345 66" fill="none" stroke="#2ecc71" stroke-width="1.5"/>
+      <path d="M 152 125 L 320 125 L 320 86.5 L 345 86.5" fill="none" stroke="#9b59b6" stroke-width="1.5"/>
+
+      <g transform="translate(345, 10) scale(0.85)">
+          <rect x="0" y="0" width="156" height="120" rx="4" fill="#0d47a1" />
+          <rect x="0" y="0" width="156" height="120" rx="4" fill="none" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1" />
+          
+          <circle cx="8" cy="18" r="2.5" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" />
+          <circle cx="8" cy="30" r="2.5" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" />
+          <circle cx="8" cy="42" r="2.5" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" />
+          <circle cx="8" cy="54" r="2.5" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" />
+          <circle cx="8" cy="66" r="2.5" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" />
+          <circle cx="8" cy="78" r="2.5" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" />
+          <circle cx="8" cy="90" r="2.5" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" />
+          <circle cx="8" cy="102" r="2.5" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" />
+          
+          <g fill="#ffffff" font-size="7.5" font-weight="bold" text-anchor="start" font-family="sans-serif">
+              <text x="16" y="20.5">3V3</text>
+              <text x="16" y="32.5">RST</text>
+              <text x="16" y="44.5">GND</text>
+              <text x="16" y="56.5">IRQ</text>
+              <text x="16" y="68.5">MISO</text>
+              <text x="16" y="80.5">MOSI</text>
+              <text x="16" y="92.5">SCK</text>
+              <text x="16" y="104.5">SDA</text>
+          </g>
+          
+          <g fill="none" stroke="#2a64b5" stroke-width="1.5">
+              <rect x="71" y="16" width="74" height="88" rx="8" />
+              <rect x="75" y="20" width="66" height="80" rx="6" />
+              <rect x="79" y="24" width="58" height="72" rx="4" />
+              <rect x="83" y="28" width="50" height="64" rx="2" />
+              <rect x="87" y="32" width="42" height="56" rx="1" />
+          </g>
+          
+          <text x="150" y="60" transform="rotate(-90 150 60)" text-anchor="middle" font-size="8" fill="#ffffff" font-weight="bold" font-family="sans-serif">RFID-RC522</text>
+          
+          <rect x="40" y="46" width="28" height="28" rx="1.5" fill="#1e1e1e" />
+          <text x="54" y="59" text-anchor="middle" font-size="4.5" fill="#aaa" font-family="sans-serif">MFRC522</text>
+          
+          <rect x="45" y="22" width="18" height="8" rx="4" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1" />
+          <text x="54" y="27.5" text-anchor="middle" font-size="3.5" fill="#475569" font-family="sans-serif">27.120</text>
+      </g>
+    </svg>
+  </div>
+  <button class="try-btn" onclick="openSimulator()">&#9658; &nbsp;Try in Simulator</button>
+</div>
+
+<h2>Example Code</h2>
+<div class="warn">&#9888;&#65039; VCC must be 3.3V only. Connecting to 5V will permanently damage the MFRC522 chip.</div>
+<p class="section-desc">Install the <strong>MFRC522</strong> library before running.</p>
+<div class="code-block">
+  <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="kw">#include</span> <span class="str">&lt;SPI.h&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;MFRC522.h&gt;</span>
+
+<span class="kw">#define</span> RST_PIN  <span class="num">9</span>
+<span class="kw">#define</span> SS_PIN  <span class="num">10</span>
+
+MFRC522 rfid(SS_PIN, RST_PIN);
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  Serial.<span class="fn">begin</span>(<span class="num">9600</span>);
+  SPI.<span class="fn">begin</span>();
+  rfid.<span class="fn">PCD_Init</span>();
+  Serial.<span class="fn">println</span>(<span class="str">"Hold card near reader..."</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="kw">if</span> (!rfid.<span class="fn">PICC_IsNewCardPresent</span>()) <span class="kw">return</span>;
+  <span class="kw">if</span> (!rfid.<span class="fn">PICC_ReadCardSerial</span>()) <span class="kw">return</span>;
+  Serial.<span class="fn">print</span>(<span class="str">"UID:"</span>);
+  <span class="kw">for</span> (<span class="kw">byte</span> i = <span class="num">0</span>; i &lt; rfid.uid.size; i++) {
+    Serial.<span class="fn">print</span>(<span class="str">" "</span>);
+    Serial.<span class="fn">print</span>(rfid.uid.uidByte[i], HEX);
+  }
+  Serial.<span class="fn">println</span>();
+  rfid.<span class="fn">PICC_HaltA</span>();
+}</pre>
+</div>
+<div class="note">💡 Use the context menu during simulation to toggle "Card Present" and trigger an RFID scan.</div>
+
+<script>
+function copyCode(btn) {
+  navigator.clipboard.writeText(btn.nextElementSibling.innerText).then(() => {
+    btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+function openSimulator() {
+  const code = ["#include <SPI.h>","#include <MFRC522.h>","#define RST_PIN 9","#define SS_PIN 10","MFRC522 rfid(SS_PIN,RST_PIN);","void setup(){Serial.begin(9600);SPI.begin();rfid.PCD_Init();}","void loop(){if(!rfid.PICC_IsNewCardPresent())return;if(!rfid.PICC_ReadCardSerial())return;Serial.print('UID:');for(byte i=0;i<rfid.uid.size;i++){Serial.print(' ');Serial.print(rfid.uid.uidByte[i],HEX);}Serial.println();rfid.PICC_HaltA();}"].join("\n"); 
+  const diagram = { 
+    version:1, 
+    board:"arduino_uno", 
+    components:[
+      {id:"uno_1",type:"openhw-arduino-uno",x:80,y:150,attrs:{}},
+      {id:"rfid_1",type:"openhw-mfrc522",x:420,y:130,attrs:{cardUID:"DE AD BE EF",cardPresent:"false"}}
+    ], 
+    connections:[
+      ["uno_1:3.3V","rfid_1:3V3","red",[]],
+      ["uno_1:GND.2","rfid_1:GND","black",[]],
+      ["uno_1:9","rfid_1:RST","orange",[]],
+      ["uno_1:10","rfid_1:SDA","yellow",[]],
+      ["uno_1:11","rfid_1:MOSI","blue",[]],
+      ["uno_1:12","rfid_1:MISO","green",[]],
+      ["uno_1:13","rfid_1:SCK","purple",[]]
+    ], 
+    code 
+  }; 
+  window.open("http://localhost:5173/simulator?circuit="+encodeURIComponent(JSON.stringify(diagram)),"_blank");
+}
+</script>
+</body>
+</html>

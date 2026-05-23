@@ -1,4 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
+import { I2CProtocol } from '../../protocol-handlers/index';
 
 // DS1307 Real-Time Clock — I2C address 0x68
 //
@@ -17,10 +18,9 @@ function toBCD(val: number): number {
     return ((Math.floor(val / 10) << 4) | (val % 10));
 }
 
-export class DS1307RTCLogic extends BaseComponent {
+export class DS1307RTCLogic extends I2CProtocol {
     private startTime: number = Date.now();
     private baseDate: Date;
-    private registerPointer: number = 0;
     private powered: boolean = false;
 
     constructor(id: string, manifest: any) {
@@ -30,6 +30,7 @@ export class DS1307RTCLogic extends BaseComponent {
         this.startTime = Date.now();
 
         this.state = {
+            ...this.state,
             powered:  false,
             datetime: dt,
             display:  this.formatDisplay(this.baseDate),
@@ -57,37 +58,11 @@ export class DS1307RTCLogic extends BaseComponent {
         });
     }
 
-    private selected: boolean = false;
-    private expectingRegister: boolean = true;
-
-    // I2C interface
-    onI2CStart(address: number, read: boolean): boolean {
-        const addr7 = (address > 0x7F) ? (address >> 1) : address;
-        this.selected = (addr7 === DS1307_ADDRESS);
-        this.expectingRegister = !read;
-        return this.selected;
+    onI2CWriteRegister(reg: number, data: number[]): void {
+        // Simulation time is read-only from the PC, so we ignore writes.
     }
 
-    onI2CByte(address: number, data: number): boolean {
-        if (!this.selected) return false;
-        
-        if (this.expectingRegister) {
-            this.registerPointer = data;
-            this.expectingRegister = false;
-        } else {
-            // Write data to registerPointer
-            // (We ignore the write data since simulation time is read-only from the PC)
-            this.registerPointer = (this.registerPointer + 1) % 8;
-        }
-        return true;
-    }
-
-    onI2CStop(): void {
-        this.selected = false;
-        this.expectingRegister = true;
-    }
-
-    readI2CByte(): number {
+    onI2CReadRequest(reg: number, count: number): number[] {
         const now = this.currentDate();
         const regs: Record<number, number> = {
             0: toBCD(now.getSeconds()),
@@ -99,8 +74,20 @@ export class DS1307RTCLogic extends BaseComponent {
             6: toBCD(now.getFullYear() % 100),
             7: 0x00, // control register
         };
-        const val = regs[this.registerPointer] ?? 0xFF;
-        this.registerPointer = (this.registerPointer + 1) % 8;
-        return val;
+
+        const result: number[] = [];
+        let ptr = reg;
+        for (let i = 0; i < count; i++) {
+            result.push(regs[ptr] ?? 0xFF);
+            ptr = (ptr + 1) % 8;
+        }
+        return result;
+    }
+
+    onCustomTelemetry() {
+        this.setCustomTelemetry({
+            time: this.state.display,
+            running: this.state.powered ? "Yes" : "No"
+        });
     }
 }

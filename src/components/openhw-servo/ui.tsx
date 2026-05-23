@@ -21,6 +21,8 @@ export const ServoUI = ({ state, attrs }: { state: any, attrs: any }) => {
         }}>
             {React.createElement('wokwi-servo', {
                 angle: state?.angle || attrs?.angle || 0,
+                hornColor: attrs?.hornColor || attrs?.['horn-color'] || attrs?.color || 'white',
+                'horn-color': attrs?.hornColor || attrs?.['horn-color'] || attrs?.color || 'white',
                 ...attrs,
                 style: {
                     display: 'block',

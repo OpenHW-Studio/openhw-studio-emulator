@@ -1,48 +1,41 @@
 import { BaseComponent } from '../BaseComponent';
+import { PulseProtocol } from '../../protocol-handlers/index';
 
-export class HCSR04Logic extends BaseComponent {
-    private lastTrigHigh = 0;
+export class HCSR04Logic extends PulseProtocol {
     private isEchoing = false;
-    private echoEndCycle = 0;
     attrs: any;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
         this.attrs = manifest.attrs || {};
-        this.state = { distance: parseFloat(this.attrs.distance || '100') };
+        this.state = { 
+            ...this.state,
+            distance: parseFloat(this.attrs.distance || '100') 
+        };
     }
 
-    onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number) {
-        if (pinId === 'TRIG') {
-            if (isHigh) {
-                this.lastTrigHigh = cpuCycles;
-            } else if (this.lastTrigHigh > 0) {
-                const trigDurationUs = (cpuCycles - this.lastTrigHigh) / 16;
-                if (trigDurationUs >= 10) {
-                    this.startEcho(cpuCycles);
-                }
-                this.lastTrigHigh = 0;
-            }
+    onPulseReceived(pinId: string, isHighPulse: boolean, durationUs: number): void {
+        // HC-SR04 triggers when TRIG pin receives a HIGH pulse of at least 10us
+        if (pinId === 'TRIG' && isHighPulse && durationUs >= 10) {
+            this.startEcho();
         }
     }
 
-    private startEcho(cpuCycles: number) {
+    private startEcho() {
         if (this.isEchoing) return;
 
         const distance = parseFloat(this.attrs?.distance || '100');
         const echoDurationUs = distance * 58;
-        const echoDurationCycles = Math.floor(echoDurationUs * 16);
 
         this.isEchoing = true;
-        this.echoEndCycle = cpuCycles + echoDurationCycles;
-        this.setPinVoltage('ECHO', 5);
+        // Output HIGH pulse on ECHO pin
+        this.sendPulse('ECHO', true, echoDurationUs, 0.0);
     }
 
     update(cpuCycles: number, wires: any[], instances: BaseComponent[]) {
         super.update(cpuCycles, wires, instances);
-
-        if (this.isEchoing && cpuCycles >= this.echoEndCycle) {
-            this.setPinVoltage('ECHO', 0);
+        // If ECHO pin went low, echoing is done
+        if (this.isEchoing && this.getPinVoltage('ECHO') < 2.5) {
             this.isEchoing = false;
         }
     }

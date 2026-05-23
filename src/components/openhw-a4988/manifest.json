@@ -40,8 +40,8 @@
     },
     "autocoding": {
         "arduino": {
-            "setup": "pinMode(8, OUTPUT);\npinMode(9, OUTPUT);\npinMode(10, OUTPUT);\ndigitalWrite(10, LOW);",
-            "loop": "digitalWrite(9, HIGH);\nfor(int i=0;i<200;i++){digitalWrite(8,HIGH);delayMicroseconds(1000);digitalWrite(8,LOW);delayMicroseconds(1000);}\ndelay(500);\ndigitalWrite(9, LOW);\nfor(int i=0;i<200;i++){digitalWrite(8,HIGH);delayMicroseconds(1000);digitalWrite(8,LOW);delayMicroseconds(1000);}\ndelay(500);"
+            "setup": "pinMode(${STEP}, OUTPUT);\npinMode(${DIR}, OUTPUT);\npinMode(${ENABLE}, OUTPUT);\ndigitalWrite(${ENABLE}, LOW);",
+            "loop": "digitalWrite(${DIR}, HIGH);\nfor(int i_${COMP_SUFFIX}=0;i_${COMP_SUFFIX}<200;i_${COMP_SUFFIX}++){digitalWrite(${STEP},HIGH);delayMicroseconds(1000);digitalWrite(${STEP},LOW);delayMicroseconds(1000);}\ndelay(500);\ndigitalWrite(${DIR}, LOW);\nfor(int i_${COMP_SUFFIX}=0;i_${COMP_SUFFIX}<200;i_${COMP_SUFFIX}++){digitalWrite(${STEP},HIGH);delayMicroseconds(1000);digitalWrite(${STEP},LOW);delayMicroseconds(1000);}\ndelay(500);"
         }
     }
 }

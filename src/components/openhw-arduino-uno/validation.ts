@@ -3,61 +3,7 @@ import type { ComponentValidationRule } from '../component-schema.js';
 
 export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
-        {
-            id: 'arduino-uno-floating-pins',
-            name: 'Floating Pins Check',
-            severity: 'warn',
-            priority: 10,
-            description: 'Detect MCU pins that float through a pushbutton without a pull resistor.',
-            check: (component: any, graph: Map<string, string[]>, validator: any) => {
-                const digitalPins = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"];
-                const issues = [];
 
-                digitalPins.forEach(pinName => {
-                    const pinNode = `${component.id}.${pinName}`;
-                    let hasPathToPowerOrGnd = false;
-                    let isFloating = false;
-
-                    const queue: [string, Set<string>][] = [[pinNode, new Set([pinNode])]];
-
-                    while (queue.length > 0) {
-                        const [currentNode, visited] = queue.shift()!;
-
-                        if (currentNode.endsWith(".5V") || currentNode.endsWith(".gnd") || currentNode.match(/gnd_\d+/)) {
-                            hasPathToPowerOrGnd = true;
-                            break;
-                        }
-
-                        const neighbors = graph.get(currentNode) || [];
-                        for (const neighbor of neighbors) {
-                            if (!visited.has(neighbor)) {
-                                const newVisited = new Set(visited);
-                                newVisited.add(neighbor);
-
-                                const comp = validator?.getComponent(neighbor);
-                                if (comp && (comp.type === "openhw-pushbutton" || comp.type === "openhw-pushbutton")) {
-                                    isFloating = true;
-                                    continue;
-                                }
-                                queue.push([neighbor, newVisited]);
-                            }
-                        }
-                    }
-
-                    if (isFloating && !hasPathToPowerOrGnd) {
-                        issues.push(createValidationIssue({
-                            ruleId: 'arduino-uno-floating-pins',
-                            severity: 'warn',
-                            message: `👻 [Arduino ${component.id}] FLOATING PIN: ${pinNode} is connected to a switch but lacks a pull-up/pull-down resistor. The MCU will read random noise!`,
-                            compIds: [component.id],
-                            remediation: 'Add a pull-up or pull-down resistor.',
-                        }));
-                    }
-                });
-
-                return issues.length > 0 ? issues : null;
-            }
-        },
         {
             id: 'arduino-uno-i2c-pullups',
             name: 'I2C Pullups Check',

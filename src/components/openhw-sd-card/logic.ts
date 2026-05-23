@@ -1,4 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
+import { SPIProtocol } from '../../protocol-handlers/index';
 
 const LITTLEFS_MODULE_NAME = 'littlefs';
 const SD_BLOCK_SIZE = 512;
@@ -157,7 +158,7 @@ function createLittleFsVolume(
     };
 }
 
-export class SDCardLogic extends BaseComponent {
+export class SDCardLogic extends SPIProtocol {
     private powered = false;
     private csHigh = true;
     private mounted = true;
@@ -506,7 +507,8 @@ export class SDCardLogic extends BaseComponent {
         return new Uint8Array(found);
     }
 
-    onPinStateChange(pinId: string, isHigh: boolean) {
+    onPinStateChange(pinId: string, isHigh: boolean, cycles: number) {
+        super.onPinStateChange(pinId, isHigh, cycles);
         const pin = String(pinId || '').toUpperCase();
         if (pin === 'CS') {
             this.csHigh = isHigh;
@@ -524,7 +526,7 @@ export class SDCardLogic extends BaseComponent {
         }
     }
 
-    onSPIByte(value: number) {
+    onSPIByteExchange(value: number, index: number) {
         this.refreshPowerState();
 
         if (!this.mounted || !this.powered || this.csHigh) {

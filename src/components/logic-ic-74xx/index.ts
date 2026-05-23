@@ -2,7 +2,7 @@ import { validation } from './validation';
 import manifest from './manifest.json';
 import { LogicIC74xxLogic } from './logic';
 import { LogicIC74xxUI, LogicIC74xxContextMenu, BOUNDS } from './ui';
-import docHtml from './doc/index.html?raw';
+const docHtml = '';
 
 export default {
     manifest,

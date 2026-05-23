@@ -3,8 +3,17 @@ import manifest from './manifest.json';
 
 export const BOUNDS = { x: 0, y: 0, w: manifest.w, h: manifest.h };
 
-export const MiniBreadboardUI = () => {
+export const MiniBreadboardUI = ({ attrs }: { attrs?: any }) => {
     const { w, h, pins } = manifest;
+
+    const colorAttr = attrs?.color || 'white';
+    let bgFill = "#fbfbf6";
+    if (colorAttr === 'black') bgFill = "#1e293b";
+    else if (colorAttr === 'blue') bgFill = "#1e40af";
+    else if (colorAttr === 'red') bgFill = "#991b1b";
+    else if (colorAttr === 'green') bgFill = "#166534";
+    else if (colorAttr === 'yellow') bgFill = "#ca8a04";
+    else if (colorAttr === 'transparent') bgFill = "#cbd5e188";
 
     // Draw lines for power rails based on known Y coordinates
     const startX = 15;
@@ -14,7 +23,7 @@ export const MiniBreadboardUI = () => {
     return (
         <svg width="100%" height="100%" viewBox={`0 0 ${w} ${h}`} xmlns="http://www.w3.org/2000/svg">
             {/* Base board */}
-            <rect width={w} height={h} fill="#fbfbf6" rx="10" stroke="#dddddd" strokeWidth="2" />
+            <rect width={w} height={h} fill={bgFill} rx="10" stroke="#dddddd" strokeWidth="2" />
 
             {/* Middle Valley Line */}
             <rect x={startX - 10} y={startY + 15 * 5} width={endX - startX + 20} height={10} fill="#eeeeee" />

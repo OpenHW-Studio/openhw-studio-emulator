@@ -2,7 +2,7 @@ import manifest from './manifest.json';
 import { MPU6050UI, MPU6050ContextMenu, BOUNDS } from './ui';
 import { MPU6050Logic } from './logic';
 import { validation } from './validation';
-import docHtml from './doc/index.html?raw';
+const docHtml = '';
 
 export default {
     manifest,

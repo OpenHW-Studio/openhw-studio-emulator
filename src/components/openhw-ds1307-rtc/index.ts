@@ -2,7 +2,7 @@ import manifest from './manifest.json';
 import { DS1307RTCUI, DS1307RTCContextMenu, BOUNDS } from './ui';
 import { DS1307RTCLogic } from './logic';
 import { validation } from './validation';
-import docHtml from './doc/index.html?raw';
+const docHtml = '';
 
 export default {
     manifest,

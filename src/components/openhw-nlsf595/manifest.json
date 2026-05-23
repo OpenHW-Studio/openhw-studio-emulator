@@ -14,5 +14,26 @@
         { "id": "R1",   "x": 118, "y": 11, "type": "digital" },
         { "id": "G1",   "x": 118, "y": 26, "type": "digital" },
         { "id": "B1",   "x": 118, "y": 41, "type": "digital" }
-    ]
+    ],
+    "telemetry": {
+      "template": "Data=${state.data}, Latch=${state.latch}, Clock=${state.clock}",
+      "criticalKeys": ["state.data"]
+    },
+    "autowiring": {
+      "connections": [
+        { "from": "GND", "to": "arduino:GND" },
+        { "from": "VCC", "to": "arduino:5V" },
+        { "from": "MOSI", "to": "arduino:11" },
+        { "from": "SCK", "to": "arduino:13" },
+        { "from": "CS", "to": "arduino:10" }
+      ]
+    },
+    "autocoding": {
+      "libraries": [],
+      "arduino": {
+        "globals": "const int latchPin_${COMP_SUFFIX} = 10;\nconst int clockPin_${COMP_SUFFIX} = 13;\nconst int dataPin_${COMP_SUFFIX} = 11;",
+        "setup": "pinMode(latchPin_${COMP_SUFFIX}, OUTPUT);\npinMode(clockPin_${COMP_SUFFIX}, OUTPUT);\npinMode(dataPin_${COMP_SUFFIX}, OUTPUT);",
+        "loop": "digitalWrite(latchPin_${COMP_SUFFIX}, LOW);\nshiftOut(dataPin_${COMP_SUFFIX}, clockPin_${COMP_SUFFIX}, MSBFIRST, 255);\ndigitalWrite(latchPin_${COMP_SUFFIX}, HIGH);\ndelay(1000);\ndigitalWrite(latchPin_${COMP_SUFFIX}, LOW);\nshiftOut(dataPin_${COMP_SUFFIX}, clockPin_${COMP_SUFFIX}, MSBFIRST, 0);\ndigitalWrite(latchPin_${COMP_SUFFIX}, HIGH);\ndelay(1000);"
+      }
+    }
 }
