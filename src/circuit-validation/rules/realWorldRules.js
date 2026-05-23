@@ -379,7 +379,7 @@ export function validateFloatingPins(validator) {
                     }
 
                     const currentComp = validator.getComponent(currentNode);
-                    if (currentComp && validator.isType(currentComp, 'openhw-pushbutton')) {
+                    if (currentComp && validator.isType(currentComp, 'openhw-pushbutton', 'openhw-pushbutton-6mm')) {
                         continue;
                     }
 
@@ -395,7 +395,7 @@ export function validateFloatingPins(validator) {
                         const nextVisited = new Set(visited);
                         nextVisited.add(nextNode);
                         const nextComp = validator.getComponent(nextNode);
-                        const nextThroughSwitch = throughSwitch || validator.isType(nextComp, 'openhw-pushbutton');
+                        const nextThroughSwitch = throughSwitch || validator.isType(nextComp, 'openhw-pushbutton', 'openhw-pushbutton-6mm');
 
                         queue.push([nextNode, nextThroughSwitch, nextVisited]);
                     }

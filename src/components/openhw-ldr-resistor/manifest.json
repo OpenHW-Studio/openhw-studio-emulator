@@ -1,0 +1,66 @@
+{
+  "type": "openhw-ldr-resistor",
+  "label": "LDR Resistor",
+  "group": "Passives",
+  "w": 60,
+  "h": 12,
+  "attrs": {
+    "lux": "100",
+    "gamma": "0.7",
+    "r10": "10000"
+  },
+  "pins": [
+    {
+      "id": "p1",
+      "x": 0,
+      "y": 6,
+      "type": "passive"
+    },
+    {
+      "id": "p2",
+      "x": 60,
+      "y": 6,
+      "type": "passive"
+    }
+  ],
+  "telemetry": {
+    "default": {
+      "title": "LDR Resistor",
+      "metrics": [
+        {
+          "key": "resistance",
+          "type": "number",
+          "label": "Resistance (Ω)"
+        },
+        {
+          "key": "lux",
+          "type": "number",
+          "label": "Light Intensity (lux)"
+        },
+        {
+          "key": "voltage",
+          "type": "number",
+          "label": "Voltage (V)"
+        },
+        {
+          "key": "current",
+          "type": "number",
+          "label": "Current (mA)"
+        }
+      ]
+    }
+  },
+  "autowiring": {
+    "rules": [
+      {
+        "from": { "components": ["resistor"], "pins": ["p2"] },
+        "to": "p2",
+        "description": "Pairs with resistor to create voltage divider"
+      }
+    ]
+  },
+  "autocoding": {
+    "includes": [],
+    "code": "// LDR Resistor - use analogRead(A0) or A1 to measure voltage\n// Connect LDR and pull-up resistor in series for voltage divider\nint sensorValue = analogRead(A0);  // 0-1023\nfloat voltage = sensorValue * 5.0 / 1024.0;  // Convert to 0-5V"
+  }
+}

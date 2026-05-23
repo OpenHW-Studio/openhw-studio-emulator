@@ -2,8 +2,8 @@
 export { BaseComponent } from './BaseComponent';
 export { default as openhwLed } from './openhw-led';
 export { default as openhwArduinoUno } from './openhw-arduino-uno';
-export { default as openhwPico } from './openhw-pico/index.ts';
-export { default as openhwPicoW } from './openhw-pico-w/index.ts';
+export { default as openhwPico } from './openhw-pico';
+export { default as openhwPicoW } from './openhw-pico-w';
 export { default as openhwResistor } from './openhw-resistor';
 export { default as openhwPushbutton } from './openhw-pushbutton';
 export { default as openhwPowerSupply } from './openhw-power-supply';
@@ -23,6 +23,7 @@ export { default as openhwLcd2004I2C } from './openhw-lcd2004-i2c';
 export { default as openhwLcd1602I2C } from './openhw-lcd1602-i2c';
 export { default as openhwLcd1602 } from './openhw-lcd1602';
 export { default as openhwLdrModule } from './openhw-ldr-module';
+export { default as openhwLdrResistor } from './openhw-ldr-resistor';
 export { default as max30102 } from './max30102';
 export { default as openhwSdCard } from './openhw-sd-card';
 export { default as openhwMembraneKeypad } from './openhw-membrane-keypad';
@@ -57,9 +58,11 @@ export { default as openhwBmp180 } from './openhw-bmp180';
 export { default as openhwDs1307Rtc } from './openhw-ds1307-rtc';
 export { default as openhwMpu6050 } from './openhw-mpu6050';
 export { default as openhwNtcThermistor } from './openhw-ntc-thermistor';
-export { default as openhwRelayModule } from './openhw-relay-module';
-
-
+export { default as openhwDht11 } from './openhw-dht11';
+export { default as openhwStm32BluePill } from './openhw-stm32-bluepill';
+export { default as openhwDipswitch8 } from './openhw-dipswitch-8';
+export { default as openhwPushbutton6mm } from './openhw-pushbutton-6mm';
+export { default as openhwSlideswitchSpdt } from './openhw-slideswitch-spdt';
 export { default as logicMux2to1 } from './logic-mux-2to1';
 export { default as logicDFlipFlop } from './logic-d-flipflop';
 export { default as logicDFlipFlopR } from './logic-d-flipflop-r';

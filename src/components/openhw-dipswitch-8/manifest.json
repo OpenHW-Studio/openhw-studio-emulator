@@ -1,0 +1,51 @@
+{
+    "type": "openhw-dipswitch-8",
+    "label": "8-Position DIP Switch",
+    "description": "8-position Dual In-line Package (DIP) switch. Contains 8 independent SPST switches to control 8 separate circuits.",
+    "group": "Basic",
+    "w": 135,
+    "h": 75,
+    "attrs": {
+        "breadboard": {
+            "anchorPin": "1",
+            "ravine": true
+        }
+    },
+    "telemetry": {
+        "template": "switches=${state.switches.join(',')}",
+        "criticalKeys": [
+            "state.switches"
+        ]
+    },
+    "pins": [
+        { "id": "1", "x": 15, "y": 0, "type": "passive", "description": "Switch 1 Input" },
+        { "id": "2", "x": 30, "y": 0, "type": "passive", "description": "Switch 2 Input" },
+        { "id": "3", "x": 45, "y": 0, "type": "passive", "description": "Switch 3 Input" },
+        { "id": "4", "x": 60, "y": 0, "type": "passive", "description": "Switch 4 Input" },
+        { "id": "5", "x": 75, "y": 0, "type": "passive", "description": "Switch 5 Input" },
+        { "id": "6", "x": 90, "y": 0, "type": "passive", "description": "Switch 6 Input" },
+        { "id": "7", "x": 105, "y": 0, "type": "passive", "description": "Switch 7 Input" },
+        { "id": "8", "x": 120, "y": 0, "type": "passive", "description": "Switch 8 Input" },
+        
+        { "id": "1B", "x": 15, "y": 75, "type": "passive", "description": "Switch 1 Output" },
+        { "id": "2B", "x": 30, "y": 75, "type": "passive", "description": "Switch 2 Output" },
+        { "id": "3B", "x": 45, "y": 75, "type": "passive", "description": "Switch 3 Output" },
+        { "id": "4B", "x": 60, "y": 75, "type": "passive", "description": "Switch 4 Output" },
+        { "id": "5B", "x": 75, "y": 75, "type": "passive", "description": "Switch 5 Output" },
+        { "id": "6B", "x": 90, "y": 75, "type": "passive", "description": "Switch 6 Output" },
+        { "id": "7B", "x": 105, "y": 75, "type": "passive", "description": "Switch 7 Output" },
+        { "id": "8B", "x": 120, "y": 75, "type": "passive", "description": "Switch 8 Output" }
+    ],
+    "autowiring": {
+        "connections": [
+            { "from": "1B", "to": "arduino:GND" },
+            { "from": "1", "to": "arduino:2" }
+        ]
+    },
+    "autocoding": {
+        "arduino": {
+            "setup": "Serial.begin(9600);\npinMode(${1}, INPUT_PULLUP);\nSerial.println(\"DIP Switch Ready\");",
+            "loop": "int sw1 = digitalRead(${1});\nSerial.print(\"Switch 1: \");\nSerial.println(sw1 == HIGH ? \"OPEN/HIGH\" : \"CLOSED/LOW\");\ndelay(200);"
+        }
+    }
+}

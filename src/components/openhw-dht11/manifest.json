@@ -1,0 +1,19 @@
+{
+  "type": "openhw-dht11",
+  "label": "DHT11 Sensor",
+  "group": "Sensor",
+  "description": "Temperature and Humidity Sensor (4-pin)",
+  "w": 75,
+  "h": 60,
+  "attrs": {
+    "temperature": "25",
+    "humidity": "50",
+    "breadboard": { "anchorPin": "VCC" }
+  },
+  "pins": [
+    { "id": "VCC", "x": 15, "y": 60, "type": "power", "description": "Power Supply" },
+    { "id": "DATA", "x": 30, "y": 60, "type": "digital_inout", "description": "Data out" },
+    { "id": "NC", "x": 45, "y": 60, "type": "unconnected", "description": "Not connected" },
+    { "id": "GND", "x": 60, "y": 60, "type": "power", "description": "Ground" }
+  ]
+}

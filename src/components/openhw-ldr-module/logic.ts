@@ -20,6 +20,12 @@ export class LdrModuleLogic extends BaseComponent {
         }
     }
 
+    // Set light intensity (for context menu updates)
+    setLux(luxValue: number) {
+        this.state.lux = Math.max(0, luxValue);
+        this.stateChanged = true;
+    }
+
     update() {
         const vcc = this.getPinVoltage('VCC');
         const gnd = this.getPinVoltage('GND');

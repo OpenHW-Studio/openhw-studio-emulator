@@ -353,5 +353,54 @@ export const validationCases = [
                 { from: 'uno1.5V', to: 'oled.VCC' }
             ]
         }
+    },
+    {
+        name: 'dipswitch_8_isolated_warning',
+        expectPass: true,
+        expectMessageIncludes: 'Warning: Component is completely disconnected',
+        project: {
+            components: [
+                {
+                    id: 'dip_1',
+                    type: 'openhw-dipswitch-8',
+                    pins: [
+                        { id: '1', type: 'passive' },
+                        { id: '1B', type: 'passive' }
+                    ],
+                    validation: {
+                        rules: [
+                            {
+                                id: 'dipswitch-8-floating-check',
+                                severity: 'warn',
+                                priority: 10,
+                                check(component, graph) {
+                                    let anyConnected = false;
+                                    for (let i = 1; i <= 8; i++) {
+                                        const pA = graph.get(`${component.id}.${i}`);
+                                        const pB = graph.get(`${component.id}.${i}B`);
+                                        if ((pA && pA.length > 0) || (pB && pB.length > 0)) {
+                                            anyConnected = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!anyConnected) {
+                                        return {
+                                            id: 'dipswitch-8-floating-check',
+                                            ruleId: 'dipswitch-8-floating-check',
+                                            severity: 'warn',
+                                            message: 'Warning: Component is completely disconnected.',
+                                            compIds: [component.id],
+                                            remediation: 'Connect wires to the top (1-8) and bottom (1B-8B) pins.',
+                                        };
+                                    }
+                                    return null;
+                                }
+                            }
+                        ]
+                    }
+                }
+            ],
+            connections: []
+        }
     }
 ];

@@ -31,12 +31,19 @@ export class FullCircuitValidator {
 
         this.componentSpecs = {
             'wokwi-resistor': { maxPowerW: 0.25 },
+            'openhw-resistor': { maxPowerW: 0.25 },
             'wokwi-potentiometer': { maxPowerW: 0.25, totalResistance: 10000 },
+            'openhw-potentiometer': { maxPowerW: 0.25, totalResistance: 10000 },
             'wokwi-slide-potentiometer': { maxPowerW: 0.25, totalResistance: 10000 },
+            'openhw-slide-potentiometer': { maxPowerW: 0.25, totalResistance: 10000 },
             'wokwi-led': { forwardVoltage: 2.0, maxCurrentA: 0.02, reverseBreakdownVoltage: 5.0 },
+            'openhw-led': { forwardVoltage: 2.0, maxCurrentA: 0.02, reverseBreakdownVoltage: 5.0 },
             'wokwi-buzzer': { typicalCurrentA: 0.03 },
+            'openhw-buzzer': { typicalCurrentA: 0.03 },
             'wokwi-motor': { typicalCurrentA: 0.25 },
+            'openhw-motor': { typicalCurrentA: 0.25 },
             'wokwi-servo': { typicalCurrentA: 0.5 },
+            'openhw-servo': { typicalCurrentA: 0.5 },
         };
     }
 
@@ -524,7 +531,8 @@ export class FullCircuitValidator {
             'potentiometer',
             'switch',
             'wokwi-pushbutton',
-            'openhw-pushbutton'
+            'openhw-pushbutton',
+            'openhw-pushbutton-6mm'
         );
     }
 
@@ -541,7 +549,7 @@ export class FullCircuitValidator {
             return Math.max(0, this.getComponentAttrNumber(component, 'value', specResistance));
         }
 
-        if (this.isType(component, 'switch', 'wokwi-pushbutton', 'openhw-pushbutton')) {
+        if (this.isType(component, 'switch', 'wokwi-pushbutton', 'openhw-pushbutton', 'openhw-pushbutton-6mm')) {
             return 0;
         }
 

@@ -1,0 +1,38 @@
+{
+    "type": "openhw-slideswitch-spdt",
+    "label": "SPDT Slide Switch",
+    "description": "Single-pole double-throw (SPDT) slide switch. Connects the middle common pin (COM) to either terminal 1 (left) or terminal 2 (right).",
+    "group": "Basic",
+    "w": 60,
+    "h": 45,
+    "attrs": {
+        "breadboard": {
+            "anchorPin": "COM",
+            "ravine": false
+        }
+    },
+    "telemetry": {
+        "template": "position=${state.position}",
+        "criticalKeys": [
+            "state.position"
+        ]
+    },
+    "pins": [
+        { "id": "1", "x": 15, "y": 45, "type": "passive", "description": "Terminal 1" },
+        { "id": "COM", "x": 30, "y": 45, "type": "passive", "description": "Common Terminal" },
+        { "id": "2", "x": 45, "y": 45, "type": "passive", "description": "Terminal 2" }
+    ],
+    "autowiring": {
+        "connections": [
+            { "from": "COM", "to": "arduino:2" },
+            { "from": "1", "to": "arduino:5V" },
+            { "from": "2", "to": "arduino:GND" }
+        ]
+    },
+    "autocoding": {
+        "arduino": {
+            "setup": "Serial.begin(9600);\npinMode(${1}, INPUT_PULLUP);\nSerial.println(\"SPDT Switch Ready\");",
+            "loop": "int switchState = digitalRead(${1});\nSerial.print(\"Switch: \");\nSerial.println(switchState == HIGH ? \"HIGH (Right/Open)\" : \"LOW (Left/Closed)\");\ndelay(200);"
+        }
+    }
+}

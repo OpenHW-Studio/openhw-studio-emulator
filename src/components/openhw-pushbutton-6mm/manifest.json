@@ -1,0 +1,22 @@
+{
+    "type": "openhw-pushbutton-6mm",
+    "label": "6mm Push Button",
+    "description": "4-pin momentary tactile push button.",
+    "group": "Basic",
+    "w": 50,
+    "h": 50,
+    "attrs": { "breadboard": { "anchorPin": "1A", "ravine": true } },
+    "telemetry": { "template": "pressed=${state.pressed}", "criticalKeys": ["state.pressed"] },
+    "pins": [
+        { "id": "1A", "x": 0, "y": 10, "type": "passive", "description": "Terminal 1A" },
+        { "id": "1B", "x": 0, "y": 40, "type": "passive", "description": "Terminal 1B" },
+        { "id": "2A", "x": 45, "y": 10, "type": "passive", "description": "Terminal 2A" },
+        { "id": "2B", "x": 45, "y": 40, "type": "passive", "description": "Terminal 2B" }
+    ],
+    "autowiring": {
+        "connections": [
+            { "from": "1A", "to": "arduino:2" },
+            { "from": "2A", "to": "arduino:GND" }
+        ]
+    }
+}

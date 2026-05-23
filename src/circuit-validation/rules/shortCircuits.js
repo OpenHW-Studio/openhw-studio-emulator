@@ -44,7 +44,7 @@ export function validateShortCircuits(validator) {
                             queue.push([nextNode, newVisited, resistance + addedResistance]);
                             continue;
                         }
-                    } else if (validator.isType(comp, 'potentiometer', 'openhw-potentiometer', 'openhw-slide-potentiometer', 'switch', 'openhw-pushbutton')) {
+                    } else if (validator.isType(comp, 'potentiometer', 'openhw-potentiometer', 'openhw-slide-potentiometer', 'switch', 'openhw-pushbutton', 'openhw-pushbutton-6mm')) {
                         const nextNode = validator.getOtherTerminalNode(comp, neighbor);
                         if (nextNode) {
                             queue.push([nextNode, newVisited, resistance]);
