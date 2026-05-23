@@ -22,5 +22,25 @@
         { "id": "XCL", "x": 6, "y": 90, "type": "output",        "description": "Auxiliary I2C Clock" },
         { "id": "ADO", "x": 6, "y": 105, "type": "input",         "description": "I2C Slave Address LSB" },
         { "id": "INT", "x": 6, "y": 120, "type": "output",        "description": "Interrupt output" }
-    ]
+    ],
+    "telemetry": {
+      "template": "A=(${state.ax},${state.ay},${state.az}) G=(${state.gx},${state.gy},${state.gz}) T=${state.temp}",
+      "criticalKeys": ["state.ax", "state.gx", "state.temp"]
+    },
+    "autowiring": {
+      "connections": [
+        { "from": "GND", "to": "arduino:GND" },
+        { "from": "VCC", "to": "arduino:5V" },
+        { "from": "SDA", "to": "arduino:A4", "i2c": true },
+        { "from": "SCL", "to": "arduino:A5", "i2c": true }
+      ]
+    },
+    "autocoding": {
+      "libraries": ["Adafruit MPU6050", "Adafruit Unified Sensor"],
+      "arduino": {
+        "globals": "#include <Wire.h>\n#include <Adafruit_MPU6050.h>\n#include <Adafruit_Sensor.h>\nAdafruit_MPU6050 mpu_${COMP_SUFFIX};",
+        "setup": "if (!mpu_${COMP_SUFFIX}.begin()) {\n  Serial.println(\"Failed to find MPU6050 chip\");\n  while (1);\n}",
+        "loop": "sensors_event_t a_${COMP_SUFFIX}, g_${COMP_SUFFIX}, temp_${COMP_SUFFIX};\nmpu_${COMP_SUFFIX}.getEvent(&a_${COMP_SUFFIX}, &g_${COMP_SUFFIX}, &temp_${COMP_SUFFIX});\nSerial.print(\"Accel X: \"); Serial.println(a_${COMP_SUFFIX}.acceleration.x);\ndelay(500);"
+      }
+    }
 }

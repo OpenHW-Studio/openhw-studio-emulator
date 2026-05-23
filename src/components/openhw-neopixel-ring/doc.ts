@@ -40,8 +40,8 @@ export const doc = `
     <h2>Pin Reference</h2>
     <table class="pin-table">
       <tr><th>Pin</th><th>Type</th><th>Description</th></tr>
-      <tr><td>VDD</td><td>Power</td><td>Power supply (5V).</td></tr>
-      <tr><td>VSS</td><td>Power</td><td>Ground.</td></tr>
+      <tr><td>VCC</td><td>Power</td><td>Power supply (5V).</td></tr>
+      <tr><td>GND</td><td>Power</td><td>Ground.</td></tr>
       <tr><td>DIN</td><td>Input</td><td>Data In. Connect to microcontroller.</td></tr>
       <tr><td>DOUT</td><td>Output</td><td>Data Out. Connect to the DIN of another NeoPixel device.</td></tr>
     </table>

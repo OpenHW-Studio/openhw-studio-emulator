@@ -1,0 +1,44 @@
+{
+    "type": "openhw-adxl345",
+    "label": "ADXL345 Accelerometer",
+    "group": "Sensors",
+    "w": 94.5,
+    "h": 135,
+    "attrs": {
+        "accelX": "0",
+        "accelY": "0",
+        "accelZ": "1"
+    },
+    "pins": [
+        { "id": "GND", "x": 6, "y": 15,  "type": "input",         "description": "Ground" },
+        { "id": "VCC", "x": 6, "y": 30,  "type": "input",         "description": "Power (3V to 6V)" },
+        { "id": "CS", "x": 6, "y": 45,  "type": "input",         "description": "Chip Select" },
+        { "id": "INT1", "x": 6, "y": 60,  "type": "output",        "description": "Interrupt 1 Output" },
+        { "id": "INT2", "x": 6, "y": 75,  "type": "output",        "description": "Interrupt 2 Output" },
+        { "id": "SDO", "x": 6, "y": 90,  "type": "bidirectional", "description": "Serial Data Out / I2C Address Select" },
+        { "id": "SDA", "x": 6, "y": 105, "type": "bidirectional", "description": "Serial Data" },
+        { "id": "SCL", "x": 6, "y": 120, "type": "input",         "description": "Serial Clock" }
+    ],
+    "telemetry": {
+        "template": "X=${state.accelX}g, Y=${state.accelY}g, Z=${state.accelZ}g, Powered=${state.powered}",
+        "criticalKeys": ["state.accelX", "state.accelY", "state.accelZ"]
+    },
+    "autowiring": {
+        "connections": [
+            { "from": "GND", "to": "arduino:GND" },
+            { "from": "VCC", "to": "arduino:5V" },
+            { "from": "CS", "to": "arduino:5V" },
+            { "from": "SDO", "to": "arduino:GND" },
+            { "from": "SCL", "to": "arduino:A5", "i2c": true },
+            { "from": "SDA", "to": "arduino:A4", "i2c": true }
+        ]
+    },
+    "autocoding": {
+        "libraries": ["Adafruit ADXL345", "Adafruit Unified Sensor"],
+        "arduino": {
+            "globals": "#include <Wire.h>\n#include <Adafruit_Sensor.h>\n#include <Adafruit_ADXL345_U.h>\n\nAdafruit_ADXL345_Unified accel_${COMP_SUFFIX} = Adafruit_ADXL345_Unified(12345);",
+            "setup": "if(!accel_${COMP_SUFFIX}.begin()) {\n  Serial.println(\"No ADXL345 detected\");\n  while(1);\n}",
+            "loop": "sensors_event_t event_${COMP_SUFFIX};\naccel_${COMP_SUFFIX}.getEvent(&event_${COMP_SUFFIX});\nSerial.print(\"X: \"); Serial.print(event_${COMP_SUFFIX}.acceleration.x);\nSerial.print(\"  Y: \"); Serial.print(event_${COMP_SUFFIX}.acceleration.y);\nSerial.print(\"  Z: \"); Serial.print(event_${COMP_SUFFIX}.acceleration.z);\nSerial.println(\" m/s^2\");\ndelay(500);"
+        }
+    }
+}

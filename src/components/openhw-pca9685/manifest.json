@@ -477,5 +477,25 @@
             "y": 141,
             "type": "power"
         }
-    ]
+    ],
+    "telemetry": {
+      "template": "Channels Active=${state.activeCount}",
+      "criticalKeys": []
+    },
+    "autowiring": {
+      "connections": [
+        { "from": "GND", "to": "arduino:GND" },
+        { "from": "VCC_IN", "to": "arduino:5V" },
+        { "from": "SDA", "to": "arduino:A4", "i2c": true },
+        { "from": "SCL", "to": "arduino:A5", "i2c": true }
+      ]
+    },
+    "autocoding": {
+      "libraries": ["Adafruit PWM Servo Driver Library"],
+      "arduino": {
+        "globals": "#include <Wire.h>\n#include <Adafruit_PWMServoDriver.h>\nAdafruit_PWMServoDriver pwm_${COMP_SUFFIX} = Adafruit_PWMServoDriver();",
+        "setup": "pwm_${COMP_SUFFIX}.begin();\npwm_${COMP_SUFFIX}.setPWMFreq(60);",
+        "loop": "pwm_${COMP_SUFFIX}.setPWM(0, 0, 150);\ndelay(1000);\npwm_${COMP_SUFFIX}.setPWM(0, 0, 600);\ndelay(1000);"
+      }
+    }
 }

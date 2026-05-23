@@ -36,5 +36,26 @@
             "y": 67.5,
             "type": "power"
         }
-    ]
+    ],
+    "telemetry": {
+      "template": "Rot=${state.rot}, SW=${state.sw}",
+      "criticalKeys": ["state.rot", "state.sw"]
+    },
+    "autowiring": {
+      "connections": [
+        { "from": "GND", "to": "arduino:GND" },
+        { "from": "VCC", "to": "arduino:5V" },
+        { "from": "SW", "to": "arduino:4" },
+        { "from": "DT", "to": "arduino:3" },
+        { "from": "CLK", "to": "arduino:2" }
+      ]
+    },
+    "autocoding": {
+      "libraries": [],
+      "arduino": {
+        "globals": "const int clkPin_${COMP_SUFFIX} = 2;\nconst int dtPin_${COMP_SUFFIX} = 3;\nconst int swPin_${COMP_SUFFIX} = 4;\nint lastClk_${COMP_SUFFIX} = HIGH;",
+        "setup": "pinMode(clkPin_${COMP_SUFFIX}, INPUT_PULLUP);\npinMode(dtPin_${COMP_SUFFIX}, INPUT_PULLUP);\npinMode(swPin_${COMP_SUFFIX}, INPUT_PULLUP);\nSerial.begin(9600);",
+        "loop": "int clk_${COMP_SUFFIX} = digitalRead(clkPin_${COMP_SUFFIX});\nif(clk_${COMP_SUFFIX} != lastClk_${COMP_SUFFIX}) {\n  if(digitalRead(dtPin_${COMP_SUFFIX}) != clk_${COMP_SUFFIX}) Serial.println(\"Rotated CW\");\n  else Serial.println(\"Rotated CCW\");\n}\nlastClk_${COMP_SUFFIX} = clk_${COMP_SUFFIX};\nif(digitalRead(swPin_${COMP_SUFFIX}) == LOW) Serial.println(\"Button Pressed\");\ndelay(1);"
+      }
+    }
 }

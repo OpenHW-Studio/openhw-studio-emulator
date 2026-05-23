@@ -8,9 +8,28 @@
         "pixels": "16"
     },
     "pins": [
-        { "id": "VDD",  "x": 7.5, "y": 60, "type": "power" },
-        { "id": "VSS",  "x": 22.5, "y": 60, "type": "power" },
+        { "id": "VCC",  "x": 7.5, "y": 60, "type": "power" },
+        { "id": "GND",  "x": 22.5, "y": 60, "type": "power" },
         { "id": "DIN",  "x": 37.5, "y": 60, "type": "digital" },
         { "id": "DOUT", "x": 52.5, "y": 60, "type": "digital" }
-    ]
+    ],
+    "telemetry": {
+      "template": "Pixels=${state.count}, Brightness=${state.brightness}",
+      "criticalKeys": ["state.pixels"]
+    },
+    "autowiring": {
+      "connections": [
+        { "from": "GND", "to": "arduino:GND" },
+        { "from": "VCC", "to": "arduino:5V" },
+        { "from": "DIN", "to": "arduino:6" }
+      ]
+    },
+    "autocoding": {
+      "libraries": ["FastLED"],
+      "arduino": {
+        "globals": "#include <FastLED.h>\n#define NUM_LEDS_${COMP_SUFFIX} 16\nCRGB leds_${COMP_SUFFIX}[NUM_LEDS_${COMP_SUFFIX}];",
+        "setup": "FastLED.addLeds<NEOPIXEL, 6>(leds_${COMP_SUFFIX}, NUM_LEDS_${COMP_SUFFIX});",
+        "loop": "fill_solid(leds_${COMP_SUFFIX}, NUM_LEDS_${COMP_SUFFIX}, CRGB::Red);\nFastLED.show();\ndelay(500);\nfill_solid(leds_${COMP_SUFFIX}, NUM_LEDS_${COMP_SUFFIX}, CRGB::Black);\nFastLED.show();\ndelay(500);"
+      }
+    }
 }

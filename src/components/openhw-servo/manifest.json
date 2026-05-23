@@ -50,5 +50,9 @@
             "setup": "myServo_${COMP_SUFFIX}.attach(${PWM});\nmyServo_${COMP_SUFFIX}.write(0);\ndelay(500);",
             "loop": "for (int pos_${COMP_SUFFIX} = 0; pos_${COMP_SUFFIX} <= 180; pos_${COMP_SUFFIX}++) {\n  myServo_${COMP_SUFFIX}.write(pos_${COMP_SUFFIX});\n  delay(10);\n}\nfor (int pos_${COMP_SUFFIX} = 180; pos_${COMP_SUFFIX} >= 0; pos_${COMP_SUFFIX}--) {\n  myServo_${COMP_SUFFIX}.write(pos_${COMP_SUFFIX});\n  delay(10);\n}"
         }
+    },
+    "telemetry": {
+      "template": "Angle=${state.angle}°, Moving=${state.moving}",
+      "criticalKeys": ["state.angle"]
     }
 }

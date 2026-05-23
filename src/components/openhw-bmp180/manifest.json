@@ -39,5 +39,25 @@
       "type": "bidirectional",
       "description": "I2C Serial Data"
     }
-  ]
+  ],
+  "telemetry": {
+    "template": "Temp=${state.temp}°C, Pres=${state.pressure}Pa",
+    "criticalKeys": ["state.temp", "state.pressure"]
+  },
+  "autowiring": {
+    "connections": [
+      { "from": "GND", "to": "arduino:GND" },
+      { "from": "VIN", "to": "arduino:3V3" },
+      { "from": "SDA", "to": "arduino:A4", "i2c": true },
+      { "from": "SCL", "to": "arduino:A5", "i2c": true }
+    ]
+  },
+  "autocoding": {
+    "libraries": ["Adafruit BMP085 Library"],
+    "arduino": {
+      "globals": "#include <Wire.h>\n#include <Adafruit_BMP085.h>\nAdafruit_BMP085 bmp_${COMP_SUFFIX};",
+      "setup": "if (!bmp_${COMP_SUFFIX}.begin()) {\n  Serial.println(\"Could not find a valid BMP085 sensor, check wiring!\");\n  while (1) {}\n}",
+      "loop": "Serial.print(\"Temperature = \");\nSerial.print(bmp_${COMP_SUFFIX}.readTemperature());\nSerial.println(\" *C\");\ndelay(1000);"
+    }
+  }
 }
