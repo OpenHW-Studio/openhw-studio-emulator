@@ -7,7 +7,7 @@ export class SoilMoistureSensorLogic extends BaseComponent {
     }
 
     onPinStateChange() {
-        const vcc = this.getPinVoltage('VCC');
+        const vcc = this.getPinVoltage('VCC') || this.getPinVoltage('5V');
         if (vcc < 1.0) {
             this.setPinVoltage('SIG', 0);
             return;
@@ -24,7 +24,7 @@ export class SoilMoistureSensorLogic extends BaseComponent {
     }
 
     onCustomTelemetry() {
-        const vcc = this.getPinVoltage('VCC');
+        const vcc = this.getPinVoltage('VCC') || this.getPinVoltage('5V');
         const sig = this.getPinVoltage('SIG');
         
         this.setCustomTelemetry({
