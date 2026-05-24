@@ -5,6 +5,7 @@ export { default as openhwLed } from './openhw-led';
 export { default as openhwArduinoUno } from './openhw-arduino-uno';
 export { default as openhwPico } from './openhw-pico/index.ts';
 export { default as openhwPicoW } from './openhw-pico-w/index.ts';
+export { default as openhwEsp32 } from './ESP32/index.ts';
 export { default as openhwResistor } from './openhw-resistor';
 export { default as openhwPushbutton } from './openhw-pushbutton';
 export { default as openhwPowerSupply } from './openhw-power-supply';

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DHT22 Sensor - Comprehensive Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f7f9fc;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #1a365d;
+            border-bottom: 3px solid #e2e8f0;
+            padding-bottom: 15px;
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #2b6cb0;
+            margin-top: 40px;
+            font-size: 1.8em;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+        p {
+            font-size: 1.1em;
+            color: #4a5568;
+        }
+        .hero-img {
+            display: block;
+            margin: 30px auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .infobox {
+            background-color: #ebf8ff;
+            border-left: 5px solid #3182ce;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .infobox h4 {
+            margin-top: 0;
+            color: #2b6cb0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 1.1em;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #f7fafc;
+            color: #4a5568;
+        }
+        pre {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 1.05em;
+        }
+        .pin-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: white;
+        }
+        .pin-vcc { background-color: #e53e3e; }
+        .pin-sda { background-color: #3182ce; }
+        .pin-nc { background-color: #a0aec0; }
+        .pin-gnd { background-color: #000000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DHT22 Temperature & Humidity Sensor</h1>
+        
+        <p>The <strong>DHT22 (AM2302)</strong> is a basic, low-cost digital temperature and humidity sensor. It uses a capacitive humidity sensor and a thermistor to measure the surrounding air, and spits out a digital signal on the data pin (no analog input pins needed).</p>
+
+        <img src="./dht22_sensor.png" alt="DHT22 Sensor Diagram" class="hero-img" />
+
+        <h2>How It Works</h2>
+        <p>Inside the slotted plastic casing are two specialized sensors and a small 8-bit microcontroller:</p>
+        <ol>
+            <li><strong>Capacitive Humidity Sensor:</strong> Contains a moisture-absorbing substrate nestled between two electrodes. As it absorbs moisture, the capacitance changes, which the internal IC measures to determine relative humidity.</li>
+            <li><strong>NTC Thermistor:</strong> A component whose resistance decreases drastically as temperature increases. The IC uses this to calculate ambient temperature.</li>
+            <li><strong>Single Wire Protocol:</strong> The built-in IC converts the analog readings into a precisely-timed 40-bit digital signal (containing 16-bits for humidity, 16-bits for temperature, and an 8-bit checksum) and outputs it down the single DATA pin to the Arduino.</li>
+        </ol>
+
+        <h2>Hardware Pinout</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Pin</th>
+                    <th>Function</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="pin-tag pin-vcc">VCC</span></td>
+                    <td>Power supply. Connect to Arduino 5V (or 3.3V).</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-sda">DATA / SDA</span></td>
+                    <td>Digital signal output. Connect to any digital pin. Requires a pull-up resistor in hardware (emulated internally in OpenHW Studio).</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-nc">NC</span></td>
+                    <td>Not Connected. Do not wire.</td>
+                </tr>
+                <tr>
+                    <td><span class="pin-tag pin-gnd">GND</span></td>
+                    <td>Common ground connection.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Using the Emulator</h2>
+        <div class="infobox">
+            <h4>💡 Simulation Testing</h4>
+            <p>During a running simulation, a dark <strong>floating control panel</strong> with two sliders will appear beneath the DHT22 module in OpenHW Studio. Use these sliders to manually sweep the temperature and humidity values up and down. The simulated sensor will instantly feed these values to your code!</p>
+        </div>
+
+        <h2>Arduino Code Exampe</h2>
+        <p>You must install the <strong>DHT sensor library</strong> by Adafruit to use this component easily.</p>
+        
+        <pre><code>#include "DHT.h"
+
+// Define the pin and type
+#define DHTPIN 2     // Digital pin connected to the DHT sensor
+#define DHTTYPE DHT22   // DHT 22  (AM2302)
+
+// Initialize DHT sensor module
+DHT dht(DHTPIN, DHTTYPE);
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println(F("DHT22 Starting..."));
+  dht.begin();
+}
+
+void loop() {
+  // Wait a few seconds between measurements (the sensor is slow)
+  delay(2000);
+
+  // Read temperatures
+  float h = dht.readHumidity();
+  float t = dht.readTemperature(); // Read Temperature in Celsius
+
+  // Check if any reads failed
+  if (isnan(h) || isnan(t)) {
+    Serial.println(F("Failed to read from DHT sensor!"));
+    return;
+  }
+
+  Serial.print(F("Humidity: "));
+  Serial.print(h);
+  Serial.print(F("%  Temperature: "));
+  Serial.print(t);
+  Serial.println(F("°C "));
+}</code></pre>
+
+    </div>
+</body>
+</html>
