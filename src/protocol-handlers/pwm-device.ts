@@ -31,9 +31,13 @@ export class PWMProtocol extends BaseComponent {
     private isMonitoredPin(pinId: string): boolean {
         const allowed = this.getPWMPinNames().map(p => p.toUpperCase());
         const upperPin = pinId.toUpperCase();
-        return allowed.includes(upperPin) || 
-               // Check if it's the exact pin defined in manifest
-               Object.keys(this.manifest?.pins || {}).some(p => p.toUpperCase() === upperPin);
+        if (allowed.includes(upperPin)) return true;
+        
+        if (Array.isArray(this.manifest?.pins)) {
+            return this.manifest.pins.some((p: any) => String(p.id).toUpperCase() === upperPin);
+        } else {
+            return Object.keys(this.manifest?.pins || {}).some(p => p.toUpperCase() === upperPin);
+        }
     }
 
     onPWMRawTick(pinId: string, meta: PWMMeta): void {
