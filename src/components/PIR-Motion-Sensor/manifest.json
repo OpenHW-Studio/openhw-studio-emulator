@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-pir-motion-sensor",
+    "type": "openhw-pir-motion-sensor",
     "label": "PIR Motion Sensor",
     "description": "Passive Infrared (PIR) motion detection sensor. Outputs HIGH on the OUT pin when motion is detected.",
     "group": "Sensors",
@@ -22,7 +22,7 @@
     "autowiring": {
         "connections": [
             { "from": "VCC", "to": "esp32:VIN" },
-            { "from": "GND", "to": "esp32:GND" },
+            { "from": "GND", "to": "esp32:GND.1" },
             { "from": "OUT", "to": "esp32:13" }
         ]
     }

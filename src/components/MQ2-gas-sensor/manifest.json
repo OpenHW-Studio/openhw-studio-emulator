@@ -1,5 +1,5 @@
 {
-    "type": "MQ-2 Gas Sensor",
+    "type": "openhw-mq2-gas-sensor",
     "label": "MQ-2 Gas Sensor",
     "description": "Analog/Digital Gas Sensor Module — detects LPG, smoke, alcohol, propane, hydrogen, methane and carbon monoxide.",
     "group": "Sensors",
@@ -25,7 +25,7 @@
     "autowiring": {
         "connections": [
             { "from": "VCC", "to": "esp32:VIN" },
-            { "from": "GND", "to": "esp32:GND" },
+            { "from": "GND", "to": "esp32:GND.1" },
             { "from": "DO",  "to": "esp32:34" },
             { "from": "AO",  "to": "esp32:35" }
         ]

@@ -1,5 +1,5 @@
 {
-  "type": "wokwi-esp32",
+  "type": "openhw-esp32",
   "label": "ESP32",
   "description": "ESP32 Development Board",
   "group": "Boards",

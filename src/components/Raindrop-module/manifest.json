@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-raindrop-module",
+    "type": "openhw-raindrop-module",
     "label": "Raindrop Module",
     "description": "LM393-based raindrop comparator module. Reads from sensing pad and outputs AO (analog) and DO (digital, active LOW) for Arduino/ESP32.",
     "group": "Sensors",
@@ -27,7 +27,7 @@
     "autowiring": {
         "connections": [
             { "from": "VCC", "to": "esp32:3V3" },
-            { "from": "GND", "to": "esp32:GND" },
+            { "from": "GND", "to": "esp32:GND.1" },
             { "from": "DO",  "to": "esp32:26" },
             { "from": "AO",  "to": "esp32:25" }
         ]
