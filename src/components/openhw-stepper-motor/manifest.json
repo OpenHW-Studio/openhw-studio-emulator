@@ -40,8 +40,8 @@
         ],
         "connections": [
             { "from": "A+", "to": "helper:driver:1A" },
-            { "from": "A-", "to": "helper:driver:2A" },
-            { "from": "B+", "to": "helper:driver:1B" },
+            { "from": "A-", "to": "helper:driver:1B" },
+            { "from": "B+", "to": "helper:driver:2A" },
             { "from": "B-", "to": "helper:driver:2B" },
             
             { "from": "helper:driver:STEP",      "to": "arduino:8" },

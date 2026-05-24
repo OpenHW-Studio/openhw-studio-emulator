@@ -42,6 +42,10 @@ export class LEDLogic extends BaseComponent {
             glow: false,
             vHistory: []
         };
+        this.lastUpdateCycles = 0;
+        this.totalCyclesSinceSync = 0;
+        this.illuminatedCyclesSinceSync = 0;
+        this.hasIlluminatedSinceSync = false;
     }
 
     getConductance() {
@@ -55,6 +59,15 @@ export class LEDLogic extends BaseComponent {
     }
 
     update(cpuCycles: number, currentWires: any[], allComponentsInstances: BaseComponent[]) {
+        if (this.lastUpdateCycles === 0) this.lastUpdateCycles = cpuCycles;
+        const deltaCycles = cpuCycles - this.lastUpdateCycles;
+        this.lastUpdateCycles = cpuCycles;
+
+        this.totalCyclesSinceSync += deltaCycles;
+        if (this.state.illuminated) {
+            this.illuminatedCyclesSinceSync += deltaCycles;
+        }
+
         if (this.state.burnedOut) return;
 
         const vA = this.getPinVoltage('A');
@@ -94,6 +107,7 @@ export class LEDLogic extends BaseComponent {
                 glow: current > 0.015, // Glow if > 15mA
                 vHistory
             });
+            this.hasIlluminatedSinceSync = true;
         } else {
             const vHistory = [...(this.state.vHistory || []).slice(-19), voltageDiff > 0 ? voltageDiff : 0];
             this.setState({ 
@@ -105,6 +119,36 @@ export class LEDLogic extends BaseComponent {
                 vHistory
             });
         }
+    }
+
+    getSyncState() {
+        const state = super.getSyncState() || {};
+        const res = { ...state };
+        
+        if (this.totalCyclesSinceSync > 0) {
+            const dutyCycle = this.illuminatedCyclesSinceSync / this.totalCyclesSinceSync;
+            if (dutyCycle > 0.01 && dutyCycle < 0.99) {
+                // PWM Intensity Averaging
+                res.illuminated = true;
+                res.brightness = Math.round(dutyCycle * 255);
+                res.glow = res.brightness > 50;
+            } else if (dutyCycle <= 0.01 && this.hasIlluminatedSinceSync) {
+                // Pulse Stretching for split-second blinks
+                res.illuminated = true;
+                res.brightness = 255;
+                res.glow = true;
+            }
+        } else if (this.hasIlluminatedSinceSync) {
+            res.illuminated = true;
+            res.brightness = 255;
+            res.glow = true;
+        }
+
+        this.totalCyclesSinceSync = 0;
+        this.illuminatedCyclesSinceSync = 0;
+        this.hasIlluminatedSinceSync = false;
+        
+        return res;
     }
 
     onCustomTelemetry() {
