@@ -36,14 +36,30 @@ export class GasSensorLogic extends BaseComponent {
     }
 
     private updateVoltages() {
+        const vcc = this.getPinVoltage('VCC') || this.getPinVoltage('5V');
+        const gnd = this.getPinVoltage('GND');
+
+        // Require both power pins to be physically connected — a floating GND
+        // pin defaults to 0 V, which would make (vcc - gnd) pass even unwired.
+        const vccConnected = this.state?.pins?.['VCC'] || this.state?.pins?.['5V'];
+        const gndConnected = this.state?.pins?.['GND'];
+        const hasPower = !!vccConnected && !!gndConnected && (vcc - gnd) >= 3.0;
+
         // Output voltages
-        // AO outputs voltage proportional to gasLevel (0 to 1023 corresponds to 0V to 5V)
-        const analogVoltage = (this.state.gasLevel / 1023) * 5.0;
+        // AO outputs voltage proportional to gasLevel (0 to 1023 corresponds to 0V to VCC)
+        const analogVoltage = hasPower ? (this.state.gasLevel / 1023) * vcc : 0.0;
 
         // DO outputs LOW (0V) when limit exceeded (Active Low like many real modules)
-        const digitalVoltage = this.state.limitExceeded ? 0.0 : 5.0;
+        // If not powered, it drops to 0V
+        const digitalVoltage = hasPower ? (this.state.limitExceeded ? 0.0 : vcc) : 0.0;
 
         this.setPinVoltage('AO', analogVoltage);
         this.setPinVoltage('DO', digitalVoltage);
+    }
+
+    onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number) {
+        if (pinId === 'VCC' || pinId === '5V' || pinId === 'GND') {
+            this.updateVoltages();
+        }
     }
 }

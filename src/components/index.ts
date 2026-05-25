@@ -99,6 +99,10 @@ export { default as openhwIrReceiver } from './openhw-ir-receiver';
 export { default as openhwMfrc522 } from './openhw-mfrc522';
 export { nrf24l01 as openhwNrf24l01 } from './openhw-nrf24l01';
 export { cc1101 as openhwCc1101 } from './openhw-cc1101';
+export { default as openhwMq2GasSensor } from './MQ2-gas-sensor';
+export { default as openhwPirMotionSensor } from './PIR-Motion-Sensor';
+export { default as openhwRaindropModule } from './Raindrop-module';
+export { default as openhwRaindropPad } from './Raindrop-pad';
 
 export { FullCircuitValidator, analyzeCodeHardwareSync, ProtocolAnalyzer, runUnifiedValidation } from '../circuit-validation/index.js';
 
