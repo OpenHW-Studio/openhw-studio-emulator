@@ -23,19 +23,27 @@ export const validation: { rules: ComponentValidationRule[] } = {
                     });
                 }
 
-                const sources = validator.collectVoltageSources(pin1);
-                const res = validator.findSeriesResistance(pin1);
-                if (res === 0) {
-                    const isMcu = sources.some((s: any) => s.nodeId.includes('arduino') || s.nodeId.includes('pico') || s.nodeId.includes('uno'));
-                    if (isMcu) {
-                        return createValidationIssue({
-                            ruleId: 'buzzer-series-resistor',
-                            severity: 'warn',
-                            message: `⚠️ [Buzzer ${component.id}] Safety Warning: No series resistor detected between Buzzer and MCU. Direct drive can stress GPIO pins.`,
-                            compIds: [component.id],
-                            remediation: 'Add a series resistor or use a driver transistor.',
-                        });
+                let isMcu = false;
+                let hasResistor = false;
+
+                for (const pin of [pin1, pin2]) {
+                    if (!pin) continue;
+                    const sources = validator.collectVoltageSources(pin);
+                    const res = validator.findSeriesResistance(pin);
+                    if (res > 0) hasResistor = true;
+                    if (sources.some((s: any) => s.nodeId.includes('arduino') || s.nodeId.includes('pico') || s.nodeId.includes('uno'))) {
+                        isMcu = true;
                     }
+                }
+
+                if (isMcu && !hasResistor) {
+                    return createValidationIssue({
+                        ruleId: 'buzzer-series-resistor',
+                        severity: 'warn',
+                        message: `⚠️ [Buzzer ${component.id}] Safety Warning: No series resistor detected between Buzzer and MCU. Direct drive can stress GPIO pins.`,
+                        compIds: [component.id],
+                        remediation: 'Add a series resistor or use a driver transistor.',
+                    });
                 }
 
                 return null;

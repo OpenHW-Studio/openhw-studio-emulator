@@ -1,0 +1,47 @@
+{
+    "type": "openhw-hx711_5",
+    "label": "HX711 Load Cell (5kg)",
+    "description": "HX711 Load Cell Amplifier with 5kg Load Cell",
+    "group": "Inputs",
+    "w": 220,
+    "h": 100,
+    "attrs": {
+        "load": ""
+    },
+    "telemetry": {
+        "template": "load=${state.load}",
+        "criticalKeys": [
+            "state.load"
+        ]
+    },
+    "pins": [
+        {
+            "id": "GND",
+            "x": 7,
+            "y": 26,
+            "type": "ground",
+            "description": "Ground"
+        },
+        {
+            "id": "DT",
+            "x": 7,
+            "y": 35,
+            "type": "digital",
+            "description": "Data out"
+        },
+        {
+            "id": "SCK",
+            "x": 7,
+            "y": 44,
+            "type": "digital",
+            "description": "Clock in"
+        },
+        {
+            "id": "VCC",
+            "x": 7,
+            "y": 53,
+            "type": "power",
+            "description": "Power (5V)"
+        }
+    ]
+}

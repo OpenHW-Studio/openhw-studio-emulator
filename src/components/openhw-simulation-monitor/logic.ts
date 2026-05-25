@@ -28,7 +28,7 @@ export class SimulationMonitorLogic extends BaseComponent {
         this.stateChanged = true;
     }
 
-    updateMetrics(cpuCycles: number, targetFreq: number, isTelemetryEnabled: boolean, watchedParams: string[]) {
+    updateMetrics(cpuCycles: number, targetFreq: number, isTelemetryEnabled: boolean, watchedParams: string[], realCanvasFps: number = 60, realUiBlockedMs: number = 0) {
         const now = performance.now();
         if (this.simStartTime === 0) {
             this.simStartTime = now;
@@ -41,7 +41,7 @@ export class SimulationMonitorLogic extends BaseComponent {
         const cycleDelta = Math.max(0, cpuCycles - this.lastCycles);
 
         const watchAll = watchedParams.includes('all');
-        const watchSram = watchAll || watchedParams.includes('deepSiliconSRAM');
+        const watchSram = this.deepSiliconEnabled && (watchAll || watchedParams.includes('deepSiliconSRAM'));
         const activeParamsCount = watchAll ? 10 : watchedParams.length;
 
         if (isTelemetryEnabled) {
@@ -89,8 +89,8 @@ export class SimulationMonitorLogic extends BaseComponent {
             workerCpuLoadPercentage: load,
             telemetrySerializationTimeMs: Number(this.lastSerializationTimeMs.toFixed(3)),
             telemetryPayloadBytes: this.lastPayloadBytes,
-            canvasFps: isTelemetryEnabled ? (load > 50 ? 28 : 58) : 60,
-            uiMainThreadBlockedTimeMs: isTelemetryEnabled ? Number((this.lastSerializationTimeMs * 2.5).toFixed(1)) : 1.2,
+            canvasFps: Number(realCanvasFps.toFixed(2)),
+            uiMainThreadBlockedTimeMs: realUiBlockedMs,
             workerMessageQueueLagMs: isTelemetryEnabled ? (load > 50 ? 12.4 : 1.5) : 0.2
         };
 

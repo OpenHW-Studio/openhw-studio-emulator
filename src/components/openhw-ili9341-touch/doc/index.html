@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ILI9341 Touch Screen LCD 2.8" – OpenHW Studio Docs</title>
+  <style>
+    :root { --accent:#6366f1; --bg:#0f172a; --bg2:#1e293b; --text:#e2e8f0; --text2:#94a3b8; --border:#334155; --radius:8px }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:24px;max-width:780px;margin:0 auto;line-height:1.6}
+    h1{color:var(--accent);font-size:1.6rem;margin-bottom:4px}
+    .badge{display:inline-block;background:var(--accent)22;color:var(--accent);border:1px solid var(--accent)44;border-radius:4px;padding:2px 8px;font-size:12px;font-weight:600;margin-bottom:16px}
+    p{color:var(--text2);margin-bottom:16px}
+    h2{font-size:1rem;color:var(--text);margin:24px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px}
+    table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px}
+    td{padding:8px 10px;border:1px solid var(--border);color:var(--text)}
+    pre{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-size:13px;overflow-x:auto;margin-bottom:16px}
+    code{color:#7dd3fc}
+  </style>
+</head>
+<body>
+  <h1>ILI9341 2.8" TFT LCD with Touch</h1>
+  <span class="badge">Display</span>
+  <span class="badge">Input</span>
+  <p>A vibrant 2.8-inch TFT LCD color display driven by the ILI9341 controller over SPI, combined with a capacitive touch screen overlay via an FT6206 or similar I2C controller.</p>
+
+  <h2>Pinout</h2>
+  <table>
+    <tr><td><b>VCC</b></td><td>Power supply (3.3V or 5V)</td></tr>
+    <tr><td><b>GND</b></td><td>Ground</td></tr>
+    <tr><td><b>CS</b></td><td>Display Chip Select (Active Low)</td></tr>
+    <tr><td><b>RESET</b></td><td>Display Reset (Active Low)</td></tr>
+    <tr><td><b>DC</b></td><td>Data/Command Select</td></tr>
+    <tr><td><b>MOSI</b></td><td>SPI MOSI (Data In)</td></tr>
+    <tr><td><b>SCK</b></td><td>SPI SCK (Clock)</td></tr>
+    <tr><td><b>LED</b></td><td>Backlight Power</td></tr>
+    <tr><td><b>MISO</b></td><td>SPI MISO (Data Out)</td></tr>
+    <tr><td><b>SCL</b></td><td>Touch I2C Clock</td></tr>
+    <tr><td><b>SDA</b></td><td>Touch I2C Data</td></tr>
+  </table>
+
+  <h2>Wiring with Arduino</h2>
+  <pre><code>
+Arduino 5V   ────► VCC, LED
+Arduino GND  ────► GND
+Arduino 10   ────► CS
+Arduino 9    ────► DC
+Arduino 8    ────► RESET
+Arduino 11   ────► MOSI
+Arduino 12   ────► MISO
+Arduino 13   ────► SCK
+Arduino A5   ────► SCL
+Arduino A4   ────► SDA
+  </code></pre>
+</body>
+</html>

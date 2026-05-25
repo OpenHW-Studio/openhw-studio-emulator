@@ -1,0 +1,54 @@
+{
+    "type": "openhw-oled-display",
+    "label": "OLED Display 1.8 and 0.95",
+    "group": "Displays",
+    "w": 135,
+    "h": 120,
+    "attrs": { "i2cAddress": "0x3C", "breadboard": { "anchorPin": "GND" } },
+    "telemetry": {
+        "template": "vramDirty=${state.vramDirty}, updateCount=${state.updateCount}, i2cBytes=${state.i2cBytes}",
+        "criticalKeys": ["state.vramDirty", "state.updateCount"]
+    },
+    "pins": [
+        {
+            "id": "GND",
+            "x": 30,
+            "y": 7.5,
+            "type": "power"
+        },
+        {
+            "id": "VCC",
+            "x": 45,
+            "y": 7.5,
+            "type": "power"
+        },
+        {
+            "id": "SCL",
+            "x": 60,
+            "y": 7.5,
+            "type": "input"
+        },
+        {
+            "id": "SDA",
+            "x": 75,
+            "y": 7.5,
+            "type": "bidirectional"
+        }
+    ],
+    "autowiring": {
+        "connections": [
+            { "from": "GND", "to": "arduino:GND" },
+            { "from": "VCC", "to": "arduino:3V3" },
+            { "from": "SCL", "to": "arduino:A5", "i2c": true },
+            { "from": "SDA", "to": "arduino:A4", "i2c": true }
+        ]
+    },
+    "autocoding": {
+        "libraries": ["Adafruit SSD1306", "Adafruit GFX Library"],
+        "arduino": {
+            "globals": "#include <Wire.h>\n#include <Adafruit_GFX.h>\n#include <Adafruit_SSD1306.h>\nAdafruit_SSD1306 display(128, 64, &Wire, -1);",
+            "setup": "display.begin(SSD1306_SWITCHCAPVCC, 0x3C);\ndisplay.clearDisplay();\ndisplay.setTextSize(2);\ndisplay.setTextColor(SSD1306_WHITE);\ndisplay.setCursor(8, 20);\ndisplay.println(\"OpenHW!\");\ndisplay.display();\ndelay(2000);",
+            "loop": "unsigned long t = millis() / 1000;\ndisplay.clearDisplay();\ndisplay.setTextSize(1);\ndisplay.setCursor(0, 0);\ndisplay.println(\"Welcome to OpenHW!\");\ndisplay.setTextSize(2);\ndisplay.setCursor(20, 30);\ndisplay.print(t);\ndisplay.print(\" s\");\ndisplay.display();\ndelay(500);"
+        }
+    }
+}

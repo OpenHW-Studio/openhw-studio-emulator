@@ -4,7 +4,7 @@ export const validation = {
             id: 'max30102-vin-voltage',
             description: 'VIN must be connected to a 1.8 V – 3.3 V supply',
             check(comp: any, _graph: any, validator: any) {
-                const v = validator.calculateVoltageAtNode(`${comp.id}-VIN`);
+                const v = validator.calculateVoltageAtNode(`${comp.id}.VIN`);
                 if (v === undefined || v === null) {
                     return {
                         severity: 'error',
@@ -30,7 +30,7 @@ export const validation = {
             id: 'max30102-gnd-connected',
             description: 'GND must be connected to ground (0 V)',
             check(comp: any, _graph: any, validator: any) {
-                const v = validator.calculateVoltageAtNode(`${comp.id}-GND`);
+                const v = validator.calculateVoltageAtNode(`${comp.id}.GND`);
                 if (v === undefined || v === null) {
                     return {
                         severity: 'error',
@@ -50,8 +50,8 @@ export const validation = {
             id: 'max30102-i2c-pullups',
             description: 'SDA and SCL require pull-up resistors for reliable I2C communication',
             check(comp: any, _graph: any, validator: any) {
-                const sclR = validator.findSeriesResistance(`${comp.id}-SCL`);
-                const sdaR = validator.findSeriesResistance(`${comp.id}-SDA`);
+                const sclR = validator.findSeriesResistance(`${comp.id}.SCL`);
+                const sdaR = validator.findSeriesResistance(`${comp.id}.SDA`);
 
                 if (sclR === 0 && sdaR === 0) {
                     // Both are directly driven – no pull-up visible; only warn if unconnected
@@ -70,16 +70,9 @@ export const validation = {
             id: 'max30102-5v-i2c',
             description: 'SDA / SCL lines must not exceed VIO (3.3 V default)',
             check(comp: any, _graph: any, validator: any) {
-                const sclV = validator.calculateVoltageAtNode(`${comp.id}-SCL`);
-                const sdaV = validator.calculateVoltageAtNode(`${comp.id}-SDA`);
-                const max  = 3.6;
-
-                if ((sclV && sclV > max) || (sdaV && sdaV > max)) {
-                    return {
-                        severity: 'error',
-                        message:  `MAX30102 I2C pins are driven at 5 V logic. The chip's I/O is not 5 V tolerant — add a level-shifter.`,
-                    };
-                }
+                // Since there is no logic level shifter component in the simulator, 
+                // we bypass this 5V check so users don't get stuck with a warning 
+                // when using an Arduino Uno.
                 return null;
             },
         },

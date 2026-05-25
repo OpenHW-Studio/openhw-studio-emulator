@@ -1,0 +1,1 @@
+export const BOUNDS = { x: 0, y: 0, w: 90, h: 90 };

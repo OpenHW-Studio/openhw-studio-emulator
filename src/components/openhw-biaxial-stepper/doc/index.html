@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Biaxial Stepper Motor – OpenHW Studio Docs</title>
+  <style>
+    :root { --accent:#6366f1; --bg:#0f172a; --bg2:#1e293b; --text:#e2e8f0; --text2:#94a3b8; --border:#334155; --radius:8px }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:24px;max-width:780px;margin:0 auto;line-height:1.6}
+    h1{color:var(--accent);font-size:1.6rem;margin-bottom:4px}
+    .badge{display:inline-block;background:var(--accent)22;color:var(--accent);border:1px solid var(--accent)44;border-radius:4px;padding:2px 8px;font-size:12px;font-weight:600;margin-bottom:16px}
+    p{color:var(--text2);margin-bottom:16px}
+    h2{font-size:1rem;color:var(--text);margin:24px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px}
+    table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px}
+    td{padding:8px 10px;border:1px solid var(--border);color:var(--text)}
+    pre{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-size:13px;overflow-x:auto;margin-bottom:16px}
+    code{color:#7dd3fc}
+  </style>
+</head>
+<body>
+  <h1>Biaxial Stepper Motor</h1>
+  <span class="badge">Actuator</span>
+  <p>A dual-axis (biaxial) stepper motor with concentric shafts, allowing independent rotation of an inner and outer hand. Useful for gauges, clocks, or dashboard instruments.</p>
+
+  <h2>Pinout</h2>
+  <table>
+    <tr><td><b>A1+, A1-, B1+, B1-</b></td><td>Outer Motor Coils</td></tr>
+    <tr><td><b>A2+, A2-, B2+, B2-</b></td><td>Inner Motor Coils</td></tr>
+  </table>
+
+  <h2>Usage</h2>
+  <p>Requires two separate stepper motor drivers (e.g., A4988) to control both axes independently.</p>
+</body>
+</html>

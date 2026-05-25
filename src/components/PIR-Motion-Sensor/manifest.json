@@ -1,0 +1,29 @@
+{
+    "type": "wokwi-pir-motion-sensor",
+    "label": "PIR Motion Sensor",
+    "description": "Passive Infrared (PIR) motion detection sensor. Outputs HIGH on the OUT pin when motion is detected.",
+    "group": "Sensors",
+    "w": 90,
+    "h": 90,
+    "attrs": {
+        "delay": 500
+    },
+    "pins": [
+        { "id": "VCC", "type": "power",   "description": "Power (5V)",       "x": 35.5, "y": 90 },
+        { "id": "GND", "type": "power",   "description": "Ground",            "x": 56,   "y": 90 },
+        { "id": "OUT", "type": "digital", "description": "Digital Output",    "x": 46.5, "y": 90 }
+    ],
+    "autocoding": {
+        "arduino": {
+            "setup": "#define PIR_PIN ${OUT}\npinMode(PIR_PIN, INPUT);\nSerial.println(\"PIR Motion Sensor ready.\");",
+            "loop": "int motionState = digitalRead(PIR_PIN);\nif (motionState == HIGH) {\n  Serial.println(\"Motion detected!\");\n} else {\n  Serial.println(\"No motion.\");\n}\ndelay(500);"
+        }
+    },
+    "autowiring": {
+        "connections": [
+            { "from": "VCC", "to": "esp32:VIN" },
+            { "from": "GND", "to": "esp32:GND" },
+            { "from": "OUT", "to": "esp32:13" }
+        ]
+    }
+}

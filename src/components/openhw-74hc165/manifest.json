@@ -1,0 +1,123 @@
+{
+    "type": "openhw-74hc165",
+    "label": "74HC165 Input Shift Register (PISO)",
+    "description": "8-bit Parallel-In Serial-Out (PISO) Shift Register. Exact UI simulation of Wokwi 74HC165.",
+    "group": "Inputs",
+    "w": 135,
+    "h": 45,
+    "attrs": {},
+    "pins": [
+        {
+            "id": "vcc",
+            "x": 120,
+            "y": 0,
+            "type": "power",
+            "description": "VCC (Pin 16)"
+        },
+        {
+            "id": "ce",
+            "x": 105,
+            "y": 0,
+            "type": "digital",
+            "description": "CE / Clock Enable (Pin 15)"
+        },
+        {
+            "id": "d3",
+            "x": 90,
+            "y": 0,
+            "type": "digital",
+            "description": "D3 (Pin 14)"
+        },
+        {
+            "id": "d2",
+            "x": 75,
+            "y": 0,
+            "type": "digital",
+            "description": "D2 (Pin 13)"
+        },
+        {
+            "id": "d1",
+            "x": 60,
+            "y": 0,
+            "type": "digital",
+            "description": "D1 (Pin 12)"
+        },
+        {
+            "id": "d0",
+            "x": 45,
+            "y": 0,
+            "type": "digital",
+            "description": "D0 (Pin 11)"
+        },
+        {
+            "id": "ds",
+            "x": 30,
+            "y": 0,
+            "type": "digital",
+            "description": "DS / Serial Input (Pin 10)"
+        },
+        {
+            "id": "q7",
+            "x": 15,
+            "y": 0,
+            "type": "digital",
+            "description": "Q7 / Serial Output (Pin 9)"
+        },
+        {
+            "id": "pl",
+            "x": 15,
+            "y": 45,
+            "type": "digital",
+            "description": "PL / Parallel Load (Pin 1)"
+        },
+        {
+            "id": "cp",
+            "x": 30,
+            "y": 45,
+            "type": "digital",
+            "description": "CP / Serial Clock (Pin 2)"
+        },
+        {
+            "id": "d4",
+            "x": 45,
+            "y": 45,
+            "type": "digital",
+            "description": "D4 (Pin 3)"
+        },
+        {
+            "id": "d5",
+            "x": 60,
+            "y": 45,
+            "type": "digital",
+            "description": "D5 (Pin 4)"
+        },
+        {
+            "id": "d6",
+            "x": 75,
+            "y": 45,
+            "type": "digital",
+            "description": "D6 (Pin 5)"
+        },
+        {
+            "id": "d7",
+            "x": 90,
+            "y": 45,
+            "type": "digital",
+            "description": "D7 (Pin 6)"
+        },
+        {
+            "id": "q7n",
+            "x": 105,
+            "y": 45,
+            "type": "digital",
+            "description": "Q7_N / Inverted Serial Output (Pin 7)"
+        },
+        {
+            "id": "gnd",
+            "x": 120,
+            "y": 45,
+            "type": "power",
+            "description": "GND (Pin 8)"
+        }
+    ]
+}

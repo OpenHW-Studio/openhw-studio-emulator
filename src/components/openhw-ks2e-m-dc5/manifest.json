@@ -1,0 +1,75 @@
+{
+    "type": "openhw-ks2e-m-dc5",
+    "label": "DPDT Relay",
+    "description": "Double Pole Double Throw (DPDT) electromechanical relay, 5V DC coil",
+    "group": "Outputs",
+    "w": 100,
+    "h": 50,
+    "attrs": {
+        "energised": false
+    },
+    "telemetry": {
+        "template": "energised=${state.energised}",
+        "criticalKeys": [
+            "state.energised"
+        ]
+    },
+    "pins": [
+        {
+            "id": "COIL1",
+            "x": 7,
+            "y": 4,
+            "type": "input",
+            "description": "Relay Coil Terminal 1"
+        },
+        {
+            "id": "COIL2",
+            "x": 7,
+            "y": 32,
+            "type": "input",
+            "description": "Relay Coil Terminal 2"
+        },
+        {
+            "id": "P1",
+            "x": 25,
+            "y": 4,
+            "type": "passive",
+            "description": "Pole 1 (Common 1)"
+        },
+        {
+            "id": "NC1",
+            "x": 45,
+            "y": 4,
+            "type": "passive",
+            "description": "Normally Closed 1"
+        },
+        {
+            "id": "NO1",
+            "x": 73,
+            "y": 4,
+            "type": "passive",
+            "description": "Normally Open 1"
+        },
+        {
+            "id": "P2",
+            "x": 25,
+            "y": 32,
+            "type": "passive",
+            "description": "Pole 2 (Common 2)"
+        },
+        {
+            "id": "NC2",
+            "x": 45,
+            "y": 32,
+            "type": "passive",
+            "description": "Normally Closed 2"
+        },
+        {
+            "id": "NO2",
+            "x": 73,
+            "y": 32,
+            "type": "passive",
+            "description": "Normally Open 2"
+        }
+    ]
+}
