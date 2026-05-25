@@ -169,10 +169,45 @@ export const GasSensorUI = ({ state, attrs, isRunning }: { state: any, attrs: an
                     minWidth: BOUNDS.w,
                     minHeight: BOUNDS.h
                 }}>
-                {React.createElement('wokwi-gas-sensor', {
-                    style: { pointerEvents: 'none', width: '100%', height: '100%' },
-                    ...attrs
-                })}
+                <svg width="100%" height="100%" viewBox={`0 0 ${BOUNDS.w} ${BOUNDS.h}`} style={{ pointerEvents: 'none', position: 'absolute', top: 0, left: 0 }}>
+                    {/* PCB Base */}
+                    <rect x="5" y="5" width="120" height="53" rx="4" fill="#0369a1" />
+                    
+                    {/* Mounting holes */}
+                    <circle cx="15" cy="15" r="3" fill="#0f172a" />
+                    <circle cx="15" cy="48" r="3" fill="#0f172a" />
+                    
+                    {/* Sensor Head (Silver cylinder) */}
+                    <circle cx="45" cy="31" r="22" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="2" />
+                    <circle cx="45" cy="31" r="16" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+                    <path d="M35 21 L55 41 M35 41 L55 21 M45 15 L45 47 M25 31 L65 31" stroke="#94a3b8" strokeWidth="1" opacity="0.5" />
+                    
+                    {/* Potentiometer (Threshold adjuster) */}
+                    <rect x="75" y="38" width="14" height="14" fill="#1e40af" rx="1" />
+                    <circle cx="82" cy="45" r="5" fill="#facc15" />
+                    <line x1="82" y1="41" x2="82" y2="49" stroke="#854d0e" strokeWidth="2" />
+                    
+                    {/* Status LEDs */}
+                    <circle cx="85" cy="15" r="2" fill="#22c55e" /> {/* Power LED */}
+                    <circle cx="95" cy="15" r="2" fill={isExceeded ? "#ef4444" : "#475569"} /> {/* DO LED */}
+
+                    {/* Component Label */}
+                    <text x="75" y="28" fill="#e0f2fe" fontSize="10" fontFamily="sans-serif" fontWeight="bold">MQ-2</text>
+                    
+                    {/* Header Pins Block */}
+                    <rect x="125" y="12" width="5" height="39" fill="#1e293b" />
+                    {/* Pins (Gold) */}
+                    <rect x="130" y="45" width="5" height="2" fill="#eab308" />
+                    <rect x="130" y="35" width="5" height="2" fill="#eab308" />
+                    <rect x="130" y="25" width="5" height="2" fill="#eab308" />
+                    <rect x="130" y="16" width="5" height="2" fill="#eab308" />
+                    
+                    {/* Pin Labels */}
+                    <text x="122" y="49" fill="#f8fafc" fontSize="7" fontFamily="monospace" textAnchor="end">VCC</text>
+                    <text x="122" y="39" fill="#f8fafc" fontSize="7" fontFamily="monospace" textAnchor="end">GND</text>
+                    <text x="122" y="29" fill="#f8fafc" fontSize="7" fontFamily="monospace" textAnchor="end">DO</text>
+                    <text x="122" y="20" fill="#f8fafc" fontSize="7" fontFamily="monospace" textAnchor="end">AO</text>
+                </svg>
                 {/* Visual indicator light for Digital Threshold Output */}
                 {isExceeded && (
                     <div style={{
