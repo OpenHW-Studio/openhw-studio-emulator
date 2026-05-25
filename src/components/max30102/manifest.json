@@ -72,8 +72,8 @@
       "connections": [
           { "from": "VIN", "to": "arduino:3V3" },
           { "from": "GND", "to": "arduino:GND" },
-          { "from": "SDA", "to": "arduino:SDA" },
-          { "from": "SCL", "to": "arduino:SCL" }
+          { "from": "SDA", "to": "arduino:SDA", "i2c": true },
+          { "from": "SCL", "to": "arduino:SCL", "i2c": true }
       ]
   },
   "autocoding": {
