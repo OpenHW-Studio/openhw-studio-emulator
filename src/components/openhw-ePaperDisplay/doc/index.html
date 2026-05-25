@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>2.9" e-Paper Display – OpenHW Studio Docs</title>
+  <style>
+    :root { --accent:#6366f1; --bg:#0f172a; --bg2:#1e293b; --text:#e2e8f0; --text2:#94a3b8; --border:#334155; --radius:8px }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:24px;max-width:780px;margin:0 auto;line-height:1.6}
+    h1{color:var(--accent);font-size:1.6rem;margin-bottom:4px}
+    .badge{display:inline-block;background:var(--accent)22;color:var(--accent);border:1px solid var(--accent)44;border-radius:4px;padding:2px 8px;font-size:12px;font-weight:600;margin-bottom:16px}
+    p{color:var(--text2);margin-bottom:16px}
+    h2{font-size:1rem;color:var(--text);margin:24px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px}
+    table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px}
+    td{padding:8px 10px;border:1px solid var(--border);color:var(--text)}
+    pre{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-size:13px;overflow-x:auto;margin-bottom:16px}
+    code{color:#7dd3fc}
+  </style>
+</head>
+<body>
+  <h1>2.9" e-Paper Display</h1>
+  <span class="badge">Display</span>
+  <p>A 2.9-inch electronic paper display module communicating via SPI. E-Paper displays are ultra-low power and retain their image even when power is removed.</p>
+
+  <h2>Pinout</h2>
+  <table>
+    <tr><td><b>VCC</b></td><td>Power supply (typically 3.3V)</td></tr>
+    <tr><td><b>GND</b></td><td>Ground</td></tr>
+    <tr><td><b>DIN</b></td><td>SPI MOSI (Data In)</td></tr>
+    <tr><td><b>CLK</b></td><td>SPI SCK (Clock)</td></tr>
+    <tr><td><b>CS</b></td><td>Chip Select (Active Low)</td></tr>
+    <tr><td><b>DC</b></td><td>Data/Command Select</td></tr>
+    <tr><td><b>RST</b></td><td>Reset (Active Low)</td></tr>
+    <tr><td><b>BUSY</b></td><td>Busy Status Output</td></tr>
+  </table>
+
+  <h2>Wiring with Arduino</h2>
+  <pre><code>
+Arduino 3.3V ────► VCC
+Arduino GND  ────► GND
+Arduino 11   ────► DIN
+Arduino 13   ────► CLK
+Arduino 10   ────► CS
+Arduino 9    ────► DC
+Arduino 8    ────► RST
+Arduino 7    ────► BUSY
+  </code></pre>
+</body>
+</html>

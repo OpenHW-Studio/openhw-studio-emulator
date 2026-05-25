@@ -1,36 +1,41 @@
 {
     "type": "openhw-tm1637-7segment",
-    "label": "TM1637 Display",
-    "group": "Outputs",
-    "w": 180,
-    "h": 75,
+    "label": "Seven Segment Display (TM1637)",
+    "description": "4-Digit 7-Segment Display module with TM1637 driver",
+    "group": "Displays",
+    "w": 200,
+    "h": 100,
     "attrs": {
         "color": "red"
     },
     "pins": [
         {
-            "id": "GND",
-            "x": 0,
-            "y": 15,
-            "type": "power"
-        },
-        {
-            "id": "VCC",
-            "x": 0,
-            "y": 30,
-            "type": "power"
+            "id": "CLK",
+            "x": 200,
+            "y": 35,
+            "type": "digital",
+            "description": "Clock Input"
         },
         {
             "id": "DIO",
-            "x": 0,
+            "x": 200,
             "y": 45,
-            "type": "digital"
+            "type": "digital",
+            "description": "Data I/O"
         },
         {
-            "id": "CLK",
-            "x": 0,
-            "y": 60,
-            "type": "digital"
+            "id": "VCC",
+            "x": 200,
+            "y": 55,
+            "type": "power",
+            "description": "Power Supply"
+        },
+        {
+            "id": "GND",
+            "x": 200,
+            "y": 65,
+            "type": "power",
+            "description": "Ground"
         }
     ]
 }

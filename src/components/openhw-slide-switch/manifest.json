@@ -1,0 +1,41 @@
+{
+    "type": "openhw-slide-switch",
+    "label": "Slide Switch",
+    "description": "Standard Single Pole Double Throw (SPDT) slide switch.",
+    "group": "Inputs",
+    "w": 34,
+    "h": 32,
+    "attrs": {
+        "value": "",
+        "bounce": ""
+    },
+    "telemetry": {
+        "template": "value=${state.value}",
+        "criticalKeys": [
+            "state.value"
+        ]
+    },
+    "pins": [
+        {
+            "id": "1",
+            "x": 6,
+            "y": 32,
+            "type": "passive",
+            "description": "Left terminal"
+        },
+        {
+            "id": "2",
+            "x": 17,
+            "y": 32,
+            "type": "passive",
+            "description": "Common terminal"
+        },
+        {
+            "id": "3",
+            "x": 28,
+            "y": 32,
+            "type": "passive",
+            "description": "Right terminal"
+        }
+    ]
+}

@@ -1,0 +1,123 @@
+{
+    "type": "openhw-74hc595",
+    "label": "74HC595 Shift Register",
+    "description": "8-bit serial-in, parallel-out shift register. Exact UI simulation of Wokwi 74HC595.",
+    "group": "Inputs",
+    "w": 135,
+    "h": 45,
+    "attrs": {},
+    "pins": [
+        {
+            "id": "vcc",
+            "x": 120,
+            "y": 0,
+            "type": "power",
+            "description": "VCC (Pin 16)"
+        },
+        {
+            "id": "q0",
+            "x": 105,
+            "y": 0,
+            "type": "digital",
+            "description": "Q0 / Output 0 (Pin 15)"
+        },
+        {
+            "id": "ser",
+            "x": 90,
+            "y": 0,
+            "type": "digital",
+            "description": "DS / Serial Input (Pin 14)"
+        },
+        {
+            "id": "oe",
+            "x": 75,
+            "y": 0,
+            "type": "digital",
+            "description": "OE / Output Enable (Pin 13)"
+        },
+        {
+            "id": "rclk",
+            "x": 60,
+            "y": 0,
+            "type": "digital",
+            "description": "STCP / Storage Register Clock (Pin 12)"
+        },
+        {
+            "id": "srclk",
+            "x": 45,
+            "y": 0,
+            "type": "digital",
+            "description": "SHCP / Shift Register Clock (Pin 11)"
+        },
+        {
+            "id": "srclr",
+            "x": 30,
+            "y": 0,
+            "type": "digital",
+            "description": "MR / Master Reclear (Pin 10)"
+        },
+        {
+            "id": "q7s",
+            "x": 15,
+            "y": 0,
+            "type": "digital",
+            "description": "Q7S / Serial Output (Pin 9)"
+        },
+        {
+            "id": "q1",
+            "x": 15,
+            "y": 45,
+            "type": "digital",
+            "description": "Q1 / Output 1 (Pin 1)"
+        },
+        {
+            "id": "q2",
+            "x": 30,
+            "y": 45,
+            "type": "digital",
+            "description": "Q2 / Output 2 (Pin 2)"
+        },
+        {
+            "id": "q3",
+            "x": 45,
+            "y": 45,
+            "type": "digital",
+            "description": "Q3 / Output 3 (Pin 3)"
+        },
+        {
+            "id": "q4",
+            "x": 60,
+            "y": 45,
+            "type": "digital",
+            "description": "Q4 / Output 4 (Pin 4)"
+        },
+        {
+            "id": "q5",
+            "x": 75,
+            "y": 45,
+            "type": "digital",
+            "description": "Q5 / Output 5 (Pin 5)"
+        },
+        {
+            "id": "q6",
+            "x": 90,
+            "y": 45,
+            "type": "digital",
+            "description": "Q6 / Output 6 (Pin 6)"
+        },
+        {
+            "id": "q7",
+            "x": 105,
+            "y": 45,
+            "type": "digital",
+            "description": "Q7 / Output 7 (Pin 7)"
+        },
+        {
+            "id": "gnd",
+            "x": 120,
+            "y": 45,
+            "type": "power",
+            "description": "GND (Pin 8)"
+        }
+    ]
+}
