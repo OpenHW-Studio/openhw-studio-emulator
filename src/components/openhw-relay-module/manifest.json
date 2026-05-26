@@ -15,5 +15,28 @@
         { "id": "IN",  "x": 187, "y": 25, "type": "input",   "description": "Control signal from Arduino" },
         { "id": "GND", "x": 187, "y": 40, "type": "input",   "description": "Ground" },
         { "id": "VCC", "x": 187, "y": 55, "type": "input",   "description": "Power Supply (5V)" }
-    ]
+    ],
+    "telemetry": {
+        "template": "Energised=${state.energised}",
+        "criticalKeys": ["state.energised"]
+    },
+    "autocoding": {
+        "arduino": {
+            "globals": "const int relayPin_${COMP_SUFFIX} = ${IN};",
+            "setup": "pinMode(relayPin_${COMP_SUFFIX}, OUTPUT);\ndigitalWrite(relayPin_${COMP_SUFFIX}, HIGH); // Assumes active-low trigger",
+            "loop": "digitalWrite(relayPin_${COMP_SUFFIX}, LOW); // Energise relay\ndelay(1000);\ndigitalWrite(relayPin_${COMP_SUFFIX}, HIGH); // De-energise relay\ndelay(1000);"
+        },
+        "micropython": {
+            "globals": "from machine import Pin\nimport time",
+            "setup": "relay_${COMP_SUFFIX} = Pin(${IN}, Pin.OUT)\nrelay_${COMP_SUFFIX}.value(1) # Assumes active-low trigger",
+            "loop": "relay_${COMP_SUFFIX}.value(0) # Energise relay\ntime.sleep(1)\nrelay_${COMP_SUFFIX}.value(1) # De-energise relay\ntime.sleep(1)"
+        }
+    },
+    "autowiring": {
+        "connections": [
+            { "from": "VCC", "to": "arduino:5V" },
+            { "from": "GND", "to": "arduino:GND" },
+            { "from": "IN", "to": "arduino:2" }
+        ]
+    }
 }
