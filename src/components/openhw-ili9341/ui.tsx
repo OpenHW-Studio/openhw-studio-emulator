@@ -7,6 +7,7 @@ export const ILI9341UI = ({ state }) => {
     // Shadow buffer Ref - The absolute ground truth in RGBA
     const rgbaBufferRef = useRef(new Uint8ClampedArray(240 * 320 * 4));
     const lastHeartbeatRef = useRef(Date.now());
+    const blackoutTimerRef = useRef<number | null>(null);
 
     // Initialize shadow buffer with alpha 255
     useEffect(() => {
@@ -43,33 +44,49 @@ export const ILI9341UI = ({ state }) => {
                 rgbaBuf[dst + 2] = rgbBuf[src + 2];
             }
         }
-    }, [state]);
+    }, [state?.t, state?.powerOn, state?.reset, state?.buffer]);
 
     useEffect(() => {
-        if (!canvasRef.current) return;
+        if (!canvasRef.current || !state) return;
         const ctx = canvasRef.current.getContext('2d', { alpha: false });
         if (!ctx) return;
 
-        let animationId: number;
-
-        const render = () => {
-            const now = Date.now();
-            const timeSinceHeartbeat = now - lastHeartbeatRef.current;
-
-            if (timeSinceHeartbeat > 600) {
-                ctx.fillStyle = '#000000';
-                ctx.fillRect(0, 0, 240, 320);
-            } else {
-                const imgData = new ImageData(rgbaBufferRef.current, 240, 320);
-                ctx.putImageData(imgData, 0, 0);
-            }
-
-            animationId = requestAnimationFrame(render);
+        const paintBlack = () => {
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, 240, 320);
         };
 
-        render();
-        return () => cancelAnimationFrame(animationId);
-    }, []);
+        const paintFrame = () => {
+            if (!state.powerOn || state.reset) {
+                paintBlack();
+                return;
+            }
+
+            const imgData = new ImageData(rgbaBufferRef.current, 240, 320);
+            ctx.putImageData(imgData, 0, 0);
+        };
+
+        if (blackoutTimerRef.current !== null) {
+            window.clearTimeout(blackoutTimerRef.current);
+            blackoutTimerRef.current = null;
+        }
+
+        lastHeartbeatRef.current = Date.now();
+        paintFrame();
+
+        blackoutTimerRef.current = window.setTimeout(() => {
+            if (Date.now() - lastHeartbeatRef.current >= 600) {
+                paintBlack();
+            }
+        }, 600);
+
+        return () => {
+            if (blackoutTimerRef.current !== null) {
+                window.clearTimeout(blackoutTimerRef.current);
+                blackoutTimerRef.current = null;
+            }
+        };
+    }, [state?.t, state?.powerOn, state?.reset, state?.buffer]);
 
     const w = 240;
     const h = 360;
@@ -97,13 +114,13 @@ export const ILI9341UI = ({ state }) => {
                     <text x={w / 2} y="33" fill="#FFFFFF" fontSize="21" fontFamily="monospace" textAnchor="middle" fontWeight="bold">ILI9341</text>
 
                     {/* Screen Bezel */}
-                    <rect x="7.5" y="43.5" width={w - 15} height={h - 63} fill="#F4E3EB" />
+                    <rect x="8" y="42" width="224" height="290" fill="#F4E3EB" />
 
                     {/* Screen Dark Area */}
-                    <rect x="12" y="48" width={w - 24} height={h - 72} fill="#000000" />
+                    <rect x="12" y="46" width="216" height="282" fill="#000000" />
 
                     {/* The Simulation Canvas */}
-                    <foreignObject x="12" y="48" width={w - 24} height={h - 72}>
+                    <foreignObject x="12" y="46" width="216" height="282">
                         <canvas
                             ref={canvasRef}
                             width={240}
@@ -118,12 +135,12 @@ export const ILI9341UI = ({ state }) => {
                     </foreignObject>
 
                     {/* Flex Cable Connector */}
-                    <rect x={w / 2 - 60} y={h - 37.5} width="120" height="18" fill="#b06423" />
+                    <rect x={w / 2 - 60} y="323" width="120" height="18" fill="#b06423" />
 
                     {/* Pin Headers at 15px pitch */}
-                    <rect x="54" y="346.5" width="132" height="12" fill="none" stroke="#FFFFFF" strokeWidth="0.75" opacity="0.5" />
+                    <rect x="54" y="348" width="132" height="12" fill="none" stroke="#FFFFFF" strokeWidth="0.75" opacity="0.7" />
                     {[60, 75, 90, 105, 120, 135, 150, 165, 180].map((x, i) => (
-                        <circle key={i} cx={x} cy="352.5" r="2.25" fill="#FFFFFF" />
+                        <circle key={i} cx={x} cy="352" r="2.25" fill="#FFFFFF" />
                     ))}
                 </g>
             </svg>
