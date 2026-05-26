@@ -26,7 +26,7 @@ export class ILI9341Logic extends SPIProtocol {
     private powerOn = true;
     private writeCount = 0;
     private madctl = 0x48;
-    private vccDetected = false;
+    private vccDetected = true;
     private powerOffCountdown = 0;
 
     // Compact snapshot settings
@@ -34,6 +34,8 @@ export class ILI9341Logic extends SPIProtocol {
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
+        this.powerOn = true;
+        this.vccDetected = true;
         this.state = { buffer: this.vram, powerOn: true, t: Date.now(), spiFrames: [], compactSnapshot: null };
     }
 
@@ -73,24 +75,25 @@ export class ILI9341Logic extends SPIProtocol {
         const vccIsHigh = vcc > 2.0;
         
         // Check if VCC is connected to a power rail via wiring
+        const hasWires = currentWires.length > 0;
         const vccConnected = currentWires.some(w => 
             (w.from === `${this.id}:VCC` || w.to === `${this.id}:VCC`) &&
-            (w.from?.includes('5V') || w.from?.includes('3V3') || w.from?.includes('VIN') || 
-             w.to?.includes('5V') || w.to?.includes('3V3') || w.to?.includes('VIN'))
+            (w.from?.includes('5V') || w.from?.includes('3V3') || w.from?.includes('VIN') || w.from?.includes('VBUS') ||
+             w.to?.includes('5V') || w.to?.includes('3V3') || w.to?.includes('VIN') || w.to?.includes('VBUS'))
         );
 
         // Power state machine: 
         // - If VCC is high or connected to power rail, stay powered
         // - Only power off if we see explicit low voltage AND stay low for multiple frames
-        if (vccIsHigh || vccConnected) {
+        if (vccIsHigh || vccConnected || !hasWires) {
             this.vccDetected = true;
             this.powerOffCountdown = 0;
         } else {
             this.powerOffCountdown++;
         }
 
-        // Require 5 consecutive frames of low/no VCC before powering off (debounce)
-        const newPower = this.vccDetected && this.powerOffCountdown < 5;
+        // Require 10 consecutive frames of low/no VCC before powering off (debounce)
+        const newPower = this.vccDetected && (this.powerOffCountdown < 10);
 
         if (newPower !== this.powerOn) {
             this.powerOn = newPower;
@@ -181,15 +184,6 @@ export class ILI9341Logic extends SPIProtocol {
                 this.state.spiTrafficCount = (this.state.spiTrafficCount || 0) + 1;
                 this.stateChanged = true;
             }
-
-            console.log(
-                `[ILI9341] ${this.id} cs-deassert frame=${frame.length} ` +
-                `cmd=0x${Number(meta?.command ?? 0).toString(16).padStart(2, '0')} ` +
-                `powerOn=${this.powerOn ? '1' : '0'} ` +
-                `currentCommand=0x${(this.currentCommand & 0xff).toString(16).padStart(2, '0')} ` +
-                `writeCount=${this.writeCount} ` +
-                `fill=${this.state?.compactSnapshot?.vramFillPercentage ?? 'n/a'}`
-            );
         } catch (e) {
             // swallow telemetry errors
         }
@@ -200,15 +194,6 @@ export class ILI9341Logic extends SPIProtocol {
         if (dmaAddress > 0 && !this.state.dmaBypassDisabled) return; // Bypass normal SPI processing if DMA active
         
         if (!this.powerOn) return;
-
-        if (byteIndex < 8 || byte === 0x2A || byte === 0x2B || byte === 0x2C || byte === 0x36) {
-            console.log(
-                `[ILI9341] ${this.id} byte index=${byteIndex} byte=0x${byte.toString(16).padStart(2, '0')} ` +
-                `dc=${this.dcHigh ? '1' : '0'} ` +
-                `cmd=0x${(this.currentCommand & 0xff).toString(16).padStart(2, '0')} ` +
-                `x=${this.currentX} y=${this.currentY} powerOn=${this.powerOn ? '1' : '0'}`
-            );
-        }
 
         if (!this.dcHigh) {
             this.currentCommand = byte;
