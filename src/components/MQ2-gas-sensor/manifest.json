@@ -1,5 +1,5 @@
 {
-    "type": "MQ-2 Gas Sensor",
+    "type": "openhw-mq2-gas-sensor",
     "label": "MQ-2 Gas Sensor",
     "description": "Analog/Digital Gas Sensor Module — detects LPG, smoke, alcohol, propane, hydrogen, methane and carbon monoxide.",
     "group": "Sensors",

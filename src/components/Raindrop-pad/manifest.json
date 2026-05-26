@@ -1,5 +1,5 @@
 {
-    "type": "wokwi-raindrop-pad",
+    "type": "openhw-raindrop-pad",
     "label": "Rain Sensor Pad",
     "description": "Raindrop sensing pad — resistive PCB that detects water. Wire AOUT to the Raindrop Module's PAD+ pin.",
     "group": "Sensors",
@@ -32,7 +32,7 @@
     },
     "autowiring": {
         "connections": [
-            { "from": "GND", "to": "esp32:GND" }
+            { "from": "GND", "to": "esp32:GND.1" }
         ]
     }
 }

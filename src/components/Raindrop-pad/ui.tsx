@@ -109,7 +109,8 @@ export const RaindropPadUI = ({ state, attrs, isRunning }: { state: any; attrs: 
             setCloudMode('heavy');
             setCloudPos({ x: 0, y: -150 });
         }
-    }, [isRunning, triggerRainLevel]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isRunning]);
 
     const intensity = rainLevel / 1023;
     const PADDING = -8;

@@ -192,6 +192,22 @@ export class SPIProtocol extends BaseComponent {
                 const command = frame[0];
                 const payload = frame.slice(1);
 
+                this.recordSpiTransaction(frame);
+
+                if (frame.length <= 32) {
+                    try {
+                        console.log(`[SPI] ${this.id} CS deassert frame=${frame.length} cmd=0x${command.toString(16).padStart(2, '0')} bytes=[${frame.map(b => `0x${(b & 0xff).toString(16).padStart(2, '0')}`).join(', ')}]`);
+                    } catch {
+                        // keep telemetry path silent if console formatting fails
+                    }
+                } else {
+                    try {
+                        console.log(`[SPI] ${this.id} CS deassert frame=${frame.length} cmd=0x${command.toString(16).padStart(2, '0')} preview=[${frame.slice(0, 16).map(b => `0x${(b & 0xff).toString(16).padStart(2, '0')}`).join(', ')} ...]`);
+                    } catch {
+                        // keep telemetry path silent if console formatting fails
+                    }
+                }
+
                 this.state.lastCommand = command;
                 this.state.lastFrame = frame;
 

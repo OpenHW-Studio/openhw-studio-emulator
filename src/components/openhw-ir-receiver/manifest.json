@@ -3,8 +3,8 @@
   "label": "IR Receiver",
   "group": "Sensors",
   "description": "38 kHz infrared demodulator. Receives NEC protocol IR signals from a virtual remote control and outputs a clean digital signal.",
-  "w": 70,
-  "h": 105,
+  "w": 100,
+  "h": 150,
   "attrs": {
     "frequency": "38"
   },
@@ -19,22 +19,22 @@
   "pins": [
     {
       "id": "GND",
-      "x": 23.1,
-      "y": 101.5,
+      "x": 33,
+      "y": 145,
       "type": "power",
       "description": "Ground (G)"
     },
     {
       "id": "VCC",
-      "x": 33.6,
-      "y": 101.5,
+      "x": 48,
+      "y": 145,
       "type": "power",
       "description": "Power Supply 3.3V / 5V (V)"
     },
     {
       "id": "OUT",
-      "x": 44.1,
-      "y": 101.5,
+      "x": 63,
+      "y": 145,
       "type": "digital",
       "description": "Digital Signal Output (R - Active LOW)"
     }

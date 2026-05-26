@@ -1,0 +1,27 @@
+{
+  "type": "openhw-esp32-cam",
+  "label": "ESP32-CAM",
+  "description": "ESP32 Board with OV2640 Camera Module",
+  "group": "Boards",
+  "board": true,
+  "w": 156.25,
+  "h": 234.375,
+  "pins": [
+    { "id": "5V.1", "description": "5V", "x": 11.5625, "y": 28.9, "type": "power" },
+    { "id": "GND.1", "description": "GND", "x": 11.5625, "y": 43.9, "type": "power" },
+    { "id": "12", "description": "12", "x": 11.5625, "y": 58.9 },
+    { "id": "13", "description": "13", "x": 11.5625, "y": 73.9 },
+    { "id": "15", "description": "15", "x": 11.5625, "y": 88.9 },
+    { "id": "14", "description": "14", "x": 11.5625, "y": 103.9 },
+    { "id": "2", "description": "2", "x": 11.5625, "y": 118.9 },
+    { "id": "4", "description": "4", "x": 11.5625, "y": 133.9 },
+    { "id": "3V3", "description": "3.3V", "x": 143.4375, "y": 28.9, "type": "power" },
+    { "id": "16", "description": "16", "x": 143.4375, "y": 43.9 },
+    { "id": "0", "description": "0", "x": 143.4375, "y": 58.9 },
+    { "id": "GND.2", "description": "GND", "x": 143.4375, "y": 73.9, "type": "power" },
+    { "id": "VCC", "description": "VCC", "x": 143.4375, "y": 88.9, "type": "power" },
+    { "id": "3", "description": "RX", "x": 143.4375, "y": 103.9 },
+    { "id": "1", "description": "TX", "x": 143.4375, "y": 118.9 },
+    { "id": "GND.3", "description": "GND", "x": 143.4375, "y": 133.9, "type": "power" }
+  ]
+}
