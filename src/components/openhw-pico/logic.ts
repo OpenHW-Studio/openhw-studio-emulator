@@ -25,6 +25,7 @@ export class PicoLogic extends BaseComponent {
   }
 
   onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number) {
+    super.onPinStateChange(pinId, isHigh, cpuCycles);
     const pin = normalizePicoPin(pinId);
     this.irqEventCount += 1;
     this.irqByPin[pin] = Number(this.irqByPin[pin] || 0) + 1;

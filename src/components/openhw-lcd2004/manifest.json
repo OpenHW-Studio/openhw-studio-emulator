@@ -1,0 +1,128 @@
+{
+    "type": "openhw-lcd2004",
+    "label": "LCD 20x4",
+    "description": "20x4 Character LCD Display (Parallel)",
+    "group": "Displays",
+    "w": 360,
+    "h": 190,
+    "attrs": {
+        "color": "blue",
+        "breadboard": {
+            "anchorPin": "VSS"
+        }
+    },
+    "pins": [
+        {
+            "id": "VSS",
+            "x": 32.5,
+            "y": 174,
+            "type": "power",
+            "description": "Ground (GND)"
+        },
+        {
+            "id": "VDD",
+            "x": 41.9,
+            "y": 174,
+            "type": "power",
+            "description": "Power (5V)"
+        },
+        {
+            "id": "V0",
+            "x": 51.8,
+            "y": 174,
+            "type": "analog",
+            "description": "Contrast"
+        },
+        {
+            "id": "RS",
+            "x": 61,
+            "y": 174,
+            "type": "digital",
+            "description": "Register Select"
+        },
+        {
+            "id": "RW",
+            "x": 70.8,
+            "y": 174,
+            "type": "digital",
+            "description": "Read/Write"
+        },
+        {
+            "id": "E",
+            "x": 80.5,
+            "y": 174,
+            "type": "digital",
+            "description": "Enable"
+        },
+        {
+            "id": "D0",
+            "x": 90,
+            "y": 174,
+            "type": "digital",
+            "description": "Data 0"
+        },
+        {
+            "id": "D1",
+            "x": 99.5,
+            "y": 174,
+            "type": "digital",
+            "description": "Data 1"
+        },
+        {
+            "id": "D2",
+            "x": 109.5,
+            "y": 174,
+            "type": "digital",
+            "description": "Data 2"
+        },
+        {
+            "id": "D3",
+            "x": 119,
+            "y": 174,
+            "type": "digital",
+            "description": "Data 3"
+        },
+        {
+            "id": "D4",
+            "x": 128.5,
+            "y": 174,
+            "type": "digital",
+            "description": "Data 4"
+        },
+        {
+            "id": "D5",
+            "x": 138,
+            "y": 174,
+            "type": "digital",
+            "description": "Data 5"
+        },
+        {
+            "id": "D6",
+            "x": 147.5,
+            "y": 174,
+            "type": "digital",
+            "description": "Data 6"
+        },
+        {
+            "id": "D7",
+            "x": 157,
+            "y": 174,
+            "type": "digital",
+            "description": "Data 7"
+        },
+        {
+            "id": "A",
+            "x": 166.5,
+            "y": 174,
+            "type": "power",
+            "description": "Backlight Anode (+)"
+        },
+        {
+            "id": "K",
+            "x": 176,
+            "y": 174,
+            "type": "power",
+            "description": "Backlight Cathode (-)"
+        }
+    ]
+}

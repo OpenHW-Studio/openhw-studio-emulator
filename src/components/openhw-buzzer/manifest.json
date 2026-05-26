@@ -11,14 +11,14 @@
     },
     "pins": [
         {
-            "id": "1",
+            "id": "GND",
             "x": 10.1,
             "y": 45.9,
             "type": "power",
             "description": "Negative"
         },
         {
-            "id": "2",
+            "id": "SIG",
             "x": 25.1,
             "y": 45.9,
             "type": "digital",
@@ -27,14 +27,24 @@
     ],
     "autowiring": {
         "connections": [
-            { "from": "2", "to": "arduino:8", "via": "openhw-resistor", "attrs": { "value": "100" } },
-            { "from": "1", "to": "arduino:GND" }
+            {
+                "from": "SIG",
+                "to": "arduino:8",
+                "via": "openhw-resistor",
+                "attrs": {
+                    "value": "100"
+                }
+            },
+            {
+                "from": "GND",
+                "to": "arduino:GND"
+            }
         ]
     },
     "autocoding": {
         "arduino": {
-            "setup": "pinMode(${2}, OUTPUT);",
-            "loop": "int notes_${COMP_SUFFIX}[] = {262, 294, 330, 349, 392, 440, 494, 523};\nint durs_${COMP_SUFFIX}[] = {200, 200, 200, 200, 200, 200, 200, 400};\nfor (int i_${COMP_SUFFIX} = 0; i_${COMP_SUFFIX} < 8; i_${COMP_SUFFIX}++) {\n  tone(${2}, notes_${COMP_SUFFIX}[i_${COMP_SUFFIX}], durs_${COMP_SUFFIX}[i_${COMP_SUFFIX}]);\n  delay(durs_${COMP_SUFFIX}[i_${COMP_SUFFIX}] + 30);\n}\nnoTone(${2});\ndelay(1000);"
+            "setup": "pinMode(${SIG}, OUTPUT);",
+            "loop": "int notes_${COMP_SUFFIX}[] = {262, 294, 330, 349, 392, 440, 494, 523};\nint durs_${COMP_SUFFIX}[] = {200, 200, 200, 200, 200, 200, 200, 400};\nfor (int i_${COMP_SUFFIX} = 0; i_${COMP_SUFFIX} < 8; i_${COMP_SUFFIX}++) {\n  tone(${SIG}, notes_${COMP_SUFFIX}[i_${COMP_SUFFIX}], durs_${COMP_SUFFIX}[i_${COMP_SUFFIX}]);\n  delay(durs_${COMP_SUFFIX}[i_${COMP_SUFFIX}] + 30);\n}\nnoTone(${SIG});\ndelay(1000);"
         }
     }
 }
