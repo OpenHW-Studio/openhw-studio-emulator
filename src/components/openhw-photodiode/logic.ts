@@ -4,10 +4,18 @@ export class PhotodiodeLogic extends BaseComponent {
     constructor(id: string, manifest: any) {
         super(id, manifest);
         // Default light lux level (0 = dark, 100 = bright)
-        this.state = { light: 0 };
+        this.state = { light: manifest.attrs?.light ?? 0 };
     }
 
-    onPinStateChange() {
+    onEvent(event: any) {
+        if (event.type === 'SET_ATTR') {
+            this.state[event.key] = event.value;
+            this.stateChanged = true;
+            this.update();
+        }
+    }
+
+    update() {
         const va = this.getPinVoltage('A');
         const vc = this.getPinVoltage('C');
 
@@ -18,18 +26,15 @@ export class PhotodiodeLogic extends BaseComponent {
         }
 
         // Photodiode behavior in reverse bias
-        // When reverse biased (V_C > V_A), it leaks current proportional to light.
-        // We'll simulate this by lowering the resistance (allowing voltage to pass from C to A).
-        if (vc > va) {
+        if (vc > 0 && vc >= va) {
             const light = this.state.light; // 0 to 100
-            // If light is 100, acts like a wire with low drop
-            // If light is 0, completely blocks
-            if (light > 0) {
-                // Pass voltage from C to A based on light intensity
-                this.setPinVoltage('A', (vc * light) / 100.0);
-            } else {
-                this.setPinVoltage('A', 0);
-            }
+            this.setPinVoltage('A', (vc * light) / 100.0);
+        } else if (vc === 0) {
+            this.setPinVoltage('A', 0);
         }
+    }
+
+    getSyncState() {
+        return { ...this.state };
     }
 }
