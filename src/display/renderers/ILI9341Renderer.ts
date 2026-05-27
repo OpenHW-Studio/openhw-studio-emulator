@@ -13,9 +13,6 @@ export class ILI9341Renderer implements IDisplayRenderer {
     private ctx: OffscreenCanvasRenderingContext2D | null = null;
     /** Shadow RGBA buffer — reused every frame to avoid GC pressure. */
     private rgbaBuffer = new Uint8ClampedArray(240 * 320 * 4);
-    private blackoutTimer: ReturnType<typeof setTimeout> | null = null;
-    private lastFrameTs = 0;
-    private readonly BLACKOUT_TIMEOUT_MS = 600;
 
     constructor() {
         // Pre-set alpha channel to 255 (fully opaque) — never changes.
@@ -34,14 +31,6 @@ export class ILI9341Renderer implements IDisplayRenderer {
 
     paint(frame: DisplayFrame): void {
         if (!this.ctx) return;
-
-        this.lastFrameTs = frame.timestamp;
-
-        // Clear any pending blackout timer — we just received a live frame.
-        if (this.blackoutTimer !== null) {
-            clearTimeout(this.blackoutTimer);
-            this.blackoutTimer = null;
-        }
 
         const { powerOn, reset } = frame.state || {};
 
@@ -66,22 +55,9 @@ export class ILI9341Renderer implements IDisplayRenderer {
             const imgData = new ImageData(rgba, 240, 320);
             this.ctx.putImageData(imgData, 0, 0);
         }
-
-        // Schedule a blackout if no new frames arrive within the timeout.
-        this.blackoutTimer = setTimeout(() => {
-            if (Date.now() - this.lastFrameTs >= this.BLACKOUT_TIMEOUT_MS && this.ctx) {
-                this.ctx.fillStyle = '#000000';
-                this.ctx.fillRect(0, 0, 240, 320);
-            }
-            this.blackoutTimer = null;
-        }, this.BLACKOUT_TIMEOUT_MS);
     }
 
     destroy(): void {
-        if (this.blackoutTimer !== null) {
-            clearTimeout(this.blackoutTimer);
-            this.blackoutTimer = null;
-        }
         if (this.ctx) {
             this.ctx.fillStyle = '#000000';
             this.ctx.fillRect(0, 0, 240, 320);

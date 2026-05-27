@@ -41,6 +41,9 @@ export class BuzzerLogic extends PWMProtocol {
 
     // Silence detection — if PWMProtocol stops firing, the signal has gone quiet
     update(cpuCycles: number, wires: any[], instances: BaseComponent[]) {
+        if ((this as any)._isToneBypassed) {
+            return;
+        }
         super.update(cpuCycles, wires, instances);
 
         // Detect clock speed from board type present in the simulation
