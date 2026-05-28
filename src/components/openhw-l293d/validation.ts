@@ -12,7 +12,7 @@ export const validation: { rules: ComponentValidationRule[] } = {
             check: (component: any, graph: Map<string, string[]>, validator: any) => {
                 const vcc1 = `${component.id}.VCC1`;
                 const vcc2 = `${component.id}.VCC2`;
-                const gndCandidates = [`${component.id}.GND.1`, `${component.id}.GND`];
+                const gndCandidates = [`${component.id}.GND1`, `${component.id}.GND2`, `${component.id}.GND3`, `${component.id}.GND4`, `${component.id}.GND`];
                 const gnd = gndCandidates.find(node => validator.getNeighbors(node).length > 0) || gndCandidates[0];
                 const issues = [];
 
