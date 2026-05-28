@@ -12,7 +12,7 @@
         { "id": "NO",  "x": 0,   "y": 25, "type": "passive", "description": "Normally Open terminal" },
         { "id": "COM", "x": 0,   "y": 40, "type": "passive", "description": "Common terminal" },
         { "id": "NC",  "x": 0,   "y": 55, "type": "passive", "description": "Normally Closed terminal" },
-        { "id": "IN",  "x": 187, "y": 25, "type": "input",   "description": "Control signal from Arduino" },
+        { "id": "SIG",  "x": 187, "y": 25, "type": "input",   "description": "Control signal from Arduino" },
         { "id": "GND", "x": 187, "y": 40, "type": "input",   "description": "Ground" },
         { "id": "VCC", "x": 187, "y": 55, "type": "input",   "description": "Power Supply (5V)" }
     ],
@@ -22,13 +22,13 @@
     },
     "autocoding": {
         "arduino": {
-            "globals": "const int relayPin_${COMP_SUFFIX} = ${IN};",
+            "globals": "const int relayPin_${COMP_SUFFIX} = ${SIG};",
             "setup": "pinMode(relayPin_${COMP_SUFFIX}, OUTPUT);\ndigitalWrite(relayPin_${COMP_SUFFIX}, HIGH); // Assumes active-low trigger",
             "loop": "digitalWrite(relayPin_${COMP_SUFFIX}, LOW); // Energise relay\ndelay(1000);\ndigitalWrite(relayPin_${COMP_SUFFIX}, HIGH); // De-energise relay\ndelay(1000);"
         },
         "micropython": {
             "globals": "from machine import Pin\nimport time",
-            "setup": "relay_${COMP_SUFFIX} = Pin(${IN}, Pin.OUT)\nrelay_${COMP_SUFFIX}.value(1) # Assumes active-low trigger",
+            "setup": "relay_${COMP_SUFFIX} = Pin(${SIG}, Pin.OUT)\nrelay_${COMP_SUFFIX}.value(1) # Assumes active-low trigger",
             "loop": "relay_${COMP_SUFFIX}.value(0) # Energise relay\ntime.sleep(1)\nrelay_${COMP_SUFFIX}.value(1) # De-energise relay\ntime.sleep(1)"
         }
     },
@@ -36,7 +36,7 @@
         "connections": [
             { "from": "VCC", "to": "arduino:5V" },
             { "from": "GND", "to": "arduino:GND" },
-            { "from": "IN", "to": "arduino:2" }
+            { "from": "SIG", "to": "arduino:2" }
         ]
     }
 }
