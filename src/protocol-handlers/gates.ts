@@ -1,5 +1,5 @@
 import { BaseComponent } from '../components/BaseComponent';
-import { DigitalProtocol } from './digital-device.ts';
+import { DigitalProtocol } from './digital-device';
 
 function gateVoltage(isHigh: boolean): number {
     return isHigh ? 5.0 : 0.0;

@@ -37,4 +37,20 @@ export class RGBLEDLogic extends BaseComponent {
 
         this.stateChanged = true;
     }
+
+    onPWMSignal(pinId: string, frequencyHz: number, dutyCycle: number, pulseUs: number) {
+        if (pinId === 'R' || pinId === 'G' || pinId === 'B') {
+            // dutyCycle is 0.0 to 1.0. Map to 0-255
+            const mappedVal = Math.min(255, Math.max(0, Math.floor(dutyCycle * 255)));
+            
+            // For common anode, the pin sinks current. So a HIGH duty cycle means the LED is OFF!
+            const effectiveBrightness = this.isAnode ? (255 - mappedVal) : mappedVal;
+            
+            if (pinId === 'R') this.state.r = effectiveBrightness;
+            if (pinId === 'G') this.state.g = effectiveBrightness;
+            if (pinId === 'B') this.state.b = effectiveBrightness;
+            
+            this.stateChanged = true;
+        }
+    }
 }
