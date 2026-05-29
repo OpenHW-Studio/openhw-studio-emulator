@@ -336,13 +336,13 @@ export class MAX30102Logic extends BaseComponent {
         const pulse = ppgPulseShape(this.ppgPhase);
 
         // ── RED channel ──────────────────────────────────────────────
-        // DC scales strongly with amplitude; AC (pulsatile) ~1.5% of DC
+        // DC scales strongly with amplitude; AC (pulsatile) ~0.5% of DC for healthy SpO2
         const redDC  = this.redAmp * 780;
-        const redAC  = redDC * 0.014;
+        const redAC  = redDC * 0.005;
         let redVal   = Math.round(redDC + redAC * pulse);
 
         // ── IR channel ───────────────────────────────────────────────
-        // IR absorption is slightly higher; AC ratio is lower (~1.0%)
+        // IR absorption is slightly higher; AC ratio is higher (~1.0%)
         const irDC   = this.irAmp * 900;
         const irAC   = irDC * 0.010;
         let irVal    = Math.round(irDC + irAC * pulse);

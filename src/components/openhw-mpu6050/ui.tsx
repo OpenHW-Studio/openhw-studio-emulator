@@ -50,13 +50,15 @@ export const MPU6050UI = ({
     attrs: any;
 }) => {
     const powered = state?.powered ?? false;
-    const ax = parseFloat(state?.accelX ?? attrs?.accelX ?? 0).toFixed(1);
-    const ay = parseFloat(state?.accelY ?? attrs?.accelY ?? 0).toFixed(1);
-    const az = parseFloat(state?.accelZ ?? attrs?.accelZ ?? 1).toFixed(1);
-    const gx = parseFloat(state?.gyroX  ?? attrs?.gyroX ?? 0).toFixed(0);
-    const gy = parseFloat(state?.gyroY  ?? attrs?.gyroY ?? 0).toFixed(0);
-    const gz = parseFloat(state?.gyroZ  ?? attrs?.gyroZ ?? 0).toFixed(0);
-    const temp = parseFloat(state?.temperature ?? attrs?.temperature ?? 25).toFixed(1);
+    // Use flat state keys (ax/ay/az/gx/gy/gz/temp) that logic.ts now stores;
+    // fall back to attrs so the HUD shows sensible values before the first update().
+    const ax   = parseFloat(state?.ax   ?? attrs?.accelX ?? 0).toFixed(1);
+    const ay   = parseFloat(state?.ay   ?? attrs?.accelY ?? 0).toFixed(1);
+    const az   = parseFloat(state?.az   ?? attrs?.accelZ ?? 1).toFixed(1);
+    const gx   = parseFloat(state?.gx   ?? attrs?.gyroX  ?? 0).toFixed(0);
+    const gy   = parseFloat(state?.gy   ?? attrs?.gyroY  ?? 0).toFixed(0);
+    const gz   = parseFloat(state?.gz   ?? attrs?.gyroZ  ?? 0).toFixed(0);
+    const temp = parseFloat(state?.temp ?? attrs?.temperature ?? 25).toFixed(1);
 
     return (
         <div style={{ position: 'relative', width: 94.5, height: 135 }}>
