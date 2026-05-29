@@ -10,8 +10,8 @@ export const validation: { rules: ComponentValidationRule[] } = {
             priority: 10,
             description: 'Check that the logic and motor supply rails are connected.',
             check: (component: any, graph: Map<string, string[]>) => {
-                const logicPower = graph.get(`${component.id}.VCC`);
-                const motorPower = graph.get(`${component.id}.VM`);
+                const logicPower = graph.get(`${component.id}.5V`) || graph.get(`${component.id}.VCC`);
+                const motorPower = graph.get(`${component.id}.12V`) || graph.get(`${component.id}.VM`);
                 const issues = [];
 
                 if (!logicPower || logicPower.length === 0) {
