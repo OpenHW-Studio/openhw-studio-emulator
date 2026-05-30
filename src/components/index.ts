@@ -43,7 +43,6 @@ export { default as openhwBreadboardMini } from './openhw-breadboard-mini';
 export { default as openhwA4988 } from './openhw-a4988';
 export { default as openhwStepperMotor } from './openhw-stepper-motor';
 export { default as openhwBiaxialStepper } from './openhw-biaxial-stepper';
-export { default as openhwCD74HC4067 } from './openhw-cd74hc4067';
 export { default as openhwL293D } from './openhw-l293d';
 export { default as openhwRGBLED } from './openhw-rgb-led';
 export { default as openhwRotaryEncoder } from './openhw-rotary-encoder';

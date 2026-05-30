@@ -1,9 +1,8 @@
-export const BOUNDS = { x: 0, y: 0, w: 70, h: 160 };
-
 import React from 'react';
 import moduleImage from './RainDropModule.png';
 
 const W = 97, H = 227;
+export const BOUNDS = { x: 0, y: 0, w: 70, h: 160 };
 
 export const RaindropModuleContextMenu = ({
     attrs, onUpdate,

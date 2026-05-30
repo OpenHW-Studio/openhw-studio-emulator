@@ -2,18 +2,18 @@
     "type": "openhw-relay-module",
     "label": "Relay Module",
     "group": "Outputs",
-    "w": 200,
-    "h": 80,
+    "w": 340,
+    "h": 180,
     "attrs": {
         "state": "off",
         "triggerLevel": "low"
     },
     "pins": [
-        { "id": "NO",  "x": 0,   "y": 25, "type": "passive", "description": "Normally Open terminal" },
-        { "id": "COM", "x": 0,   "y": 40, "type": "passive", "description": "Common terminal" },
-        { "id": "NC",  "x": 0,   "y": 55, "type": "passive", "description": "Normally Closed terminal" },
-        { "id": "IN",  "x": 187, "y": 25, "type": "input",   "description": "Control signal from Arduino" },
-        { "id": "GND", "x": 187, "y": 40, "type": "input",   "description": "Ground" },
-        { "id": "VCC", "x": 187, "y": 55, "type": "input",   "description": "Power Supply (5V)" }
+        { "id": "VCC", "x": 26,  "y": 66,  "type": "input",   "description": "Power Supply (5V)" },
+        { "id": "GND", "x": 26,  "y": 86,  "type": "input",   "description": "Ground" },
+        { "id": "IN",  "x": 26,  "y": 106, "type": "input",   "description": "Control signal from Arduino" },
+        { "id": "NO",  "x": 295, "y": 47,  "type": "passive", "description": "Normally Open terminal" },
+        { "id": "COM", "x": 295, "y": 87,  "type": "passive", "description": "Common terminal" },
+        { "id": "NC",  "x": 295, "y": 127, "type": "passive", "description": "Normally Closed terminal" }
     ]
 }
