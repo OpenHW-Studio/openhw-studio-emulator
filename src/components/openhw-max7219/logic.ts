@@ -52,12 +52,42 @@ export class MAX7219Logic extends SPIProtocol {
         this.setState({ matrix: [...this.matrixData], active: !this.shutdown });
     }
 
-    // Passthrough clock & CS to daisy-chain output
+    // Bit-banging state for LedControl
+    private clkLast = false;
+    private currentByte = 0;
+    private bitsReceived = 0;
+
+    // Passthrough clock & CS to daisy-chain output and decode bit-banging
     onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number) {
         super.onPinStateChange(pinId, isHigh, cpuCycles);
         const v = isHigh ? 5.0 : 0.0;
+        
         if (pinId === 'CS')  this.setPinVoltage('CS_OUT', v);
         if (pinId === 'CLK') this.setPinVoltage('CLK_OUT', v);
+
+        // Bit-banging decode (LedControl uses MSB first, latch on rising edge)
+        if (pinId === 'CLK') {
+            const rising = isHigh && !this.clkLast;
+            this.clkLast = isHigh;
+
+            if (rising && this.csActive) {
+                const dinBit = this.getPinVoltage('DIN') > 0.5 ? 1 : 0;
+                this.currentByte = ((this.currentByte << 1) | dinBit) & 0xFF;
+                this.bitsReceived++;
+
+                if (this.bitsReceived === 8) {
+                    this.onSPIByte(this.currentByte);
+                    this.bitsReceived = 0;
+                    this.currentByte = 0;
+                }
+            }
+        }
+
+        if (pinId === 'CS' && !isHigh) {
+            // Reset bit-banging state when CS goes active (LOW)
+            this.bitsReceived = 0;
+            this.currentByte = 0;
+        }
     }
 
     getSyncState() { return { ...this.state }; }
