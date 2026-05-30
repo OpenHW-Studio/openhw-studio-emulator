@@ -35,7 +35,7 @@ export class RelayModuleLogic extends BaseComponent {
 
     update(cpuCycles: number, currentWires: any[], allComponentsInstances: BaseComponent[]) {
         const vcc = this.getPinVoltage('VCC');
-        const inp = this.getPinVoltage('SIG');
+        const inp = this.getPinVoltage('IN');
 
         if (vcc < 2.5) {
             // Not powered
