@@ -4,11 +4,10 @@ export const validation = {
             id: 'max7219-power-check',
             description: 'MAX7219 needs VCC and GND properly connected',
             check(comp: any, graph: any, validator: any) {
-                const vccPin = comp.pins.find((p: any) => p.id === 'VCC');
-                const vccVolts = validator.calculateVoltageAtNode(vccPin.id);
+                const vccVolts = validator?.calculateVoltageAtNode(`${comp.id}.VCC`);
                 
-                if (vccVolts < 4.5) {
-                    return { level: 'warning', message: 'MAX7219 requires 5V on VCC' };
+                if (vccVolts !== undefined && vccVolts < 4.5) {
+                    return { severity: 'warn', message: 'MAX7219 requires 5V on VCC' };
                 }
                 return null;
             }
