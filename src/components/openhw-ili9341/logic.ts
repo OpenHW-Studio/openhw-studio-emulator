@@ -193,9 +193,15 @@ export class ILI9341Logic extends SPIProtocol {
         const dmaAddress = parseInt((this as any).attrs?.dmaAddress || this.state?.dmaAddress || '0', 16);
         if (dmaAddress > 0 && !this.state.dmaBypassDisabled) return; // Bypass normal SPI processing if DMA active
         
-        if (!this.powerOn) return;
+        if (!this.powerOn) {
+            console.warn(`[ILI9341Logic] onSPIByteReceived ignored because powerOn is false! VCC voltage=${this.getPinVoltage('VCC')}`);
+            return;
+        }
 
-        if (!this.dcHigh) {
+        const isDC = this.dcHigh;
+
+
+        if (!isDC) {
             this.currentCommand = byte;
             this.params = [];
             this.secondByte = false;
@@ -247,8 +253,25 @@ export class ILI9341Logic extends SPIProtocol {
                     const g = ((full >> 5) & 0x3f) << 2;
                     const b = (full & 0x1f) << 3;
 
-                    if (this.currentX >= 0 && this.currentX < 240 && this.currentY >= 0 && this.currentY < 320) {
-                        const idx = (this.currentY * 240 + this.currentX) * 3;
+                    const mv = (this.madctl >> 5) & 1;
+                    const mx = (this.madctl >> 6) & 1;
+                    const my = (this.madctl >> 7) & 1;
+
+                    let physX = 0;
+                    let physY = 0;
+
+                    if (mv === 0) {
+                        // Portrait
+                        physX = mx ? this.currentX : (239 - this.currentX);
+                        physY = my ? (319 - this.currentY) : this.currentY;
+                    } else {
+                        // Landscape
+                        physX = mx ? (239 - this.currentY) : this.currentY;
+                        physY = my ? this.currentX : (319 - this.currentX);
+                    }
+
+                    if (physX >= 0 && physX < 240 && physY >= 0 && physY < 320) {
+                        const idx = (physY * 240 + physX) * 3;
                         this.vram[idx] = r;
                         this.vram[idx + 1] = g;
                         this.vram[idx + 2] = b;
