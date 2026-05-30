@@ -1,7 +1,6 @@
 import React from 'react';
 
-// Keeping the larger 200x80 bounds
-export const BOUNDS = { x: 0, y: 0, w: 200, h: 80 };
+export const BOUNDS = { x: 0, y: 0, w: 340, h: 180 };
 
 export const RelayModuleContextMenu = ({
     attrs,
@@ -32,55 +31,160 @@ export const RelayModuleUI = ({
 }) => {
     const energised = state?.energised ?? false;
 
+    const W = BOUNDS.w;
+    const H = BOUNDS.h;
+
     return (
-        <div style={{ position: 'relative', width: 200, height: 80 }}>
-            <svg width="200" height="80" viewBox="0 0 200 80" style={{ fontFamily: 'sans-serif' }}>
-                {/* PCB Base */}
-                <rect x="0" y="0" width="188" height="80" rx="3" fill="#002b5e" />
-                <rect x="0" y="0" width="188" height="80" rx="3" fill="none" stroke="#ffffff" strokeOpacity="0.15" strokeWidth="1" />
+        <div tabIndex={-1} style={{ position: 'relative', width: W, height: H, outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent' }}>
+            <svg
+                width={W}
+                height={H}
+                viewBox={`0 0 ${W} ${H}`}
+                style={{ fontFamily: 'Arial, sans-serif', display: 'block' }}
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <defs>
+                    {/* Metallic screw gradient */}
+                    <radialGradient id="metalGrad" cx="30%" cy="30%" r="70%">
+                        <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
+                        <stop offset="35%" stopColor="#d9d9d9" stopOpacity="1" />
+                        <stop offset="100%" stopColor="#9a9a9a" stopOpacity="1" />
+                    </radialGradient>
 
-                {/* Left Terminal Block */}
-                <rect x="0" y="4" width="28" height="72" rx="2" fill="#0a5eb0" stroke="#063b73" strokeWidth="1" />
-                
-                {/* Screws at 25, 40, 55 */}
-                <circle cx="14" cy="25" r="7" fill="#d1d5db" stroke="#9ca3af" strokeWidth="1" />
-                <line x1="9" y1="25" x2="19" y2="25" stroke="#4b5563" strokeWidth="2" />
+                    {/* Subtle highlight for screw center */}
+                    <linearGradient id="screwSlot" x1="0" x2="1">
+                        <stop offset="0%" stopColor="#fff" stopOpacity="0.85" />
+                        <stop offset="100%" stopColor="#000" stopOpacity="0.25" />
+                    </linearGradient>
 
-                <circle cx="14" cy="40" r="7" fill="#d1d5db" stroke="#9ca3af" strokeWidth="1" />
-                <line x1="10" y1="36" x2="18" y2="44" stroke="#4b5563" strokeWidth="2" />
+                    {/* Relay drop shadow */}
+                    <filter id="relayDrop" x="-50%" y="-50%" width="200%" height="200%">
+                        <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#000" floodOpacity="0.35" />
+                    </filter>
 
-                <circle cx="14" cy="55" r="7" fill="#d1d5db" stroke="#9ca3af" strokeWidth="1" />
-                <line x1="10" y1="59" x2="18" y2="51" stroke="#4b5563" strokeWidth="2" />
+                    {/* PCB drop shadow */}
+                    <filter id="pcbShadow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#000" floodOpacity="0.2" />
+                    </filter>
+                </defs>
+                {/* === PCB Base (red) === */}
+                <rect x="30" y="5" width={W - 40} height={H - 10} rx="5" fill="#d32f2f" filter="url(#pcbShadow)" />
+                <rect x="30" y="5" width={W - 40} height={H - 10} rx="5" fill="none" stroke="#b71c1c" strokeWidth="1.2" />
 
-                {/* Silkscreen Left */}
-                <text x="32" y="28" fill="#ffffff" fontSize="7" fontWeight="bold">NO</text>
-                <text x="32" y="43" fill="#ffffff" fontSize="7" fontWeight="bold">COM</text>
-                <text x="32" y="58" fill="#ffffff" fontSize="7" fontWeight="bold">NC</text>
+                {/* Mounting holes (4 corners) */}
+                <circle cx="42" cy="17" r="5" fill="#333" stroke="#222" strokeWidth="1" />
+                <circle cx="42" cy="17" r="2.5" fill="#555" />
+                <circle cx={W - 22} cy="17" r="5" fill="#333" stroke="#222" strokeWidth="1" />
+                <circle cx={W - 22} cy="17" r="2.5" fill="#555" />
+                <circle cx="42" cy={H - 17} r="5" fill="#333" stroke="#222" strokeWidth="1" />
+                <circle cx="42" cy={H - 17} r="2.5" fill="#555" />
+                <circle cx={W - 22} cy={H - 17} r="5" fill="#333" stroke="#222" strokeWidth="1" />
+                <circle cx={W - 22} cy={H - 17} r="2.5" fill="#555" />
 
-                {/* Relay Component */}
-                <rect x="52" y="4" width="80" height="72" rx="2" fill="#0a5eb0" stroke="#063b73" strokeWidth="1" />
-                
-                {/* Decorative SMD Components */}
-                <rect x="138" y="32" width="5" height="8" fill="#111" />
-                <rect x="146" y="32" width="5" height="8" fill="#111" />
+                {/* ====== PWR LED (top-left area) ====== */}
+                {/* Big green circle */}
+                <circle cx="68" cy="20" r="7" fill="#27ae60" />
+                <circle cx="68" cy="20" r="3" fill="#2ecc71" opacity="0.8" />
 
-                {/* LEDs */}
-                <circle cx="140" cy="16" r="4.4" fill="#ef4444" />
-                <circle cx="140" cy="16" r="1.6" fill="#fca5a5" />
+                {/* SMD LED package for PWR */}
+                <g transform="translate(58, 32)">
+                    <rect x="0" y="0" width="24" height="14" rx="1.5" fill="#fff" stroke="#ccc" strokeWidth="0.8" />
+                    <rect x="3" y="2" width="8" height="10" fill="#e74c3c" opacity="0.5" />
+                    <rect x="13" y="2" width="8" height="10" fill="#bdc3c7" />
+                </g>
+                <text x="88" y="43" fill="#fff" fontSize="11" fontWeight="700">PWR</text>
 
-                <circle cx="140" cy="64" r="4.4" fill={energised ? '#22c55e' : '#14532d'} />
-                <circle cx="140" cy="64" r="1.6" fill={energised ? '#bbf7d0' : '#052e16'} />
+                {/* ====== Input Pin Header (VCC, GND, IN) ====== */}
+                <g transform="translate(56, 58)">
+                    {/* Pin header black body */}
+                    <rect x="0" y="-4" width="14" height="72" rx="1.5" fill="#1a1a2e" stroke="#111" strokeWidth="1" />
 
-                {/* Silkscreen Right */}
-                <text x="148" y="28" fill="#ffffff" fontSize="7" fontWeight="bold">IN</text>
-                <text x="148" y="43" fill="#ffffff" fontSize="7" fontWeight="bold">GND</text>
-                <text x="148" y="58" fill="#ffffff" fontSize="7" fontWeight="bold">VCC</text>
+                    {/* VCC pin — trace extends left outside board (thicker) */}
+                    <line x1="-30" y1="8" x2="0" y2="8" stroke="#bdc3c7" strokeWidth="3.5" />
+                    <circle cx="7" cy="8" r="4" fill="#fbbf24" stroke="#b8860b" strokeWidth="0.6" />
+                    <circle cx="7" cy="8" r="14" fill="#000" opacity="0" />
 
-                {/* Pin Header Base & Connection Pads at 25, 40, 55 */}
-                <rect x="184" y="8" width="6" height="64" rx="1" fill="#1a1a1a" />
-                <circle cx="187" cy="25" r="2" fill="#fbbf24" />
-                <circle cx="187" cy="40" r="2" fill="#fbbf24" />
-                <circle cx="187" cy="55" r="2" fill="#fbbf24" />
+                    {/* GND pin */}
+                    <line x1="-30" y1="28" x2="0" y2="28" stroke="#bdc3c7" strokeWidth="3.5" />
+                    <circle cx="7" cy="28" r="4" fill="#fbbf24" stroke="#b8860b" strokeWidth="0.6" />
+                    <circle cx="7" cy="28" r="14" fill="#000" opacity="0" />
+
+                    {/* IN pin */}
+                    <line x1="-30" y1="48" x2="0" y2="48" stroke="#bdc3c7" strokeWidth="3.5" />
+                    <circle cx="7" cy="48" r="4" fill="#fbbf24" stroke="#b8860b" strokeWidth="0.6" />
+                    <circle cx="7" cy="48" r="14" fill="#000" opacity="0" />
+
+                    {/* Labels to the right of the header */}
+                    <text x="20" y="12" fill="#fff" fontSize="12" fontWeight="700">VCC</text>
+                    <text x="20" y="32" fill="#fff" fontSize="12" fontWeight="700">GND</text>
+                    <text x="20" y="52" fill="#fff" fontSize="12" fontWeight="700">IN</text>
+                </g>
+
+                {/* ====== LED1 (bottom-left) ====== */}
+                <g transform="translate(58, 138)">
+                    <rect x="0" y="0" width="24" height="14" rx="1.5" fill="#fff" stroke="#ccc" strokeWidth="0.8" />
+                    <rect x="3" y="2" width="8" height="10" fill={energised ? '#2ecc71' : '#145a32'} />
+                    <rect x="13" y="2" width="8" height="10" fill="#bdc3c7" />
+                </g>
+                <text x="88" y="149" fill="#fff" fontSize="11" fontWeight="700">LED1</text>
+
+                {/* ====== Relay Body (large blue box, center-right) ====== */}
+                <g transform="translate(148, 22)">
+                    <rect x="0" y="0" width="120" height="130" rx="4" fill="#2471a3" stroke="#1a5276" strokeWidth="1.2" filter="url(#relayDrop)" />
+                    <rect x="5" y="5" width="110" height="120" rx="3" fill="#3498db" />
+
+                    {/* subtle inset to give depth */}
+                    <rect x="6" y="6" width="108" height="118" rx="2.5" fill="none" stroke="rgba(255,255,255,0.06)" />
+
+                    {/* Relay label */}
+                    <text x="60" y="52" fill="#fff" fontSize="28" fontWeight="700" textAnchor="middle">Relay</text>
+                    <text x="60" y="78" fill="#ecf0f1" fontSize="18" fontWeight="600" textAnchor="middle">Module</text>
+
+                    {/* Status indicator dot */}
+                    <circle cx="25" cy="108" r="4" fill={energised ? '#8e44ad' : '#4a235a'} />
+                </g>
+
+                {/* ====== Output Screw Terminal Block (NO, COM, NC) ====== */}
+                <g transform="translate(280, 22)">
+                    <rect x="0" y="0" width="30" height="130" rx="2" fill="#2471a3" stroke="#1a5276" strokeWidth="1.2" />
+
+                    {/* NO screw terminal (metallic) */}
+                    <circle cx="15" cy="25" r="10" fill="url(#metalGrad)" stroke="#8f9597" strokeWidth="0.9" />
+                    {/* slot */}
+                    <rect x="8" y="23.2" width="14" height="2" rx="1" fill="#566573" />
+                    <ellipse cx="15" cy="21.5" rx="6" ry="2" fill="rgba(255,255,255,0.14)" />
+                    <circle cx="15" cy="25" r="12" fill="#000" opacity="0" />
+
+                    {/* COM screw terminal */}
+                    <circle cx="15" cy="65" r="10" fill="url(#metalGrad)" stroke="#8f9597" strokeWidth="0.9" />
+                    <rect x="8" y="63.2" width="14" height="2" rx="1" fill="#566573" transform="rotate(15,15,65)" />
+                    <ellipse cx="15" cy="61.5" rx="6" ry="2" fill="rgba(255,255,255,0.12)" />
+                    <circle cx="15" cy="65" r="12" fill="#000" opacity="0" />
+
+                    {/* NC screw terminal */}
+                    <circle cx="15" cy="105" r="10" fill="url(#metalGrad)" stroke="#8f9597" strokeWidth="0.9" />
+                    <rect x="8" y="103.2" width="14" height="2" rx="1" fill="#566573" transform="rotate(-15,15,105)" />
+                    <ellipse cx="15" cy="101.5" rx="6" ry="2" fill="rgba(255,255,255,0.12)" />
+                    <circle cx="15" cy="105" r="12" fill="#000" opacity="0" />
+                </g>
+
+                {/* NO / COM / NC labels — rotated 90° to the right of the terminal block */}
+                <text x="318" y="50" fill="#fff" fontSize="11" fontWeight="700" textAnchor="middle" transform="rotate(90, 318, 50)">NO</text>
+                <text x="318" y="90" fill="#fff" fontSize="11" fontWeight="700" textAnchor="middle" transform="rotate(90, 318, 90)">COM</text>
+                <text x="318" y="130" fill="#fff" fontSize="11" fontWeight="700" textAnchor="middle" transform="rotate(90, 318, 130)">NC</text>
+
+                {/* Tiny PCB details: silkscreen dots, fake resistor marks, traces */}
+                <g>
+                    {/* small silkscreen dots */}
+                    <circle cx="60" cy="16" r="1.1" fill="#fff" opacity="0.9" />
+                    <circle cx="90" cy="150" r="1" fill="#fff" opacity="0.8" />
+                    {/* fake resistor markings */}
+                    <rect x="110" y="30" width="18" height="4" rx="1" fill="#7f8c8d" opacity="0.7" />
+                    <rect x="130" y="34" width="2" height="8" fill="#fff" opacity="0.12" />
+                    {/* thin white traces */}
+                    <path d="M84 22 L118 36" stroke="#fff" strokeWidth="0.8" opacity="0.18" strokeLinecap="round" />
+                </g>
+
             </svg>
         </div>
     );
