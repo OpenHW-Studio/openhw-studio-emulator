@@ -49,6 +49,21 @@
             "globals": "#define PIN_R_${COMP_SUFFIX} ${R}\n#define PIN_G_${COMP_SUFFIX} ${G}\n#define PIN_B_${COMP_SUFFIX} ${B}",
             "setup": "pinMode(PIN_R_${COMP_SUFFIX}, OUTPUT);\n  pinMode(PIN_G_${COMP_SUFFIX}, OUTPUT);\n  pinMode(PIN_B_${COMP_SUFFIX}, OUTPUT);",
             "loop": "// Red\n  analogWrite(PIN_R_${COMP_SUFFIX}, 255);\n  analogWrite(PIN_G_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_B_${COMP_SUFFIX}, 0);\n  delay(500);\n\n  // Green\n  analogWrite(PIN_R_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_G_${COMP_SUFFIX}, 255);\n  analogWrite(PIN_B_${COMP_SUFFIX}, 0);\n  delay(500);\n\n  // Blue\n  analogWrite(PIN_R_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_G_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_B_${COMP_SUFFIX}, 255);\n  delay(500);"
+        },
+        "pico": {
+            "globals": "#define PIN_R_${COMP_SUFFIX} ${R}\n#define PIN_G_${COMP_SUFFIX} ${G}\n#define PIN_B_${COMP_SUFFIX} ${B}",
+            "setup": "pinMode(PIN_R_${COMP_SUFFIX}, OUTPUT);\n  pinMode(PIN_G_${COMP_SUFFIX}, OUTPUT);\n  pinMode(PIN_B_${COMP_SUFFIX}, OUTPUT);",
+            "loop": "// Red\n  analogWrite(PIN_R_${COMP_SUFFIX}, 255);\n  analogWrite(PIN_G_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_B_${COMP_SUFFIX}, 0);\n  delay(500);\n\n  // Green\n  analogWrite(PIN_R_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_G_${COMP_SUFFIX}, 255);\n  analogWrite(PIN_B_${COMP_SUFFIX}, 0);\n  delay(500);\n\n  // Blue\n  analogWrite(PIN_R_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_G_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_B_${COMP_SUFFIX}, 255);\n  delay(500);"
+        },
+        "micropython": {
+            "globals": "from machine import Pin, PWM\nimport time\n\nled_r_${COMP_SUFFIX} = PWM(Pin(${R}))\nled_g_${COMP_SUFFIX} = PWM(Pin(${G}))\nled_b_${COMP_SUFFIX} = PWM(Pin(${B}))\nled_r_${COMP_SUFFIX}.freq(1000)\nled_g_${COMP_SUFFIX}.freq(1000)\nled_b_${COMP_SUFFIX}.freq(1000)",
+            "setup": "",
+            "loop": "# Red\nled_r_${COMP_SUFFIX}.duty_u16(65535)\nled_g_${COMP_SUFFIX}.duty_u16(0)\nled_b_${COMP_SUFFIX}.duty_u16(0)\ntime.sleep(0.5)\n\n# Green\nled_r_${COMP_SUFFIX}.duty_u16(0)\nled_g_${COMP_SUFFIX}.duty_u16(65535)\nled_b_${COMP_SUFFIX}.duty_u16(0)\ntime.sleep(0.5)\n\n# Blue\nled_r_${COMP_SUFFIX}.duty_u16(0)\nled_g_${COMP_SUFFIX}.duty_u16(0)\nled_b_${COMP_SUFFIX}.duty_u16(65535)\ntime.sleep(0.5)"
+        },
+        "esp32": {
+            "globals": "#define PIN_R_${COMP_SUFFIX} ${R}\n#define PIN_G_${COMP_SUFFIX} ${G}\n#define PIN_B_${COMP_SUFFIX} ${B}",
+            "setup": "pinMode(PIN_R_${COMP_SUFFIX}, OUTPUT);\n  pinMode(PIN_G_${COMP_SUFFIX}, OUTPUT);\n  pinMode(PIN_B_${COMP_SUFFIX}, OUTPUT);",
+            "loop": "// Red\n  analogWrite(PIN_R_${COMP_SUFFIX}, 255);\n  analogWrite(PIN_G_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_B_${COMP_SUFFIX}, 0);\n  delay(500);\n\n  // Green\n  analogWrite(PIN_R_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_G_${COMP_SUFFIX}, 255);\n  analogWrite(PIN_B_${COMP_SUFFIX}, 0);\n  delay(500);\n\n  // Blue\n  analogWrite(PIN_R_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_G_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_B_${COMP_SUFFIX}, 255);\n  delay(500);"
         }
     }
 }

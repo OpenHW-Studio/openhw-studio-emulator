@@ -1,1 +1,1 @@
-export { I2CProtocol, SPIProtocol } from './index.ts';
+export { I2CProtocol, SPIProtocol } from './index';

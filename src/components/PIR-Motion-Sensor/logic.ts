@@ -2,7 +2,6 @@ import { BaseComponent } from '../BaseComponent';
 
 export class PIRLogic extends BaseComponent {
     private motionTimeout: any = null;
-    private attrs: any;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);

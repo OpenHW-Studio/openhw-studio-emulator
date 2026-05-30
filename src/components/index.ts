@@ -1,14 +1,13 @@
 // Export everything from the emulator components package so the frontend can import it
 export { BaseComponent } from './BaseComponent';
-export * from '../protocol-handlers/index.ts';
+export * from '../protocol-handlers/index';
 export { default as openhwLed } from './openhw-led';
 export { default as openhwArduinoUno } from './openhw-arduino-uno';
-export { default as openhwPico } from './openhw-pico/index.ts';
-export { default as openhwPicoW } from './openhw-pico-w/index.ts';
-export { default as openhwEsp32 } from './ESP32/index.ts';
-export { default as openhwStm32BluePill } from './openhw-stm32-bluepill/index.ts';
-
-export { default as openhwEsp32Cam } from './openhw-esp32-cam/index.ts';
+export { default as openhwPico } from './openhw-pico/index';
+export { default as openhwPicoW } from './openhw-pico-w/index';
+export { default as openhwEsp32 } from './ESP32/index';
+export { default as openhwEsp32Cam } from './openhw-esp32-cam/index';
+export { default as openhwStm32BluePill } from './openhw-stm32-bluepill/index';
 export { default as openhwResistor } from './openhw-resistor';
 export { default as openhwPushbutton } from './openhw-pushbutton';
 export { default as openhwPowerSupply } from './openhw-power-supply';
