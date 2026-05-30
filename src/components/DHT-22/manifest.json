@@ -1,5 +1,5 @@
 {
-    "type": "DHT-22",
+    "type": "openhw-dht22",
     "label": "DHT22",
     "description": "DHT22 Temperature and Humidity Sensor",
     "group": "Sensors",
@@ -23,7 +23,7 @@
     "autowiring": {
         "connections": [
             { "from": "VCC", "to": "esp32:3V3" },
-            { "from": "GND", "to": "esp32:GND" },
+            { "from": "GND", "to": "esp32:GND.1" },
             { "from": "SDA", "to": "esp32:4" }
         ]
     }

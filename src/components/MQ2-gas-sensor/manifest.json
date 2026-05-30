@@ -1,5 +1,5 @@
 {
-    "type": "MQ-2 Gas Sensor",
+    "type": "openhw-mq2-gas-sensor",
     "label": "MQ-2 Gas Sensor",
     "description": "Analog/Digital Gas Sensor Module — detects LPG, smoke, alcohol, propane, hydrogen, methane and carbon monoxide.",
     "group": "Sensors",
@@ -18,16 +18,16 @@
     ],
     "autocoding": {
         "arduino": {
-            "setup": "#define MQ2_AO_PIN ${AO}\n#define MQ2_DO_PIN ${DO}\npinMode(MQ2_DO_PIN, INPUT);\nSerial.println(\"MQ-2 Gas Sensor ready.\");",
-            "loop": "int analogVal = analogRead(MQ2_AO_PIN);\nint digitalVal = digitalRead(MQ2_DO_PIN);\nSerial.print(\"MQ-2 AO: \");\nSerial.print(analogVal);\nSerial.print(\"  DO: \");\nSerial.println(digitalVal == LOW ? \"GAS DETECTED\" : \"Clear\");\ndelay(1000);"
+            "setup": "Serial.begin(115200);\npinMode(${DO}, INPUT);\nSerial.println(\"MQ-2 Gas Sensor ready.\");",
+            "loop": "int analogVal = analogRead(${AO});\nint digitalVal = digitalRead(${DO});\nSerial.print(\"MQ-2 AO: \");\nSerial.print(analogVal);\nSerial.print(\"  DO: \");\nSerial.println(digitalVal == LOW ? \"GAS DETECTED\" : \"Clear\");\ndelay(1000);"
         }
     },
     "autowiring": {
         "connections": [
-            { "from": "VCC", "to": "esp32:VIN" },
-            { "from": "GND", "to": "esp32:GND" },
-            { "from": "DO",  "to": "esp32:34" },
-            { "from": "AO",  "to": "esp32:35" }
+            { "from": "VCC", "to": "arduino:5V" },
+            { "from": "GND", "to": "arduino:GND" },
+            { "from": "DO",  "to": "arduino:2|3|4|5|6|7" },
+            { "from": "AO",  "to": "arduino:A0|A1|A2|A3|A4|A5" }
         ]
     }
 }

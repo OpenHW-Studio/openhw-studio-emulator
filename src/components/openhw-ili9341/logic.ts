@@ -26,10 +26,40 @@ export class ILI9341Logic extends SPIProtocol {
     private powerOn = true;
     private writeCount = 0;
     private madctl = 0x48;
+    private vccDetected = true;
+    private powerOffCountdown = 0;
+
+    // Compact snapshot settings
+    private compactPrefixBytes = 64;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
-        this.state = { buffer: this.vram, powerOn: true, t: Date.now() };
+        this.powerOn = true;
+        this.vccDetected = true;
+        this.state = { buffer: this.vram, powerOn: true, t: Date.now(), spiFrames: [], compactSnapshot: null };
+    }
+
+    // CRC32 helper for compact snapshot
+    private static crcTable: number[] | null = null;
+    private static makeCRCTable(): number[] {
+        const table: number[] = [];
+        for (let n = 0; n < 256; n++) {
+            let c = n;
+            for (let k = 0; k < 8; k++) {
+                c = ((c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
+            }
+            table[n] = c >>> 0;
+        }
+        return table;
+    }
+    private static crc32(buf: Uint8Array): number {
+        if (!ILI9341Logic.crcTable) ILI9341Logic.crcTable = ILI9341Logic.makeCRCTable();
+        let crc = 0xFFFFFFFF;
+        const table = ILI9341Logic.crcTable;
+        for (let i = 0; i < buf.length; i++) {
+            crc = (crc >>> 8) ^ table[(crc ^ buf[i]) & 0xFF];
+        }
+        return (crc ^ 0xFFFFFFFF) >>> 0;
     }
 
     private get dcHigh(): boolean {
@@ -40,12 +70,34 @@ export class ILI9341Logic extends SPIProtocol {
         super.update(cpuCycles, currentWires, instances);
         const now = Date.now();
 
-        // Power Sensing: If VCC pin is low, we are powered off
+        // Power Sensing: Check if VCC pin is wired to a power source or explicitly powered
         const vcc = this.getPinVoltage('VCC');
-        const newPower = vcc > 2.0;
+        const vccIsHigh = vcc > 2.0;
+        
+        // Check if VCC is connected to a power rail via wiring
+        const hasWires = currentWires.length > 0;
+        const vccConnected = currentWires.some(w => 
+            (w.from === `${this.id}:VCC` || w.to === `${this.id}:VCC`) &&
+            (w.from?.includes('5V') || w.from?.includes('3V3') || w.from?.includes('VIN') || w.from?.includes('VBUS') ||
+             w.to?.includes('5V') || w.to?.includes('3V3') || w.to?.includes('VIN') || w.to?.includes('VBUS'))
+        );
+
+        // Power state machine: 
+        // - If VCC is high or connected to power rail, stay powered
+        // - Only power off if we see explicit low voltage AND stay low for multiple frames
+        if (vccIsHigh || vccConnected || !hasWires) {
+            this.vccDetected = true;
+            this.powerOffCountdown = 0;
+        } else {
+            this.powerOffCountdown++;
+        }
+
+        // Require 10 consecutive frames of low/no VCC before powering off (debounce)
+        const newPower = this.vccDetected && (this.powerOffCountdown < 10);
 
         if (newPower !== this.powerOn) {
             this.powerOn = newPower;
+            this.state.powerOn = newPower;
             this.stateChanged = true;
             if (!this.powerOn) {
                 this.vram.fill(0);
@@ -62,7 +114,7 @@ export class ILI9341Logic extends SPIProtocol {
         }
 
         // DMA Bypass Optimization for Displays
-        const dmaAddress = parseInt(this.attrs?.dmaAddress || this.state?.dmaAddress || '0', 16);
+        const dmaAddress = parseInt((this as any).attrs?.dmaAddress || this.state?.dmaAddress || '0', 16);
         
         const hasLogicAnalyzer = this.isLogicAnalyzerAttached(instances);
         if (hasLogicAnalyzer) {
@@ -119,8 +171,26 @@ export class ILI9341Logic extends SPIProtocol {
         this.secondByte = false;
     }
 
+    onCSDeassert(meta: any): void {
+        // Record recent SPI frames for telemetry/debugging (bounded)
+        try {
+            const frame = meta?.frame || [];
+            if (frame && frame.length > 0) {
+                const max = 8;
+                const buf = (this.state.spiFrames as any[]) || [];
+                buf.push({ t: Date.now(), frame });
+                while (buf.length > max) buf.shift();
+                this.state.spiFrames = buf;
+                this.state.spiTrafficCount = (this.state.spiTrafficCount || 0) + 1;
+                this.stateChanged = true;
+            }
+        } catch (e) {
+            // swallow telemetry errors
+        }
+    }
+
     onSPIByteReceived(byte: number, byteIndex: number): void {
-        const dmaAddress = parseInt(this.attrs?.dmaAddress || this.state?.dmaAddress || '0', 16);
+        const dmaAddress = parseInt((this as any).attrs?.dmaAddress || this.state?.dmaAddress || '0', 16);
         if (dmaAddress > 0 && !this.state.dmaBypassDisabled) return; // Bypass normal SPI processing if DMA active
         
         if (!this.powerOn) return;
@@ -216,7 +286,6 @@ export class ILI9341Logic extends SPIProtocol {
         const total = 240 * 320;
         const fillPercent = (activeCount / total) * 100;
         const orientation = (this.madctl & 0x20) !== 0 ? 'landscape' : 'portrait';
-
         this.setCustomTelemetry({
             powerStatus: this.powerOn ? "On" : "Off",
             resolution: "240x320",
@@ -224,5 +293,24 @@ export class ILI9341Logic extends SPIProtocol {
             writeCount: this.writeCount,
             vramFillPercentage: Number(fillPercent.toFixed(1)),
         });
+
+        // Also publish a compact snapshot to state for lightweight telemetry
+        try {
+            const prefix = Math.min(this.compactPrefixBytes, this.vram.length);
+            const firstBytes = new Uint8Array(prefix);
+            for (let i = 0; i < prefix; i++) firstBytes[i] = this.vram[i];
+            const checksum = ILI9341Logic.crc32(firstBytes);
+            this.state.compactSnapshot = {
+                firstBytes: Array.from(firstBytes),
+                checksum,
+                vramFillPercentage: Number(fillPercent.toFixed(1)),
+                writeCount: this.writeCount,
+                width: 240,
+                height: 320
+            };
+            this.stateChanged = true;
+        } catch (e) {
+            // ignore telemetry failures
+        }
     }
 }

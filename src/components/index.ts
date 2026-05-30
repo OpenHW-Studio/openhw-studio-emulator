@@ -1,15 +1,14 @@
 // Export everything from the emulator components package so the frontend can import it
 export { BaseComponent } from './BaseComponent';
-export * from '../protocol-handlers/index';
+export * from '../protocol-handlers/index.ts';
 export { default as openhwLed } from './openhw-led';
 export { default as openhwArduinoUno } from './openhw-arduino-uno';
-export { default as openhwPico } from './openhw-pico/index';
-export { default as openhwPicoW } from './openhw-pico-w/index';
-export { default as openhwEsp32 } from './ESP32/index';
+export { default as openhwPico } from './openhw-pico/index.ts';
+export { default as openhwPicoW } from './openhw-pico-w/index.ts';
+export { default as openhwEsp32 } from './ESP32/index.ts';
+export { default as openhwEsp32Cam } from './openhw-esp32-cam/index.ts';
 export { default as openhwResistor } from './openhw-resistor';
 export { default as openhwPushbutton } from './openhw-pushbutton';
-export { default as openhwPushbutton6mm } from './openhw-6mm-pushbutton';
-export { default as openhwStm32BluePill } from './openhw-stm32-blue-pill';
 export { default as openhwPowerSupply } from './openhw-power-supply';
 export { default as openhwNeopixelMatrix } from './openhw-neopixel-matrix';
 export { default as openhwBuzzer } from './openhw-buzzer';
@@ -100,6 +99,10 @@ export { default as openhwIrReceiver } from './openhw-ir-receiver';
 export { default as openhwMfrc522 } from './openhw-mfrc522';
 export { nrf24l01 as openhwNrf24l01 } from './openhw-nrf24l01';
 export { cc1101 as openhwCc1101 } from './openhw-cc1101';
+export { default as openhwMq2GasSensor } from './MQ2-gas-sensor';
+export { default as openhwPirMotionSensor } from './PIR-Motion-Sensor';
+export { default as openhwRaindropModule } from './Raindrop-module';
+export { default as openhwRaindropPad } from './Raindrop-pad';
 
 export { FullCircuitValidator, analyzeCodeHardwareSync, ProtocolAnalyzer, runUnifiedValidation } from '../circuit-validation/index.js';
 

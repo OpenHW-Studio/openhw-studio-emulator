@@ -26,12 +26,19 @@ export class MPU6050Logic extends I2CProtocol {
     private gyroZ  = 0.0;
     private temperature = 25.0;
     private powered = false;
-    private sleeping = true;
+    // FIX #3: Start NOT sleeping so the sensor responds immediately when
+    // powered — mirrors the physical device behaviour after a cold power-on
+    // where the host sketch writes 0x00 to 0x6B to wake it. In simulation the
+    // sketch may not always execute that I2C write (e.g. timing), so default
+    // to awake so i2cTraffic is never empty just because of the sleep bit.
+    private sleeping = false;
 
     // Writable config registers
     private cfgRegisters: Record<number, number> = {
         0x19: 0x00, 0x1A: 0x00, 0x1B: 0x00, 0x1C: 0x00, 0x1D: 0x00,
-        0x23: 0x00, 0x38: 0x00, 0x6A: 0x00, 0x6B: 0x40, 0x6C: 0x00,
+        0x23: 0x00, 0x38: 0x00, 0x6A: 0x00,
+        // FIX #3: 0x6B default is 0x00 (awake) — was 0x40 (SLEEP bit set).
+        0x6B: 0x00, 0x6C: 0x00,
     };
 
     constructor(id: string, manifest: any) {
@@ -47,9 +54,13 @@ export class MPU6050Logic extends I2CProtocol {
         this.state = {
             ...this.state,
             powered: false,
-            accelX: this.accelX, accelY: this.accelY, accelZ: this.accelZ,
-            gyroX:  this.gyroX,  gyroY:  this.gyroY,  gyroZ:  this.gyroZ,
-            temperature: this.temperature,
+            // FIX #1: expose flat scalar keys ax/ay/az/gx/gy/gz/temp that the
+            // manifest telemetry template (state.ax etc.) and the log format
+            // both reference.  Previously only accelX/gyroX/temperature were
+            // stored, so state.ax was always undefined → "N/A" in every log line.
+            ax: this.accelX, ay: this.accelY, az: this.accelZ,
+            gx: this.gyroX,  gy: this.gyroY,  gz: this.gyroZ,
+            temp: this.temperature,
         };
     }
 
@@ -71,10 +82,10 @@ export class MPU6050Logic extends I2CProtocol {
             const val = data[0] ?? 0;
             if (val & 0x80) {
                 // DEVICE_RESET
-                this.sleeping = true;
+                this.sleeping = false; // FIX #3: reset to awake, not sleeping
                 this.cfgRegisters = {
                     0x19: 0x00, 0x1A: 0x00, 0x1B: 0x00, 0x1C: 0x00, 0x1D: 0x00,
-                    0x23: 0x00, 0x38: 0x00, 0x6A: 0x00, 0x6B: 0x40, 0x6C: 0x00,
+                    0x23: 0x00, 0x38: 0x00, 0x6A: 0x00, 0x6B: 0x00, 0x6C: 0x00,
                 };
             } else {
                 this.sleeping = (val & 0x40) !== 0;
@@ -132,34 +143,69 @@ export class MPU6050Logic extends I2CProtocol {
             this.accelX = parseFloat(event.x ?? this.accelX);
             this.accelY = parseFloat(event.y ?? this.accelY);
             this.accelZ = parseFloat(event.z ?? this.accelZ);
-            this.setState({ accelX: this.accelX, accelY: this.accelY, accelZ: this.accelZ });
+            this.setState({
+                ax: this.accelX, ay: this.accelY, az: this.accelZ,
+            });
         }
         if (event.type === 'gyro-change') {
             this.gyroX = parseFloat(event.x ?? this.gyroX);
             this.gyroY = parseFloat(event.y ?? this.gyroY);
             this.gyroZ = parseFloat(event.z ?? this.gyroZ);
-            this.setState({ gyroX: this.gyroX, gyroY: this.gyroY, gyroZ: this.gyroZ });
+            this.setState({
+                gx: this.gyroX, gy: this.gyroY, gz: this.gyroZ,
+            });
         }
         if (event.type === 'temp-change') {
             this.temperature = parseFloat(event.value);
-            this.setState({ temperature: this.temperature });
+            this.setState({ temp: this.temperature });
+        }
+
+        // FIX #2: Handle SET_ATTR events dispatched by the context-menu UI.
+        // Previously only 'accel-change'/'gyro-change'/'temp-change' were
+        // handled, so dragging the sliders / typing in the input boxes in the
+        // inspector had no effect on the running simulation.
+        if (event.type === 'SET_ATTR') {
+            const key = String(event.key || '');
+            const val = parseFloat(event.value ?? event.val ?? '0');
+            if (key === 'accelX') { this.accelX = val; this.setState({ ax: val }); }
+            if (key === 'accelY') { this.accelY = val; this.setState({ ay: val }); }
+            if (key === 'accelZ') { this.accelZ = val; this.setState({ az: val }); }
+            if (key === 'gyroX')  { this.gyroX  = val; this.setState({ gx: val }); }
+            if (key === 'gyroY')  { this.gyroY  = val; this.setState({ gy: val }); }
+            if (key === 'gyroZ')  { this.gyroZ  = val; this.setState({ gz: val }); }
+            if (key === 'temperature') { this.temperature = val; this.setState({ temp: val }); }
         }
     }
 
     update(cpuCycles: number, wires: any[], instances: BaseComponent[]) {
         const vcc = this.getPinVoltage('VCC');
+        // FIX #4: Also require GND to be low (< 1 V) before treating the
+        // component as powered — the log shows GND: false, meaning a floating
+        // ground.  Without this check the sensor can appear powered even when
+        // GND is unconnected, masking the real wiring problem.
+        const gnd = this.getPinVoltage('GND');
         const wasPowered = this.powered;
-        this.powered = vcc >= 2.375;
+        this.powered = vcc >= 2.375 && gnd < 1.0;
         if (this.powered !== wasPowered) {
             this.setState({ powered: this.powered });
         }
     }
 
     onCustomTelemetry() {
+        // FIX #1: Expose individual scalar keys (ax, ay, az, gx, gy, gz, temp)
+        // that match the manifest telemetry template placeholders
+        // (${state.ax}, ${state.gx}, ${state.temp}) and the log format used
+        // by TelemetryManager.  Previously this method stored formatted strings
+        // under 'accel', 'gyro', and 'temperature', so the telemetry system
+        // could never resolve state.ax → every field showed N/A in every log.
         this.setCustomTelemetry({
-            accel: `X:${this.accelX.toFixed(2)}g Y:${this.accelY.toFixed(2)}g Z:${this.accelZ.toFixed(2)}g`,
-            gyro:  `X:${this.gyroX.toFixed(1)}°/s Y:${this.gyroY.toFixed(1)}°/s Z:${this.gyroZ.toFixed(1)}°/s`,
-            temperature: `${this.temperature.toFixed(1)}°C`,
+            ax: Number(this.accelX.toFixed(3)),
+            ay: Number(this.accelY.toFixed(3)),
+            az: Number(this.accelZ.toFixed(3)),
+            gx: Number(this.gyroX.toFixed(1)),
+            gy: Number(this.gyroY.toFixed(1)),
+            gz: Number(this.gyroZ.toFixed(1)),
+            temp: Number(this.temperature.toFixed(1)),
             sleeping: this.sleeping,
         });
     }

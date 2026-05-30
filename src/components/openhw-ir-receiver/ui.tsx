@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 // Adjusted bounds for the vertical footprint
-export const BOUNDS = { x: 0, y: 0, w: 70, h: 105 };
+export const BOUNDS = { x: 0, y: 0, w: 100, h: 150 };
 
 const REMOTE_BUTTONS = [
     ['POWER'],
@@ -41,7 +41,7 @@ export const IRReceiverUI = ({ state, attrs, onEvent }: { state: any; attrs: any
     };
 
     return (
-        <div style={{ position: 'relative', width: 70, height: 105 }}>
+        <div style={{ position: 'relative', width: 100, height: 150 }}>
             <svg
                 viewBox="0 0 200 300"
                 width="100%"

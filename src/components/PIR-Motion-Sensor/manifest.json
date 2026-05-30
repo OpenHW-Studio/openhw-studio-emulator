@@ -21,9 +21,9 @@
     },
     "autowiring": {
         "connections": [
-            { "from": "VCC", "to": "esp32:VIN" },
-            { "from": "GND", "to": "esp32:GND" },
-            { "from": "OUT", "to": "esp32:13" }
+            { "from": "VCC", "to": "arduino:5V" },
+            { "from": "GND", "to": "arduino:GND" },
+            { "from": "OUT", "to": "arduino:13" }
         ]
     }
 }

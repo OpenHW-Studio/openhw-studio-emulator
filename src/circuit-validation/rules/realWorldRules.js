@@ -1,4 +1,4 @@
-const MCU_TYPES = ['openhw-arduino-uno', 'mcu_uno'];
+const MCU_TYPES = ['openhw-arduino-uno', 'mcu_uno', 'openhw-pico', 'openhw-pico-w', 'openhw-esp32', 'openhw-esp32-cam'];
 const I2C_DEVICE_TYPES = [
     'openhw-lcd1602-i2c',
     'openhw-lcd2004-i2c',

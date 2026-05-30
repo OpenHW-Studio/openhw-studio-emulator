@@ -421,7 +421,7 @@ export class FullCircuitValidator {
 
     getPinNumericVoltageLabel(pinId) {
         const normalized = String(pinId || '').toLowerCase();
-        if (normalized === '5v') return 5.0;
+        if (normalized === '5v' || normalized === 'vbus' || normalized === 'vsys') return 5.0;
         if (normalized === '3v3' || normalized === '3.3v') return 3.3;
         if (normalized === '12v') return 12.0;
         return null;
@@ -436,7 +436,7 @@ export class FullCircuitValidator {
     isSupplyNode(nodeId) {
         const { pinId } = this.getNodeParts(nodeId);
         const normalized = String(pinId || '').toLowerCase();
-        return ['5v', '3v3', '3.3v', 'vcc', 'vin', '12v'].includes(normalized);
+        return ['5v', '3v3', '3.3v', 'vcc', 'vin', '12v', 'vbus', 'vsys'].includes(normalized);
     }
 
     hasResistivePathToSupply(startNode) {
