@@ -48,11 +48,17 @@ export class DS1307RTCLogic extends I2CProtocol {
     }
 
     update(cpuCycles: number, currentWires: any[], allComponentsInstances: BaseComponent[]) {
-        const vcc = this.getPinVoltage('VCC');
+        // Accept power from either VCC pin name or the '5V' alias that some wiring uses
+        const vcc = Math.max(
+            this.getPinVoltage('VCC'),
+            this.getPinVoltage('VCC_2'),
+            this.getPinVoltage('5V'),
+        );
         this.powered = vcc >= 2.5;
         const now = this.currentDate();
         this.setState({
             powered:  this.powered,
+            running:  this.powered,
             datetime: now.toISOString(),
             display:  this.formatDisplay(now),
         });
@@ -85,9 +91,11 @@ export class DS1307RTCLogic extends I2CProtocol {
     }
 
     onCustomTelemetry() {
+        const now = this.currentDate();
         this.setCustomTelemetry({
-            time: this.state.display,
-            running: this.state.powered ? "Yes" : "No"
+            time:     this.formatDisplay(now),
+            running:  this.powered ? 'Yes' : 'No',
+            datetime: now.toISOString(),
         });
     }
 }
