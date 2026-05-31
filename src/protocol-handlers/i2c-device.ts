@@ -8,7 +8,13 @@ export class I2CProtocol extends BaseComponent {
         super(id, manifest);
         
         const type = String(manifest?.type || '').toLowerCase();
-        const defaultAddress = type === 'openhw-lcd2004-i2c' ? 0x27 : type === 'max30102' ? 0x57 : 0x3c;
+        const defaultAddress =
+            type === 'openhw-lcd2004-i2c' || type === 'wokwi-lcd2004-i2c' || type === 'openhw-lcd1602-i2c' || type === 'wokwi-lcd1602-i2c' ? 0x27 :
+            type === 'max30102' ? 0x57 :
+            type === 'openhw-bmp180' || type === 'wokwi-bmp180' || type === 'openhw-bmp180-breakout' || type === 'wokwi-bmp180-breakout' ? 0x77 :
+            type === 'openhw-mpu6050' || type === 'wokwi-mpu6050' ? 0x68 :
+            type === 'openhw-ds1307-rtc' || type === 'wokwi-ds1307-rtc' ? 0x68 :
+            0x3c;
         const rawAddress = Number(manifest?.attrs?.address ?? manifest?.attrs?.i2cAddress ?? manifest?.attrs?.addr ?? defaultAddress);
         this.address = Number.isFinite(rawAddress) ? (rawAddress & 0x7f) : defaultAddress;
 
