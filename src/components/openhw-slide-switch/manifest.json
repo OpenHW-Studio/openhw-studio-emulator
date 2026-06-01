@@ -48,8 +48,8 @@
     "autocoding": {
         "arduino": {
             "globals": "bool lastSwitchState_${COMP_SUFFIX} = false;",
-            "setup": "Serial.begin(9600);\npinMode(${2}, INPUT);\npinMode(LED_BUILTIN, OUTPUT);\nSerial.println(\"Slide Switch Ready\");",
-            "loop": "bool switchState_${COMP_SUFFIX} = digitalRead(${2});\nif (switchState_${COMP_SUFFIX} != lastSwitchState_${COMP_SUFFIX}) {\n  Serial.print(\"Switch: \");\n  Serial.println(switchState_${COMP_SUFFIX} ? \"ON\" : \"OFF\");\n  digitalWrite(LED_BUILTIN, switchState_${COMP_SUFFIX} ? HIGH : LOW);\n  lastSwitchState_${COMP_SUFFIX} = switchState_${COMP_SUFFIX};\n}\ndelay(50);"
+            "setup": "Serial.begin(9600);\npinMode(${2}, INPUT);\npinMode(13, OUTPUT);\nSerial.println(\"Slide Switch Ready\");",
+            "loop": "bool switchState_${COMP_SUFFIX} = digitalRead(${2});\nif (switchState_${COMP_SUFFIX} != lastSwitchState_${COMP_SUFFIX}) {\n  Serial.print(\"Switch: \");\n  Serial.println(switchState_${COMP_SUFFIX} ? \"ON\" : \"OFF\");\n  digitalWrite(13, switchState_${COMP_SUFFIX} ? HIGH : LOW);\n  lastSwitchState_${COMP_SUFFIX} = switchState_${COMP_SUFFIX};\n}\ndelay(50);"
         }
     }
 }
