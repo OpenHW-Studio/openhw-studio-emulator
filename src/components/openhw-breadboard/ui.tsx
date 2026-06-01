@@ -19,6 +19,8 @@ export const BreadboardUI = ({ attrs }: { attrs?: any }) => {
     // Draw lines for power rails based on known Y coordinates
     const startX = 30;
     const endX = startX + 62 * 15;
+    const centerBridgeX1 = startX + 28 * 15;
+    const centerBridgeX2 = startX + 31 * 15;
 
     return (
         <svg 
@@ -34,10 +36,18 @@ export const BreadboardUI = ({ attrs }: { attrs?: any }) => {
             {/* Top Power Rail Lines */}
             <line x1={startX} y1={28} x2={endX} y2={28} stroke="#0000ff" strokeWidth="2" strokeOpacity="0.6" />
             <line x1={startX} y1={43} x2={endX} y2={43} stroke="#ff0000" strokeWidth="2" strokeOpacity="0.6" />
+            <line x1={450} y1={20} x2={480} y2={20} stroke="#111827" strokeWidth="5" strokeLinecap="round" />
+            <line x1={450} y1={35} x2={480} y2={35} stroke="#dc2626" strokeWidth="5" strokeLinecap="round" />
+            <text x={startX - 22} y={22} fontSize="8" fill="#0000ff" textAnchor="start" fontWeight="700">GND</text>
+            <text x={startX - 22} y={38} fontSize="8" fill="#dc2626" textAnchor="start" fontWeight="700">3.3V</text>
 
             {/* Bottom Power Rail Lines */}
             <line x1={startX} y1={252} x2={endX} y2={252} stroke="#ff0000" strokeWidth="2" strokeOpacity="0.6" />
-            <line x1={startX} y1={267} x2={endX} y2={267} stroke="#0000ff" strokeWidth="2" strokeOpacity="0.6" />
+            <line x1={startX} y1={267} x2={endX} y2={267} stroke="#0000ff" strokeWidth="2" strokeOpacity="0.75" />
+            <line x1={450} y1={260} x2={480} y2={260} stroke="#dc2626" strokeWidth="5" strokeLinecap="round" />
+            <line x1={450} y1={275} x2={480} y2={275} stroke="#111827" strokeWidth="5" strokeLinecap="round" />
+            <text x={startX - 15} y={262} fontSize="8" fill="#dc2626" textAnchor="start" fontWeight="700">5V</text>
+            <text x={startX - 22} y={277} fontSize="8" fill="#0000ff" textAnchor="start" fontWeight="700">GND</text>
 
             {/* Middle Valley Line */}
             <rect x={startX - 10} y={127} width={endX - startX + 20} height={10} fill="#eeeeee" />

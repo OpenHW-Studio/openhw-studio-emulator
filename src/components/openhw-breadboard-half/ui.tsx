@@ -25,12 +25,16 @@ export const HalfBreadboardUI = ({ attrs }: { attrs?: any }) => {
             <rect width={w} height={h} fill={bgFill} rx="10" stroke="#dddddd" strokeWidth="2" />
 
             {/* Top Power Rail Lines */}
-            <line x1={startX} y1={28} x2={endX} y2={28} stroke="#0000ff" strokeWidth="2" strokeOpacity="0.6" />
+            <line x1={startX} y1={28} x2={endX} y2={28} stroke="#0000ff" strokeWidth="2" strokeOpacity="0.75" />
             <line x1={startX} y1={43} x2={endX} y2={43} stroke="#ff0000" strokeWidth="2" strokeOpacity="0.6" />
+            <text x={startX - 22} y={22} fontSize="8" fill="#0000ff" textAnchor="start" fontWeight="700">GND</text>
+            <text x={startX - 22} y={38} fontSize="8" fill="#dc2626" textAnchor="start" fontWeight="700">3.3V</text>
 
             {/* Bottom Power Rail Lines */}
             <line x1={startX} y1={252} x2={endX} y2={252} stroke="#ff0000" strokeWidth="2" strokeOpacity="0.6" />
-            <line x1={startX} y1={267} x2={endX} y2={267} stroke="#0000ff" strokeWidth="2" strokeOpacity="0.6" />
+            <line x1={startX} y1={267} x2={endX} y2={267} stroke="#0000ff" strokeWidth="2" strokeOpacity="0.75" />
+            <text x={startX - 15} y={262} fontSize="8" fill="#dc2626" textAnchor="start" fontWeight="700">5V</text>
+            <text x={startX - 22} y={277} fontSize="8" fill="#0000ff" textAnchor="start" fontWeight="700">GND</text>
 
             {/* Middle Valley Line */}
             <rect x={startX - 10} y={127} width={endX - startX + 20} height={10} fill="#eeeeee" />
