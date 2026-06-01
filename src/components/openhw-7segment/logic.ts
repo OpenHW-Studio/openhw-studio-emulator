@@ -7,7 +7,7 @@ export class Wokwi7SegmentLogic extends BaseComponent {
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
-        this.numDigits = parseInt(manifest.attrs?.digits || '1', 10);
+        this.numDigits = parseInt(manifest.attrs?.digits || '4', 10);
         this.isAnode = manifest.attrs?.common === 'anode';
         
         this.state = this.getEmptyState();
@@ -15,19 +15,16 @@ export class Wokwi7SegmentLogic extends BaseComponent {
 
     private getEmptyState() {
         return {
-            digits: Array(this.numDigits).fill(null).map(() => ({
+            digitSegments: Array(this.numDigits).fill(null).map(() => ({
                 A: false, B: false, C: false, D: false, E: false, F: false, G: false, DP: false
             })),
             colon: false
         };
     }
 
-    onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number) {
-        // Accumulate segment states over the 16.6ms simulation frame
+    private evaluateCurrentState() {
         for (let i = 0; i < this.numDigits; i++) {
             const digPin = `DIG${i + 1}`;
-            
-            // Cathode: DIG pin LOW activates the digit. Anode: HIGH activates.
             const digActive = this.isAnode ? this.getPinVoltage(digPin) > 2.5 : this.getPinVoltage(digPin) < 2.5;
 
             if (digActive) {
@@ -36,27 +33,39 @@ export class Wokwi7SegmentLogic extends BaseComponent {
                     const segLit = this.isAnode ? segVoltage < 2.5 : segVoltage > 2.5;
                     
                     if (segLit) {
-                        this.state.digits[i][seg] = true;
-                        this.stateChanged = true;
+                        this.state.digitSegments[i][seg] = true;
                     }
                 });
             }
         }
 
-        // Handle Colon
         const colonVoltage = this.getPinVoltage('COLON');
         const colonLit = this.isAnode ? colonVoltage < 2.5 : colonVoltage > 2.5;
         if (colonLit) {
             this.state.colon = true;
-            this.stateChanged = true;
         }
     }
 
+    onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number) {
+        // Accumulate segment states over the 16.6ms simulation frame
+        this.evaluateCurrentState();
+        this.stateChanged = true;
+    }
+
     getSyncState() {
-        // 1. Clone current accumulated state to send to UI
+        // 1. Evaluate current state one last time before syncing (crucial for static states)
+        this.evaluateCurrentState();
+        
+        // 2. Clone current accumulated state to send to UI
         const syncData = JSON.parse(JSON.stringify(this.state));
         
-        // 2. Clear state for the next frame to prevent digits staying "stuck" on
+        // Debug log to see if any digit is active
+        const isAnyDigitOn = syncData.digitSegments && syncData.digitSegments.some((d: any) => Object.values(d).some(v => v === true));
+        if (isAnyDigitOn) {
+            console.log('[7SEG DEBUG] SyncData has active segments:', JSON.stringify(syncData.digitSegments));
+        }
+
+        // 3. Clear state for the next frame to prevent digits staying "stuck" on
         this.state = this.getEmptyState();
         
         return syncData;
@@ -68,10 +77,10 @@ export class Wokwi7SegmentLogic extends BaseComponent {
         
         // Count active segments across all digits
         for (let i = 0; i < this.numDigits; i++) {
-            const digit = this.state.digits[i];
+            const digit = this.state.digitSegments[i];
             let digitActive = false;
             for (const seg of this.segmentsList) {
-                if (digit[seg]) {
+                if (digit && digit[seg]) {
                     activatedSegments++;
                     digitActive = true;
                 }

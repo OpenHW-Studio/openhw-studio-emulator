@@ -87,7 +87,8 @@
             "id": "COLON",
             "x": 59.4,
             "y": 104,
-            "type": "digital"
+            "type": "digital",
+            "pull": "down"
         }
     ],
     "telemetry": {
@@ -96,7 +97,6 @@
     },
     "autowiring": {
       "connections": [
-        { "from": "COM", "to": "arduino:GND" },
         { "from": "A", "to": "arduino:2" },
         { "from": "B", "to": "arduino:3" },
         { "from": "C", "to": "arduino:4" },
@@ -104,15 +104,19 @@
         { "from": "E", "to": "arduino:6" },
         { "from": "F", "to": "arduino:7" },
         { "from": "G", "to": "arduino:8" },
-        { "from": "DP", "to": "arduino:9" }
+        { "from": "DP", "to": "arduino:9" },
+        { "from": "DIG1", "to": "arduino:10" },
+        { "from": "DIG2", "to": "arduino:11" },
+        { "from": "DIG3", "to": "arduino:12" },
+        { "from": "DIG4", "to": "arduino:13" }
       ]
     },
     "autocoding": {
-      "libraries": [],
+      "libraries": ["SevSeg"],
       "arduino": {
-        "globals": "int pins_${COMP_SUFFIX}[] = {2, 3, 4, 5, 6, 7, 8, 9};",
-        "setup": "for(int i=0; i<8; i++) pinMode(pins_${COMP_SUFFIX}[i], OUTPUT);",
-        "loop": "for(int i=0; i<8; i++) digitalWrite(pins_${COMP_SUFFIX}[i], HIGH);\ndelay(500);\nfor(int i=0; i<8; i++) digitalWrite(pins_${COMP_SUFFIX}[i], LOW);\ndelay(500);"
+        "globals": "#include \"SevSeg.h\"\nSevSeg sevseg_${COMP_SUFFIX};",
+        "setup": "byte numDigits = 4;\nbyte digitPins[] = {10, 11, 12, 13};\nbyte segmentPins[] = {2, 3, 4, 5, 6, 7, 8, 9};\nbool resistorsOnSegments = true;\nbyte hardwareConfig = COMMON_CATHODE;\nsevseg_${COMP_SUFFIX}.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments);\nsevseg_${COMP_SUFFIX}.setBrightness(90);",
+        "loop": "sevseg_${COMP_SUFFIX}.setNumber(1234, 1);\nsevseg_${COMP_SUFFIX}.refreshDisplay();"
       }
     }
 }
