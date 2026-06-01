@@ -56,7 +56,7 @@ export const PushbuttonUI = ({ state, attrs, isRunning }: { state: any, attrs: a
     // This decouples the visual UI state from delayed/echoed worker messages, eliminating stickiness.
     const pressed = isPressed;
 
-    // 1. Sync properties directly to the wokwi-pushbutton element (exactly like velxio-master)
+    // 1. Sync properties directly to the wokwi-pushbutton element (exactly like openhw)
     useLayoutEffect(() => {
         if (buttonElement) {
             buttonElement.color = color;

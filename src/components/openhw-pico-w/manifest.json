@@ -9,7 +9,7 @@
     "env": { "type": "string", "default": "" },
     "builder": { "type": "string", "default": "arduino-pico" },
     "wirelessMode": { "type": "string", "default": "compat-stub" },
-    "wirelessSsid": { "type": "string", "default": "Velxio-GUEST" },
+    "wirelessSsid": { "type": "string", "default": "OpenHW-GUEST" },
     "wirelessIp": { "type": "string", "default": "192.168.4.2" }
   },
   "pins": [
