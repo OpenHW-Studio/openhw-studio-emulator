@@ -750,7 +750,7 @@ export class BaseComponent {
             Number(this.telemetryRuntime.createdAtMs || 0)
         );
         const idleMs = Math.max(0, Date.now() - lastActivityMs);
-        if (this.telemetryRuntime.updateCount > 40 && idleMs > 8000) {
+        if (this.telemetryRuntime.updateCount > 40 && idleMs > 60000) {
             addFinding(`State has been stable for ${Math.round(idleMs)}ms while updates continue.`, 'warn');
         }
 
