@@ -62,7 +62,7 @@ export const PhotoresistorUI = ({ state, attrs, onAttrChange, isRunning }: { sta
 
             {/* Hidden simulation slider (only shows when running) */}
             {isRunning && (
-                <div style={{ 
+                <div className="nodrag" style={{ 
                     position: 'absolute', 
                     top: '-45px', 
                     background: 'rgba(0,0,0,0.85)', 
