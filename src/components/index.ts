@@ -7,6 +7,9 @@ export { default as openhwPico } from './openhw-pico/index.ts';
 export { default as openhwPicoW } from './openhw-pico-w/index.ts';
 export { default as openhwEsp32 } from './ESP32/index.ts';
 export { default as openhwStm32BluePill } from './openhw-stm32-bluepill/index.ts';
+// WiFi Access Point — functional AP component (equivalent to wokwi-wifi-ap)
+export { WiFiApLogic as openhwWifiAp, WiFiApLogic as wokwiWifiAp } from './openhw-wifi-ap/index.ts';
+
 
 export { default as openhwEsp32Cam } from './openhw-esp32-cam/index.ts';
 export { default as openhwResistor } from './openhw-resistor';

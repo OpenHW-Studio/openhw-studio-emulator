@@ -1,16 +1,17 @@
 {
   "type": "openhw-pico-w",
   "label": "Raspberry Pi Pico W",
-  "description": "RP2040 Pico W board. Runtime uses RP2040 emulation with wireless compatibility stubs (status events only).",
+  "description": "RP2040 Pico W board with full WiFi simulation. Uses a complete L2\u2013L7 userspace network stack (ARP/DHCP/DNS/ICMP/TCP/UDP) providing real internet access. PCAP capture available.",
   "group": "Boards",
   "w": 124,
   "h": 314,
   "attrs": {
     "env": { "type": "string", "default": "" },
     "builder": { "type": "string", "default": "arduino-pico" },
-    "wirelessMode": { "type": "string", "default": "compat-stub" },
+    "wirelessMode": { "type": "string", "default": "full", "enum": ["full", "compat-stub", "off"] },
     "wirelessSsid": { "type": "string", "default": "OpenHW-GUEST" },
-    "wirelessIp": { "type": "string", "default": "192.168.4.2" }
+    "wirelessPassword": { "type": "string", "default": "" },
+    "wirelessIp": { "type": "string", "default": "10.13.37.42" }
   },
   "pins": [
     { "id": "GP0", "description": "GP0", "x": 9.5, "y": 20.4, "type": "digital" },

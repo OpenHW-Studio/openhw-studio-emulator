@@ -21,3 +21,31 @@ export { SimulationMonitorLogic } from './simulation-monitor.ts';
 // Legacy name kept for backward compatibility
 export { I2CProtocol as GenericI2CDevice } from './i2c-device.ts';
 export { SPIProtocol as GenericSPIDevice } from './spi-device.ts';
+
+// ── WiFi / Network stack ─────────────────────────────────────────────────────
+// WifiEnvironment: shared registry for all WiFi boards and AP components.
+export {
+  WifiEnvironment, wifiEnvironment,
+  type WiFiApConfig, type WiFiConnectionStatus,
+  type WiFiNodeInfo, type WiFiPacketEvent,
+} from './wifi-environment.ts';
+
+// Pico W full L2–L7 userspace network stack (port of velxio picow_net).
+export { PicowNetBridge, type FrameEmitFn } from './picow-net/index.ts';
+export { PcapWriter } from './picow-net/pcap-writer.ts';
+export { TcpNat } from './picow-net/tcp-nat.ts';
+export { UdpNat } from './picow-net/udp-nat.ts';
+
+// ESP32 serial output parser for WiFi/BLE status events.
+export {
+  WiFiStatusStreamParser,
+  parseWifiLine, parseBleLine, parseSerialText,
+  type WifiEvent, type BleEvent,
+} from './wifi-status-parser.ts';
+
+// Network Worker proxy — boards use this to talk to the dedicated network worker.
+export {
+  NetworkWorkerProxy, networkWorkerProxy,
+  type NetWorkerStatusMsg, type NetWorkerFrameInMsg,
+} from './network-worker-proxy.ts';
+
