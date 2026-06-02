@@ -29,7 +29,7 @@
   ],
   "autowiring": {
     "connections": [
-      { "from": "3V3",  "to": "arduino:3.3V", "color": "red" },
+      { "from": "3V3",  "to": "arduino:3v3", "color": "red" },
       { "from": "GND",  "to": "arduino:GND", "color": "black" },
       { "from": "RST",  "to": "arduino:9", "color": "orange" },
       { "from": "SDA",  "to": "arduino:10", "color": "yellow" },
@@ -43,7 +43,7 @@
     "arduino": {
       "globals": "#include <SPI.h>\n#include <MFRC522.h>\n\n#define RST_PIN_${COMP_SUFFIX} ${RST}\n#define SS_PIN_${COMP_SUFFIX} ${SDA}\nMFRC522 mfrc522_${COMP_SUFFIX}(SS_PIN_${COMP_SUFFIX}, RST_PIN_${COMP_SUFFIX});",
       "setup": "SPI.begin();\nmfrc522_${COMP_SUFFIX}.PCD_Init();\nSerial.println(\"MFRC522 RFID Ready\");",
-      "loop": "if (mfrc522_${COMP_SUFFIX}.PICC_IsNewCardPresent() && mfrc522_${COMP_SUFFIX}.PICC_ReadCardSerial()) {\n  Serial.print(\"RFID UID:\");\n  for (byte i = 0; i < mfrc522_${COMP_SUFFIX}.uid.size; i++) {\n    Serial.print(mfrc522_${COMP_SUFFIX}.uid.uidByte[i] < 0x10 ? \" 0\" : \" \");\n    Serial.print(mfrc522_${COMP_SUFFIX}.uid.uidByte[i], HEX);\n  }\n  Serial.println();\n  mfrc522_${COMP_SUFFIX}.PICC_HaltA();\n}\ndelay(200);"
+      "loop": "Serial.println(\"Scanning for RFID card...\");\nif (mfrc522_${COMP_SUFFIX}.PICC_IsNewCardPresent() && mfrc522_${COMP_SUFFIX}.PICC_ReadCardSerial()) {\n  Serial.print(\"RFID UID:\");\n  for (byte i = 0; i < mfrc522_${COMP_SUFFIX}.uid.size; i++) {\n    Serial.print(mfrc522_${COMP_SUFFIX}.uid.uidByte[i] < 0x10 ? \" 0\" : \" \");\n    Serial.print(mfrc522_${COMP_SUFFIX}.uid.uidByte[i], HEX);\n  }\n  Serial.println();\n  mfrc522_${COMP_SUFFIX}.PICC_HaltA();\n}\ndelay(500);"
     }
   }
 }

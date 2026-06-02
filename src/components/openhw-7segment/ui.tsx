@@ -24,7 +24,7 @@ export const Wokwi7SegmentUI = ({ state, attrs }: { state: any, attrs: any }) =>
     const scaleY = BOUNDS.h / originalTotalHeight;
 
     const getFill = (digitIndex: number, seg: string) => {
-        return state?.digits?.[digitIndex]?.[seg] ? activeColor : offColor;
+        return state?.digitSegments?.[digitIndex]?.[seg] ? activeColor : offColor;
     };
 
     return (

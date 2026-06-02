@@ -1,0 +1,296 @@
+{
+  "type": "openhw-stm32-blue-pill",
+  "label": "STM32 Blue Pill",
+  "description": "STM32F103C8T6 Blue Pill development board with external pin headers and power rails.",
+  "group": "Boards",
+  "w": 170,
+  "h": 440,
+  "attrs": {
+    "breadboard": {
+      "anchorPin": "PA0",
+      "ravine": false
+    }
+  },
+  "pins": [
+    {
+      "id": "PB12",
+      "x": 22,
+      "y": 56,
+      "type": "digital",
+      "description": "PB12"
+    },
+    {
+      "id": "PB13",
+      "x": 22,
+      "y": 75,
+      "type": "digital",
+      "description": "PB13"
+    },
+    {
+      "id": "PB14",
+      "x": 22,
+      "y": 94,
+      "type": "digital",
+      "description": "PB14"
+    },
+    {
+      "id": "PB15",
+      "x": 22,
+      "y": 113,
+      "type": "digital",
+      "description": "PB15"
+    },
+    {
+      "id": "PA8",
+      "x": 22,
+      "y": 132,
+      "type": "digital",
+      "description": "PA8"
+    },
+    {
+      "id": "PA9",
+      "x": 22,
+      "y": 151,
+      "type": "digital",
+      "description": "PA9"
+    },
+    {
+      "id": "PA10",
+      "x": 22,
+      "y": 170,
+      "type": "digital",
+      "description": "PA10"
+    },
+    {
+      "id": "PA11",
+      "x": 22,
+      "y": 189,
+      "type": "digital",
+      "description": "PA11"
+    },
+    {
+      "id": "PA12",
+      "x": 22,
+      "y": 208,
+      "type": "digital",
+      "description": "PA12"
+    },
+    {
+      "id": "PA15",
+      "x": 22,
+      "y": 227,
+      "type": "digital",
+      "description": "PA15"
+    },
+    {
+      "id": "PB3",
+      "x": 22,
+      "y": 246,
+      "type": "digital",
+      "description": "PB3"
+    },
+    {
+      "id": "PB4",
+      "x": 22,
+      "y": 265,
+      "type": "digital",
+      "description": "PB4"
+    },
+    {
+      "id": "PB5",
+      "x": 22,
+      "y": 284,
+      "type": "digital",
+      "description": "PB5"
+    },
+    {
+      "id": "PB6",
+      "x": 22,
+      "y": 303,
+      "type": "digital",
+      "description": "PB6"
+    },
+    {
+      "id": "PB7",
+      "x": 22,
+      "y": 322,
+      "type": "digital",
+      "description": "PB7"
+    },
+    {
+      "id": "PB8",
+      "x": 22,
+      "y": 341,
+      "type": "digital",
+      "description": "PB8"
+    },
+    {
+      "id": "PB9",
+      "x": 22,
+      "y": 360,
+      "type": "digital",
+      "description": "PB9"
+    },
+    {
+      "id": "5V",
+      "x": 22,
+      "y": 379,
+      "type": "power",
+      "description": "5V"
+    },
+    {
+      "id": "GND",
+      "x": 22,
+      "y": 398,
+      "type": "power",
+      "description": "GND"
+    },
+    {
+      "id": "3V3",
+      "x": 22,
+      "y": 417,
+      "type": "power",
+      "description": "3V3"
+    },
+    {
+      "id": "GND.2",
+      "x": 148,
+      "y": 56,
+      "type": "power",
+      "description": "GND"
+    },
+    {
+      "id": "GND.3",
+      "x": 148,
+      "y": 75,
+      "type": "power",
+      "description": "GND"
+    },
+    {
+      "id": "3V3.2",
+      "x": 148,
+      "y": 94,
+      "type": "power",
+      "description": "3V3"
+    },
+    {
+      "id": "RST",
+      "x": 148,
+      "y": 113,
+      "type": "digital",
+      "description": "RST"
+    },
+    {
+      "id": "PB11",
+      "x": 148,
+      "y": 132,
+      "type": "digital",
+      "description": "PB11"
+    },
+    {
+      "id": "PB10",
+      "x": 148,
+      "y": 151,
+      "type": "digital",
+      "description": "PB10"
+    },
+    {
+      "id": "PB1",
+      "x": 148,
+      "y": 170,
+      "type": "digital",
+      "description": "PB1"
+    },
+    {
+      "id": "PB0",
+      "x": 148,
+      "y": 189,
+      "type": "digital",
+      "description": "PB0"
+    },
+    {
+      "id": "PA7",
+      "x": 148,
+      "y": 208,
+      "type": "digital",
+      "description": "PA7"
+    },
+    {
+      "id": "PA6",
+      "x": 148,
+      "y": 227,
+      "type": "digital",
+      "description": "PA6"
+    },
+    {
+      "id": "PA5",
+      "x": 148,
+      "y": 246,
+      "type": "digital",
+      "description": "PA5"
+    },
+    {
+      "id": "PA4",
+      "x": 148,
+      "y": 265,
+      "type": "digital",
+      "description": "PA4"
+    },
+    {
+      "id": "PA3",
+      "x": 148,
+      "y": 284,
+      "type": "digital",
+      "description": "PA3"
+    },
+    {
+      "id": "PA2",
+      "x": 148,
+      "y": 303,
+      "type": "digital",
+      "description": "PA2"
+    },
+    {
+      "id": "PA1",
+      "x": 148,
+      "y": 322,
+      "type": "digital",
+      "description": "PA1"
+    },
+    {
+      "id": "PA0",
+      "x": 148,
+      "y": 341,
+      "type": "digital",
+      "description": "PA0"
+    },
+    {
+      "id": "PC15",
+      "x": 148,
+      "y": 360,
+      "type": "digital",
+      "description": "PC15"
+    },
+    {
+      "id": "PC14",
+      "x": 148,
+      "y": 379,
+      "type": "digital",
+      "description": "PC14"
+    },
+    {
+      "id": "PC13",
+      "x": 148,
+      "y": 398,
+      "type": "digital",
+      "description": "PC13"
+    },
+    {
+      "id": "VBAT",
+      "x": 148,
+      "y": 417,
+      "type": "power",
+      "description": "VBAT"
+    }
+  ]
+}

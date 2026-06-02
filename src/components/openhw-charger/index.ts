@@ -21,12 +21,12 @@ try {
     uiRaw = '';
 }
 try {
-    logicRaw = _nodeFs?.readFileSync(new URL('./logic.ts', import.meta.url), 'utf8');
+    logicRaw = _nodeFs?.readFileSync(new URL('./logic', import.meta.url), 'utf8');
 } catch (e) {
     logicRaw = '';
 }
 try {
-    validationRaw = _nodeFs?.readFileSync(new URL('./validation.ts', import.meta.url), 'utf8');
+    validationRaw = _nodeFs?.readFileSync(new URL('./validation', import.meta.url), 'utf8');
 } catch (e) {
     validationRaw = '';
 }

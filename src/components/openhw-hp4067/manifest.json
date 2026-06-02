@@ -1,0 +1,51 @@
+{
+    "type": "openhw-hp4067",
+    "label": "16-Channel Mux (HP4067)",
+    "group": "Logic",
+    "w": 100,
+    "h": 280,
+    "attrs": {},
+    "pins": [
+      { "id": "GND", "x": 85, "y": 20, "type": "power" },
+      { "id": "VCC", "x": 85, "y": 34, "type": "power" },
+      { "id": "EN",  "x": 85, "y": 48, "type": "digital" },
+      { "id": "S3",  "x": 85, "y": 90, "type": "digital" },
+      { "id": "S2",  "x": 85, "y": 104, "type": "digital" },
+      { "id": "S1",  "x": 85, "y": 118, "type": "digital" },
+      { "id": "S0",  "x": 85, "y": 132, "type": "digital" },
+      { "id": "SIG", "x": 85, "y": 230, "type": "analog" },
+
+      { "id": "C15", "x": 15, "y": 20,  "type": "analog" },
+      { "id": "C14", "x": 15, "y": 34,  "type": "analog" },
+      { "id": "C13", "x": 15, "y": 48,  "type": "analog" },
+      { "id": "C12", "x": 15, "y": 62,  "type": "analog" },
+      { "id": "C11", "x": 15, "y": 76,  "type": "analog" },
+      { "id": "C10", "x": 15, "y": 90,  "type": "analog" },
+      { "id": "C9",  "x": 15, "y": 104, "type": "analog" },
+      { "id": "C8",  "x": 15, "y": 118, "type": "analog" },
+      { "id": "C7",  "x": 15, "y": 132, "type": "analog" },
+      { "id": "C6",  "x": 15, "y": 146, "type": "analog" },
+      { "id": "C5",  "x": 15, "y": 160, "type": "analog" },
+      { "id": "C4",  "x": 15, "y": 174, "type": "analog" },
+      { "id": "C3",  "x": 15, "y": 188, "type": "analog" },
+      { "id": "C2",  "x": 15, "y": 202, "type": "analog" },
+      { "id": "C1",  "x": 15, "y": 216, "type": "analog" },
+      { "id": "C0",  "x": 15, "y": 230, "type": "analog" }
+    ],
+    "telemetry": {
+      "template": "ActiveChannel=${state.activeChannel}",
+      "criticalKeys": ["state.activeChannel"]
+    },
+    "autowiring": {
+      "connections": [
+        { "from": "GND", "to": "arduino:GND" },
+        { "from": "VCC", "to": "arduino:5V" },
+        { "from": "EN", "to": "arduino:GND" },
+        { "from": "S0", "to": "arduino:8" },
+        { "from": "S1", "to": "arduino:9" },
+        { "from": "S2", "to": "arduino:10" },
+        { "from": "S3", "to": "arduino:11" },
+        { "from": "SIG", "to": "arduino:A0" }
+      ]
+    }
+}

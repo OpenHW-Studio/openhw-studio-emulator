@@ -17,7 +17,7 @@ export const validation: { rules: ComponentValidationRule[] } = {
 
                 pin1Neighbors.forEach(n1 => {
                     const comp1 = validator?.getComponent(n1);
-                    if (comp1 && (comp1.type === 'openhw-diode' || comp1.type === 'openhw-diode')) {
+                    if (comp1 && (comp1.type === 'openhw-diode' || comp1.type === 'wokwi-diode')) {
                         const otherDiodePin = n1.endsWith('.anode') ? `${comp1.id}.cathode` : `${comp1.id}.anode`;
                         if (pin2Neighbors.includes(otherDiodePin)) {
                             hasFlybackDiode = true;
@@ -25,7 +25,15 @@ export const validation: { rules: ComponentValidationRule[] } = {
                     }
                 });
 
-                if (!hasFlybackDiode) {
+                let connectedToDriver = false;
+                [...pin1Neighbors, ...pin2Neighbors].forEach(n => {
+                    const comp = validator?.getComponent(n);
+                    if (comp && (comp.type.includes('motor-driver') || comp.type.includes('l293d'))) {
+                        connectedToDriver = true;
+                    }
+                });
+
+                if (!hasFlybackDiode && !connectedToDriver) {
                     return createValidationIssue({
                         ruleId: 'motor-flyback-diode-check',
                         severity: 'warn',

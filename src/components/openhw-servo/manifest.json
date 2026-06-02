@@ -44,9 +44,14 @@
         "externalVoltage": "5.0"
     },
     "autocoding": {
-        "libraries": ["Servo"],
+        "libraries": ["Servo", "ESP32Servo"],
         "arduino": {
             "globals": "#include <Servo.h>\nServo myServo_${COMP_SUFFIX};",
+            "setup": "myServo_${COMP_SUFFIX}.attach(${PWM});\nmyServo_${COMP_SUFFIX}.write(0);\ndelay(500);",
+            "loop": "for (int pos_${COMP_SUFFIX} = 0; pos_${COMP_SUFFIX} <= 180; pos_${COMP_SUFFIX}++) {\n  myServo_${COMP_SUFFIX}.write(pos_${COMP_SUFFIX});\n  delay(10);\n}\nfor (int pos_${COMP_SUFFIX} = 180; pos_${COMP_SUFFIX} >= 0; pos_${COMP_SUFFIX}--) {\n  myServo_${COMP_SUFFIX}.write(pos_${COMP_SUFFIX});\n  delay(10);\n}"
+        },
+        "esp32": {
+            "globals": "#include <ESP32Servo.h>\nServo myServo_${COMP_SUFFIX};",
             "setup": "myServo_${COMP_SUFFIX}.attach(${PWM});\nmyServo_${COMP_SUFFIX}.write(0);\ndelay(500);",
             "loop": "for (int pos_${COMP_SUFFIX} = 0; pos_${COMP_SUFFIX} <= 180; pos_${COMP_SUFFIX}++) {\n  myServo_${COMP_SUFFIX}.write(pos_${COMP_SUFFIX});\n  delay(10);\n}\nfor (int pos_${COMP_SUFFIX} = 180; pos_${COMP_SUFFIX} >= 0; pos_${COMP_SUFFIX}--) {\n  myServo_${COMP_SUFFIX}.write(pos_${COMP_SUFFIX});\n  delay(10);\n}"
         }

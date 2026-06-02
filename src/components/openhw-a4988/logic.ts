@@ -24,9 +24,10 @@ export class A4988Logic extends BaseComponent {
                 const enabled = this.getPinVoltage('ENABLE') < 2.5;
                 // Sleep & Reset (Active LOW, meaning must be HIGH to operate)
                 const asleep = this.getPinVoltage('SLEEP') < 2.5;
+                const reset = this.getPinVoltage('RESET') < 2.5;
 
-                // If not asleep and enabled, process step
-                if (!asleep && enabled) {
+                // If not asleep, not reset, and enabled, process step
+                if (!asleep && !reset && enabled) {
                     const dir = this.getPinVoltage('DIR') > 2.5 ? 1 : -1;
                     this.stepPos = (this.stepPos + dir + 4) % 4;
                     this.updateOutputs();
@@ -35,7 +36,7 @@ export class A4988Logic extends BaseComponent {
             this.stepPinLast = isHigh;
         }
 
-        if (pinId === 'ENABLE' || pinId === 'SLEEP') {
+        if (pinId === 'ENABLE' || pinId === 'SLEEP' || pinId === 'RESET') {
             this.updateOutputs();
         }
     }
@@ -43,9 +44,10 @@ export class A4988Logic extends BaseComponent {
     private updateOutputs() {
         const enabled = this.getPinVoltage('ENABLE') < 2.5;
         const asleep = this.getPinVoltage('SLEEP') < 2.5;
+        const reset = this.getPinVoltage('RESET') < 2.5;
 
-        // If disabled or asleep, coils are off (freewheeling)
-        if (asleep || !enabled) {
+        // If disabled, reset, or asleep, coils are off (freewheeling)
+        if (asleep || reset || !enabled) {
             this.setPinVoltage('1A', 0);
             this.setPinVoltage('1B', 0);
             this.setPinVoltage('2A', 0);

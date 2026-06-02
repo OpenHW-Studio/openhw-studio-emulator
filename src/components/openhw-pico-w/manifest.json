@@ -54,6 +54,11 @@
     { "id": "GP18", "description": "GP18", "x": 114.5, "y": 260.4, "type": "digital" },
     { "id": "GND_6", "description": "GND", "x": 114.5, "y": 275.4, "type": "power" },
     { "id": "GP17", "description": "GP17", "x": 114.5, "y": 290.4, "type": "digital" },
-    { "id": "GP16", "description": "GP16", "x": 114.5, "y": 305.4, "type": "digital" }
+    { "id": "GP16", "description": "GP16", "x": 114.5, "y": 305.4, "type": "digital" },
+    { "id": "13", "description": "Alias for GP13", "x": 9.5, "y": 260.4, "type": "digital" },
+    { "id": "2", "description": "Alias for GP2", "x": 9.5, "y": 65.4, "type": "digital" },
+    { "id": "5V", "description": "Alias for VBUS", "x": 114.5, "y": 20.4, "type": "power" },
+    { "id": "A4", "description": "Alias for GP20", "x": 114.5, "y": 230.4, "type": "analog" },
+    { "id": "A5", "description": "Alias for GP21", "x": 114.5, "y": 215.4, "type": "analog" }
   ]
 }

@@ -47,6 +47,8 @@ export class MotorDriverLogic extends BaseComponent {
         const elapsedCycles = time - this.lastUpdateCycle;
         this.lastUpdateCycle = time;
 
+        if (elapsedCycles <= 0) return;
+
         const ena = Math.max(0, this.getAverageVoltage('ENA', time, elapsedCycles) || 0);
         const in1 = this.getAverageVoltage('IN1', time, elapsedCycles) > 2.5;
         const in2 = this.getAverageVoltage('IN2', time, elapsedCycles) > 2.5;
@@ -76,5 +78,11 @@ export class MotorDriverLogic extends BaseComponent {
         } else {
             this.setPinVoltage('5V', 0);
         }
+
+        this.setState({
+            active: ena > 0.5 || enb > 0.5
+        });
+
+        this.stateChanged = true;
     }
 }

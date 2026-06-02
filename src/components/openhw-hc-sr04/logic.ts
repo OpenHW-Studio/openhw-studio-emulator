@@ -3,7 +3,6 @@ import { PulseProtocol } from '../../protocol-handlers/index';
 
 export class HCSR04Logic extends PulseProtocol {
     private isEchoing = false;
-    attrs: any;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);

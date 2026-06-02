@@ -40,7 +40,8 @@ export class NeopixelLogic extends NeoPixelProtocol {
             totalPixels: pixels.length,
             averageColor: avgColor,
             estimatedPowerMa: Number(estPowerMa.toFixed(2)),
-            pattern: activeCount === 0 ? 'Off' : pattern
+            pattern: activeCount === 0 ? 'Off' : pattern,
+            cpuFreq: (this as any).cpuFreqMHz || 16
         });
     }
 }

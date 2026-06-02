@@ -2,6 +2,10 @@ import { BaseComponent } from '../BaseComponent';
 
 export class LEDLogic extends BaseComponent {
     voltageDrop = 1.8;
+    lastUpdateCycles: number;
+    totalCyclesSinceSync: number;
+    illuminatedCyclesSinceSync: number;
+    hasIlluminatedSinceSync: boolean;
 
     private hasResistorInConnectedPath(currentWires: any[], allComponentsInstances: BaseComponent[]): boolean {
         const startNodes = new Set([`${this.id}:A`, `${this.id}:K`]);

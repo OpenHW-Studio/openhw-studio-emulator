@@ -13,6 +13,9 @@ export class NeoPixelProtocol extends BaseComponent {
             pixels: []
         };
     }
+    
+    private cpuFreqMHz = 16;
+    private freqDetected = false;
 
     getNeoPixelPinName(): string {
         return 'DIN';
@@ -24,6 +27,19 @@ export class NeoPixelProtocol extends BaseComponent {
     
     update(cpuCycles: number, currentWires: any[], instances: BaseComponent[]) {
         super.update(cpuCycles, currentWires, instances);
+        
+        if (!this.freqDetected && instances) {
+            const hasPico = instances.some(i => i.manifest?.type?.includes('pico'));
+            const hasEsp32 = instances.some(i => i.manifest?.type?.includes('esp32'));
+            if (hasPico) {
+                this.cpuFreqMHz = 125;
+            } else if (hasEsp32) {
+                this.cpuFreqMHz = 240;
+            } else {
+                this.cpuFreqMHz = 16;
+            }
+            this.freqDetected = true;
+        }
         
         // DMA Bypass Optimization for NeoPixels
         const dmaAddress = parseInt(this.attrs?.dmaAddress || this.state?.dmaAddress || '0', 16);
@@ -75,8 +91,9 @@ export class NeoPixelProtocol extends BaseComponent {
 
             if (isHigh) {
                 // Rising edge. The time spent LOW is `elapsed`.
-                if (elapsed > 400) {
-                    // Reset > 25us (400 cycles @ 16mhz)
+                const resetThreshold = this.cpuFreqMHz * 25; // 25us minimum for reset
+                if (elapsed > resetThreshold) {
+                    // Reset
                     if (this.buffer.length > 0) {
                         const pixels = [];
                         for (let i = 0; i < this.buffer.length; i += 3) {
@@ -95,8 +112,10 @@ export class NeoPixelProtocol extends BaseComponent {
                 }
             } else {
                 // Falling edge. The time spent HIGH is `elapsed`.
-                // A 0-bit is ~0.4us (6.4 cycles). A 1-bit is ~0.8us (12.8 cycles). Threshold 9:
-                const bit = elapsed >= 9 ? 1 : 0;
+                // A 0-bit is ~0.4us. A 1-bit is ~0.8us.
+                // Threshold between 0 and 1 is ~0.5625us.
+                const threshold = this.cpuFreqMHz * 0.5625;
+                const bit = elapsed >= threshold ? 1 : 0;
                 this.currentByte = (this.currentByte << 1) | bit;
                 this.currentBit++;
 
