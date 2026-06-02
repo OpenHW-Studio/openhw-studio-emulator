@@ -1,0 +1,32 @@
+{
+  "type": "openhw-wifi-ap",
+  "label": "WiFi Access Point",
+  "description": "Simulated WiFi access point. All ESP32 and Pico W boards in the simulation connect through this AP. Equivalent to wokwi-wifi-ap.",
+  "group": "Connectivity",
+  "w": 80,
+  "h": 60,
+  "attrs": {
+    "ssid": {
+      "type": "string",
+      "default": "OpenHW-GUEST",
+      "label": "SSID"
+    },
+    "password": {
+      "type": "string",
+      "default": "",
+      "label": "Password (leave blank for open)"
+    },
+    "channel": {
+      "type": "string",
+      "default": "6",
+      "label": "Channel (1–13)"
+    },
+    "internet": {
+      "type": "string",
+      "default": "1",
+      "label": "Internet access (1=yes, 0=no)"
+    }
+  },
+  "pins": [],
+  "aliases": ["wokwi-wifi-ap"]
+}

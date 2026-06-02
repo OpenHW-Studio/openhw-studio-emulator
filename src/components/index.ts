@@ -6,8 +6,10 @@ export { default as openhwArduinoUno } from './openhw-arduino-uno';
 export { default as openhwPico } from './openhw-pico/index';
 export { default as openhwPicoW } from './openhw-pico-w/index';
 export { default as openhwEsp32 } from './ESP32/index';
-export { default as openhwEsp32Cam } from './openhw-esp32-cam/index';
 export { default as openhwStm32BluePill } from './openhw-stm32-bluepill/index';
+// WiFi Access Point — functional AP component (equivalent to wokwi-wifi-ap)
+export { WiFiApLogic as openhwWifiAp, WiFiApLogic as wokwiWifiAp } from './openhw-wifi-ap/index';
+export { default as openhwEsp32Cam } from './openhw-esp32-cam/index';
 export { default as openhwResistor } from './openhw-resistor';
 export { default as openhwPushbutton } from './openhw-pushbutton';
 export { default as openhwPowerSupply } from './openhw-power-supply';
