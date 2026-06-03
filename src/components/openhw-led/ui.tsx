@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from 'react';
 // Bounding box for the blue selection ring.
 // x, y: offset from comp.x/comp.y (top-left corner of the visual area)
 // w, h: width and height of the visual area
-export const BOUNDS = { x: 0, y: 0, w: 38, h: 38 };
+export const BOUNDS = { x: 0, y: 0, w: 65.3, h: 65.3 };
 
 export const LEDUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const isLit = state?.illuminated;
