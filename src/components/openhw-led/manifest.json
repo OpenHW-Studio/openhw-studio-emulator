@@ -38,11 +38,11 @@
     "autocoding": {
         "arduino": {
             "setup": "pinMode(${A}, OUTPUT);",
-            "loop": ""
+            "loop": "digitalWrite(${A}, HIGH);\ndelay(1000);\ndigitalWrite(${A}, LOW);\ndelay(1000);"
         },
         "micropython": {
-            "setup": "from machine import Pin\nled = Pin(25, Pin.OUT)",
-            "loop": ""
+            "setup": "from machine import Pin\nimport time\nled = Pin(${A}, Pin.OUT)",
+            "loop": "led.value(1)\ntime.sleep(1)\nled.value(0)\ntime.sleep(1)"
         }
     },
     "autowiring": {
