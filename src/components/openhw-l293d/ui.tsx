@@ -18,7 +18,7 @@ export const L293DUI = ({ state, attrs }: { state: any, attrs: any }) => {
                 const y = 15 + i * 15;
                 return (
                     <g key={`L${i}`}>
-                        <circle cx="15" cy={y} r="4.5" fill="#ecf0f1" />
+                        <rect x="10.5" y={y - 4.5} width="9" height="9" fill="#ecf0f1" />
                         <line x1="0" y1={y} x2="15" y2={y} stroke="#bdc3c7" strokeWidth="3" />
                         <text x="22" y={y + 2.5} fontSize="6" fontFamily="monospace" fill="#bdc3c7" textAnchor="start">{label}</text>
                     </g>
@@ -30,7 +30,7 @@ export const L293DUI = ({ state, attrs }: { state: any, attrs: any }) => {
                 const y = 15 + i * 15;
                 return (
                     <g key={`R${i}`}>
-                        <circle cx="75" cy={y} r="4.5" fill="#ecf0f1" />
+                        <rect x="70.5" y={y - 4.5} width="9" height="9" fill="#ecf0f1" />
                         <line x1="90" y1={y} x2="75" y2={y} stroke="#bdc3c7" strokeWidth="3" />
                         <text x="68" y={y + 2.5} fontSize="6" fontFamily="monospace" fill="#bdc3c7" textAnchor="end">{label}</text>
                     </g>
