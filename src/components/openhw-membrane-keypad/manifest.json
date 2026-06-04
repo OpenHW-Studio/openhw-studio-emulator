@@ -3,17 +3,17 @@
     "label": "Membrane Keypad (4x4)",
     "description": "Standard 4x4 membrane keypad matrix. Connect rows to output pins and columns to input pullup pins to scan for key presses.",
     "group": "Inputs",
-    "w": 265.84,
-    "h": 343.94,
+    "w": 415.37,
+    "h": 537.40,
     "pins": [
-        { "id": "R1", "x": 100, "y": 338, "type": "passive", "description": "Row 1" },
-        { "id": "R2", "x": 110, "y": 338, "type": "passive", "description": "Row 2" },
-        { "id": "R3", "x": 119.5, "y": 338, "type": "passive", "description": "Row 3" },
-        { "id": "R4", "x": 129, "y": 338, "type": "passive", "description": "Row 4" },
-        { "id": "C1", "x": 138.5, "y": 338, "type": "passive", "description": "Column 1" },
-        { "id": "C2", "x": 148, "y": 338, "type": "passive", "description": "Column 2" },
-        { "id": "C3", "x": 157.75, "y": 338, "type": "passive", "description": "Column 3" },
-        { "id": "C4", "x": 167.5, "y": 338, "type": "passive", "description": "Column 4" }
+        { "id": "R1", "x": 155.19, "y": 527.19, "type": "passive", "description": "Row 1" },
+        { "id": "R2", "x": 170.19, "y": 527.19, "type": "passive", "description": "Row 2" },
+        { "id": "R3", "x": 185.19, "y": 527.19, "type": "passive", "description": "Row 3" },
+        { "id": "R4", "x": 200.19, "y": 527.19, "type": "passive", "description": "Row 4" },
+        { "id": "C1", "x": 215.19, "y": 527.19, "type": "passive", "description": "Column 1" },
+        { "id": "C2", "x": 230.19, "y": 527.19, "type": "passive", "description": "Column 2" },
+        { "id": "C3", "x": 245.19, "y": 527.19, "type": "passive", "description": "Column 3" },
+        { "id": "C4", "x": 260.19, "y": 527.19, "type": "passive", "description": "Column 4" }
     ],
     "autowiring": {
         "connections": [

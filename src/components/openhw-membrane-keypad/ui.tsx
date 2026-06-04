@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 265.84, h: 343.94 };
+// Bounding box scaled to exactly 15px per 0.1 inch (2.54mm) pitch
+// Original mm size: 70.336 x 91 mm
+export const BOUNDS = { x: 0, y: 0, w: 415.37, h: 537.40 };
 
 export const KeypadUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning: boolean }) => {
     const elRef = useRef<HTMLElement>(null);
