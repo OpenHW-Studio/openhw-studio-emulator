@@ -54,19 +54,19 @@ export const MFRC522UI = ({
 
                 {/* Left Through-Hole Pads */}
                 {[15, 30, 45, 60, 75, 90, 105, 120].map(y => (
-                    <circle key={`pin-${y}`} cx="8" cy={y} r="2.5" fill="#0f172a" stroke="#fbbf24" strokeWidth="1.2" />
+                    <circle key={`pin-${y}`} cx="15" cy={y} r="2.5" fill="#0f172a" stroke="#fbbf24" strokeWidth="1.2" />
                 ))}
 
                 {/* Left Silkscreen Pin Labels */}
                 <g fill="#ffffff" fontSize="7.5" fontWeight="bold" textAnchor="start">
-                    <text x="16" y={15 + 2.5}>3V3</text>
-                    <text x="16" y={30 + 2.5}>RST</text>
-                    <text x="16" y={45 + 2.5}>GND</text>
-                    <text x="16" y={60 + 2.5}>IRQ</text>
-                    <text x="16" y={75 + 2.5}>MISO</text>
-                    <text x="16" y={90 + 2.5}>MOSI</text>
-                    <text x="16" y={105 + 2.5}>SCK</text>
-                    <text x="16" y={120 + 2.5}>SDA</text>
+                    <text x="23" y={15 + 2.5}>3V3</text>
+                    <text x="23" y={30 + 2.5}>RST</text>
+                    <text x="23" y={45 + 2.5}>GND</text>
+                    <text x="23" y={60 + 2.5}>IRQ</text>
+                    <text x="23" y={75 + 2.5}>MISO</text>
+                    <text x="23" y={90 + 2.5}>MOSI</text>
+                    <text x="23" y={105 + 2.5}>SCK</text>
+                    <text x="23" y={120 + 2.5}>SDA</text>
                 </g>
 
                 {/* RFID Antenna Traces */}
