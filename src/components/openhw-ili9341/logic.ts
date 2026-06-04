@@ -106,8 +106,8 @@ export class ILI9341Logic extends SPIProtocol {
         }
 
         // Periodic Sync (10Hz heartbeat + dirty flag for immediate response)
-        // We sync if dirty OR at least every 100ms to keep heartbeats alive
-        if (this.vramDirty || (now - this.lastSync > 100)) {
+        // We sync if dirty (capped at ~30 FPS / 33ms to prevent telemetry flood) OR at least every 100ms
+        if ((this.vramDirty && (now - this.lastSync > 33)) || (now - this.lastSync > 100)) {
             this.lastSync = now;
             this.vramDirty = false;
             this.stateChanged = true;
