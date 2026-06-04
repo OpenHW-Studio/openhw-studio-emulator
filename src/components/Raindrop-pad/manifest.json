@@ -13,7 +13,7 @@
             "type": "analog",
             "description": "Analog signal output (wire to Raindrop Module PAD+)",
             "x": 240,
-            "y": 78
+            "y": 75
         },
         {
             "id": "GND",
