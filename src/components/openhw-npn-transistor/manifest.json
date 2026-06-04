@@ -2,26 +2,26 @@
     "type": "openhw-npn-transistor",
     "label": "NPN Transistor",
     "group": "Basic",
-    "w": 15,
-    "h": 25,
+    "w": 30,
+    "h": 45,
     "attrs": {},
     "pins": [
         {
             "id": "E",
             "x": 0,
-            "y": 25,
+            "y": 45,
             "type": "digital"
         },
         {
             "id": "B",
-            "x": 7.5,
-            "y": 25,
+            "x": 15,
+            "y": 45,
             "type": "digital"
         },
         {
             "id": "C",
-            "x": 15,
-            "y": 25,
+            "x": 30,
+            "y": 45,
             "type": "digital"
         }
     ]
