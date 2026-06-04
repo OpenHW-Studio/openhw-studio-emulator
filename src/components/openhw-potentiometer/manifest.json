@@ -20,21 +20,21 @@
     "pins": [
         {
             "id": "1",
-            "x": 22.5,
+            "x": 44,
             "y": 102,
             "type": "power",
             "description": "GND"
         },
         {
             "id": "SIG",
-            "x": 37.5,
+            "x": 59,
             "y": 102,
             "type": "analog",
             "description": "SIG"
         },
         {
             "id": "2",
-            "x": 52.5,
+            "x": 74,
             "y": 102,
             "type": "power",
             "description": "VCC"
