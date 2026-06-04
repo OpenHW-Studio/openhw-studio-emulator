@@ -145,9 +145,9 @@ export const JoystickUI = ({ state, attrs, isRunning, comp }: { state: any, attr
                     </text>
                     <text transform="rotate(-90)" textAnchor="start" fontSize="1.2">
                         <tspan x="-29.2" y="9.2">VCC</tspan>
-                        <tspan x="-29.2" y="11.74">VERT</tspan>
-                        <tspan x="-29.2" y="14.28">HORZ</tspan>
-                        <tspan x="-29.2" y="16.82">SEL</tspan>
+                        <tspan x="-29.2" y="11.74">VRY</tspan>
+                        <tspan x="-29.2" y="14.28">VRX</tspan>
+                        <tspan x="-29.2" y="16.82">SW</tspan>
                         <tspan x="-29.2" y="19.36">GND</tspan>
                     </text>
                 </g>

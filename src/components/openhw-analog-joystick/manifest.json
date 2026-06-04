@@ -8,9 +8,9 @@
     "attrs": {},
     "pins": [
         { "id": "VCC",  "x": 60, "y": 195, "type": "power",   "description": "5V Power" },
-        { "id": "VERT", "x": 75, "y": 195, "type": "analog",  "description": "Y-axis output (Vertical)" },
-        { "id": "HORZ", "x": 90, "y": 195, "type": "analog",  "description": "X-axis output (Horizontal)" },
-        { "id": "SEL",  "x": 105, "y": 195, "type": "digital", "description": "Switch" },
+        { "id": "VRY",  "x": 75, "y": 195, "type": "analog",  "description": "Y-axis output (Vertical)" },
+        { "id": "VRX",  "x": 90, "y": 195, "type": "analog",  "description": "X-axis output (Horizontal)" },
+        { "id": "SW",   "x": 105, "y": 195, "type": "digital", "description": "Switch" },
         { "id": "GND",  "x": 120, "y": 195, "type": "power",   "description": "Ground" }
     ],
     "telemetry": {
