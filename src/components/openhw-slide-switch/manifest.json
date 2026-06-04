@@ -3,7 +3,7 @@
     "label": "Slide Switch",
     "description": "Standard Single Pole Double Throw (SPDT) slide switch.",
     "group": "Inputs",
-    "w": 34,
+    "w": 45,
     "h": 32,
     "attrs": {
         "value": "",
@@ -18,21 +18,21 @@
     "pins": [
         {
             "id": "1",
-            "x": 6,
+            "x": 7.5,
             "y": 32,
             "type": "passive",
             "description": "Left terminal"
         },
         {
             "id": "2",
-            "x": 17,
+            "x": 22.5,
             "y": 32,
             "type": "passive",
             "description": "Common terminal"
         },
         {
             "id": "3",
-            "x": 28,
+            "x": 37.5,
             "y": 32,
             "type": "passive",
             "description": "Right terminal"

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 
 const BTN_COLORS = [
     { label: 'Blue', value: 'blue', primary: '#3b82f6', dark: '#1d4ed8' },
@@ -32,6 +32,12 @@ export const BOUNDS = { x: 0, y: 0, w: 50, h: 50 };
 
 export const Pushbutton6mmUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning: boolean }) => {
     const [isPressed, setIsPressed] = useState(false);
+    const isPressedRef = useRef(false);
+    const attrsRef = useRef(attrs);
+
+    useLayoutEffect(() => {
+        attrsRef.current = attrs;
+    });
 
     const nativeW = 50;
     const nativeH = 50;
@@ -39,13 +45,17 @@ export const Pushbutton6mmUI = ({ state, attrs, isRunning }: { state: any, attrs
     const scaleY = BOUNDS.h / nativeH;
 
     const handlePress = () => {
+        if (isPressedRef.current) return;
+        isPressedRef.current = true;
         setIsPressed(true);
-        if (attrs.onInteract) attrs.onInteract('press');
+        if (attrsRef.current?.onInteract) attrsRef.current.onInteract('press');
     };
 
     const handleRelease = () => {
+        if (!isPressedRef.current) return;
+        isPressedRef.current = false;
         setIsPressed(false);
-        if (attrs.onInteract) attrs.onInteract('release');
+        if (attrsRef.current?.onInteract) attrsRef.current.onInteract('release');
     };
 
     const pressed = isPressed || state?.pressed;
@@ -71,9 +81,14 @@ export const Pushbutton6mmUI = ({ state, attrs, isRunning }: { state: any, attrs
                     handlePress();
                 }}
                 onMouseDown={(e) => e.stopPropagation()}
-                onPointerUp={handleRelease}
-                onPointerLeave={handleRelease}
-                onPointerCancel={handleRelease}
+                onPointerUp={(e) => {
+                    e.stopPropagation();
+                    handleRelease();
+                }}
+                onPointerCancel={(e) => {
+                    e.stopPropagation();
+                    handleRelease();
+                }}
                 onLostPointerCapture={handleRelease}
                 style={{
                     position: 'relative',

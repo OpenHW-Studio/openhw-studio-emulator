@@ -28,16 +28,16 @@ export const STM32BluePillUI = ({ state, attrs }: { state: any; attrs: any }) =>
         {/* Headers - Right */}
         {Array.from({ length: 20 }).map((_, i) => (
           <g key={`right-pin-${i}`}>
-            <circle cx="77" cy={15 + i * 15} r="2.5" fill="#f1c40f" stroke="#000" strokeWidth="0.5" />
-            <circle cx="77" cy={15 + i * 15} r="1.2" fill="#000" />
+            <circle cx="75" cy={15 + i * 15} r="2.5" fill="#f1c40f" stroke="#000" strokeWidth="0.5" />
+            <circle cx="75" cy={15 + i * 15} r="1.2" fill="#000" />
           </g>
         ))}
 
         {/* SWD Headers - Bottom */}
         {Array.from({ length: 4 }).map((_, i) => (
           <g key={`swd-pin-${i}`}>
-            <circle cx={31 + i * 10} cy={315} r="2.5" fill="#bdc3c7" stroke="#000" strokeWidth="0.5" />
-            <circle cx={31 + i * 10} cy={315} r="1.2" fill="#000" />
+            <circle cx={23.5 + i * 15} cy={315} r="2.5" fill="#bdc3c7" stroke="#000" strokeWidth="0.5" />
+            <circle cx={23.5 + i * 15} cy={315} r="1.2" fill="#000" />
           </g>
         ))}
         
