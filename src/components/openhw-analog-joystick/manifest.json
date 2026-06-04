@@ -3,15 +3,15 @@
     "label": "Analog Joystick",
     "description": "2-axis analog joystick with push button",
     "group": "Sensors",
-    "w": 102.81,
-    "h": 120.19,
+    "w": 180,
+    "h": 210,
     "attrs": {},
     "pins": [
-        { "id": "VCC",  "x": 33.0, "y": 115.8, "type": "power",   "description": "5V Power" },
-        { "id": "VERT", "x": 42.6, "y": 115.8, "type": "analog",  "description": "Y-axis output (Vertical)" },
-        { "id": "HORZ", "x": 52.2, "y": 115.8, "type": "analog",  "description": "X-axis output (Horizontal)" },
-        { "id": "SEL",  "x": 61.8, "y": 115.8, "type": "digital", "description": "Switch" },
-        { "id": "GND",  "x": 71.4, "y": 115.8, "type": "power",   "description": "Ground" }
+        { "id": "VCC",  "x": 60, "y": 195, "type": "power",   "description": "5V Power" },
+        { "id": "VERT", "x": 75, "y": 195, "type": "analog",  "description": "Y-axis output (Vertical)" },
+        { "id": "HORZ", "x": 90, "y": 195, "type": "analog",  "description": "X-axis output (Horizontal)" },
+        { "id": "SEL",  "x": 105, "y": 195, "type": "digital", "description": "Switch" },
+        { "id": "GND",  "x": 120, "y": 195, "type": "power",   "description": "Ground" }
     ],
     "telemetry": {
       "template": "X=${state.x}, Y=${state.y}, Pressed=${state.pressed}",
