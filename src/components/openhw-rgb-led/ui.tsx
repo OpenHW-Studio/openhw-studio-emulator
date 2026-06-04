@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 42.129, h: 72.582 };
+export const BOUNDS = { x: 0, y: 0, w: 75, h: 105 };
 
 export const RGBLEDUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const rVal = state?.r || 0;
@@ -14,10 +14,10 @@ export const RGBLEDUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const brightness = Math.max(ledRed, ledGreen, ledBlue);
     const opacity = brightness ? 0.2 + brightness * 0.6 : 0;
 
-    const nativeW = 42.129;
-    const nativeH = 72.582;
-    const scaleX = BOUNDS.w / nativeW;
-    const scaleY = BOUNDS.h / nativeH;
+    // Exact scale factor so 8.5 viewBox units = 15px
+    const scale = 15 / 8.5;
+    const svgWidth = 37.3425 * scale;
+    const svgHeight = 57.5115 * scale;
 
     return (
         <div style={{
@@ -27,23 +27,19 @@ export const RGBLEDUI = ({ state, attrs }: { state: any, attrs: any }) => {
             position: 'relative'
         }}>
             <svg
-                width={nativeW}
-                height={nativeH}
+                width={svgWidth}
+                height={svgHeight}
                 version="1.2"
                 viewBox="-17 -10 37.3425 57.5115"
-                style={{
-                    display: 'block',
-                    transform: `scale(${scaleX}, ${scaleY})`,
-                    transformOrigin: '0 0'
-                }}
+                style={{ display: 'block', transformOrigin: '0 0' }}
                 xmlns="http://www.w3.org/2000/svg"
             >
-                {/* LED Legs */}
-                <g fill="none" stroke="#9D9999" strokeLinecap="round" strokeWidth="1.5px">
-                    <path d="m4.1 15.334 3.0611 9.971" />
-                    <path d="m8 14.4 5.9987 4.0518 1.1777 6.5679" strokeLinejoin="round" />
-                    <path d="m-4.3 14.184-5.0755 5.6592-0.10206 6.1694" strokeLinejoin="round" />
-                    <path d="m-1.1 15.607-0.33725 18.4" />
+                {/* LED Legs perfectly aligned to 15px grid */}
+                <g fill="none" stroke="#9D9999" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5px">
+                    <path d="M -4.3 14.18 L -8.5 19 L -8.5 24.0" />
+                    <path d="M -1.1 15.60 L 0.0 19 L 0.0 32.5" />
+                    <path d="M 4.1 15.33 L 8.5 19 L 8.5 24.0" />
+                    <path d="M 8.0 14.40 L 17.0 19 L 17.0 24.0" />
                 </g>
 
                 {/* LED Body */}
