@@ -3,16 +3,16 @@
   "label": "I2S MEMS Microphone (SPH0645)",
   "group": "Audio",
   "description": "I2S Digital Bottom Port Microphone",
-  "w": 60,
+  "w": 90,
   "h": 70,
   "tags": ["audio", "i2s", "mic", "microphone", "sph0645"],
   "pins": [
-    { "id": "3V", "description": "Power (1.62V to 3.6V)", "x": 10, "y": 60 },
-    { "id": "GND", "description": "Ground", "x": 18, "y": 60 },
-    { "id": "BCLK", "description": "Bit Clock", "x": 26, "y": 60 },
-    { "id": "DOUT", "description": "Serial Data Output", "x": 34, "y": 60 },
-    { "id": "LRCL", "description": "Left/Right Clock", "x": 42, "y": 60 },
-    { "id": "SEL", "description": "Channel Select", "x": 50, "y": 60 }
+    { "id": "3V", "description": "Power (1.62V to 3.6V)", "x": 7.5, "y": 54 },
+    { "id": "GND", "description": "Ground", "x": 22.5, "y": 54 },
+    { "id": "BCLK", "description": "Bit Clock", "x": 37.5, "y": 54 },
+    { "id": "DOUT", "description": "Serial Data Output", "x": 52.5, "y": 54 },
+    { "id": "LRCL", "description": "Left/Right Clock", "x": 67.5, "y": 54 },
+    { "id": "SEL", "description": "Channel Select", "x": 82.5, "y": 54 }
   ],
   "state": {
     "liveMicEnabled": true,
