@@ -1,95 +1,129 @@
-import React, { useRef, useLayoutEffect, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 
 // Bounding box for the blue selection ring.
-// x, y: offset from comp.x/comp.y (top-left corner of the visual area)
-// w, h: width and height of the visual area
-export const BOUNDS = { x: 0, y: 0, w: 112.5, h: 112.5 };
+// 120x120 is exactly 8x8 grid cells (15px each).
+export const BOUNDS = { x: 0, y: 0, w: 120, h: 120 };
+
+const knobCenter = { x: 9.91, y: 8.18 };
 
 export const PotentiometerUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning: boolean }) => {
-    const elRef = useRef<any>(null);
-
-    const nativeW = 75;
-    const nativeH = 75;
-    const scaleX = BOUNDS.w / nativeW;
-    const scaleY = BOUNDS.h / nativeH;
-
-    const isDraggingRef = useRef(false);
-
-    const { value: attrValue, onInteract, ...restAttrs } = attrs;
+    const { value: attrValue, onInteract } = attrs;
+    
+    // Value from 0 to 100
     const simValue = state?.value ?? attrValue ?? 50;
 
-    useLayoutEffect(() => {
-        if (elRef.current && !isDraggingRef.current) {
-            elRef.current.value = simValue;
-        }
-    }, [simValue]);
+    const min = 0;
+    const max = 100;
+    const startDegree = -135;
+    const endDegree = 135;
+
+    const percent = Math.max(0, Math.min(1, (simValue - min) / (max - min)));
+    const knobDeg = (endDegree - startDegree) * percent + startDegree;
+
+    const svgRef = useRef<SVGSVGElement>(null);
+    const isDragging = useRef(false);
 
     useEffect(() => {
         const handleGlobalUp = () => {
-            isDraggingRef.current = false;
+            isDragging.current = false;
+        };
+        const handleGlobalMove = (e: PointerEvent) => {
+            if (!isDragging.current || !isRunning) return;
+            updateValueFromEvent(e);
         };
         window.addEventListener('pointerup', handleGlobalUp);
         window.addEventListener('pointercancel', handleGlobalUp);
+        window.addEventListener('pointermove', handleGlobalMove);
         return () => {
             window.removeEventListener('pointerup', handleGlobalUp);
             window.removeEventListener('pointercancel', handleGlobalUp);
+            window.removeEventListener('pointermove', handleGlobalMove);
         };
-    }, []);
+    }, [isRunning, onInteract]);
 
-    useLayoutEffect(() => {
-        const el = elRef.current;
-        if (!el) return;
+    const updateValueFromEvent = (e: React.PointerEvent | PointerEvent) => {
+        if (!svgRef.current) return;
+        
+        const rect = svgRef.current.getBoundingClientRect();
+        const localX = ((e.clientX - rect.left) / rect.width) * 20;
+        const localY = ((e.clientY - rect.top) / rect.height) * 20;
+        
+        const x = knobCenter.x - localX;
+        const y = knobCenter.y - localY;
+        
+        let deg = Math.round((Math.atan2(y, x) * 180) / Math.PI);
+        if (deg < 0) deg += 360;
+        deg -= 90;
+        
+        if (x > 0 && y <= 0 && deg > 0) {
+            deg -= 360;
+        }
 
-        const handleInput = (e: any) => {
-            if (onInteract) {
-                let val = undefined;
-                if (typeof e.detail === 'number') val = e.detail;
-                else if (e.detail && e.detail.value !== undefined) val = e.detail.value;
-                else if (e.target && e.target.value !== undefined) val = e.target.value;
-                else if (e.target && e.target.percent !== undefined) val = e.target.percent;
+        deg = Math.max(startDegree, Math.min(endDegree, deg));
+        const newPercent = (deg - startDegree) / (endDegree - startDegree);
+        const newValue = Math.round(newPercent * (max - min) + min);
 
-                if (val !== undefined) {
-                    onInteract({ type: 'input', value: Number(val) });
-                }
-            }
-        };
+        if (onInteract) {
+            onInteract({ type: 'input', value: newValue });
+        }
+    };
 
-        el.addEventListener('input', handleInput);
-        el.addEventListener('change', handleInput);
-        return () => {
-            el.removeEventListener('input', handleInput);
-            el.removeEventListener('change', handleInput);
-        };
-    }, [onInteract]);
+    const handlePointerDown = (e: React.PointerEvent) => {
+        if (!isRunning) return;
+        e.stopPropagation();
+        (e.target as Element).setPointerCapture(e.pointerId);
+        isDragging.current = true;
+        updateValueFromEvent(e);
+    };
 
     return (
         <div style={{ 
-            pointerEvents: 'none',
+            pointerEvents: isRunning ? 'auto' : 'none',
             width: BOUNDS.w,
             height: BOUNDS.h,
             position: 'relative',
-            overflow: 'visible'
-        }}>
-            {React.createElement('wokwi-potentiometer', {
-                ref: elRef,
-                ...restAttrs,
-                style: { 
-                    ...attrs.style, 
-                    display: 'block',
-                    width: nativeW,
-                    height: nativeH,
-                    transform: `scale(${scaleX}, ${scaleY})`,
-                    transformOrigin: '0 0',
-                    pointerEvents: isRunning ? 'auto' : 'none'
-                },
-                onMouseDown: (e: any) => { if (isRunning) e.stopPropagation(); },
-                onPointerDown: (e: any) => {
-                    if (!isRunning) return;
-                    isDraggingRef.current = true;
-                    e.stopPropagation();
-                },
-                onDoubleClick: (e: any) => { if (isRunning) e.stopPropagation(); },
-            })}
+            overflow: 'visible',
+            touchAction: 'none'
+        }}
+        onPointerDown={handlePointerDown}
+        >
+            <svg
+                ref={svgRef}
+                width="100%"
+                height="100%"
+                viewBox="0 0 20 20"
+                style={{ fontFamily: 'sans-serif', userSelect: 'none' }}
+            >
+                <rect x=".15" y=".15" width="19.5" height="19.5" rx="1.23" fill="#045881" stroke="#045881" strokeWidth=".30" />
+                <rect x="5.4" y=".70" width="9.1" height="1.9" fill="#ccdae3" strokeWidth=".15" />
+                
+                <ellipse cx={knobCenter.x} cy={knobCenter.y} rx="7.27" ry="7.43" fill="#e4e8eb" strokeWidth=".15" />
+                
+                {/* Pins and Labels - Shifted to x=7.5, 10, 12.5 to exactly match 15px intervals at scale 6 */}
+                <rect x="6" y="17" width="8" height="2" fillOpacity="0" stroke="#fff" strokeWidth=".30" />
+                <g strokeWidth=".15" fill="#ffffff" style={{ fontSize: '1px', lineHeight: '1.25' }}>
+                    <text x="5.8" y="16.6">GND</text>
+                    <text x="8.8" y="16.6">SIG</text>
+                    <text x="11.5" y="16.6">VCC</text>
+                </g>
+                <g fill="#fff" strokeWidth=".15">
+                    <ellipse cx="1.68" cy="1.81" rx=".99" ry=".96" />
+                    <ellipse cx="1.48" cy="18.37" rx=".99" ry=".96" />
+                    <ellipse cx="17.97" cy="18.47" rx=".99" ry=".96" />
+                    <ellipse cx="18.07" cy="1.91" rx=".99" ry=".96" />
+                </g>
+                <g fill="#b3b1b0" strokeWidth=".15">
+                    <ellipse cx="7.5" cy="18" rx=".61" ry=".63" />
+                    <ellipse cx="10" cy="18" rx=".61" ry=".63" />
+                    <ellipse cx="12.5" cy="18" rx=".61" ry=".63" />
+                </g>
+
+                {/* Rotating Knob */}
+                <g style={{ transformOrigin: `${knobCenter.x}px ${knobCenter.y}px`, transform: `rotate(${knobDeg}deg)` }}>
+                    <ellipse cx="9.95" cy="8.06" rx="6.60" ry="6.58" fill="#c3c2c3" strokeWidth=".15" />
+                    <rect x="10" y="2" width=".42" height="3.1" strokeWidth=".15" />
+                </g>
+            </svg>
         </div>
     );
 };

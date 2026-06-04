@@ -3,8 +3,8 @@
     "label": "Rain Sensor Pad",
     "description": "Raindrop sensing pad — resistive PCB that detects water. Wire AOUT to the Raindrop Module's PAD+ pin.",
     "group": "Sensors",
-    "w": 247,
-    "h": 167,
+    "w": 300,
+    "h": 225,
     "attrs": {},
     "pins": [
         {
@@ -13,7 +13,7 @@
             "type": "analog",
             "description": "Analog signal output (wire to Raindrop Module PAD+)",
             "x": 240,
-            "y": 78
+            "y": 75
         },
         {
             "id": "GND",

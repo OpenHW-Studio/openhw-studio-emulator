@@ -3,8 +3,8 @@
     "label": "Rotary Potentiometer",
     "description": "Rotary potentiometer (variable resistor). Outputs an analog voltage proportional to the knob's rotation angle. Use with analogRead() on an Arduino analog pin.",
     "group": "Sensors",
-    "w": 112.5,
-    "h": 112.5,
+    "w": 120,
+    "h": 120,
     "attrs": {
         "value": "50",
         "breadboard": {
@@ -20,22 +20,22 @@
     "pins": [
         {
             "id": "1",
-            "x": 44,
-            "y": 102,
+            "x": 45,
+            "y": 108,
             "type": "power",
             "description": "GND"
         },
         {
             "id": "SIG",
-            "x": 59,
-            "y": 102,
+            "x": 60,
+            "y": 108,
             "type": "analog",
             "description": "SIG"
         },
         {
             "id": "2",
-            "x": 74,
-            "y": 102,
+            "x": 75,
+            "y": 108,
             "type": "power",
             "description": "VCC"
         }
