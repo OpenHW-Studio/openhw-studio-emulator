@@ -3,45 +3,15 @@
     "label": "Analog Joystick",
     "description": "2-axis analog joystick with push button",
     "group": "Sensors",
-    "w": 84,
-    "h": 84,
+    "w": 102.81,
+    "h": 120.19,
     "attrs": {},
     "pins": [
-        {
-            "id": "GND",
-            "x": 10,
-            "y": 84,
-            "type": "power",
-            "description": "Ground"
-        },
-        {
-            "id": "5V",
-            "x": 25,
-            "y": 84,
-            "type": "power",
-            "description": "5V Power"
-        },
-        {
-            "id": "VRX",
-            "x": 40,
-            "y": 84,
-            "type": "analog",
-            "description": "X-axis output"
-        },
-        {
-            "id": "VRY",
-            "x": 55,
-            "y": 84,
-            "type": "analog",
-            "description": "Y-axis output"
-        },
-        {
-            "id": "SW",
-            "x": 70.1,
-            "y": 84,
-            "type": "digital",
-            "description": "Switch"
-        }
+        { "id": "VCC",  "x": 33.0, "y": 115.8, "type": "power",   "description": "5V Power" },
+        { "id": "VERT", "x": 42.6, "y": 115.8, "type": "analog",  "description": "Y-axis output (Vertical)" },
+        { "id": "HORZ", "x": 52.2, "y": 115.8, "type": "analog",  "description": "X-axis output (Horizontal)" },
+        { "id": "SEL",  "x": 61.8, "y": 115.8, "type": "digital", "description": "Switch" },
+        { "id": "GND",  "x": 71.4, "y": 115.8, "type": "power",   "description": "Ground" }
     ],
     "telemetry": {
       "template": "X=${state.x}, Y=${state.y}, Pressed=${state.pressed}",
@@ -50,10 +20,10 @@
     "autowiring": {
       "connections": [
         { "from": "GND", "to": "arduino:GND" },
-        { "from": "5V", "to": "arduino:5V" },
-        { "from": "VRX", "to": "arduino:A0" },
-        { "from": "VRY", "to": "arduino:A1" },
-        { "from": "SW", "to": "arduino:2" }
+        { "from": "VCC", "to": "arduino:5V" },
+        { "from": "VERT", "to": "arduino:A0" },
+        { "from": "HORZ", "to": "arduino:A1" },
+        { "from": "SEL", "to": "arduino:2" }
       ]
     },
     "autocoding": {

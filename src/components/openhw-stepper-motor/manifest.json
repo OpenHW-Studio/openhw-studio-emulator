@@ -2,34 +2,34 @@
     "type": "openhw-stepper-motor",
     "label": "Stepper Motor (Bipolar)",
     "group": "Actuators",
-    "w": 75,
-    "h": 75,
+    "w": 220.37,
+    "h": 235.49,
     "attrs": {
         "step_angle": "1.8"
     },
     "pins": [
         {
-            "id": "A+",
-            "x": 15,
-            "y": 75,
+            "id": "A-",
+            "x": 95.12,
+            "y": 235.49,
             "type": "digital"
         },
         {
-            "id": "A-",
-            "x": 30,
-            "y": 75,
+            "id": "A+",
+            "x": 104.72,
+            "y": 235.49,
             "type": "digital"
         },
         {
             "id": "B+",
-            "x": 45,
-            "y": 75,
+            "x": 114.32,
+            "y": 235.49,
             "type": "digital"
         },
         {
             "id": "B-",
-            "x": 60,
-            "y": 75,
+            "x": 123.93,
+            "y": 235.49,
             "type": "digital"
         }
     ],

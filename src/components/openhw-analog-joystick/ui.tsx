@@ -1,10 +1,9 @@
 import React, { useState, useRef } from 'react';
 
-// Bounding box for the blue selection ring.
-export const BOUNDS = { x: 0, y: 0, w: 84, h: 84 };
+// Bounding box scaled by ~3.78 to match Wokwi visual size from 27.2x31.8 SVG
+export const BOUNDS = { x: 0, y: 0, w: 102.8, h: 120.2 };
 
 export const JoystickUI = ({ state, attrs, isRunning, comp }: { state: any, attrs: any, isRunning: boolean, comp?: any }) => {
-    const handleRef = useRef<SVGCircleElement>(null);
     const [localState, setLocalState] = useState({ x: 0.5, y: 0.5, pressed: false });
 
     // Use simulated state if running, else local component state
@@ -14,12 +13,6 @@ export const JoystickUI = ({ state, attrs, isRunning, comp }: { state: any, attr
     const currentX = isDraggingRef.current || isArrowHoldingRef.current ? localState.x : (isRunning && state?.x !== undefined ? state.x : localState.x);
     const currentY = isDraggingRef.current || isArrowHoldingRef.current ? localState.y : (isRunning && state?.y !== undefined ? state.y : localState.y);
     const isPressed = isDraggingRef.current || isArrowHoldingRef.current ? localState.pressed : (isRunning && state?.pressed !== undefined ? state.pressed : localState.pressed);
-
-    // Map 0..1 to UI coordinates
-    // Center is 30,30. Movement radius is ~15.
-
-    const nativeW = 84;
-    const nativeH = 84;
 
     const updatePosition = (e: React.PointerEvent) => {
         const rect = (e.currentTarget as SVGElement).getBoundingClientRect();
@@ -72,62 +65,11 @@ export const JoystickUI = ({ state, attrs, isRunning, comp }: { state: any, attr
         setLocalState({ x: 0.5, y: 0.5, pressed: false });
     };
 
-    const handleArrowDown = (e: React.PointerEvent | React.MouseEvent, nx: number, ny: number) => {
-        if (!isRunning) return;
-        e.stopPropagation();
-        try { if ('pointerId' in e) (e.target as any).setPointerCapture((e as React.PointerEvent).pointerId); } catch (err) { }
-
-        isArrowHoldingRef.current = true;
-        if (attrs.onInteract) attrs.onInteract({ type: 'move', x: nx, y: ny });
-        setLocalState((prev: any) => ({ ...prev, x: nx, y: ny }));
-    };
-
-    const handleArrowUp = (e: React.PointerEvent | React.MouseEvent) => {
-        if (!isRunning) return;
-        e.stopPropagation();
-        try { if ('pointerId' in e) (e.target as any).releasePointerCapture((e as React.PointerEvent).pointerId); } catch (err) { }
-
-        isArrowHoldingRef.current = false;
-        if (attrs.onInteract) attrs.onInteract({ type: 'move', x: 0.5, y: 0.5 });
-        setLocalState((prev: any) => ({ ...prev, x: 0.5, y: 0.5 }));
-    };
-
-    const Arrow = ({ d, nx, ny, hx, hy, hw, hh }: { d: string, nx: number, ny: number, hx: number, hy: number, hw: number, hh: number }) => (
-        <g>
-            <rect
-                x={hx} y={hy} width={hw} height={hh}
-                fill="#ffffff" opacity={0.01} stroke="none"
-                style={{ cursor: isRunning ? 'pointer' : 'default', pointerEvents: 'all' }}
-                onPointerDown={(e: React.PointerEvent) => handleArrowDown(e, nx, ny)}
-                onPointerUp={handleArrowUp}
-                onPointerCancel={handleArrowUp}
-                onPointerLeave={(e: React.PointerEvent) => {
-                    if (isArrowHoldingRef.current && (e.target as any).hasPointerCapture && (e.target as any).hasPointerCapture(e.pointerId)) {
-                        // Do nothing if it captured
-                    } else if (!isArrowHoldingRef.current) {
-                        // Do nothing
-                    } else {
-                        handleArrowUp(e)
-                    }
-                }}
-                onMouseDown={e => {
-                    if (isRunning) e.stopPropagation();
-                }}
-            />
-            <path
-                d={d}
-                fill="#7f8c8d"
-                stroke="#2c3e50"
-                strokeWidth={0.5}
-                style={{ opacity: 0.6, pointerEvents: 'none' }}
-            />
-        </g>
-    );
-
-    // Map 0..1 to UI coordinates
-    // Center is 42,42. Movement radius is ~20.
-    const cx = 42 + (currentX - 0.5) * 42;
-    const cy = 42 + (currentY - 0.5) * 42;
+    // Calculate translation for the knob. Wokwi maps -1 to 1 value to translation of 2.5
+    // our currentX/currentY is 0 to 1, where 0 is left/top, 1 is right/bottom.
+    // So dx = (currentX - 0.5) * 5 (which maps to -2.5 to 2.5)
+    const dx = (currentX - 0.5) * 5;
+    const dy = (currentY - 0.5) * 5;
 
     return (
         <div style={{
@@ -137,9 +79,9 @@ export const JoystickUI = ({ state, attrs, isRunning, comp }: { state: any, attr
             position: 'relative'
         }}>
             <svg
-                width={nativeW}
-                height={nativeH}
-                viewBox="0 0 84 84"
+                width="100%"
+                height="100%"
+                viewBox="0 0 27.2 31.8"
                 style={{ 
                     display: 'block', 
                     overflow: 'visible', 
@@ -154,45 +96,97 @@ export const JoystickUI = ({ state, attrs, isRunning, comp }: { state: any, attr
                 onPointerCancel={handlePointerUp}
                 onContextMenu={e => { if (isRunning) e.preventDefault(); }} // Prevent context menu if running
             >
-            {/* Base */}
-            <rect x={2} y={2} width={80} height={80} rx={12} fill="#2c3e50" stroke="#1a252f" strokeWidth={2} />
-            <circle cx={42} cy={42} r={32} fill="#34495e" stroke="#2c3e50" strokeWidth={2} />
-
-            {/* D-Pad Arrows with large hitboxes */}
-            <Arrow d="M 38 20 L 42 12 L 46 20 Z" nx={0.5} ny={0.0} hx={30} hy={8} hw={24} hh={14} />
-            <Arrow d="M 38 64 L 42 72 L 46 64 Z" nx={0.5} ny={1.0} hx={30} hy={60} hw={24} hh={14} />
-            <Arrow d="M 20 38 L 12 42 L 20 46 Z" nx={0.0} ny={0.5} hx={8} hy={30} hw={14} hh={24} />
-            <Arrow d="M 64 38 L 72 42 L 64 46 Z" nx={1.0} ny={0.5} hx={60} hy={30} hw={14} hh={24} />
-
-            {/* Pins at 10, 25, 40, 55, 70 matching manifest */}
-            {[10, 25, 40, 55, 70].map((px, i) => (
-                <g key={i}>
-                    <line x1={px} y1={80} x2={px} y2={84} stroke="#f1c40f" strokeWidth={2} />
-                    <circle cx={px} cy={84} r={1.5} fill="#f1c40f" />
+                <defs>
+                    <filter id={`noise-${comp?.id || 'default'}`} primitiveUnits="objectBoundingBox">
+                        <feTurbulence baseFrequency="2 2" type="fractalNoise" />
+                        <feColorMatrix
+                            values=".1 0 0 0 .1
+                                    .1 0 0 0 .1
+                                    .1 0 0 0 .1
+                                    0 0 0 0 1"
+                        />
+                        <feComposite in2="SourceGraphic" operator="lighter" />
+                        <feComposite result="body" in2="SourceAlpha" operator="in" />
+                    </filter>
+                    <radialGradient id={`g-knob-${comp?.id || 'default'}`} cx="13.6" cy="13.6" r="10.6" gradientUnits="userSpaceOnUse">
+                        <stop offset="0" />
+                        <stop offset="0.9" />
+                        <stop stopColor="#777" offset="1" />
+                    </radialGradient>
+                    <radialGradient
+                        id={`g-knob-base-${comp?.id || 'default'}`}
+                        cx="13.6"
+                        cy="13.6"
+                        r="13.6"
+                        gradientUnits="userSpaceOnUse"
+                    >
+                        <stop offset="0" />
+                        <stop stopColor="#444" offset=".8" />
+                        <stop stopColor="#555" offset=".9" />
+                        <stop offset="1" />
+                    </radialGradient>
+                    <path
+                        id={`pin-${comp?.id || 'default'}`}
+                        fill="silver"
+                        stroke="#a2a2a2"
+                        strokeWidth=".024"
+                        d="M8.726 29.801a.828.828 0 00-.828.829.828.828 0 00.828.828.828.828 0 00.829-.828.828.828 0 00-.829-.829zm-.004.34a.49.49 0 01.004 0 .49.49 0 01.49.489.49.49 0 01-.49.49.49.49 0 01-.489-.49.49.49 0 01.485-.49z"
+                    />
+                </defs>
+                <path
+                    d="M1.3 0v31.7h25.5V0zm2.33.683a1.87 1.87 0 01.009 0 1.87 1.87 0 011.87 1.87 1.87 1.87 0 01-1.87 1.87 1.87 1.87 0 01-1.87-1.87 1.87 1.87 0 011.87-1.87zm20.5 0a1.87 1.87 0 01.009 0 1.87 1.87 0 011.87 1.87 1.87 1.87 0 01-1.87 1.87 1.87 1.87 0 01-1.87-1.87 1.87 1.87 0 011.87-1.87zm-20.5 26.8a1.87 1.87 0 01.009 0 1.87 1.87 0 011.87 1.87 1.87 1.87 0 01-1.87 1.87 1.87 1.87 0 01-1.87-1.87 1.87 1.87 0 011.87-1.87zm20.4 0a1.87 1.87 0 01.009 0 1.87 1.87 0 011.87 1.87 1.87 1.87 0 01-1.87 1.87 1.87 1.87 0 01-1.87-1.87 1.87 1.87 0 011.87-1.87zm-12.7 2.66a.489.489 0 01.004 0 .489.489 0 01.489.489.489.489 0 01-.489.489.489.489 0 01-.489-.489.489.489 0 01.485-.489zm2.57 0a.489.489 0 01.004 0 .489.489 0 01.489.489.489.489 0 01-.489.489.489.489 0 01-.489-.489.489.489 0 01.485-.489zm2.49.013a.489.489 0 01.004 0 .489.489 0 01.489.489.489.489 0 01-.489.489.489.489 0 01-.489-.489.489.489 0 01.485-.489zm-7.62.007a.489.489 0 01.004 0 .489.489 0 01.489.489.489.489 0 01-.489.489.489.489 0 01-.489-.49.489.489 0 01.485-.488zm10.2.013a.489.489 0 01.004 0 .489.489 0 01.489.489.489.489 0 01-.489.489.489.489 0 01-.489-.49.489.489 0 01.485-.488z"
+                    fill="#bd1e34"
+                />
+                <g fill="#fff" fontFamily="sans-serif" strokeWidth=".03">
+                    <text textAnchor="middle" fontSize="1.2" letterSpacing=".053">
+                        <tspan x="4.034" y="25.643">Analog</tspan>
+                        <tspan x="4.061" y="27.159">Joystick</tspan>
+                    </text>
+                    <text transform="rotate(-90)" textAnchor="start" fontSize="1.2">
+                        <tspan x="-29.2" y="9.2">VCC</tspan>
+                        <tspan x="-29.2" y="11.74">VERT</tspan>
+                        <tspan x="-29.2" y="14.28">HORZ</tspan>
+                        <tspan x="-29.2" y="16.82">SEL</tspan>
+                        <tspan x="-29.2" y="19.36">GND</tspan>
+                    </text>
                 </g>
-            ))}
-            <text x={10} y={78} fontSize={4} fill="#ecf0f1" textAnchor="middle">GND</text>
-            <text x={25} y={78} fontSize={4} fill="#ecf0f1" textAnchor="middle">5V</text>
-            <text x={40} y={78} fontSize={4} fill="#ecf0f1" textAnchor="middle">VRX</text>
-            <text x={55} y={78} fontSize={4} fill="#ecf0f1" textAnchor="middle">VRY</text>
-            <text x={70} y={78} fontSize={4} fill="#ecf0f1" textAnchor="middle">SW</text>
+                <ellipse cx="13.6" cy="13.7" rx="13.6" ry="13.7" fill={`url(#g-knob-base-${comp?.id || 'default'})`} />
+                <path
+                    d="M48.2 65.5s.042.179-.093.204c-.094.017-.246-.077-.322-.17-.094-.115-.082-.205-.009-.285.11-.122.299-.075.299-.075s-.345-.303-.705-.054c-.32.22-.228.52.06.783.262.237.053.497-.21.463-.18-.023-.252-.167-.21-.256.038-.076.167-.122.167-.122s-.149-.06-.324.005c-.157.06-.286.19-.276.513v1.51s.162-.2.352-.403c.214-.229.311-.384.53-.366.415.026.714-.159.918-.454.391-.569.085-1.2-.178-1.29"
+                    fill="#fff"
+                />
+                
+                {/* Visual Feedback for press (scale down slightly) and drag (translate dx, dy) */}
+                <g transform={`translate(${dx}, ${dy}) scale(${isPressed ? 0.95 : 1})`} style={{ transformOrigin: '13.6px 13.6px' }}>
+                    <circle
+                        cx="13.6"
+                        cy="13.6"
+                        r="10.6"
+                        fill={`url(#g-knob-${comp?.id || 'default'})`}
+                        filter={`url(#noise-${comp?.id || 'default'})`}
+                    />
+                    {isPressed && (
+                        <circle cx="13.6" cy="13.6" r="10.6" fill="#fff" opacity="0.1" pointerEvents="none" />
+                    )}
+                </g>
 
-            {/* Handle / Stick */}
-            <circle
-                ref={handleRef}
-                cx={cx}
-                cy={cy}
-                r={18}
-                fill={isPressed ? "#c0392b" : "#e74c3c"}
-                stroke="#c0392b"
-                strokeWidth={2}
-                style={{
-                    transition: (currentX === 0.5 && currentY === 0.5) ? 'all 0.15s ease-out' : 'none'
-                }}
-            />
-            {/* Inner shading for the stick */}
-            <circle cx={cx - 4} cy={cy - 4} r={6} fill="#ffffff" opacity={0.3} style={{ pointerEvents: 'none' }} />
-        </svg>
-    </div>
+                <g fill="none" stroke="#fff" strokeWidth=".142">
+                    <path
+                        d="M7.8 31.7l-.383-.351v-1.31l.617-.656h1.19l.721.656.675-.656h1.18l.708.656.662-.656h1.25l.643.656.63-.656h1.21l.695.656.636-.656h1.17l.753.656v1.3l-.416.39"
+                    />
+                    <path
+                        d="M9.5 31.7l.381-.344.381.331M12.1 31.7l.381-.344.381.331M14.7 31.7l.381-.344.381.331M17.2 31.7l.381-.344.381.331"
+                        strokeLinecap="square"
+                        strokeLinejoin="bevel"
+                    />
+                </g>
+
+                <use href={`#pin-${comp?.id || 'default'}`} x="0" />
+                <use href={`#pin-${comp?.id || 'default'}`} x="2.54" />
+                <use href={`#pin-${comp?.id || 'default'}`} x="5.08" />
+                <use href={`#pin-${comp?.id || 'default'}`} x="7.62" />
+                <use href={`#pin-${comp?.id || 'default'}`} x="10.16" />
+            </svg>
+        </div>
     );
 };

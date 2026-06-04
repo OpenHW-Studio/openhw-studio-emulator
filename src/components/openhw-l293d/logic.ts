@@ -19,6 +19,22 @@ export class L293DLogic extends BaseComponent {
         }
         data.lastState = isHigh;
         data.lastCycle = cpuCycles;
+
+        // Immediate logic propagation to support fast-switching inputs (like Stepper motors)
+        // This prevents aliasing of fast pulses between update() cycles
+        if (pinId === 'IN1' || pinId === 'IN2') {
+            const en12 = this.getPinVoltage('EN1,2');
+            if (en12 > 0.5) { // If enabled
+                if (pinId === 'IN1') this.setPinVoltage('OUT1', isHigh ? en12 : 0);
+                if (pinId === 'IN2') this.setPinVoltage('OUT2', isHigh ? en12 : 0);
+            }
+        } else if (pinId === 'IN3' || pinId === 'IN4') {
+            const en34 = this.getPinVoltage('EN3,4');
+            if (en34 > 0.5) { // If enabled
+                if (pinId === 'IN3') this.setPinVoltage('OUT3', isHigh ? en34 : 0);
+                if (pinId === 'IN4') this.setPinVoltage('OUT4', isHigh ? en34 : 0);
+            }
+        }
     }
 
     private getAverageVoltage(pinId: string, currentCycles: number, elapsedCycles: number): number {
