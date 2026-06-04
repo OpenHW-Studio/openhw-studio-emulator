@@ -3,8 +3,8 @@
     "label": "MicroSD Card",
     "description": "SPI microSD card module with virtual storage backed by an in-memory filesystem and optional littlefs-wasm runtime.",
     "group": "Memory",
-    "w": 152,
-    "h": 101.3,
+    "w": 135,
+    "h": 120,
     "attrs": {
         "mounted": "true",
         "capacityKB": "2048"
@@ -21,46 +21,53 @@
     },
     "pins": [
         {
-            "id": "VCC",
-            "x": 14.5,
-            "y": 101.3,
-            "type": "power",
-            "description": "Power"
+            "id": "CD",
+            "x": 120,
+            "y": 15,
+            "type": "digital",
+            "description": "Card Detect"
+        },
+        {
+            "id": "MISO",
+            "x": 120,
+            "y": 30,
+            "type": "digital",
+            "description": "Master In / Slave Out (DO)"
         },
         {
             "id": "GND",
-            "x": 29.8,
-            "y": 101.3,
+            "x": 120,
+            "y": 45,
             "type": "power",
             "description": "Ground"
         },
         {
-            "id": "CS",
-            "x": 44.5,
-            "y": 101.3,
-            "type": "digital",
-            "description": "Chip Select (active low)"
-        },
-        {
             "id": "SCK",
-            "x": 88.9,
-            "y": 101.3,
+            "x": 120,
+            "y": 60,
             "type": "digital",
             "description": "SPI Clock"
         },
         {
-            "id": "MOSI",
-            "x": 104.6,
-            "y": 101.3,
-            "type": "digital",
-            "description": "Master Out / Slave In"
+            "id": "VCC",
+            "x": 120,
+            "y": 75,
+            "type": "power",
+            "description": "Power"
         },
         {
-            "id": "MISO",
-            "x": 120.3,
-            "y": 101.3,
+            "id": "MOSI",
+            "x": 120,
+            "y": 90,
             "type": "digital",
-            "description": "Master In / Slave Out"
+            "description": "Master Out / Slave In (DI)"
+        },
+        {
+            "id": "CS",
+            "x": 120,
+            "y": 105,
+            "type": "digital",
+            "description": "Chip Select (active low)"
         }
     ],
     "autowiring": {
