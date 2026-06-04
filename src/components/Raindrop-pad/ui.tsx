@@ -1,9 +1,9 @@
-export const BOUNDS = { x: 0, y: 0, w: 240, h: 167 };
+export const BOUNDS = { x: 0, y: 0, w: 300, h: 225 };
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import padImage from './RainDropPad.png';
 
-const W = 300, H = 220;
+const W = 300, H = 225;
 type CloudMode = 'dry' | 'heavy';
 
 const RainStreak = ({ x, delay, dur, length }: { x: number; delay: number; dur: number; length: number }) => (
