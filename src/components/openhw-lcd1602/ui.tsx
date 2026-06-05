@@ -5,11 +5,6 @@ export const BOUNDS = { x: 0, y: 0, w: 315, h: 135 };
 export const Lcd1602UI = ({ state, attrs }: { state: any, attrs: any }) => {
     const lcdRef = useRef<any>(null);
 
-    const nativeW = 210;
-    const nativeH = 90;
-    const scaleX = BOUNDS.w / nativeW;
-    const scaleY = BOUNDS.h / nativeH;
-
     useEffect(() => {
         if (lcdRef.current && state) {
             const lines = state.lines || ["", ""];
@@ -20,27 +15,48 @@ export const Lcd1602UI = ({ state, attrs }: { state: any, attrs: any }) => {
         }
     }, [state]);
 
+    const pinLabels = ["VSS", "VDD", "V0", "RS", "RW", "E", "D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "A", "K"];
+
     return (
         <div style={{ 
             position: 'relative', 
             width: BOUNDS.w, 
             height: BOUNDS.h, 
-            pointerEvents: 'none',
-            overflow: 'visible'
+            pointerEvents: 'none'
         }}>
             <wokwi-lcd1602
                 ref={lcdRef}
+                pins="none"
                 color={attrs?.color || 'blue'}
                 style={{ 
                     display: 'block',
-                    width: nativeW,
-                    height: nativeH,
-                    transform: `translateY(7px) scale(${scaleX}, ${scaleY})`,
-                    transformOrigin: '0 0',
+                    width: '100%',
+                    height: '100%',
                     pointerEvents: 'none'
                 }}
                 {...attrs}
             />
+            {/* Custom SVG Pins Overlay */}
+            <svg style={{ position: 'absolute', top: 0, left: 0 }} width={BOUNDS.w} height={BOUNDS.h}>
+                {pinLabels.map((id, index) => {
+                    const cx = 45 + index * 15;
+                    const cy = 15;
+                    return (
+                        <g key={id}>
+                            {/* Pin hole graphic */}
+                            <circle cx={cx} cy={cy} r="4" fill="#92926d" />
+                            <circle cx={cx} cy={cy} r="2" fill="#000000" />
+                            {/* Label */}
+                            <text x={cx} y={cy - 6} fill="#ffffff" fontSize="7" fontFamily="monospace" textAnchor="middle" fontWeight="bold">
+                                {id}
+                            </text>
+                            {/* Pin index */}
+                            {index === 0 && <text x={cx - 10} y={cy + 3} fill="#ffffff" fontSize="8" fontFamily="monospace" textAnchor="middle" fontWeight="bold">1</text>}
+                            {index === 15 && <text x={cx + 12} y={cy + 3} fill="#ffffff" fontSize="8" fontFamily="monospace" textAnchor="middle" fontWeight="bold">16</text>}
+                        </g>
+                    );
+                })}
+            </svg>
         </div>
     );
 };

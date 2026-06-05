@@ -2,8 +2,8 @@
   "type": "openhw-lcd2004-i2c",
   "label": "LCD 2004 (I2C)",
   "group": "Displays",
-  "w": 555,
-  "h": 285,
+  "w": 375,
+  "h": 225,
   "attrs": {
     "i2cAddress": "0x27",
     "color": "blue",
