@@ -1,14 +1,12 @@
-import manifest from './manifest.json';
-import { Lcd2004I2CUI, BOUNDS } from './ui';
-import { Lcd2004I2CLogic } from './logic';
-import { validation } from './validation';
-import { doc } from './doc';
+import { BaseComponent } from '../BaseComponent';
+import { Lcd2004I2CUI } from './ui';
 
-export default {
-    manifest,
-    UI: Lcd2004I2CUI,
-    BOUNDS,
-    LogicClass: Lcd2004I2CLogic,
-    validation,
-    doc: doc
-};
+export default class OpenHWLcd2004I2C extends BaseComponent {
+    constructor() {
+        super(require('./manifest.json'));
+    }
+
+    getUI() {
+        return Lcd2004I2CUI;
+    }
+}

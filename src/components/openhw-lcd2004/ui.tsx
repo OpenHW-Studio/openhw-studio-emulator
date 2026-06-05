@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 360, h: 195 };
+export const BOUNDS = { x: 0, y: 0, w: 375, h: 195 };
 
 export const Lcd2004UI = ({ state, attrs }: { state: any, attrs: any }) => {
     const lcdRef = useRef<any>(null);
@@ -41,7 +41,7 @@ export const Lcd2004UI = ({ state, attrs }: { state: any, attrs: any }) => {
             {/* Custom SVG Pins Overlay */}
             <svg style={{ position: 'absolute', top: 0, left: 0 }} width={BOUNDS.w} height={BOUNDS.h}>
                 {pinLabels.map((id, index) => {
-                    const cx = 45 + index * 15;
+                    const cx = 75 + index * 15;
                     const cy = 15;
                     return (
                         <g key={id}>
