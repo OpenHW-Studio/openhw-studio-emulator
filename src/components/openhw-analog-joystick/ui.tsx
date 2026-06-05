@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 
 // Bounding box scaled by ~3.78 to match Wokwi visual size from 27.2x31.8 SVG
-export const BOUNDS = { x: 0, y: 0, w: 102.8, h: 120.2 };
+export const BOUNDS = { x: 0, y: 0, w: 237.4, h: 277.5 };
 
 export const JoystickUI = ({ state, attrs, isRunning, comp }: { state: any, attrs: any, isRunning: boolean, comp?: any }) => {
     const [localState, setLocalState] = useState({ x: 0.5, y: 0.5, pressed: false });

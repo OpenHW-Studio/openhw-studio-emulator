@@ -13,7 +13,7 @@ export const PushbuttonContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdat
     const current = attrs?.color ?? 'green';
     return (
         <>
-            <span style={{ fontSize: 12, color: 'var(--text2)' }}>Color:</span>
+            <span style={{ fontSize: 12, color: 'var(--text2)' }}>Button Color:</span>
             <select
                 value={current}
                 onChange={e => onUpdate('color', e.target.value)}
@@ -27,152 +27,97 @@ export const PushbuttonContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdat
     );
 };
 
-// Bounding box for the blue selection ring.
-// x, y: offset from comp.x/comp.y (top-left corner of the visual area)
-// w, h: width and height of the visual area
-export const BOUNDS = { x: 0, y: 0, w: 68, h: 44 };
+// Aligned to breadboard: Width 68, Height 135 (bridges Row E to Row F)
+export const BOUNDS = { x: 0, y: 0, w: 68, h: 135 };
 
 export const PushbuttonUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning: boolean }) => {
     const [buttonElement, setButtonElement] = useState<any>(null);
-
-    // Local animation state for immediate feedback
     const [isPressed, setIsPressed] = useState(false);
     const isPressedRef = useRef(false);
     const attrsRef = useRef(attrs);
 
-    useLayoutEffect(() => {
-        attrsRef.current = attrs;
-    });
+    useLayoutEffect(() => { attrsRef.current = attrs; });
 
     const nativeW = 68;
-    const nativeH = 44;
-    const scaleX = BOUNDS.w / nativeW;
-    const scaleY = BOUNDS.h / nativeH;
-
+    const nativeH = 135;
     const color = attrs?.color || 'green';
     const targetKey = attrs?.key;
 
-    // Use local state as the primary source of truth for user interaction.
-    // This decouples the visual UI state from delayed/echoed worker messages, eliminating stickiness.
-    const pressed = isPressed;
+    const darken = (hex: string, amount = 0.12) => {
+        const h = hex.replace('#', '');
+        const num = parseInt(h, 16);
+        let r = (num >> 16) & 0xff, g = (num >> 8) & 0xff, b = num & 0xff;
+        r = Math.max(0, Math.min(255, Math.floor(r * (1 - amount))));
+        g = Math.max(0, Math.min(255, Math.floor(g * (1 - amount))));
+        b = Math.max(0, Math.min(255, Math.floor(b * (1 - amount))));
+        return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    };
 
-    // 1. Sync properties directly to the wokwi-pushbutton element (exactly like openhw)
-    useLayoutEffect(() => {
-        if (buttonElement) {
-            buttonElement.color = color;
-            buttonElement.pressed = pressed;
-            if (targetKey) {
-                buttonElement.key = String(targetKey);
-                buttonElement.setAttribute('key', String(targetKey));
-            }
-        }
-    }, [buttonElement, color, pressed, targetKey]);
-
-    // Stable deduplicated handlers for press and release
     const handlePress = (source: string) => {
-        console.log(`[Pushbutton UI Press] ID: ${attrsRef.current?.id || 'unknown'}, Source: ${source}, TargetKey: ${targetKey}, Current pressed: ${isPressedRef.current}`);
-        if (isPressedRef.current) {
-            return;
-        }
+        if (isPressedRef.current) return;
         isPressedRef.current = true;
         setIsPressed(true);
-        if (attrsRef.current?.onInteract) {
-            attrsRef.current.onInteract('press');
-        }
+        if (attrsRef.current?.onInteract) attrsRef.current.onInteract('press');
     };
 
     const handleRelease = (source: string) => {
-        console.log(`[Pushbutton UI Release] ID: ${attrsRef.current?.id || 'unknown'}, Source: ${source}, TargetKey: ${targetKey}, Current pressed: ${isPressedRef.current}`);
-        if (!isPressedRef.current) {
-            return;
-        }
+        if (!isPressedRef.current) return;
         isPressedRef.current = false;
         setIsPressed(false);
-        if (attrsRef.current?.onInteract) {
-            attrsRef.current.onInteract('release');
-        }
+        if (attrsRef.current?.onInteract) attrsRef.current.onInteract('release');
     };
 
-    // 2. Listen for 'button-press' and 'button-release' custom events from wokwi-pushbutton
     useEffect(() => {
         if (!buttonElement) return;
-
         const onBtnPress = () => handlePress('button-press');
         const onBtnRelease = () => handleRelease('button-release');
-
         buttonElement.addEventListener('button-press', onBtnPress);
         buttonElement.addEventListener('button-release', onBtnRelease);
-
         return () => {
             buttonElement.removeEventListener('button-press', onBtnPress);
             buttonElement.removeEventListener('button-release', onBtnRelease);
         };
     }, [buttonElement]);
 
-    // 3. Window keyboard listeners for robust key interactivity
-    useEffect(() => {
-        if (!isRunning || !targetKey) return;
-
-        const handleKeyDown = (e: KeyboardEvent) => {
-            console.log(`[Pushbutton UI KeyDown Event] ID: ${attrsRef.current?.id || 'unknown'}, Key: ${e.key}, TargetKey: ${targetKey}`);
-            if (e.repeat) return;
-            const k = e.key;
-            const t = String(targetKey);
-            let match = false;
-            if (k.toLowerCase() === t.toLowerCase()) match = true;
-            else if (t.toLowerCase() === 'space' && k === ' ') match = true;
-
-            if (match) {
-                console.log(`[Pushbutton UI KeyDown MATCH] ID: ${attrsRef.current?.id || 'unknown'}, Key: ${e.key}, TargetKey: ${targetKey}`);
-                handlePress('keydown');
-            }
-        };
-
-        const handleKeyUp = (e: KeyboardEvent) => {
-            console.log(`[Pushbutton UI KeyUp Event] ID: ${attrsRef.current?.id || 'unknown'}, Key: ${e.key}, TargetKey: ${targetKey}`);
-            const k = e.key;
-            const t = String(targetKey);
-            let match = false;
-            if (k.toLowerCase() === t.toLowerCase()) match = true;
-            else if (t.toLowerCase() === 'space' && k === ' ') match = true;
-
-            if (match) {
-                console.log(`[Pushbutton UI KeyUp MATCH] ID: ${attrsRef.current?.id || 'unknown'}, Key: ${e.key}, TargetKey: ${targetKey}`);
-                handleRelease('keyup');
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        window.addEventListener('keyup', handleKeyUp);
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-            window.removeEventListener('keyup', handleKeyUp);
-        };
-    }, [isRunning, targetKey]); // Only re-run when simulation state or targetKey changes
-
     return (
-        <div style={{ 
-            pointerEvents: 'none', 
-            position: 'absolute', 
-            inset: 0,
-            width: BOUNDS.w,
-            height: BOUNDS.h
-        }}>
-            <div
-                className={`btn-wrapper ${pressed ? 'pressed' : ''}`}
-                style={{
-                    position: 'relative',
-                    width: nativeW,
-                    height: nativeH,
-                    transform: `scale(${scaleX}, ${scaleY})`,
-                    transformOrigin: '0 0',
-                    cursor: 'pointer',
-                    pointerEvents: isRunning ? 'auto' : 'none'
-                }}>
-                <wokwi-pushbutton
-                    ref={setButtonElement}
-                    style={{ pointerEvents: isRunning ? 'auto' : 'none', display: 'block', width: nativeW, height: nativeH }}
-                />
+        <div style={{ pointerEvents: 'none', position: 'absolute', inset: 0, width: BOUNDS.w, height: BOUNDS.h }}>
+            <div style={{ position: 'relative', width: nativeW, height: nativeH, cursor: isRunning ? 'pointer' : 'default', pointerEvents: isRunning ? 'auto' : 'none' }}>
+                <wokwi-pushbutton ref={setButtonElement} style={{ display: 'none' }} />
+                
+                <svg width={nativeW} height={nativeH} viewBox={`0 0 ${nativeW} ${nativeH}`}>
+                    {/* STATIC HOUSING: Does not move when pressed */}
+                    <rect x={6} y={50} width={56} height={35} rx={4} fill="#1a202c" /> 
+                    <rect x={10} y={46} width={48} height={40} rx={2} fill="#2d3748" />
+                    <ellipse cx={34} cy={66} rx={22} ry={12} fill="#4a5568" />
+                    <ellipse cx={34} cy={67} rx={20} ry={10} fill="#171923" />
+
+                    {/* INTERACTIVE HIT AREA */}
+                    <circle 
+                        cx={34} cy={66} r={20} fill="transparent" 
+                        onPointerDown={(e) => { e.stopPropagation(); handlePress('pointer'); }}
+                        onPointerUp={(e) => { e.stopPropagation(); handleRelease('pointer'); }}
+                        onPointerLeave={(e) => { if (isPressedRef.current) handleRelease('pointerleave'); }}
+                    />
+
+                    {/* DYNAMIC PLUNGER: Only this group moves */}
+                    <g transform={`translate(0, ${isPressed ? 4 : 0})`} style={{ transition: 'transform 60ms ease-out' }}>
+                        {(() => {
+                            const capHex = BTN_COLORS.find(c => c.value === color)?.hex || '#22c55e';
+                            const capFill = isPressed ? darken(capHex, 0.25) : capHex;
+                            return (
+                                <>
+                                    {/* Plunger Body */}
+                                    <ellipse cx={34} cy={64} rx={15} ry={10} fill={capFill} stroke="#000" strokeWidth={0.5} />
+                                    {/* Gloss Highlight */}
+                                    <ellipse 
+                                        cx={30} cy={60} rx={isPressed ? 3 : 5} ry={isPressed ? 1 : 2} 
+                                        fill="rgba(255,255,255,0.3)" 
+                                    />
+                                </>
+                            );
+                        })()}
+                    </g>
+                </svg>
             </div>
         </div>
     );
