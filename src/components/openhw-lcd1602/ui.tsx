@@ -35,7 +35,7 @@ export const Lcd1602UI = ({ state, attrs }: { state: any, attrs: any }) => {
                     display: 'block',
                     width: nativeW,
                     height: nativeH,
-                    transform: `scale(${scaleX}, ${scaleY})`,
+                    transform: `translateY(7px) scale(${scaleX}, ${scaleY})`,
                     transformOrigin: '0 0',
                     pointerEvents: 'none'
                 }}
