@@ -3,14 +3,14 @@
     "label": "Push Button",
     "description": "Momentary tactile push button.",
     "group": "Basic",
-    "w": 68, "h": 44,
+    "w": 75, "h": 60,
     "attrs": { "color": "green", "breadboard": { "anchorPin": "1l", "ravine": true } },
     "telemetry": { "template": "pressed=${state.pressed}", "criticalKeys": ["state.pressed"] },
     "pins": [
-        { "id": "1l", "x": 0,  "y": 10, "type": "passive", "description": "Terminal 1L" },
-        { "id": "2l", "x": 0, "y": 34, "type": "passive", "description": "Terminal 2L" },
-        { "id": "1r", "x": 68, "y": 10, "type": "passive", "description": "Terminal 1R" },
-        { "id": "2r", "x": 68, "y": 34, "type": "passive", "description": "Terminal 2R" }
+        { "id": "1l", "x": 0,  "y": 15, "type": "passive", "description": "Terminal 1L" },
+        { "id": "2l", "x": 0, "y": 45, "type": "passive", "description": "Terminal 2L" },
+        { "id": "1r", "x": 75, "y": 15, "type": "passive", "description": "Terminal 1R" },
+        { "id": "2r", "x": 75, "y": 45, "type": "passive", "description": "Terminal 2R" }
     ],
     "autowiring": {
         "connections": [
