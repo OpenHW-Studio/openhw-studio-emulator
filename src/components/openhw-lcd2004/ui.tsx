@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 360, h: 190 };
+export const BOUNDS = { x: 0, y: 0, w: 555, h: 285 };
 
 export const Lcd2004UI = ({ state, attrs }: { state: any, attrs: any }) => {
     const lcdRef = useRef<any>(null);
@@ -30,8 +30,10 @@ export const Lcd2004UI = ({ state, attrs }: { state: any, attrs: any }) => {
                 color={attrs?.color || 'blue'}
                 style={{
                     display: 'block',
-                    width: '100%',
-                    height: '100%',
+                    width: 555.4,
+                    height: 280.5,
+                    transform: 'translate(0.42px, 3.66px)',
+                    transformOrigin: '0 0',
                     pointerEvents: 'none'
                 }}
                 {...attrs}
