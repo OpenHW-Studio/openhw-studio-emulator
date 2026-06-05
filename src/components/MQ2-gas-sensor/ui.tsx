@@ -195,18 +195,18 @@ export const GasSensorUI = ({ state, attrs, isRunning }: { state: any, attrs: an
                     <text x="75" y="28" fill="#e0f2fe" fontSize="10" fontFamily="sans-serif" fontWeight="bold">MQ-2</text>
                     
                     {/* Header Pins Block */}
-                    <rect x="125" y="12" width="5" height="39" fill="#1e293b" />
-                    {/* Pins (Gold) */}
-                    <rect x="130" y="45" width="5" height="2" fill="#eab308" />
-                    <rect x="130" y="35" width="5" height="2" fill="#eab308" />
-                    <rect x="130" y="25" width="5" height="2" fill="#eab308" />
-                    <rect x="130" y="16" width="5" height="2" fill="#eab308" />
+                    <rect x="125" y="2" width="5" height="51" fill="#1e293b" />
+                    {/* Pins (Gold) aligned to exactly 15px pitch */}
+                    <rect x="130" y="49" width="5" height="2" fill="#eab308" />
+                    <rect x="130" y="34" width="5" height="2" fill="#eab308" />
+                    <rect x="130" y="19" width="5" height="2" fill="#eab308" />
+                    <rect x="130" y="4" width="5" height="2" fill="#eab308" />
                     
                     {/* Pin Labels */}
-                    <text x="122" y="49" fill="#f8fafc" fontSize="7" fontFamily="monospace" textAnchor="end">VCC</text>
-                    <text x="122" y="39" fill="#f8fafc" fontSize="7" fontFamily="monospace" textAnchor="end">GND</text>
-                    <text x="122" y="29" fill="#f8fafc" fontSize="7" fontFamily="monospace" textAnchor="end">DO</text>
-                    <text x="122" y="20" fill="#f8fafc" fontSize="7" fontFamily="monospace" textAnchor="end">AO</text>
+                    <text x="122" y="53" fill="#f8fafc" fontSize="7" fontFamily="monospace" textAnchor="end">VCC</text>
+                    <text x="122" y="38" fill="#f8fafc" fontSize="7" fontFamily="monospace" textAnchor="end">GND</text>
+                    <text x="122" y="23" fill="#f8fafc" fontSize="7" fontFamily="monospace" textAnchor="end">DO</text>
+                    <text x="122" y="8" fill="#f8fafc" fontSize="7" fontFamily="monospace" textAnchor="end">AO</text>
                 </svg>
                 {/* Visual indicator light for Digital Threshold Output */}
                 {isExceeded && (

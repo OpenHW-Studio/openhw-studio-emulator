@@ -10,6 +10,7 @@ export const SimulationMonitorUI = ({ state, attrs }: { state: any, attrs: any }
 
     return (
         <div style={{
+            position: 'relative',
             width: BOUNDS.w,
             height: BOUNDS.h,
             backgroundColor: 'var(--bg2, #1e293b)',
@@ -24,6 +25,24 @@ export const SimulationMonitorUI = ({ state, attrs }: { state: any, attrs: any }
             justifyContent: 'space-between',
             userSelect: 'none'
         }}>
+            {[45, 60, 75, 90].map((x, i) => (
+                <div
+                    key={x}
+                    style={{
+                        position: 'absolute',
+                        left: x - 3,
+                        bottom: -3,
+                        width: 6,
+                        height: 8,
+                        background: '#d9a21b',
+                        border: '1px solid #7c4f08',
+                        borderRadius: 1,
+                        boxSizing: 'border-box',
+                        zIndex: 2
+                    }}
+                    title={['VCC', 'GND', 'TX', 'RX'][i]}
+                />
+            ))}
             {/* Top Section: Header + Packet Status */}
             <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border, #334155)', paddingBottom: 6 }}>

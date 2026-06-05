@@ -2,7 +2,7 @@
     "type": "openhw-photodiode",
     "label": "Photodiode",
     "group": "Sensors",
-    "w": 20,
+    "w": 15,
     "h": 40,
     "attrs": {
         "light": 0
@@ -10,14 +10,14 @@
     "pins": [
         {
             "id": "A",
-            "x": 0,
-            "y": 40,
+            "x": 5,
+            "y": 32,
             "type": "analog"
         },
         {
             "id": "C",
             "x": 20,
-            "y": 40,
+            "y": 32,
             "type": "power"
         }
     ],

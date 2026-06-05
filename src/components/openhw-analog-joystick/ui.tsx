@@ -81,7 +81,8 @@ export const JoystickUI = ({ state, attrs, isRunning, comp }: { state: any, attr
             <svg
                 width="100%"
                 height="100%"
-                viewBox="0 0 27.2 31.8"
+                viewBox="-1.434 -2.39 30.48 35.56"
+                preserveAspectRatio="none"
                 style={{ 
                     display: 'block', 
                     overflow: 'visible', 
@@ -144,9 +145,9 @@ export const JoystickUI = ({ state, attrs, isRunning, comp }: { state: any, attr
                     </text>
                     <text transform="rotate(-90)" textAnchor="start" fontSize="1.2">
                         <tspan x="-29.2" y="9.2">VCC</tspan>
-                        <tspan x="-29.2" y="11.74">VERT</tspan>
-                        <tspan x="-29.2" y="14.28">HORZ</tspan>
-                        <tspan x="-29.2" y="16.82">SEL</tspan>
+                        <tspan x="-29.2" y="11.74">VRY</tspan>
+                        <tspan x="-29.2" y="14.28">VRX</tspan>
+                        <tspan x="-29.2" y="16.82">SW</tspan>
                         <tspan x="-29.2" y="19.36">GND</tspan>
                     </text>
                 </g>

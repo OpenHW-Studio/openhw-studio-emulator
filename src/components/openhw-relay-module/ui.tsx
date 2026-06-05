@@ -95,29 +95,29 @@ export const RelayModuleUI = ({
                 <text x="88" y="43" fill="#fff" fontSize="11" fontWeight="700">PWR</text>
 
                 {/* ====== Input Pin Header (VCC, GND, IN) ====== */}
-                <g transform="translate(56, 58)">
+                <g transform="translate(56, 52)">
                     {/* Pin header black body */}
-                    <rect x="0" y="-4" width="14" height="72" rx="1.5" fill="#1a1a2e" stroke="#111" strokeWidth="1" />
+                    <rect x="0" y="-4" width="14" height="54" rx="1.5" fill="#1a1a2e" stroke="#111" strokeWidth="1" />
 
                     {/* VCC pin — trace extends left outside board (thicker) */}
-                    <line x1="-30" y1="8" x2="0" y2="8" stroke="#bdc3c7" strokeWidth="3.5" />
+                    <line x1="-26" y1="8" x2="0" y2="8" stroke="#bdc3c7" strokeWidth="3.5" />
                     <circle cx="7" cy="8" r="4" fill="#fbbf24" stroke="#b8860b" strokeWidth="0.6" />
                     <circle cx="7" cy="8" r="14" fill="#000" opacity="0" />
 
-                    {/* GND pin */}
-                    <line x1="-30" y1="28" x2="0" y2="28" stroke="#bdc3c7" strokeWidth="3.5" />
-                    <circle cx="7" cy="28" r="4" fill="#fbbf24" stroke="#b8860b" strokeWidth="0.6" />
-                    <circle cx="7" cy="28" r="14" fill="#000" opacity="0" />
+                    {/* GND pin — 15px below VCC */}
+                    <line x1="-26" y1="23" x2="0" y2="23" stroke="#bdc3c7" strokeWidth="3.5" />
+                    <circle cx="7" cy="23" r="4" fill="#fbbf24" stroke="#b8860b" strokeWidth="0.6" />
+                    <circle cx="7" cy="23" r="14" fill="#000" opacity="0" />
 
-                    {/* IN pin */}
-                    <line x1="-30" y1="48" x2="0" y2="48" stroke="#bdc3c7" strokeWidth="3.5" />
-                    <circle cx="7" cy="48" r="4" fill="#fbbf24" stroke="#b8860b" strokeWidth="0.6" />
-                    <circle cx="7" cy="48" r="14" fill="#000" opacity="0" />
+                    {/* IN pin — 15px below GND */}
+                    <line x1="-26" y1="38" x2="0" y2="38" stroke="#bdc3c7" strokeWidth="3.5" />
+                    <circle cx="7" cy="38" r="4" fill="#fbbf24" stroke="#b8860b" strokeWidth="0.6" />
+                    <circle cx="7" cy="38" r="14" fill="#000" opacity="0" />
 
                     {/* Labels to the right of the header */}
                     <text x="20" y="12" fill="#fff" fontSize="12" fontWeight="700">VCC</text>
-                    <text x="20" y="32" fill="#fff" fontSize="12" fontWeight="700">GND</text>
-                    <text x="20" y="52" fill="#fff" fontSize="12" fontWeight="700">IN</text>
+                    <text x="20" y="27" fill="#fff" fontSize="12" fontWeight="700">GND</text>
+                    <text x="20" y="42" fill="#fff" fontSize="12" fontWeight="700">IN</text>
                 </g>
 
                 {/* ====== LED1 (bottom-left) ====== */}
@@ -145,33 +145,33 @@ export const RelayModuleUI = ({
                 </g>
 
                 {/* ====== Output Screw Terminal Block (NO, COM, NC) ====== */}
-                <g transform="translate(280, 22)">
-                    <rect x="0" y="0" width="30" height="130" rx="2" fill="#2471a3" stroke="#1a5276" strokeWidth="1.2" />
+                <g transform="translate(285, 20)">
+                    <rect x="0" y="0" width="30" height="140" rx="2" fill="#2471a3" stroke="#1a5276" strokeWidth="1.2" />
 
-                    {/* NO screw terminal (metallic) */}
+                    {/* NO screw terminal (metallic) — at y=25 => absolute y=45 */}
                     <circle cx="15" cy="25" r="10" fill="url(#metalGrad)" stroke="#8f9597" strokeWidth="0.9" />
                     {/* slot */}
                     <rect x="8" y="23.2" width="14" height="2" rx="1" fill="#566573" />
                     <ellipse cx="15" cy="21.5" rx="6" ry="2" fill="rgba(255,255,255,0.14)" />
                     <circle cx="15" cy="25" r="12" fill="#000" opacity="0" />
 
-                    {/* COM screw terminal */}
-                    <circle cx="15" cy="65" r="10" fill="url(#metalGrad)" stroke="#8f9597" strokeWidth="0.9" />
-                    <rect x="8" y="63.2" width="14" height="2" rx="1" fill="#566573" transform="rotate(15,15,65)" />
-                    <ellipse cx="15" cy="61.5" rx="6" ry="2" fill="rgba(255,255,255,0.12)" />
-                    <circle cx="15" cy="65" r="12" fill="#000" opacity="0" />
+                    {/* COM screw terminal — at y=70 => absolute y=90 */}
+                    <circle cx="15" cy="70" r="10" fill="url(#metalGrad)" stroke="#8f9597" strokeWidth="0.9" />
+                    <rect x="8" y="68.2" width="14" height="2" rx="1" fill="#566573" transform="rotate(15,15,70)" />
+                    <ellipse cx="15" cy="66.5" rx="6" ry="2" fill="rgba(255,255,255,0.12)" />
+                    <circle cx="15" cy="70" r="12" fill="#000" opacity="0" />
 
-                    {/* NC screw terminal */}
-                    <circle cx="15" cy="105" r="10" fill="url(#metalGrad)" stroke="#8f9597" strokeWidth="0.9" />
-                    <rect x="8" y="103.2" width="14" height="2" rx="1" fill="#566573" transform="rotate(-15,15,105)" />
-                    <ellipse cx="15" cy="101.5" rx="6" ry="2" fill="rgba(255,255,255,0.12)" />
-                    <circle cx="15" cy="105" r="12" fill="#000" opacity="0" />
+                    {/* NC screw terminal — at y=115 => absolute y=135 */}
+                    <circle cx="15" cy="115" r="10" fill="url(#metalGrad)" stroke="#8f9597" strokeWidth="0.9" />
+                    <rect x="8" y="113.2" width="14" height="2" rx="1" fill="#566573" transform="rotate(-15,15,115)" />
+                    <ellipse cx="15" cy="111.5" rx="6" ry="2" fill="rgba(255,255,255,0.12)" />
+                    <circle cx="15" cy="115" r="12" fill="#000" opacity="0" />
                 </g>
 
                 {/* NO / COM / NC labels — rotated 90° to the right of the terminal block */}
-                <text x="318" y="50" fill="#fff" fontSize="11" fontWeight="700" textAnchor="middle" transform="rotate(90, 318, 50)">NO</text>
-                <text x="318" y="90" fill="#fff" fontSize="11" fontWeight="700" textAnchor="middle" transform="rotate(90, 318, 90)">COM</text>
-                <text x="318" y="130" fill="#fff" fontSize="11" fontWeight="700" textAnchor="middle" transform="rotate(90, 318, 130)">NC</text>
+                <text x="323" y="48" fill="#fff" fontSize="11" fontWeight="700" textAnchor="middle" transform="rotate(90, 323, 48)">NO</text>
+                <text x="323" y="93" fill="#fff" fontSize="11" fontWeight="700" textAnchor="middle" transform="rotate(90, 323, 93)">COM</text>
+                <text x="323" y="138" fill="#fff" fontSize="11" fontWeight="700" textAnchor="middle" transform="rotate(90, 323, 138)">NC</text>
 
                 {/* Tiny PCB details: silkscreen dots, fake resistor marks, traces */}
                 <g>

@@ -7,10 +7,10 @@
     "h": 130,
     "attrs": {},
     "pins": [
-        { "id": "VCC", "x": 15, "y": 130, "type": "power", "description": "Power (3.3V / 5V)" },
-        { "id": "GND", "x": 50, "y": 130, "type": "power", "description": "Ground" },
-        { "id": "TX", "x": 85, "y": 130, "type": "digital", "description": "Telemetry TX" },
-        { "id": "RX", "x": 120, "y": 130, "type": "digital", "description": "Telemetry RX" }
+        { "id": "VCC", "x": 45, "y": 130, "type": "power", "description": "Power (3.3V / 5V)" },
+        { "id": "GND", "x": 60, "y": 130, "type": "power", "description": "Ground" },
+        { "id": "TX", "x": 75, "y": 130, "type": "digital", "description": "Telemetry TX" },
+        { "id": "RX", "x": 90, "y": 130, "type": "digital", "description": "Telemetry RX" }
     ],
     "autowiring": {
         "connections": [

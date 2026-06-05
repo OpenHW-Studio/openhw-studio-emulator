@@ -1,7 +1,7 @@
 import React from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 220.37, h: 235.49 };
-const mmToPix = 3.78;
+export const BOUNDS = { x: 0, y: 0, w: 345, h: 375 };
+const mmToPix = 15 / 2.54; // Exact ratio for 15px pitch per 0.1 inch (2.54mm)
 
 export const StepperMotorUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const angle = state?.angle ?? 0;
@@ -23,8 +23,12 @@ export const StepperMotorUI = ({ state, attrs }: { state: any, attrs: any }) => 
     // shaft radius offset, needed for transform
     const rOff = Math.sqrt(0.75 * Math.pow(shaftRadius, 2));
 
-    const width = (1 + frameSize) * mmToPix;
-    const height = (5 + frameSize) * mmToPix;
+    // Calculate exact offsets to snap the pins to exactly (150, 375), etc.
+    const offsetX = 150 - (24.9 * mmToPix);
+    const offsetY = 375 - (62.35 * mmToPix);
+
+    const width = BOUNDS.w;
+    const height = BOUNDS.h;
 
     return (
         <div style={{
@@ -39,7 +43,7 @@ export const StepperMotorUI = ({ state, attrs }: { state: any, attrs: any }) => 
                 version="1.1"
                 viewBox={`0 0 ${width} ${height}`}
                 xmlns="http://www.w3.org/2000/svg"
-                style={{ display: 'block' }}
+                style={{ display: 'block', overflow: 'visible' }}
             >
                 <defs>
                     <linearGradient
@@ -84,7 +88,7 @@ export const StepperMotorUI = ({ state, attrs }: { state: any, attrs: any }) => 
                     />
                 </defs>
                 {/* Body */}
-                <g transform="translate(1,1)">
+                <g transform={`translate(${offsetX},${offsetY})`}>
                     <g transform={`scale(${mmToPix})`}>
                         {/* Pins */}
                         <use href="#pin" x="0" />

@@ -9,12 +9,12 @@
         "triggerLevel": "low"
     },
     "pins": [
-        { "id": "VCC", "x": 26,  "y": 66,  "type": "input",   "description": "Power Supply (5V)" },
-        { "id": "GND", "x": 26,  "y": 86,  "type": "input",   "description": "Ground" },
-        { "id": "IN",  "x": 26,  "y": 106, "type": "input",   "description": "Control signal from Arduino" },
-        { "id": "NO",  "x": 295, "y": 47,  "type": "passive", "description": "Normally Open terminal" },
-        { "id": "COM", "x": 295, "y": 87,  "type": "passive", "description": "Common terminal" },
-        { "id": "NC",  "x": 295, "y": 127, "type": "passive", "description": "Normally Closed terminal" }
+        { "id": "VCC", "x": 30,  "y": 60,  "type": "input",   "description": "Power Supply (5V)" },
+        { "id": "GND", "x": 30,  "y": 75,  "type": "input",   "description": "Ground" },
+        { "id": "IN",  "x": 30,  "y": 90,  "type": "input",   "description": "Control signal from Arduino" },
+        { "id": "NO",  "x": 300, "y": 45,  "type": "passive", "description": "Normally Open terminal" },
+        { "id": "COM", "x": 300, "y": 90,  "type": "passive", "description": "Common terminal" },
+        { "id": "NC",  "x": 300, "y": 135, "type": "passive", "description": "Normally Closed terminal" }
     ],
     "telemetry": {
         "template": "Energised=${state.energised}",
