@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 375, h: 225 };
+export const BOUNDS = { x: 0, y: 0, w: 555, h: 285 };
 
 export const Lcd2004I2CUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const lcdRef = useRef<any>(null);
@@ -26,7 +26,14 @@ export const Lcd2004I2CUI = ({ state, attrs }: { state: any, attrs: any }) => {
                 ref={lcdRef}
                 pins="i2c"
                 color={attrs?.color || 'blue'}
-                style={{ pointerEvents: 'auto', width: '100%', height: '100%' }}
+                style={{ 
+                    pointerEvents: 'auto', 
+                    width: 555.4, 
+                    height: 280.5,
+                    transform: 'translate(7.62px, 7.92px)',
+                    transformOrigin: '0 0',
+                    display: 'block'
+                }}
                 {...attrs}
             />
         </div>

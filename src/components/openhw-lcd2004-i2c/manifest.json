@@ -2,8 +2,8 @@
   "type": "openhw-lcd2004-i2c",
   "label": "LCD 2004 (I2C)",
   "group": "Displays",
-  "w": 375,
-  "h": 225,
+  "w": 555,
+  "h": 285,
   "attrs": {
     "i2cAddress": "0x27",
     "color": "blue",
@@ -19,29 +19,29 @@
     "pins": [
         {
             "id": "GND",
-            "x": 7.5,
-            "y": 75,
+            "x": 15,
+            "y": 60,
             "type": "power",
             "description": "Ground"
         },
         {
             "id": "VCC",
-            "x": 7.5,
-            "y": 90,
+            "x": 15,
+            "y": 75,
             "type": "power",
             "description": "5V Power"
         },
         {
             "id": "SDA",
-            "x": 7.5,
-            "y": 105,
+            "x": 15,
+            "y": 90,
             "type": "input",
             "description": "I2C Data"
         },
         {
             "id": "SCL",
-            "x": 7.5,
-            "y": 120,
+            "x": 15,
+            "y": 105,
             "type": "input",
             "description": "I2C Clock"
         }
