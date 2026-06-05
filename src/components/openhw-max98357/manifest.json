@@ -27,23 +27,48 @@
   "defaultAttrs": {},
   "telemetry": {
     "template": "BitsPerFrame=${state.i2sBitsPerFrame}",
-    "criticalKeys": ["state.i2sBitsPerFrame"]
+    "criticalKeys": [
+      "state.i2sBitsPerFrame"
+    ]
   },
   "autowiring": {
     "connections": [
-      { "from": "VIN", "to": "arduino:5V", "color": "red" },
-      { "from": "GND", "to": "arduino:GND", "color": "black" },
-      { "from": "LRC", "to": "arduino:25", "color": "yellow" },
-      { "from": "BCLK", "to": "arduino:26", "color": "green" },
-      { "from": "DIN", "to": "arduino:22", "color": "blue" }
+      {
+        "from": "VIN",
+        "to": "arduino:5V",
+        "color": "red"
+      },
+      {
+        "from": "GND",
+        "to": "arduino:GND",
+        "color": "black"
+      },
+      {
+        "from": "LRC",
+        "to": "arduino:25",
+        "color": "yellow"
+      },
+      {
+        "from": "BCLK",
+        "to": "arduino:26",
+        "color": "green"
+      },
+      {
+        "from": "DIN",
+        "to": "arduino:22",
+        "color": "blue"
+      }
     ]
   },
   "autocoding": {
-    "libraries": ["I2S", "SD"],
+    "libraries": [
+      "I2S",
+      "SD"
+    ],
     "arduino": {
-      "globals": "#include <I2S.h>\\n#include <SD.h>\\nFile audioFile;\\n",
-      "setup": "Serial.begin(9600);\\nI2S.setBCLK(${BCLK});\\nI2S.setDATA(${DIN});\\nI2S.begin(I2S_PHILIPS_MODE, 44100, 16);\\nSD.begin(5);\\naudioFile = SD.open(\\\"/rec.wav\\\");",
-      "loop": "if (audioFile && audioFile.available()) {\\n  int16_t sample = 0;\\n  audioFile.read((uint8_t*)&sample, 2);\\n  I2S.write(sample);\\n  I2S.write(sample);\\n}"
+    "globals": "#include <I2S.h>\n#include <SD.h>\nFile audioFile;\n",
+      "setup": "Serial.begin(9600);\nI2S.setBCLK(${BCLK});\nI2S.setDATA(${DIN});\nI2S.begin(I2S_PHILIPS_MODE, 44100, 16);\nSD.begin(5);\naudioFile = SD.open(\"/rec.wav\");",
+      "loop": "if (audioFile && audioFile.available()) {\n  int16_t sample = 0;\n  audioFile.read((uint8_t*)&sample, 2);\n  I2S.write(sample);\n  I2S.write(sample);\n}"
     }
   }
 }

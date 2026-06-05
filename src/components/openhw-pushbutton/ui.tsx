@@ -13,7 +13,7 @@ export const PushbuttonContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdat
     const current = attrs?.color ?? 'green';
     return (
         <>
-            <span style={{ fontSize: 12, color: 'var(--text2)' }}>Color:</span>
+            <span style={{ fontSize: 12, color: 'var(--text2)' }}>Button Color:</span>
             <select
                 value={current}
                 onChange={e => onUpdate('color', e.target.value)}
@@ -35,9 +35,7 @@ export const PushbuttonUI = ({ state, attrs, isRunning }: { state: any, attrs: a
     const isPressedRef = useRef(false);
     const attrsRef = useRef(attrs);
 
-    useLayoutEffect(() => {
-        attrsRef.current = attrs;
-    });
+    useLayoutEffect(() => { attrsRef.current = attrs; });
 
     const nativeW = 75;
     const nativeH = 60;

@@ -1,6 +1,6 @@
 import manifest from './manifest.json';
 import { PhotoresistorLogic } from './logic';
-import { PhotoresistorUI, BOUNDS } from './ui';
+import { PhotoresistorUI, PhotoresistorContextMenu, BOUNDS } from './ui';
 const docHtml = '';
 
 export default {
@@ -8,6 +8,7 @@ export default {
     LogicClass: PhotoresistorLogic,
     UI: PhotoresistorUI,
     BOUNDS,
+    ContextMenu: PhotoresistorContextMenu,
     contextMenuOnlyDuringRun: true,
     doc: docHtml
 };

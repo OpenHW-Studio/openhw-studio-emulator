@@ -1,20 +1,44 @@
 import React from 'react';
 
-export const PhotoresistorUI = ({ state, attrs, onAttrChange, isRunning }: { state: any, attrs: any, onAttrChange?: (key: string, val: any) => void, isRunning: boolean }) => {
+export const PhotoresistorContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (key: string, value: any) => void }) => {
     const lux = attrs?.lux ?? 500;
 
-    const handleSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (onAttrChange) {
-            onAttrChange('lux', e.target.value);
+    const handleSlider = (key: string, value: number) => {
+        onUpdate(key, value);
+        if (attrs && attrs.onInteract) {
+            attrs.onInteract({ type: 'SET_ATTR', key, value });
         }
     };
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '4px' }} data-contextmenu="true">
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <label style={{ fontSize: '10px', color: 'var(--text2)', marginBottom: '2px' }}>Lux: {lux} lx</label>
+                <input 
+                    type="range" min="0" max="1000" value={lux}
+                    onChange={(e) => handleSlider('lux', parseFloat(e.target.value))}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    style={{ width: '80px', cursor: 'pointer' }}
+                />
+            </div>
+        </div>
+    );
+};
+
+export const PhotoresistorUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning: boolean }) => {
+    // Safely parse lux to ensure we don't get NaN rendering issues
+    let rawLux = state?.lux ?? attrs?.lux ?? 500;
+    let lux = typeof rawLux === 'number' ? rawLux : parseFloat(String(rawLux));
+    if (isNaN(lux)) lux = 500;
+
+    const luxRatio = Math.max(0, Math.min(1, lux / 1000));
 
     const nativeW = 30;
     const nativeH = 30;
     const scale = BOUNDS.w / nativeW;
 
     return (
-        <div style={{ position: 'relative', width: BOUNDS.w, height: BOUNDS.h }}>
+        <div style={{ position: 'relative', width: BOUNDS.w, height: BOUNDS.h, pointerEvents: 'none' }}>
             <svg 
                 width={nativeW} height={nativeH} viewBox="0 0 30 30" 
                 style={{ 
@@ -40,61 +64,30 @@ export const PhotoresistorUI = ({ state, attrs, onAttrChange, isRunning }: { sta
                 <rect x="4" y="15" width="2" height="15" fill="url(#pinGrad)" />
                 <rect x="24" y="15" width="2" height="15" fill="url(#pinGrad)" />
 
+                {/* Ambient Light Overlay */}
+                <circle cx="15" cy="15" r="14" fill="#f1c40f" opacity={luxRatio * 0.3} style={{ mixBlendMode: 'screen' }} />
+
                 {/* Ceramic Substrate */}
                 <circle cx="15" cy="15" r="10" fill="url(#ceramicGrad)" stroke="#bdc3c7" strokeWidth="0.5" />
                 <circle cx="15" cy="15" r="8" fill="none" stroke="#dcdde1" strokeWidth="1" strokeDasharray="1,1" />
+
+                {/* Light reflection on substrate depending on lux */}
+                <circle cx="15" cy="15" r="10" fill="#f1c40f" opacity={luxRatio * 0.25} />
 
                 {/* CdS Zigzag Track */}
                 <path 
                     d="M 10 12 L 20 12 L 10 14 L 20 14 L 10 16 L 20 16 L 10 18 L 20 18" 
                     fill="none" 
-                    stroke="#e67e22" 
+                    stroke={`hsl(30, 100%, ${30 + luxRatio * 40}%)`} 
                     strokeWidth="1.5" 
                     strokeLinecap="round" 
                     strokeLinejoin="round"
-                    style={{ opacity: 0.9 + (lux / 2000) }}
                 />
                 
                 {/* Metallic Electrodes */}
                 <path d="M 8 10 L 12 10" stroke="#7f8c8d" strokeWidth="2" strokeLinecap="round" />
                 <path d="M 18 20 L 22 20" stroke="#7f8c8d" strokeWidth="2" strokeLinecap="round" />
             </svg>
-
-            {/* Hidden simulation slider (only shows when running) */}
-            {isRunning && (
-                <div className="nodrag" style={{ 
-                    position: 'absolute', 
-                    top: '-45px', 
-                    background: 'rgba(0,0,0,0.85)', 
-                    padding: '6px 10px', 
-                    borderRadius: '6px',
-                    color: 'white',
-                    fontSize: '10px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '4px',
-                    pointerEvents: 'auto',
-                    zIndex: 1000,
-                    boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
-                    backdropFilter: 'blur(4px)',
-                    border: '1px solid rgba(255,255,255,0.1)'
-                }}
-                onMouseDown={(e) => e.stopPropagation()}
-                >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                        <span>Light</span>
-                        <span>{lux} lx</span>
-                    </div>
-                    <input 
-                        type="range" 
-                        min="0" 
-                        max="1000" 
-                        value={lux} 
-                        onChange={handleSlider}
-                        style={{ width: '80px', height: '4px', cursor: 'pointer' }}
-                    />
-                </div>
-            )}
         </div>
     );
 };
