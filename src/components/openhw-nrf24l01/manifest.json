@@ -3,8 +3,8 @@
   "label": "nRF24L01+",
   "group": "Network",
   "description": "2.4GHz RF Transceiver module.",
-  "w": 250,
-  "h": 100,
+  "w": 150,
+  "h": 75,
   "attrs": {
     "magicInterop": "false"
   },
@@ -18,14 +18,14 @@
     ]
   },
   "pins": [
-    { "id": "VCC",  "x": 100, "y": 95,  "type": "power",   "description": "3.3V Power" },
-    { "id": "GND",  "x": 60,  "y": 95,  "type": "power",   "description": "Ground" },
-    { "id": "CE",   "x": 100, "y": 165, "type": "digital", "description": "Chip Enable" },
-    { "id": "CSN",  "x": 60,  "y": 165, "type": "digital", "description": "SPI Chip Select" },
-    { "id": "SCK",  "x": 100, "y": 235, "type": "digital", "description": "SPI Clock" },
-    { "id": "MOSI", "x": 60,  "y": 235, "type": "digital", "description": "SPI MOSI" },
-    { "id": "MISO", "x": 100, "y": 305, "type": "digital", "description": "SPI MISO" },
-    { "id": "IRQ",  "x": 60,  "y": 305, "type": "digital", "description": "Interrupt Request" }
+    { "id": "VCC",  "x": 22.5, "y": 15, "type": "power",   "description": "3.3V Power" },
+    { "id": "GND",  "x": 7.5,  "y": 15, "type": "power",   "description": "Ground" },
+    { "id": "CE",   "x": 22.5, "y": 30, "type": "digital", "description": "Chip Enable" },
+    { "id": "CSN",  "x": 7.5,  "y": 30, "type": "digital", "description": "SPI Chip Select" },
+    { "id": "SCK",  "x": 22.5, "y": 45, "type": "digital", "description": "SPI Clock" },
+    { "id": "MOSI", "x": 7.5,  "y": 45, "type": "digital", "description": "SPI MOSI" },
+    { "id": "MISO", "x": 22.5, "y": 60, "type": "digital", "description": "SPI MISO" },
+    { "id": "IRQ",  "x": 7.5,  "y": 60, "type": "digital", "description": "Interrupt Request" }
   ],
   "autowiring": {
     "connections": [
