@@ -39,7 +39,7 @@ export const Lcd1602I2CUI = ({ state, attrs }: { state: any, attrs: any }) => {
                     display: 'block',
                     width: nativeW,
                     height: nativeH,
-                    transform: `scale(${scaleX}, ${scaleY})`,
+                    transform: `translate(7.5px, -7.5px) scale(${scaleX}, ${scaleY})`,
                     transformOrigin: '0 0',
                     pointerEvents: 'none'
                 }}
