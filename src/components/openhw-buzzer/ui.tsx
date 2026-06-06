@@ -122,7 +122,7 @@ export const BuzzerUI = ({ state, attrs }: { state: any, attrs: any }) => {
                     width: nativeW,
                     height: nativeH,
                     left: 2.30,
-                    top: -5.62,
+                    top: 4.40,
                     transform: `scale(${scaleX}, ${scaleY})`,
                     transformOrigin: '0 0'
                 }
