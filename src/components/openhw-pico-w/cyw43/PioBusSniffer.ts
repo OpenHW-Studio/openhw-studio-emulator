@@ -45,7 +45,7 @@ export function decodeHeader(hdr: number): Cyw43Cmd {
     increment: ((h >>> 30) & 1) === 1,
     function: ((h >>> 28) & 0b11) as 0 | 1 | 2 | 3,
     address: (h >>> 11) & 0x1ffff,
-    length: (h & 0x7ff) === 0 ? 2048 : (h & 0x7ff),
+    length: h & 0x7ff,
   };
 }
 
@@ -81,82 +81,50 @@ export type SnifferEvent =
 export class PioBusSniffer {
   private pendingCmd: Cyw43Cmd | null = null;
   private pendingPayload: number[] = [];
-  public state: 'bitcount1' | 'bitcount2' | 'command' | 'payload' = 'bitcount1';
-  public inBootSwappedMode = true;
-
-  isExpectingPayload(): boolean {
-    return this.state === 'payload';
-  }
-
-  isDmaWord(): boolean {
-    return this.state === 'command' || this.state === 'payload';
-  }
 
   *feedWord(rawWord: number): Generator<SnifferEvent> {
-    if (this.state === 'bitcount1') {
-      console.log(`[PicoW SPI Sniffer] bitcount1: ${rawWord}`);
-      this.state = 'bitcount2';
-      return; // Ignore bitcount
-    }
-    if (this.state === 'bitcount2') {
-      console.log(`[PicoW SPI Sniffer] bitcount2: ${rawWord}`);
-      this.state = 'command';
-      return; // Ignore bitcount
-    }
+    const word = swap16x2(rawWord);
 
-    // On boot, the C driver applies SWAP32 (which is actually just swap16x2)
-    // to the command word. We undo that here so we always get the logical command.
-    let word = rawWord;
-    if (this.state === 'command' && this.inBootSwappedMode) {
-      word = swap16x2(rawWord);
-    }
-    
-    console.log(`[PicoW SPI Sniffer] feedWord: raw=0x${(rawWord >>> 0).toString(16).padStart(8, '0')} decoded=0x${word.toString(16).padStart(8, '0')}`);
-
-    if (this.state === 'command') {
+    if (this.pendingCmd === null) {
+      // First word of a transaction is always the header.
       const cmd = decodeHeader(word);
       this.pendingCmd = cmd;
       this.pendingPayload = [];
       yield { kind: 'header', cmd };
 
-      // Switch out of boot swapped mode once SPI_BUS_CONTROL (0x0) is written
-      if (cmd.write && cmd.function === 0 && cmd.address === 0x0) {
-        this.inBootSwappedMode = false;
-        console.log(`[PicoW SPI Sniffer] Exiting boot swapped mode!`);
-      }
-
-      if (cmd.length === 0) {
-        // Technically length 0 was converted to 2048, so this won't hit, but for safety:
-        yield { kind: 'payload', cmd, payload: new Uint8Array(0) };
+      // This integration observes host-to-chip TX FIFO words only. Reads do
+      // not carry host payload bytes here, so emit them immediately.
+      if (cmd.length === 0 || !cmd.write) {
+        yield {
+          kind: 'payload',
+          cmd,
+          payload: new Uint8Array(0),
+        };
         this.pendingCmd = null;
-        this.state = 'bitcount1';
-      } else if (!cmd.write) {
-        // For READs, yield the empty payload immediately so logic can reply,
-        // BUT transition to 'payload' state so we consume the dummy TX DMA words!
-        yield { kind: 'payload', cmd, payload: new Uint8Array(0) };
-        this.state = 'payload';
-      } else {
-        this.state = 'payload';
       }
       return;
     }
 
-    if (this.state === 'payload') {
-      console.log(`[PicoW SPI Sniffer] payload: word=0x${(word >>> 0).toString(16).padStart(8, '0')} pendingPayload.len=${this.pendingPayload.length} cmd.len=${this.pendingCmd!.length}`);
-      for (let i = 0; i < 4; i++) {
-        this.pendingPayload.push((word >>> (i * 8)) & 0xff);
-        if (this.pendingPayload.length >= this.pendingCmd!.length) break;
-      }
-
-      if (this.pendingPayload.length >= this.pendingCmd!.length) {
-        if (this.pendingCmd!.write) {
-          yield { kind: 'payload', cmd: this.pendingCmd!, payload: new Uint8Array(this.pendingPayload) };
-        }
-        this.pendingCmd = null;
-        this.pendingPayload = [];
-        this.state = 'bitcount1';
-      }
+    // Payload follows. Each 32-bit word carries 4 payload bytes,
+    // little-endian on the wire (the PIO halfword-swap above already
+    // converted to "host byte order"; payload bytes are then byte-LSB
+    // first per pico-sdk's WORD swap macro on writes).
+    for (let i = 0; i < 4; i++) {
+      this.pendingPayload.push((word >>> (i * 8)) & 0xff);
+      if (this.pendingPayload.length >= this.pendingCmd.length) break;
     }
+
+    if (this.pendingPayload.length >= this.pendingCmd.length) {
+      const payload = new Uint8Array(this.pendingPayload.slice(0, this.pendingCmd.length));
+      yield { kind: 'payload', cmd: this.pendingCmd, payload };
+      this.pendingCmd = null;
+      this.pendingPayload = [];
+    }
+  }
+
+  reset(): void {
+    this.pendingCmd = null;
+    this.pendingPayload = [];
   }
 }
 

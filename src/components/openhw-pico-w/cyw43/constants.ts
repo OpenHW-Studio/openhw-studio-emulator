@@ -30,7 +30,7 @@ export const F0 = {
 } as const;
 
 /** Magic value the driver polls F0:0x14 for once the chip is ready. */
-export const TEST_PATTERN = 0xFEEDBEAD >>> 0;
+export const TEST_PATTERN = 0xfeedbead >>> 0;
 
 // ── F1 (backplane) — register window addresses we honour ──────────
 export const F1 = {
