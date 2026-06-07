@@ -4,15 +4,15 @@
   "group": "Audio",
   "description": "I2S Digital Bottom Port Microphone",
   "w": 90,
-  "h": 70,
+  "h": 60,
   "tags": ["audio", "i2s", "mic", "microphone", "sph0645"],
   "pins": [
-    { "id": "3V", "description": "Power (1.62V to 3.6V)", "x": 7.5, "y": 54 },
-    { "id": "GND", "description": "Ground", "x": 22.5, "y": 54 },
-    { "id": "BCLK", "description": "Bit Clock", "x": 37.5, "y": 54 },
-    { "id": "DOUT", "description": "Serial Data Output", "x": 52.5, "y": 54 },
-    { "id": "LRCL", "description": "Left/Right Clock", "x": 67.5, "y": 54 },
-    { "id": "SEL", "description": "Channel Select", "x": 82.5, "y": 54 }
+    { "id": "3V", "description": "Power (1.62V to 3.6V)", "x": 7.5, "y": 52.5 },
+    { "id": "GND", "description": "Ground", "x": 22.5, "y": 52.5 },
+    { "id": "BCLK", "description": "Bit Clock", "x": 37.5, "y": 52.5 },
+    { "id": "DOUT", "description": "Serial Data Output", "x": 52.5, "y": 52.5 },
+    { "id": "LRCL", "description": "Left/Right Clock", "x": 67.5, "y": 52.5 },
+    { "id": "SEL", "description": "Channel Select", "x": 82.5, "y": 52.5 }
   ],
   "state": {
     "liveMicEnabled": true,

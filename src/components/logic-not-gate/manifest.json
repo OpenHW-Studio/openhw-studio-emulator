@@ -3,21 +3,21 @@
     "label": "NOT Gate",
     "description": "Logical NOT gate. Inverts the input signal.",
     "group": "Logic",
-    "w": 70,
-    "h": 50,
+    "w": 60,
+    "h": 30,
     "attrs": {},
     "pins": [
         {
             "id": "IN",
             "x": 0,
-            "y": 25,
+            "y": 15,
             "type": "digital",
             "description": "Input"
         },
         {
             "id": "OUT",
-            "x": 70,
-            "y": 25,
+            "x": 60,
+            "y": 15,
             "type": "digital",
             "description": "Inverted output"
         }

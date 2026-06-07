@@ -1,16 +1,16 @@
 import React from 'react'
 
 // Clean-grid layout UI for HP4067
-export const BOUNDS = { x: 0, y: 0, w: 100, h: 280 }
+export const BOUNDS = { x: 0, y: 0, w: 105, h: 270 }
 
 export const HP4067UI = ({ state }: { state: any }) => {
   const active = typeof state?.activeChannel === 'number' ? state.activeChannel : -1
 
   // Grid constants per "Clean Slate" prompt
   const leftX = 15
-  const rightX = 85
-  const startY = 20
-  const step = 14
+  const rightX = 90
+  const startY = 15
+  const step = 15
   const totalC = 16
 
   // y for a given C index where C15 is at the top (startY)
@@ -59,14 +59,14 @@ export const HP4067UI = ({ state }: { state: any }) => {
     boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6)',
   } as React.CSSProperties)
 
-  // Narrow IC per request: width 20px centered at x=50
+  // Narrow IC per request: width 20px centered at x=52.5
   const chipWidth = 20
   const chipHeight = 100
-  const chipLeft = 50 - chipWidth / 2
+  const chipLeft = 52.5 - chipWidth / 2
   const chipTop = (BOUNDS.h - chipHeight) / 2
   // Absolute label gutter positions
   const labelXLeft = 28
-  const labelXRight = 72
+  const labelXRight = 77
 
   return (
     <div style={containerStyle}>

@@ -3,8 +3,8 @@
     "label": "Logic IC",
     "description": "Universal 74xx series logic IC. Supports 7400, 7402, 7404, 7407, 7408, 7432, 7486, 74266.",
     "group": "Logic",
-    "w": 125,
-    "h": 75,
+    "w": 120,
+    "h": 45,
     "attrs": {
         "icType": "7408"
     },
@@ -12,49 +12,49 @@
         {
             "id": "p1",
             "x": 15,
-            "y": 75,
+            "y": 45,
             "type": "digital",
             "description": "Pin 1"
         },
         {
             "id": "p2",
             "x": 30,
-            "y": 75,
+            "y": 45,
             "type": "digital",
             "description": "Pin 2"
         },
         {
             "id": "p3",
             "x": 45,
-            "y": 75,
+            "y": 45,
             "type": "digital",
             "description": "Pin 3"
         },
         {
             "id": "p4",
             "x": 60,
-            "y": 75,
+            "y": 45,
             "type": "digital",
             "description": "Pin 4"
         },
         {
             "id": "p5",
             "x": 75,
-            "y": 75,
+            "y": 45,
             "type": "digital",
             "description": "Pin 5"
         },
         {
             "id": "p6",
             "x": 90,
-            "y": 75,
+            "y": 45,
             "type": "digital",
             "description": "Pin 6"
         },
         {
             "id": "p7",
             "x": 105,
-            "y": 75,
+            "y": 45,
             "type": "digital",
             "description": "Pin 7 (GND)"
         },

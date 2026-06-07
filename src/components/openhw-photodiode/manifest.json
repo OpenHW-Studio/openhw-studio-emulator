@@ -3,21 +3,21 @@
     "label": "Photodiode",
     "group": "Sensors",
     "w": 15,
-    "h": 40,
+    "h": 45,
     "attrs": {
         "light": 0
     },
     "pins": [
         {
             "id": "A",
-            "x": 5,
-            "y": 32,
+            "x": 0,
+            "y": 45,
             "type": "analog"
         },
         {
             "id": "C",
-            "x": 20,
-            "y": 32,
+            "x": 15,
+            "y": 45,
             "type": "power"
         }
     ],

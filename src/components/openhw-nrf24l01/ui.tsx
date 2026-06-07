@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 250, h: 100 };
+export const BOUNDS = { x: 0, y: 0, w: 150, h: 75 };
 
 export const NRF24L01ContextMenu = ({
     attrs,
@@ -34,24 +34,24 @@ export const NRF24L01UI = ({ state, attrs }: { state: any, attrs: any }) => {
                 <circle cx="770" cy="325" r="8" fill="#161616" />
 
                 <g fill="#999">
-                    <circle cx="80" cy="95" r="16" />
-                    <circle cx="80" cy="165" r="16" />
-                    <circle cx="80" cy="235" r="16" />
-                    <circle cx="80" cy="305" r="16" />
-                    <circle cx="130" cy="95" r="16" />
-                    <circle cx="130" cy="165" r="16" />
-                    <circle cx="130" cy="235" r="16" />
-                    <circle cx="130" cy="305" r="16" />
+                    <circle cx="50" cy="80" r="16" />
+                    <circle cx="50" cy="160" r="16" />
+                    <circle cx="50" cy="240" r="16" />
+                    <circle cx="50" cy="320" r="16" />
+                    <circle cx="150" cy="80" r="16" />
+                    <circle cx="150" cy="160" r="16" />
+                    <circle cx="150" cy="240" r="16" />
+                    <circle cx="150" cy="320" r="16" />
                 </g>
                 <g fill="#e0e0e0">
-                    <rect x="73" y="88" width="14" height="14" />
-                    <rect x="73" y="158" width="14" height="14" />
-                    <rect x="73" y="228" width="14" height="14" />
-                    <rect x="73" y="298" width="14" height="14" />
-                    <rect x="123" y="88" width="14" height="14" />
-                    <rect x="123" y="158" width="14" height="14" />
-                    <rect x="123" y="228" width="14" height="14" />
-                    <rect x="123" y="298" width="14" height="14" />
+                    <rect x="43" y="73" width="14" height="14" />
+                    <rect x="43" y="153" width="14" height="14" />
+                    <rect x="43" y="233" width="14" height="14" />
+                    <rect x="43" y="313" width="14" height="14" />
+                    <rect x="143" y="73" width="14" height="14" />
+                    <rect x="143" y="153" width="14" height="14" />
+                    <rect x="143" y="233" width="14" height="14" />
+                    <rect x="143" y="313" width="14" height="14" />
                 </g>
 
                 <rect x="210" y="140" width="80" height="80" fill="#222" stroke="#444" strokeWidth="1" />
