@@ -21,8 +21,8 @@
     },
     "autocoding": {
         "arduino": {
-            "setup": "pinMode(${TRIG}, OUTPUT);\npinMode(${ECHO}, INPUT);",
-            "loop": "digitalWrite(${TRIG}, LOW);\ndelayMicroseconds(2);\ndigitalWrite(${TRIG}, HIGH);\ndelayMicroseconds(10);\ndigitalWrite(${TRIG}, LOW);\nlong dur_${COMP_SUFFIX} = pulseIn(${ECHO}, HIGH);\nfloat cm_${COMP_SUFFIX} = dur_${COMP_SUFFIX} / 58.2;\nfloat inch_${COMP_SUFFIX} = dur_${COMP_SUFFIX} / 148.0;\nSerial.print(\"Distance: \");\nSerial.print(cm_${COMP_SUFFIX}, 1);\nSerial.print(\" cm | \");\nSerial.print(inch_${COMP_SUFFIX}, 1);\nSerial.println(\" in\");\ndelay(500);"
+            "setup": "pinMode(${TRIG}, OUTPUT);\npinMode(${ECHO}, INPUT);\nSerial.begin(9600);",
+            "loop": "digitalWrite(${TRIG}, LOW);\ndelayMicroseconds(2);\ndigitalWrite(${TRIG}, HIGH);\ndelayMicroseconds(10);\ndigitalWrite(${TRIG}, LOW);\nlong dur_${COMP_SUFFIX} = pulseIn(${ECHO}, HIGH);\nfloat cm_${COMP_SUFFIX} = dur_${COMP_SUFFIX} / 58.2;\nSerial.print(\"Distance: \");\nSerial.print(cm_${COMP_SUFFIX}, 0);\nSerial.println(\" cm\");\ndelay(200);"
         }
     }
 }

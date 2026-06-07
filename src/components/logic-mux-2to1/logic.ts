@@ -24,38 +24,8 @@ export class Mux2to1Logic extends BaseComponent {
         }
 
         const outVoltage = outputHigh ? 5.0 : 0.0;
-        const outPinKey = `${this.id}:OUT`;
-        const visited = new Set<string>();
-        visited.add(outPinKey);
-
-        const propagate = (pinKey: string, voltage: number) => {
-            for (const w of wires) {
-                const match = w.from === pinKey || w.to === pinKey;
-                if (!match) continue;
-                const otherKey = w.from === pinKey ? w.to : w.from;
-                if (visited.has(otherKey)) continue;
-                visited.add(otherKey);
-
-                const [compId, compPin] = otherKey.split(':');
-                const inst = instances.find(i => i.id === compId);
-                if (!inst) continue;
-
-                if (!inst.pins[compPin]) inst.pins[compPin] = { voltage: 0, mode: 'INPUT' };
-                inst.setPinVoltage(compPin, voltage);
-
-                if (inst.type === 'openhw-resistor') {
-                    const otherPin = compPin === 'p1' ? 'p2' : 'p1';
-                    inst.setPinVoltage(otherPin, voltage);
-                    const forwardKey = `${compId}:${otherPin}`;
-                    if (!visited.has(forwardKey)) {
-                        visited.add(forwardKey);
-                        propagate(forwardKey, voltage);
-                    }
-                }
-            }
-        };
-
-        propagate(outPinKey, outVoltage);
+        if (!this.pins['OUT']) this.pins['OUT'] = { voltage: 0, mode: 'OUTPUT' };
+        this.pins['OUT'].voltage = outVoltage;
     }
 
     getPinVoltage(pinId: string): number {

@@ -17,6 +17,17 @@
             "type": "digital",
             "description": "Clock Output"
         }
-    ]
+    ],
+    "autowiring": {
+        "connections": [
+            { "from": "OUT", "to": "arduino:D2", "via": "openhw-resistor", "attrs": { "value": "220" } }
+        ]
+    },
+    "autocoding": {
+        "arduino": {
+            "setup": "Serial.begin(9600);\npinMode(${OUT}, INPUT);",
+            "loop": "Serial.print(\"CLK=\");\nSerial.println(digitalRead(${OUT}));\ndelay(100);"
+        }
+    }
 }
 

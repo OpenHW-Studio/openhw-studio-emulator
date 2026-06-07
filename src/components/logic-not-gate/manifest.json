@@ -21,5 +21,17 @@
             "type": "digital",
             "description": "Inverted output"
         }
-    ]
+    ],
+    "autowiring": {
+        "connections": [
+            { "from": "IN", "to": "arduino:D2" },
+            { "from": "OUT", "to": "arduino:D4", "via": "openhw-resistor", "attrs": { "value": "220" } }
+        ]
+    },
+    "autocoding": {
+        "arduino": {
+            "setup": "Serial.begin(9600);\npinMode(${IN}, OUTPUT);\npinMode(${OUT}, INPUT);\nSerial.println(\"NOT Gate ready\");",
+            "loop": "digitalWrite(${IN}, LOW);\ndelay(10);\nSerial.print(\"NOT | 0 -> \");\nSerial.println(digitalRead(${OUT})?\"HIGH\":\"LOW\");\ndelay(1000);\ndigitalWrite(${IN}, HIGH);\ndelay(10);\nSerial.print(\"NOT | 1 -> \");\nSerial.println(digitalRead(${OUT})?\"HIGH\":\"LOW\");\ndelay(1000);"
+        }
+    }
 }
