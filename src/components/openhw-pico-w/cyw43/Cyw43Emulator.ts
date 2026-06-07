@@ -195,7 +195,7 @@ export class Cyw43Emulator {
     if (cmd.address === F0.READ_TEST) {
       const value = this.readTestPrimed ? TEST_PATTERN : 0;
       this.readTestPrimed = true;
-      writeU32LE(out, 0, value);
+      writeU32Swap(out, 0, value);
       this.chipReady = true;
     } else {
       const idx = cmd.address >>> 2;
@@ -212,16 +212,12 @@ export class Cyw43Emulator {
     if (cmd.write) {
       if (cmd.address === F1.SDIO_BACKPLANE_ADDRESS_LOW) {
         this.f1Window = (this.f1Window & 0xffff00) | (payload[0] ?? 0);
-        // console.log(`[Cyw43Emulator] F1 Backplane Window set to 0x${this.f1Window.toString(16)} (LOW)`);
       } else if (cmd.address === F1.SDIO_BACKPLANE_ADDRESS_MID) {
         this.f1Window = (this.f1Window & 0xff00ff) | ((payload[0] ?? 0) << 8);
-        // console.log(`[Cyw43Emulator] F1 Backplane Window set to 0x${this.f1Window.toString(16)} (MID)`);
       } else if (cmd.address === F1.SDIO_BACKPLANE_ADDRESS_HIGH) {
         this.f1Window = (this.f1Window & 0x00ffff) | ((payload[0] ?? 0) << 16);
-        console.log(`[Cyw43Emulator] F1 Backplane Window updated: 0x${this.f1Window.toString(16)}`);
       } else if (cmd.address === F1.SDIO_CHIP_CLOCK_CSR) {
         const requested = payload[0] ?? 0;
-        console.log(`[Cyw43Emulator] F1 Clock CSR Write: 0x${requested.toString(16)}`);
         if (requested & ClockCsr.ALP_AVAIL_REQ) this.clockCsr |= ClockCsr.ALP_AVAIL;
         if (requested & ClockCsr.HT_AVAIL_REQ) this.clockCsr |= ClockCsr.HT_AVAIL;
       }
@@ -248,11 +244,7 @@ export class Cyw43Emulator {
   private handleF2(cmd: Cyw43Cmd, _payload: Uint8Array): Uint8Array | null {
     if (cmd.write) {
       const frame = decodeSdpcm(_payload);
-      if (frame) {
-        this.handleHostFrame(frame.channel, frame.payload);
-      } else {
-        console.warn(`[Cyw43Emulator] Failed to decode SDPCM frame on F2 write!`);
-      }
+      if (frame) this.handleHostFrame(frame.channel, frame.payload);
       return null;
     }
 
@@ -281,7 +273,6 @@ export class Cyw43Emulator {
       // for the test harness we forward raw payload.
       const BDC = 4;
       const ether = payload.length >= BDC ? payload.subarray(BDC) : payload;
-      console.log(`[Cyw43Emulator] Outbound network packet, len=${ether.length}`);
       this.firePacketOut(ether);
     }
     // Channel 1 (events) is chip → host only.
@@ -301,7 +292,6 @@ export class Cyw43Emulator {
       varName = readCString(data, 0);
       varOff = varName.length + 1;
     }
-    console.log(`[Cyw43Emulator] IOCTL ${isGet ? 'GET' : 'SET'} cmd=${cdc.cmd}${varName ? ' var=' + varName : ''} reqId=${(cdc.flags >>> 16) & 0xffff}`);
     const reqId = (cdc.flags >>> 16) & 0xffff;
     let response: Uint8Array<ArrayBufferLike> = new Uint8Array(0);
     const status = 0;
@@ -403,7 +393,6 @@ export class Cyw43Emulator {
     const dv = new DataView(data.buffer, data.byteOffset, data.byteLength);
     const ssidLen = Math.min(dv.getUint32(0, true), 32);
     const ssid = new TextDecoder('utf-8').decode(data.subarray(4, 4 + ssidLen));
-    console.log(`[Cyw43Emulator] SET_SSID: Attempting to join "${ssid}"`);
     this.currentSsid = ssid;
     this.linkState = 'authenticating';
 
@@ -414,7 +403,6 @@ export class Cyw43Emulator {
     this.queueEvent(WLC_E.ASSOC_START, WLC_E_STATUS.SUCCESS, 0);
 
     if (ssid === this.ap.ssid) {
-      console.log(`[Cyw43Emulator] SET_SSID: Joined AP successfully`);
       this.queueEvent(WLC_E.ASSOC, WLC_E_STATUS.SUCCESS, 0);
       this.queueEvent(WLC_E.SET_SSID, WLC_E_STATUS.SUCCESS, 0,
         encodeSetSsidPayload(ssid));
@@ -422,7 +410,6 @@ export class Cyw43Emulator {
       this.linkState = 'up';
       this.fireConnect(ssid);
     } else {
-      console.warn(`[Cyw43Emulator] SET_SSID: Failed to join (SSID not found)`);
       this.queueEvent(WLC_E.SET_SSID, WLC_E_STATUS.FAIL, 0,
         encodeSetSsidPayload(ssid));
       this.queueEvent(WLC_E.LINK, WLC_E_STATUS.SUCCESS, 0);
@@ -431,7 +418,6 @@ export class Cyw43Emulator {
   }
 
   private handleScan(): void {
-    console.log(`[Cyw43Emulator] Scanning... returning AP "${this.ap.ssid}"`);
     // Real chip emits one ESCAN_RESULT per BSS, then SCAN_COMPLETE.
     const bss = bssInfoBlob(this.ap);
     const escanPayload = buildEscanResult(bss);
@@ -542,6 +528,12 @@ function writeU32LE(buf: Uint8Array, off: number, value: number): void {
   buf[off + 1] = (value >>> 8) & 0xff;
   buf[off + 2] = (value >>> 16) & 0xff;
   buf[off + 3] = (value >>> 24) & 0xff;
+}
+function writeU32Swap(buf: Uint8Array, off: number, value: number): void {
+  buf[off] = (value >>> 8) & 0xff;
+  buf[off + 1] = value & 0xff;
+  buf[off + 2] = (value >>> 24) & 0xff;
+  buf[off + 3] = (value >>> 16) & 0xff;
 }
 function readCString(buf: Uint8Array, off: number): string {
   let end = off;
