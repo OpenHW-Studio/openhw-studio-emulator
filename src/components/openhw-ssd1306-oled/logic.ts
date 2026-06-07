@@ -92,7 +92,7 @@ export class SSD1306Logic extends I2CProtocol {
 
   onI2CByte(addr: number, data: number) {
     super.onI2CByte(addr, data);
-    console.log(`[SSD1306 OLED] Received I2C byte: 0x${data.toString(16)} at address 0x${addr.toString(16)}`);
+    // console.log(`[SSD1306 OLED] Received I2C byte: 0x${data.toString(16)} at address 0x${addr.toString(16)}`);
 
 
     if (this.awaitingControlByte) {
