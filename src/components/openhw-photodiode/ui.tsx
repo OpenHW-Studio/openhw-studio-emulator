@@ -26,14 +26,14 @@ export const PhotodiodeContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdat
     );
 };
 
-export const BOUNDS = { x: 0, y: 0, w: 15, h: 40 };
+export const BOUNDS = { x: 0, y: 0, w: 15, h: 45 };
 
 export const PhotodiodeUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const light = state?.light ?? 0;
 
     return (
         <div style={{ pointerEvents: 'none', position: 'absolute', inset: 0 }}>
-            <svg width="100%" height="100%" viewBox="-3 -5 21 55" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }}>
+            <svg width="100%" height="100%" viewBox="-5 -5 25 60" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }}>
                 <g transform="translate(7.5, 10)">
                     <path d="M -5 5 L -5 -2 A 5 5 0 0 1 5 -2 L 5 5 Z" fill="#2c3e50" opacity="0.8" />
                     <rect x="-6" y="5" width="12" height="2" fill="#2c3e50" />
@@ -45,18 +45,18 @@ export const PhotodiodeUI = ({ state, attrs }: { state: any, attrs: any }) => {
                     <circle cx="0" cy="0" r="2.5" fill={light > 10 ? "#f1c40f" : "#7f8c8d"} />
                 </g>
 
-                {/* Pins with 15px spacing to match breadboard */}
-                <line x1="2.5" y1="17" x2="0" y2="40" stroke="#95a5a6" strokeWidth="1" />
-                <line x1="12.5" y1="17" x2="20" y2="40" stroke="#95a5a6" strokeWidth="1" />
+                {/* Pins */}
+                <line x1="4.5" y1="17" x2="0" y2="45" stroke="#95a5a6" strokeWidth="1" />
+                <line x1="10.5" y1="17" x2="15" y2="45" stroke="#95a5a6" strokeWidth="1" />
 
-                <circle cx="0" cy="40" r="1.5" fill="#ecf0f1" />
-                <circle cx="20" cy="40" r="1.5" fill="#ecf0f1" />
+                <circle cx="0" cy="45" r="1.5" fill="#ecf0f1" />
+                <circle cx="15" cy="45" r="1.5" fill="#ecf0f1" />
 
                 {/* Flat spot indicating cathode commonly */}
-                <rect x="11" y="15" width="2" height="2" fill="#e74c3c" />
+                <rect x="11.5" y="15" width="2" height="2" fill="#e74c3c" />
 
-                <text x="0" y="46" fontSize="4" fill="#f8fafc" textAnchor="middle">A</text>
-                <text x="15" y="46" fontSize="4" fill="#f8fafc" textAnchor="middle">C</text>
+                <text x="0" y="51" fontSize="4" fill="var(--text2, black)" textAnchor="middle">A</text>
+                <text x="15" y="51" fontSize="4" fill="var(--text2, black)" textAnchor="middle">C</text>
             </svg>
         </div>
     );

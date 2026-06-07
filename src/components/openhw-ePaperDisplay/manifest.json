@@ -3,7 +3,7 @@
     "label": "2.9\" e-Paper Display (beta)",
     "group": "Displays",
     "w": 220,
-    "h": 90,
+    "h": 135,
     "attrs": {
         "breadboard": {
             "anchorPin": "GND"
@@ -18,50 +18,50 @@
     "pins": [
         {
             "id": "VCC",
-            "x": 10,
-            "y": 20,
+            "x": 15,
+            "y": 15,
             "type": "power"
         },
         {
             "id": "GND",
-            "x": 10,
-            "y": 27,
+            "x": 15,
+            "y": 30,
             "type": "power"
         },
         {
             "id": "DIN",
-            "x": 10,
-            "y": 34,
+            "x": 15,
+            "y": 45,
             "type": "input"
         },
         {
             "id": "CLK",
-            "x": 10,
-            "y": 41,
+            "x": 15,
+            "y": 60,
             "type": "input"
         },
         {
             "id": "CS",
-            "x": 10,
-            "y": 48,
+            "x": 15,
+            "y": 75,
             "type": "input"
         },
         {
             "id": "DC",
-            "x": 10,
-            "y": 55,
+            "x": 15,
+            "y": 90,
             "type": "input"
         },
         {
             "id": "RST",
-            "x": 10,
-            "y": 62,
+            "x": 15,
+            "y": 105,
             "type": "input"
         },
         {
             "id": "BUSY",
-            "x": 10,
-            "y": 69,
+            "x": 15,
+            "y": 120,
             "type": "output"
         }
     ],

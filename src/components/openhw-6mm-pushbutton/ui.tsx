@@ -28,7 +28,7 @@ export const Pushbutton6mmContextMenu = ({ attrs, onUpdate }: { attrs: any, onUp
     );
 };
 
-export const BOUNDS = { x: 0, y: 0, w: 50, h: 50 };
+export const BOUNDS = { x: 0, y: 0, w: 45, h: 60 };
 
 export const Pushbutton6mmUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning: boolean }) => {
     const [isPressed, setIsPressed] = useState(false);
@@ -39,8 +39,8 @@ export const Pushbutton6mmUI = ({ state, attrs, isRunning }: { state: any, attrs
         attrsRef.current = attrs;
     });
 
-    const nativeW = 50;
-    const nativeH = 50;
+    const nativeW = 45;
+    const nativeH = 60;
     const scaleX = BOUNDS.w / nativeW;
     const scaleY = BOUNDS.h / nativeH;
 
@@ -104,7 +104,7 @@ export const Pushbutton6mmUI = ({ state, attrs, isRunning }: { state: any, attrs
                 <svg
                     width={nativeW}
                     height={nativeH}
-                    viewBox="0 0 50 50"
+                    viewBox="0 0 45 60"
                     xmlns="http://www.w3.org/2000/svg"
                 >
                     <defs>
@@ -128,28 +128,28 @@ export const Pushbutton6mmUI = ({ state, attrs, isRunning }: { state: any, attrs
                         </radialGradient>
                     </defs>
 
-                    <path d="M 8 10 H 3 Q 0 10 0 12" stroke={`url(#leg-grad-${uniqueId})`} strokeWidth="3" strokeLinecap="round" fill="none" />
-                    <path d="M 8 40 H 3 Q 0 40 0 38" stroke={`url(#leg-grad-${uniqueId})`} strokeWidth="3" strokeLinecap="round" fill="none" />
+                    <path d="M 5.5 15 H 3 Q 0 15 0 17" stroke={`url(#leg-grad-${uniqueId})`} strokeWidth="3" strokeLinecap="round" fill="none" />
+                    <path d="M 5.5 45 H 3 Q 0 45 0 43" stroke={`url(#leg-grad-${uniqueId})`} strokeWidth="3" strokeLinecap="round" fill="none" />
 
-                    <path d="M 42 10 H 45 Q 45 10 45 12" stroke={`url(#leg-grad-${uniqueId})`} strokeWidth="3" strokeLinecap="round" fill="none" />
-                    <path d="M 42 40 H 45 Q 45 40 45 38" stroke={`url(#leg-grad-${uniqueId})`} strokeWidth="3" strokeLinecap="round" fill="none" />
+                    <path d="M 39.5 15 H 45 Q 45 15 45 17" stroke={`url(#leg-grad-${uniqueId})`} strokeWidth="3" strokeLinecap="round" fill="none" />
+                    <path d="M 39.5 45 H 45 Q 45 45 45 43" stroke={`url(#leg-grad-${uniqueId})`} strokeWidth="3" strokeLinecap="round" fill="none" />
 
-                    <circle cx="0" cy="10" r="1.5" fill="#9ca3af" />
-                    <circle cx="0" cy="40" r="1.5" fill="#9ca3af" />
-                    <circle cx="45" cy="10" r="1.5" fill="#9ca3af" />
-                    <circle cx="45" cy="40" r="1.5" fill="#9ca3af" />
+                    <circle cx="0" cy="15" r="1.5" fill="#9ca3af" />
+                    <circle cx="0" cy="45" r="1.5" fill="#9ca3af" />
+                    <circle cx="45" cy="15" r="1.5" fill="#9ca3af" />
+                    <circle cx="45" cy="45" r="1.5" fill="#9ca3af" />
 
-                    <rect x="7" y="5" width="36" height="40" rx="3" fill={`url(#base-grad-${uniqueId})`} stroke="#000000" strokeWidth="0.8" />
-                    <rect x="10" y="8" width="30" height="34" rx="2" fill={`url(#metal-grad-${uniqueId})`} stroke="#4b5563" strokeWidth="0.6" />
+                    <rect x="4.5" y="10" width="36" height="40" rx="3" fill={`url(#base-grad-${uniqueId})`} stroke="#000000" strokeWidth="0.8" />
+                    <rect x="7.5" y="13" width="30" height="34" rx="2" fill={`url(#metal-grad-${uniqueId})`} stroke="#4b5563" strokeWidth="0.6" />
 
-                    <circle cx="12.5" cy="10.5" r="1" fill="#1f2937" />
-                    <circle cx="37.5" cy="10.5" r="1" fill="#1f2937" />
-                    <circle cx="12.5" cy="39.5" r="1" fill="#1f2937" />
-                    <circle cx="37.5" cy="39.5" r="1" fill="#1f2937" />
+                    <circle cx="10" cy="15.5" r="1" fill="#1f2937" />
+                    <circle cx="35" cy="15.5" r="1" fill="#1f2937" />
+                    <circle cx="10" cy="44.5" r="1" fill="#1f2937" />
+                    <circle cx="35" cy="44.5" r="1" fill="#1f2937" />
 
-                    <circle cx="25" cy="25" r="11" fill="#1f2937" opacity="0.15" />
-                    <circle cx="25" cy="25" r="10" fill="#4b5563" stroke="#374151" strokeWidth="0.5" />
-                    <circle cx="25" cy="25" r="8.5" fill={`url(#plunger-grad-${uniqueId})`} stroke="#1f2937" strokeWidth="0.5" />
+                    <circle cx="22.5" cy="30" r="11" fill="#1f2937" opacity="0.15" />
+                    <circle cx="22.5" cy="30" r="10" fill="#4b5563" stroke="#374151" strokeWidth="0.5" />
+                    <circle cx="22.5" cy="30" r="8.5" fill={`url(#plunger-grad-${uniqueId})`} stroke="#1f2937" strokeWidth="0.5" />
                 </svg>
             </div>
         </div>

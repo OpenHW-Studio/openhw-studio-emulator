@@ -2,8 +2,8 @@
     "type": "openhw-biaxial-stepper",
     "label": "Biaxial Stepper Motor",
     "group": "Outputs",
-    "w": 280,
-    "h": 280,
+    "w": 435,
+    "h": 435,
     "attrs": {
         "outerHandLength": "30",
         "outerHandColor": "gold",
@@ -16,50 +16,50 @@
     "pins": [
         {
             "id": "A1-",
-            "x": 80,
-            "y": 119,
+            "x": 75,
+            "y": 150,
             "type": "digital"
         },
         {
             "id": "A1+",
-            "x": 80,
-            "y": 129,
+            "x": 75,
+            "y": 165,
             "type": "digital"
         },
         {
             "id": "B1+",
-            "x": 80,
-            "y": 139,
+            "x": 75,
+            "y": 180,
             "type": "digital"
         },
         {
             "id": "B1-",
-            "x": 80,
-            "y": 148,
+            "x": 75,
+            "y": 195,
             "type": "digital"
         },
         {
             "id": "A2-",
-            "x": 80,
-            "y": 158,
+            "x": 75,
+            "y": 210,
             "type": "digital"
         },
         {
             "id": "A2+",
-            "x": 80,
-            "y": 167,
+            "x": 75,
+            "y": 225,
             "type": "digital"
         },
         {
             "id": "B2+",
-            "x": 80,
-            "y": 177,
+            "x": 75,
+            "y": 240,
             "type": "digital"
         },
         {
             "id": "B2-",
-            "x": 80,
-            "y": 187,
+            "x": 75,
+            "y": 255,
             "type": "digital"
         }
     ],

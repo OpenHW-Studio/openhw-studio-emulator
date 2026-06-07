@@ -23,6 +23,7 @@ export { default as openhwSlideSwitch } from './openhw-slide-switch';
 export { default as openhwPotentiometer } from './openhw-potentiometer';
 export { default as openhw74hc595 } from './openhw-74hc595';
 export { default as openhw74hc165 } from './openhw-74hc165';
+
 export { default as openhwMax7219 } from './openhw-max7219';
 export { default as openhwSSD1306Oled } from './openhw-ssd1306-oled';
 export { default as openhw7Segment } from './openhw-7segment';

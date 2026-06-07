@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 220, h: 90 };
+export const BOUNDS = { x: 0, y: 0, w: 220, h: 135 };
 
 export const EPaperUI = ({ state }: { state: any }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -85,26 +85,26 @@ export const EPaperUI = ({ state }: { state: any }) => {
 
         {/* Pin Labels & Pins */}
         {[
-            { id: "VCC", y: 20 },
-            { id: "GND", y: 27 },
-            { id: "DIN", y: 34 },
-            { id: "CLK", y: 41 },
-            { id: "CS",  y: 48 },
-            { id: "DC",  y: 55 },
-            { id: "RST", y: 62 },
-            { id: "BUSY",y: 69 }
+            { id: "VCC", y: 15 },
+            { id: "GND", y: 30 },
+            { id: "DIN", y: 45 },
+            { id: "CLK", y: 60 },
+            { id: "CS",  y: 75 },
+            { id: "DC",  y: 90 },
+            { id: "RST", y: 105 },
+            { id: "BUSY",y: 120 }
         ].map(pin => (
             <g key={pin.id}>
-                <circle cx="10" cy={pin.y} r="2.5" stroke="#E5B85C" strokeWidth="1" fill="#FFFFFF" />
-                <text x="16" y={pin.y + 1.5} fill="#FFFFFF" fontSize="4" fontFamily="Arial, sans-serif" fontWeight="bold">{pin.id}</text>
+                <circle cx="15" cy={pin.y} r="2.5" stroke="#E5B85C" strokeWidth="1" fill="#FFFFFF" />
+                <text x="21" y={pin.y + 1.5} fill="#FFFFFF" fontSize="4" fontFamily="Arial, sans-serif" fontWeight="bold">{pin.id}</text>
             </g>
         ))}
 
-        {/* Screen bezel */}
-        <rect x="35" y="5" width="160" height="80" fill="#E0E0E0" rx="2" />
-        <rect x="38" y="8" width="154" height="74" fill="#000000" />
+        {/* Screen bezel (centered vertically) */}
+        <rect x="40" y="27.5" width="160" height="80" fill="#E0E0E0" rx="2" />
+        <rect x="43" y="30.5" width="154" height="74" fill="#000000" />
         
-        <foreignObject x="40" y="10" width="150" height="70">
+        <foreignObject x="45" y="32.5" width="150" height="70">
             <canvas
             ref={canvasRef}
             width="296"

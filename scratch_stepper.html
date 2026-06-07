@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://unpkg.com/@wokwi/elements@latest"></script>
+</head>
+<body>
+  <div style="width: 280px; height: 280px; position: relative;" id="container">
+    <wokwi-biaxial-stepper id="motor" style="display: block; width: 280px; height: 280px;"></wokwi-biaxial-stepper>
+  </div>
+  <pre id="output"></pre>
+  <script>
+    setTimeout(() => {
+        const motor = document.getElementById('motor');
+        const shadow = motor.shadowRoot;
+        if (!shadow) {
+            document.getElementById('output').textContent = "No shadow root";
+            return;
+        }
+        // find all rects or paths that look like pins.
+        // Usually pins are `rect` or `path` inside a `<g>` with id="pins" or similar.
+        const pins = shadow.querySelectorAll('use[href="#pin"], path[id^="pin"]');
+        let out = "";
+        const motorRect = motor.getBoundingClientRect();
+        
+        // If we can't find specific pins, let's just dump all elements with bounding boxes
+        const allElements = shadow.querySelectorAll('*');
+        const pinCandidates = [];
+        allElements.forEach(el => {
+            const rect = el.getBoundingClientRect();
+            // Pins are usually small, e.g. 10x10 or similar
+            if (rect.width > 0 && rect.width < 20 && rect.height > 0 && rect.height < 20) {
+                pinCandidates.push({
+                    tag: el.tagName,
+                    id: el.id,
+                    x: rect.left - motorRect.left,
+                    y: rect.top - motorRect.top,
+                    w: rect.width,
+                    h: rect.height
+                });
+            }
+        });
+        
+        out += JSON.stringify(pinCandidates, null, 2);
+        document.getElementById('output').textContent = out;
+    }, 1000);
+  </script>
+</body>
+</html>

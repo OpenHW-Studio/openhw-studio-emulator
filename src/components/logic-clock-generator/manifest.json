@@ -3,8 +3,8 @@
     "label": "Clock",
     "description": "Adjustable Clock Generator. Outputs a continuous square wave.",
     "group": "Logic",
-    "w": 125,
-    "h": 100,
+    "w": 75,
+    "h": 60,
     "attrs": {
         "frequency": "10",
         "units": "KHz"
@@ -12,8 +12,8 @@
     "pins": [
         {
             "id": "OUT",
-            "x": 125,
-            "y": 42.8,
+            "x": 75,
+            "y": 30,
             "type": "digital",
             "description": "Clock Output"
         }
