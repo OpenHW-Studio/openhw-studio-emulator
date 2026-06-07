@@ -107,5 +107,20 @@
             "type": "digital",
             "description": "Pin 14 (VCC)"
         }
-    ]
+    ],
+    "autowiring": {
+        "connections": [
+            { "from": "p7", "to": "arduino:GND" },
+            { "from": "p14", "to": "arduino:5V" },
+            { "from": "p1", "to": "arduino:D2" },
+            { "from": "p2", "to": "arduino:D3" },
+            { "from": "p3", "to": "arduino:D4" }
+        ]
+    },
+    "autocoding": {
+        "arduino": {
+            "setup": "Serial.begin(9600);\nSerial.println(\"Logic IC (${icType}) ready\");\npinMode(${p1}, OUTPUT);\npinMode(${p2}, OUTPUT);\npinMode(${p3}, INPUT);",
+            "loop": "for (int i=0; i<4; i++) {\n  digitalWrite(${p1}, (i&1)?HIGH:LOW);\n  digitalWrite(${p2}, (i&2)?HIGH:LOW);\n  delay(5);\n  Serial.print(\"IC | p1=\");\n  Serial.print((i&1)?1:0);\n  Serial.print(\" p2=\");\n  Serial.print((i&2)?1:0);\n  Serial.print(\" -> p3=\");\n  Serial.println(digitalRead(${p3}));\n  delay(500);\n}"
+        }
+    }
 }

@@ -21,6 +21,8 @@ export class OrGateLogic extends BaseComponent {
         }
 
         const outVoltage = outputHigh ? 5.0 : 0.0;
+        if (!this.pins['OUT']) this.pins['OUT'] = { voltage: 0, mode: 'OUTPUT' };
+        this.pins['OUT'].voltage = outVoltage;
         const outPinKey = `${this.id}:OUT`;
         const visited = new Set<string>();
         visited.add(outPinKey);
@@ -40,7 +42,7 @@ export class OrGateLogic extends BaseComponent {
                 if (!inst.pins[compPin]) inst.pins[compPin] = { voltage: 0, mode: 'INPUT' };
                 inst.setPinVoltage(compPin, voltage);
 
-                if (inst.type === 'wokwi-resistor') {
+                if (inst.type === 'wokwi-resistor' || inst.type === 'openhw-resistor') {
                     const otherPin = compPin === 'p1' ? 'p2' : 'p1';
                     inst.setPinVoltage(otherPin, voltage);
                     const forwardKey = `${compId}:${otherPin}`;
