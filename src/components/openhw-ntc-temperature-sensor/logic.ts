@@ -3,14 +3,19 @@ import { BaseComponent } from '../BaseComponent';
 export class NtcLogic extends BaseComponent {
     constructor(id: string, manifest: any) {
         super(id, manifest);
+        let temp = manifest.attrs?.temperature || '25';
+        if (typeof sessionStorage !== 'undefined') {
+            const saved = sessionStorage.getItem('openhw-ntc-temp-' + id) || sessionStorage.getItem('openhw-ntc-temp');
+            if (saved) temp = saved;
+        }
         this.state = {
             resistance: 10000,
-            temperature: parseFloat(manifest.attrs?.temperature || '25')
+            temperature: parseFloat(temp)
         };
     }
 
     getConductance() {
-        const tempC = parseFloat(this.attrs?.temperature || '25');
+        const tempC = parseFloat(this.state.temperature ?? this.attrs?.temperature ?? '25');
         const beta = parseFloat(this.attrs?.beta || '3950');
         const r25 = parseFloat(this.attrs?.r25 || '10000');
 
@@ -23,7 +28,7 @@ export class NtcLogic extends BaseComponent {
     }
 
     update() {
-        const tempC = parseFloat(this.attrs?.temperature || '25');
+        const tempC = parseFloat(this.state.temperature ?? this.attrs?.temperature ?? '25');
         const beta = parseFloat(this.attrs?.beta || '3950');
         const r25 = parseFloat(this.attrs?.r25 || '10000');
         
@@ -35,6 +40,18 @@ export class NtcLogic extends BaseComponent {
             resistance,
             temperature: tempC
         });
+    }
+
+    onEvent(event: any) {
+        if (event && event.type === 'temperature') {
+            const tempC = parseFloat(event.value);
+            this.attrs.temperature = tempC;
+            this.setState({ temperature: tempC });
+            if (typeof sessionStorage !== 'undefined') {
+                sessionStorage.setItem('openhw-ntc-temp-' + this.id, event.value);
+                sessionStorage.setItem('openhw-ntc-temp', event.value);
+            }
+        }
     }
 
     onCustomTelemetry() {
