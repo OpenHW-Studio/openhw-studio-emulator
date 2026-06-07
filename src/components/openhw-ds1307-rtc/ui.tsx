@@ -36,7 +36,7 @@ export const DS1307RTCUI = ({
 
     return (
         <div style={{ position: 'relative', width: 120, height: 120 }}>
-            <svg width="120" height="120" viewBox="0 0 120 120" style={{ fontFamily: 'sans-serif' }}>
+            <svg width="120" height="120" viewBox="0 0 128 120" style={{ fontFamily: 'sans-serif' }}>
                 {/* PCB Base - Centered, 15px margins */}
                 <rect x="15" y="0" width="90" height="120" rx="3" fill="#184a8c" />
                 <rect x="15" y="0" width="90" height="120" rx="3" fill="none" stroke="#ffffff" strokeOpacity="0.15" strokeWidth="0.75" />

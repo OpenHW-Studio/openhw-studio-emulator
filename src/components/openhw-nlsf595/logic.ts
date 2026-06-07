@@ -6,9 +6,18 @@ import { SPIProtocol } from '../../protocol-handlers/index';
 // Operates via standard SPI modes (write-only).
 // Data is shifted in on SCK rising edge (while CS is LOW).
 // Outputs are latched on CS rising edge (deassert).
+//
+// Supports both:
+//   1. Hardware SPI  — bytes arrive via onSPIByte() from the runner
+//   2. Bit-bang SPI  — monitors SCK/MOSI pin changes directly (for shiftOut users)
 
 export class NLSF595Logic extends SPIProtocol {
     private latchRegister = 0;
+
+    // Bit-banging state (for shiftOut / software SPI support)
+    private sckLast = false;
+    private bbCurrentByte = 0;
+    private bbBitsReceived = 0;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
@@ -31,6 +40,35 @@ export class NLSF595Logic extends SPIProtocol {
 
         this.latchRegister = latch;
         this.updateOutputs();
+    }
+
+    // Bit-bang fallback: decode shiftOut-style SPI from SCK/MOSI pin changes
+    onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number) {
+        super.onPinStateChange(pinId, isHigh, cpuCycles);
+
+        if (pinId === 'SCK') {
+            const rising = isHigh && !this.sckLast;
+            this.sckLast = isHigh;
+
+            // On SCK rising edge while CS is active, read the MOSI bit
+            if (rising && this.csActive) {
+                const mosiBit = this.getPinVoltage('MOSI') > 0.5 ? 1 : 0;
+                this.bbCurrentByte = ((this.bbCurrentByte << 1) | mosiBit) & 0xFF;
+                this.bbBitsReceived++;
+
+                if (this.bbBitsReceived === 8) {
+                    this.onSPIByte(this.bbCurrentByte);
+                    this.bbBitsReceived = 0;
+                    this.bbCurrentByte = 0;
+                }
+            }
+        }
+
+        // Reset bit-banging state when CS goes active (LOW)
+        if (pinId === 'CS' && !isHigh) {
+            this.bbBitsReceived = 0;
+            this.bbCurrentByte = 0;
+        }
     }
 
     private updateOutputs() {
