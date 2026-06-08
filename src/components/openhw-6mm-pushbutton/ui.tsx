@@ -128,16 +128,23 @@ export const Pushbutton6mmUI = ({ state, attrs, isRunning }: { state: any, attrs
                         </radialGradient>
                     </defs>
 
-                    <path d="M 45 5.5 V 3 Q 45 0 43 0" stroke={`url(#leg-grad-${uniqueId})`} strokeWidth="3" strokeLinecap="round" fill="none" />
-                    <path d="M 15 5.5 V 3 Q 15 0 17 0" stroke={`url(#leg-grad-${uniqueId})`} strokeWidth="3" strokeLinecap="round" fill="none" />
+                    <g fill="#999">
+                        {/* Right Top */}
+                        <rect x="41.5" y="3" width="7" height="1.5" />
+                        <rect x="44" y="0" width="2" height="4.5" rx="0.5" />
 
-                    <path d="M 45 39.5 V 45 Q 45 45 43 45" stroke={`url(#leg-grad-${uniqueId})`} strokeWidth="3" strokeLinecap="round" fill="none" />
-                    <path d="M 15 39.5 V 45 Q 15 45 17 45" stroke={`url(#leg-grad-${uniqueId})`} strokeWidth="3" strokeLinecap="round" fill="none" />
+                        {/* Left Top */}
+                        <rect x="11.5" y="3" width="7" height="1.5" />
+                        <rect x="14" y="0" width="2" height="4.5" rx="0.5" />
 
-                    <circle cx="45" cy="0" r="1.5" fill="#9ca3af" />
-                    <circle cx="15" cy="0" r="1.5" fill="#9ca3af" />
-                    <circle cx="45" cy="45" r="1.5" fill="#9ca3af" />
-                    <circle cx="15" cy="45" r="1.5" fill="#9ca3af" />
+                        {/* Right Bottom */}
+                        <rect x="41.5" y="40.5" width="7" height="1.5" />
+                        <rect x="44" y="40.5" width="2" height="4.5" rx="0.5" />
+
+                        {/* Left Bottom */}
+                        <rect x="11.5" y="40.5" width="7" height="1.5" />
+                        <rect x="14" y="40.5" width="2" height="4.5" rx="0.5" />
+                    </g>
 
                     <rect x="10" y="4.5" width="40" height="36" rx="3" fill={`url(#base-grad-${uniqueId})`} stroke="#000000" strokeWidth="0.8" />
                     <rect x="13" y="7.5" width="34" height="30" rx="2" fill={`url(#metal-grad-${uniqueId})`} stroke="#4b5563" strokeWidth="0.6" />
