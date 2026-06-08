@@ -9,13 +9,32 @@ export class NPNTransistorLogic extends BaseComponent {
     onPinStateChange() {
         const vb = this.getPinVoltage('B');
         const vc = this.getPinVoltage('C');
-        // Very simplified active region model:
+        const ve = this.getPinVoltage('E');
+
         if (vb > 0.6) {
-            // Transistor is ON, E pulls high to C (minus saturation drop)
-            this.setPinVoltage('E', Math.max(0, vc - 0.2));
+            // ON: transistor conducts C→E (saturation mode)
+            // Pull Collector toward Emitter (low-side switch behavior)
+            this.setPinVoltage('C', Math.min(vc, ve + 0.2));
+            // Pull Emitter toward Collector
+            this.setPinVoltage('E', Math.max(ve, vc - 0.2));
         } else {
-            // Transistor is OFF
+            // OFF: high impedance, Collector floats to load voltage
             this.setPinVoltage('E', 0);
+            this.setPinVoltage('C', 5.0);
+        }
+    }
+
+    update(cpuCycles: number, currentWires: any[], allComponentsInstances: BaseComponent[]) {
+        const vb = this.getPinVoltage('B');
+        const vc = this.getPinVoltage('C');
+        const ve = this.getPinVoltage('E');
+
+        if (vb > 0.6) {
+            this.setPinVoltage('C', Math.min(vc, ve + 0.2));
+            this.setPinVoltage('E', Math.max(ve, vc - 0.2));
+        } else {
+            this.setPinVoltage('E', 0);
+            this.setPinVoltage('C', 5.0);
         }
     }
 }
