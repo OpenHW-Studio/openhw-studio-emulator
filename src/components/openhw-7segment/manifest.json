@@ -10,6 +10,7 @@
         "digits": "4",
         "colon": "1"
     },
+    "pins": [
         { "id": "A", "x": 135, "y": 0, "type": "digital" },
         { "id": "B", "x": 150, "y": 0, "type": "digital" },
         { "id": "C", "x": 165, "y": 0, "type": "digital" },
