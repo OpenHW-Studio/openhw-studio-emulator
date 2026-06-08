@@ -11,6 +11,11 @@ export class BiaxialStepperLogic extends BaseComponent {
     private currentPhaseInner = -1;
     private stepCountInner = 0;
 
+    // Track digital pin states directly so 3.3V boards (ESP32/Pico) work correctly.
+    // getPinVoltage() can return stale 0V when the runner delivers events as pure
+    // digital isHigh toggles without back-filling the analog voltage map in time.
+    private pinStates: Record<string, boolean> = {};
+
     constructor(id: string, manifest: any) {
         super(id, manifest);
         if (manifest.attrs && manifest.attrs.step_angle) {
@@ -20,6 +25,13 @@ export class BiaxialStepperLogic extends BaseComponent {
             outerAngle: this.outerAngle,
             innerAngle: this.innerAngle
         };
+    }
+
+    /** Read a pin's logic level using the cached digital state first, falling
+     *  back to the analog voltage check for backward compatibility. */
+    private isPinHigh(pinId: string): boolean {
+        if (pinId in this.pinStates) return this.pinStates[pinId];
+        return this.getPinVoltage(pinId) > 2.5;
     }
 
     private processStepper(
@@ -67,11 +79,14 @@ export class BiaxialStepperLogic extends BaseComponent {
     }
 
     onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number) {
+        // Cache the digital state for this pin
+        this.pinStates[pinId] = isHigh;
+
         // Evaluate Outer Stepper (Pins 1)
-        const a1Plus = this.getPinVoltage('A1+') > 2.5;
-        const a1Minus = this.getPinVoltage('A1-') > 2.5;
-        const b1Plus = this.getPinVoltage('B1+') > 2.5;
-        const b1Minus = this.getPinVoltage('B1-') > 2.5;
+        const a1Plus = this.isPinHigh('A1+');
+        const a1Minus = this.isPinHigh('A1-');
+        const b1Plus = this.isPinHigh('B1+');
+        const b1Minus = this.isPinHigh('B1-');
 
         const outerResult = this.processStepper(
             a1Plus, a1Minus, b1Plus, b1Minus,
@@ -87,10 +102,10 @@ export class BiaxialStepperLogic extends BaseComponent {
         }
 
         // Evaluate Inner Stepper (Pins 2)
-        const a2Plus = this.getPinVoltage('A2+') > 2.5;
-        const a2Minus = this.getPinVoltage('A2-') > 2.5;
-        const b2Plus = this.getPinVoltage('B2+') > 2.5;
-        const b2Minus = this.getPinVoltage('B2-') > 2.5;
+        const a2Plus = this.isPinHigh('A2+');
+        const a2Minus = this.isPinHigh('A2-');
+        const b2Plus = this.isPinHigh('B2+');
+        const b2Minus = this.isPinHigh('B2-');
 
         const innerResult = this.processStepper(
             a2Plus, a2Minus, b2Plus, b2Minus,

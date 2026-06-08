@@ -54,6 +54,7 @@ export class MAX7219Logic extends SPIProtocol {
 
     // Bit-banging state for LedControl
     private clkLast = false;
+    private dinHigh = false;
     private currentByte = 0;
     private bitsReceived = 0;
 
@@ -61,7 +62,10 @@ export class MAX7219Logic extends SPIProtocol {
     onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number) {
         super.onPinStateChange(pinId, isHigh, cpuCycles);
         const v = isHigh ? 5.0 : 0.0;
-        
+
+        // Track DIN digital state so bit-banging works on 3.3V boards (ESP32/Pico)
+        if (pinId === 'DIN') this.dinHigh = isHigh;
+
         if (pinId === 'CS')  this.setPinVoltage('CS_OUT', v);
         if (pinId === 'CLK') this.setPinVoltage('CLK_OUT', v);
 
@@ -71,7 +75,7 @@ export class MAX7219Logic extends SPIProtocol {
             this.clkLast = isHigh;
 
             if (rising && this.csActive) {
-                const dinBit = this.getPinVoltage('DIN') > 0.5 ? 1 : 0;
+                const dinBit = (this.dinHigh || this.getPinVoltage('DIN') > 0.5) ? 1 : 0;
                 this.currentByte = ((this.currentByte << 1) | dinBit) & 0xFF;
                 this.bitsReceived++;
 
