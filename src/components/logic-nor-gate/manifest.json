@@ -3,8 +3,8 @@
     "label": "NOR Gate",
     "description": "Logical NOR gate. Outputs high only when both inputs are low.",
     "group": "Logic",
-    "w": 70,
-    "h": 50,
+    "w": 75,
+    "h": 60,
     "attrs": {},
     "pins": [
         {
@@ -17,16 +17,29 @@
         {
             "id": "IN2",
             "x": 0,
-            "y": 35,
+            "y": 45,
             "type": "digital",
             "description": "Input 2"
         },
         {
             "id": "OUT",
-            "x": 70,
-            "y": 25,
+            "x": 75,
+            "y": 30,
             "type": "digital",
             "description": "Output"
         }
-    ]
+    ],
+    "autowiring": {
+        "connections": [
+            { "from": "IN1", "to": "arduino:D2" },
+            { "from": "IN2", "to": "arduino:D3" },
+            { "from": "OUT", "to": "arduino:D4", "via": "openhw-resistor", "attrs": { "value": "220" } }
+        ]
+    },
+    "autocoding": {
+        "arduino": {
+            "setup": "Serial.begin(9600);\npinMode(${IN1}, OUTPUT);\npinMode(${IN2}, OUTPUT);\npinMode(${OUT}, INPUT);\nSerial.println(\"NOR Gate ready\");",
+            "loop": "for (int i=0; i<4; i++) {\n  digitalWrite(${IN1}, (i&1)?HIGH:LOW);\n  digitalWrite(${IN2}, (i&2)?HIGH:LOW);\n  delay(5);\n  Serial.print(\"NOR | \");\n  Serial.print((i&1)?1:0);\n  Serial.print((i&2)?1:0);\n  Serial.print(\" -> \");\n  Serial.println(digitalRead(${OUT}));\n  delay(500);\n}"
+        }
+    }
 }

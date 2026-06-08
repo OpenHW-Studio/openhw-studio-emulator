@@ -1,7 +1,7 @@
 import React from 'react';
 
 // Bounding box for the blue selection ring.
-export const BOUNDS = { x: 0, y: 0, w: 386.3, h: 104 };
+export const BOUNDS = { x: 0, y: 0, w: 390, h: 105 };
 
 export const Wokwi7SegmentUI = ({ state, attrs }: { state: any, attrs: any }) => {
     // Parse attributes

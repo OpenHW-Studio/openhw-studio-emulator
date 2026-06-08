@@ -12,7 +12,15 @@ export class DHT22Logic extends BaseComponent {
     private dataBits: boolean[] = [];
     private bitIndex: number = 0;
 
-    // Injected by execute.ts
+    /** Tracks the sensor's own SDA output voltage separately from what BFS may set. */
+    private _sdaOutputVoltage = 5.0;
+
+    /** Returns the sensor's actual SDA output voltage. */
+    get sdaOutputVoltage(): number {
+        return this._sdaOutputVoltage;
+    }
+
+    // Injected by execute.ts / avr-runner.ts run loop
     private _simCpu?: any;
     private _simUpdatePhysics?: () => void;
 
@@ -25,6 +33,14 @@ export class DHT22Logic extends BaseComponent {
         // Sensor has internal pull-up resistor (mostly) or requires external. 
         // Emulate idle high.
         this.setPinVoltage('SDA', 5.0);
+        this._sdaOutputVoltage = 5.0;
+    }
+
+    setPinVoltage(pinId: string, voltage: number) {
+        super.setPinVoltage(pinId, voltage);
+        if (pinId === 'SDA') {
+            this._sdaOutputVoltage = voltage;
+        }
     }
 
     onEvent(event: any) {
@@ -144,5 +160,11 @@ export class DHT22Logic extends BaseComponent {
         }, 50 * 16);
     }
 
-    update() {}
+    update(cpuCycles: number, wires: any[], instances: BaseComponent[]) {
+        super.update(cpuCycles, wires, instances);
+        const sdaPin = this.pins['SDA'];
+        if (sdaPin && sdaPin.voltage !== this._sdaOutputVoltage) {
+            this.setPinVoltage('SDA', this._sdaOutputVoltage);
+        }
+    }
 }

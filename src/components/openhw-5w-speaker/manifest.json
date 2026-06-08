@@ -3,12 +3,12 @@
   "label": "5W Audio Speaker",
   "group": "Audio",
   "description": "5 Watt Analog Speaker with Web Audio playback",
-  "w": 80,
+  "w": 75,
   "h": 90,
   "tags": ["audio", "speaker", "sound", "analog", "5w"],
   "pins": [
-    { "id": "IN+", "description": "Positive Audio Input", "x": 30, "y": 80 },
-    { "id": "IN-", "description": "Negative Audio Input", "x": 50, "y": 80 }
+    { "id": "IN+", "description": "Positive Audio Input", "x": 30, "y": 90 },
+    { "id": "IN-", "description": "Negative Audio Input", "x": 45, "y": 90 }
   ],
   "state": {},
   "defaultAttrs": {},

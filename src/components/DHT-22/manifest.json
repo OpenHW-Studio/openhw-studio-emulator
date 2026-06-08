@@ -16,15 +16,26 @@
     ],
     "autocoding": {
         "arduino": {
-            "setup": "#include <DHT.h>\n#define DHTPIN ${SDA}\n#define DHTTYPE DHT22\nDHT dht(DHTPIN, DHTTYPE);\ndht.begin();",
+            "globals": "#include <DHT.h>\n#define DHTPIN ${SDA}\n#define DHTTYPE DHT22\nDHT dht(DHTPIN, DHTTYPE);",
+            "setup": "Serial.begin(9600);\ndht.begin();",
+            "loop": "float humidity = dht.readHumidity();\nfloat temperature = dht.readTemperature();\nif (isnan(humidity) || isnan(temperature)) {\n  Serial.println(\"DHT22 read failed!\");\n  return;\n}\nSerial.print(\"Humidity: \");\nSerial.print(humidity);\nSerial.print(\" %  Temperature: \");\nSerial.print(temperature);\nSerial.println(\" C\");\ndelay(2000);"
+        },
+        "esp32": {
+            "globals": "#include <DHT.h>\n#define DHTPIN ${SDA}\n#define DHTTYPE DHT22\nDHT dht(DHTPIN, DHTTYPE);",
+            "setup": "Serial.begin(115200);\ndht.begin();",
+            "loop": "float humidity = dht.readHumidity();\nfloat temperature = dht.readTemperature();\nif (isnan(humidity) || isnan(temperature)) {\n  Serial.println(\"DHT22 read failed!\");\n  return;\n}\nSerial.print(\"Humidity: \");\nSerial.print(humidity);\nSerial.print(\" %  Temperature: \");\nSerial.print(temperature);\nSerial.println(\" C\");\ndelay(2000);"
+        },
+        "pico": {
+            "globals": "#include <DHT.h>\n#define DHTPIN ${SDA}\n#define DHTTYPE DHT22\nDHT dht(DHTPIN, DHTTYPE);",
+            "setup": "Serial.begin(115200);\ndht.begin();",
             "loop": "float humidity = dht.readHumidity();\nfloat temperature = dht.readTemperature();\nif (isnan(humidity) || isnan(temperature)) {\n  Serial.println(\"DHT22 read failed!\");\n  return;\n}\nSerial.print(\"Humidity: \");\nSerial.print(humidity);\nSerial.print(\" %  Temperature: \");\nSerial.print(temperature);\nSerial.println(\" C\");\ndelay(2000);"
         }
     },
     "autowiring": {
         "connections": [
-            { "from": "VCC", "to": "esp32:3V3" },
-            { "from": "GND", "to": "esp32:GND.1" },
-            { "from": "SDA", "to": "esp32:4" }
+            { "from": "VCC", "to": "arduino:5V" },
+            { "from": "GND", "to": "arduino:GND" },
+            { "from": "SDA", "to": "arduino:2" }
         ]
     }
 }

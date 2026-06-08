@@ -15,29 +15,29 @@
     "pins": [
         {
             "id": "GND",
-            "x": 7.5,
-            "y": 37.5,
+            "x": 15,
+            "y": 30,
             "type": "power",
             "description": "Ground"
         },
         {
             "id": "VCC",
-            "x": 7.5,
-            "y": 52.5,
+            "x": 15,
+            "y": 45,
             "type": "power",
             "description": "Power (5V)"
         },
         {
             "id": "SDA",
-            "x": 7.5,
-            "y": 67.5,
+            "x": 15,
+            "y": 60,
             "type": "bidi",
             "description": "I2C Data"
         },
         {
             "id": "SCL",
-            "x": 7.5,
-            "y": 82.5,
+            "x": 15,
+            "y": 75,
             "type": "bidi",
             "description": "I2C Clock"
         }
