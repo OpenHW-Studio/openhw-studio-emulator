@@ -1,7 +1,7 @@
 import React from 'react';
 
 // Defines the physical bounds for the simulator engine
-export const BOUNDS = { x: 0, y: 0, w: 50, h: 100 };
+export const BOUNDS = { x: 0, y: 0, w: 60, h: 90 };
 
 // Context menu for part attributes (simulating temperature)
 export const DS18B20ContextMenu = ({ attrs, onUpdate }: { attrs: any; onUpdate: (key: string, value: any) => void }) => (
@@ -33,30 +33,34 @@ export const DS18B20UI = ({ state, attrs, onEvent }: { state: any; attrs: any; o
     const temperature = Number(state?.temperature ?? attrs?.temperature ?? 25.0);
 
     return (
-        <div style={{ position: 'relative', width: 50, height: 100 }}>
+        <div style={{ position: 'relative', width: 60, height: 90 }}>
             <svg
-                viewBox="0 0 50 100"
+                viewBox="0 0 60 90"
                 width="100%"
                 height="100%"
                 style={{ cursor: 'pointer', display: 'block' }}
                 onClick={() => onEvent?.({ type: 'PART_CLICK' })}
             >
+                <g transform="translate(5, 2.5)">
                 {/* Dark Blue PCB Background */}
-                <rect x="1" y="1" width="48" height="98" rx="3" ry="3" fill="#0c4c92" stroke="#08386c" strokeWidth="0.5" />
+                <rect x="1" y="1" width="48" height="83" rx="3" ry="3" fill="#0c4c92" stroke="#08386c" strokeWidth="0.5" />
 
-                {/* --- Top Text Box & Vias --- */}
-                <rect x="3" y="3" width="44" height="14" fill="none" stroke="white" strokeWidth="0.8" />
-                <text x="10" y="12" fontFamily="sans-serif" fontSize="6.5" fontWeight="bold" fill="white" textAnchor="middle">GND</text>
-                <text x="25" y="12" fontFamily="sans-serif" fontSize="6.5" fontWeight="bold" fill="white" textAnchor="middle">DQ</text>
-                <text x="40" y="12" fontFamily="sans-serif" fontSize="6.5" fontWeight="bold" fill="white" textAnchor="middle">VCC</text>
+                {/* Header Plastic Block (moved to top) */}
+                <rect x="5" y="10" width="40" height="5" rx="1.5" ry="1.5" fill="#1a1a1a" />
                 
-                {/* Top vias */}
-                <circle cx="10" cy="22" r="2" fill="#111" stroke="#ccc" strokeWidth="1"/>
-                <circle cx="25" cy="22" r="2" fill="#111" stroke="#ccc" strokeWidth="1"/>
-                <circle cx="40" cy="22" r="2" fill="#111" stroke="#ccc" strokeWidth="1"/>
+                {/* Connection Pads/vias on header */}
+                <circle cx="10" cy="12.5" r="1.5" fill="#bbb" />
+                <circle cx="25" cy="12.5" r="1.5" fill="#bbb" />
+                <circle cx="40" cy="12.5" r="1.5" fill="#bbb" />
+
+                {/* --- Text Box (below pins) --- */}
+                <rect x="3" y="18" width="44" height="10" fill="none" stroke="white" strokeWidth="0.8" />
+                <text x="10" y="26" fontFamily="sans-serif" fontSize="6.5" fontWeight="bold" fill="white" textAnchor="middle">GND</text>
+                <text x="25" y="26" fontFamily="sans-serif" fontSize="6.5" fontWeight="bold" fill="white" textAnchor="middle">DQ</text>
+                <text x="40" y="26" fontFamily="sans-serif" fontSize="6.5" fontWeight="bold" fill="white" textAnchor="middle">VCC</text>
 
                 {/* --- Trace Routing --- */}
-                <path d="M 10 24 L 10 55 Q 25 55, 25 45 M 25 24 L 25 35 Q 25 40, 25 45 M 40 24 L 40 55 Q 25 55, 25 45" fill="none" stroke="#60a5fa" strokeWidth="0.5" opacity="0.3" />
+                <path d="M 10 28 L 10 55 Q 25 55, 25 45 M 25 28 L 25 35 Q 25 40, 25 45 M 40 28 L 40 55 Q 25 55, 25 45" fill="none" stroke="#60a5fa" strokeWidth="0.5" opacity="0.3" />
 
                 {/* --- Components --- */}
                 {/* DS18B20 Sensor package (TO-92) */}
@@ -87,14 +91,7 @@ export const DS18B20UI = ({ state, attrs, onEvent }: { state: any; attrs: any; o
                 {/* U1 Label */}
                 <text x="5" y="45" fontFamily="sans-serif" fontSize="6.5" fill="white" transform="rotate(-90 5 45)">U1</text>
 
-                {/* --- Bottom Pins & Header --- */}
-                {/* Header Plastic Block */}
-                <rect x="5" y="85" width="40" height="5" rx="1.5" ry="1.5" fill="#1a1a1a" />
-                
-                {/* Connection Pads/vias on header */}
-                <circle cx="10" cy="87.5" r="1.5" fill="#bbb" />
-                <circle cx="25" cy="87.5" r="1.5" fill="#bbb" />
-                <circle cx="40" cy="87.5" r="1.5" fill="#bbb" />
+                </g>
             </svg>
         </div>
     );
