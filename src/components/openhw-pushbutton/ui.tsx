@@ -27,7 +27,7 @@ export const PushbuttonContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdat
     );
 };
 
-export const BOUNDS = { x: 0, y: 0, w: 75, h: 60 };
+export const BOUNDS = { x: 0, y: 0, w: 60, h: 75 };
 
 export const PushbuttonUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning: boolean }) => {
     // Local animation state for immediate feedback
@@ -37,8 +37,8 @@ export const PushbuttonUI = ({ state, attrs, isRunning }: { state: any, attrs: a
 
     useLayoutEffect(() => { attrsRef.current = attrs; });
 
-    const nativeW = 75;
-    const nativeH = 60;
+    const nativeW = 60;
+    const nativeH = 75;
     const scaleX = BOUNDS.w / nativeW;
     const scaleY = BOUNDS.h / nativeH;
 
@@ -139,7 +139,7 @@ export const PushbuttonUI = ({ state, attrs, isRunning }: { state: any, attrs: a
                 <svg
                     width={nativeW}
                     height={nativeH}
-                    viewBox="0 0 75 60"
+                    viewBox="0 0 60 75"
                     xmlns="http://www.w3.org/2000/svg"
                 >
                     <defs>
@@ -159,44 +159,44 @@ export const PushbuttonUI = ({ state, attrs, isRunning }: { state: any, attrs: a
 
                     {/* Metal Legs */}
                     <g fill="#999">
-                        {/* Left Top (y=15) */}
-                        <rect x="12" y="11.5" width="1.5" height="7" />
-                        <rect x="0" y="14" width="12.5" height="2" rx="0.5" />
+                        {/* Right Top (formerly Left Top) */}
+                        <rect x="41.5" y="12" width="7" height="1.5" />
+                        <rect x="44" y="0" width="2" height="12.5" rx="0.5" />
                         
-                        {/* Left Bottom (y=45) */}
-                        <rect x="12" y="41.5" width="1.5" height="7" />
-                        <rect x="0" y="44" width="12.5" height="2" rx="0.5" />
+                        {/* Left Top (formerly Left Bottom) */}
+                        <rect x="11.5" y="12" width="7" height="1.5" />
+                        <rect x="14" y="0" width="2" height="12.5" rx="0.5" />
 
-                        {/* Right Top (y=15) */}
-                        <rect x="61.5" y="11.5" width="1.5" height="7" />
-                        <rect x="62.5" y="14" width="12.5" height="2" rx="0.5" />
+                        {/* Right Bottom (formerly Right Top) */}
+                        <rect x="41.5" y="61.5" width="7" height="1.5" />
+                        <rect x="44" y="62.5" width="2" height="12.5" rx="0.5" />
 
-                        {/* Right Bottom (y=45) */}
-                        <rect x="61.5" y="41.5" width="1.5" height="7" />
-                        <rect x="62.5" y="44" width="12.5" height="2" rx="0.5" />
+                        {/* Left Bottom (formerly Right Bottom) */}
+                        <rect x="11.5" y="61.5" width="7" height="1.5" />
+                        <rect x="14" y="62.5" width="2" height="12.5" rx="0.5" />
                     </g>
 
-                    {/* Main Metal Body (48x48 centered in 75x60) */}
-                    <rect x="13.5" y="6" width="48" height="48" rx="1.76" ry="1.76" fill="#464646" />
-                    <rect x="16.5" y="9" width="42" height="42" rx="0.84" ry="0.84" fill="#eaeaea" />
+                    {/* Main Metal Body (48x48 centered in 60x75) */}
+                    <rect x="6" y="13.5" width="48" height="48" rx="1.76" ry="1.76" fill="#464646" />
+                    <rect x="9" y="16.5" width="42" height="42" rx="0.84" ry="0.84" fill="#eaeaea" />
 
                     {/* Corner Rivets */}
                     <g fill="#1b1b1b">
-                        <circle cx="20.5" cy="13.1" r="1.48" />
-                        <circle cx="54.1" cy="13.1" r="1.48" />
-                        <circle cx="54.1" cy="46.7" r="1.48" />
-                        <circle cx="20.5" cy="46.7" r="1.48" />
+                        <circle cx="46.9" cy="20.5" r="1.48" />
+                        <circle cx="46.9" cy="54.1" r="1.48" />
+                        <circle cx="13.3" cy="54.1" r="1.48" />
+                        <circle cx="13.3" cy="20.5" r="1.48" />
                     </g>
 
                     {/* Plunger */}
                     <g>
                         {/* Outer gradient ring */}
-                        <circle cx="37.5" cy="30" r="15.28" fill={buttonFill} />
+                        <circle cx="30" cy="37.5" r="15.28" fill={buttonFill} />
                         
                         {/* Inner colored circle */}
                         <circle 
-                            cx="37.5" 
-                            cy="30" 
+                            cx="30" 
+                            cy="37.5" 
                             r="11.6" 
                             fill={btnColor.hex} 
                             stroke="#2f2f2f" 

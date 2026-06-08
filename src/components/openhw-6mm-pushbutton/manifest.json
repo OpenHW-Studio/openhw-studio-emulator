@@ -3,15 +3,15 @@
     "label": "6mm Push Button",
     "description": "4-pin momentary tactile push button.",
     "group": "Basic",
-    "w": 45,
-    "h": 60,
+    "w": 45, "h": 60, 
     "attrs": { "breadboard": { "anchorPin": "1A", "ravine": true } },
     "telemetry": { "template": "pressed=${state.pressed}", "criticalKeys": ["state.pressed"] },
     "pins": [
-        { "id": "1A", "x": 0, "y": 15, "type": "passive", "description": "Terminal 1A" },
-        { "id": "1B", "x": 0, "y": 45, "type": "passive", "description": "Terminal 1B" },
-        { "id": "2A", "x": 45, "y": 15, "type": "passive", "description": "Terminal 2A" },
-        { "id": "2B", "x": 45, "y": 45, "type": "passive", "description": "Terminal 2B" }
+        
+        { "id": "1A", "x": 45, "y": 45, "type": "passive", "description": "Terminal 1A" },
+        { "id": "1B", "x": 45, "y": 15, "type": "passive", "description": "Terminal 1B" },
+        { "id": "2A", "x": 0,  "y": 45, "type": "passive", "description": "Terminal 2A" },
+        { "id": "2B", "x": 0,  "y": 15, "type": "passive", "description": "Terminal 2B" }
     ],
     "autowiring": {
         "connections": [
