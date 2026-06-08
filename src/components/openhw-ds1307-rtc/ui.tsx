@@ -36,10 +36,10 @@ export const DS1307RTCUI = ({
 
     return (
         <div style={{ position: 'relative', width: 120, height: 120 }}>
-            <svg width="120" height="120" viewBox="0 0 128 120" style={{ fontFamily: 'sans-serif' }}>
+            <svg width="120" height="120" viewBox="0 0 120 120" style={{ fontFamily: 'sans-serif' }}>
                 {/* PCB Base - Centered, 15px margins */}
-                <rect x="15" y="0" width="90" height="120" rx="3" fill="#184a8c" />
-                <rect x="15" y="0" width="90" height="120" rx="3" fill="none" stroke="#ffffff" strokeOpacity="0.15" strokeWidth="0.75" />
+                <rect x="10" y="0" width="100" height="120" rx="3" fill="#184a8c" />
+                <rect x="10" y="0" width="100" height="120" rx="3" fill="none" stroke="#ffffff" strokeOpacity="0.15" strokeWidth="0.75" />
 
                 {/* Mounting Holes */}
                 <circle cx="21" cy="7.5" r="2.6" fill="#0f172a" stroke="#d1d5db" strokeWidth="0.75"/>
@@ -51,29 +51,29 @@ export const DS1307RTCUI = ({
 
                 {/* Left Pins (Gold) & Holes (15px pitch) */}
                 {[30, 45, 60, 75, 90].map(y => (
-                    <circle key={`lpad-${y}`} cx="19.5" cy={y} r="1.875" fill="#0f172a" stroke="#fbbf24" strokeWidth="0.6" />
+                    <circle key={`lpad-${y}`} cx="15.0" cy={y} r="1.875" fill="#0f172a" stroke="#fbbf24" strokeWidth="0.6" />
                 ))}
 
                 {/* Left Silkscreen */}
-                <text x="25.5" y="32" textAnchor="start" fontSize="4.875" fill="#ffffff" fontWeight="bold">DS</text>
-                <text x="25.5" y="47" textAnchor="start" fontSize="4.875" fill="#ffffff" fontWeight="bold">SCL</text>
-                <text x="25.5" y="62" textAnchor="start" fontSize="4.875" fill="#ffffff" fontWeight="bold">SDA</text>
-                <text x="25.5" y="77" textAnchor="start" fontSize="4.875" fill="#ffffff" fontWeight="bold">VCC</text>
-                <text x="25.5" y="92" textAnchor="start" fontSize="4.875" fill="#ffffff" fontWeight="bold">GND</text>
+                <text x="21" y="32" textAnchor="start" fontSize="4.875" fill="#ffffff" fontWeight="bold">DS</text>
+                <text x="21" y="47" textAnchor="start" fontSize="4.875" fill="#ffffff" fontWeight="bold">SCL</text>
+                <text x="21" y="62" textAnchor="start" fontSize="4.875" fill="#ffffff" fontWeight="bold">SDA</text>
+                <text x="21" y="77" textAnchor="start" fontSize="4.875" fill="#ffffff" fontWeight="bold">VCC</text>
+                <text x="21" y="92" textAnchor="start" fontSize="4.875" fill="#ffffff" fontWeight="bold">GND</text>
 
                 {/* Right Pins (Gold) & Holes (15px pitch) */}
                 {[15, 30, 45, 60, 75, 90, 105].map(y => (
-                    <circle key={`rpad-${y}`} cx="100.5" cy={y} r="1.875" fill="#0f172a" stroke="#fbbf24" strokeWidth="0.6" />
+                    <circle key={`rpad-${y}`} cx="105.0" cy={y} r="1.875" fill="#0f172a" stroke="#fbbf24" strokeWidth="0.6" />
                 ))}
 
                 {/* Right Silkscreen */}
-                <text x="94.5" y="17" textAnchor="end" fontSize="4.875" fill="#ffffff" fontWeight="bold">SQ</text>
-                <text x="94.5" y="32" textAnchor="end" fontSize="4.875" fill="#ffffff" fontWeight="bold">DS</text>
-                <text x="94.5" y="47" textAnchor="end" fontSize="4.875" fill="#ffffff" fontWeight="bold">SCL</text>
-                <text x="94.5" y="62" textAnchor="end" fontSize="4.875" fill="#ffffff" fontWeight="bold">SDA</text>
-                <text x="94.5" y="77" textAnchor="end" fontSize="4.875" fill="#ffffff" fontWeight="bold">VCC</text>
-                <text x="94.5" y="92" textAnchor="end" fontSize="4.875" fill="#ffffff" fontWeight="bold">GND</text>
-                <text x="94.5" y="107" textAnchor="end" fontSize="4.875" fill="#ffffff" fontWeight="bold">BAT</text>
+                <text x="99" y="17" textAnchor="end" fontSize="4.875" fill="#ffffff" fontWeight="bold">SQ</text>
+                <text x="99" y="32" textAnchor="end" fontSize="4.875" fill="#ffffff" fontWeight="bold">DS</text>
+                <text x="99" y="47" textAnchor="end" fontSize="4.875" fill="#ffffff" fontWeight="bold">SCL</text>
+                <text x="99" y="62" textAnchor="end" fontSize="4.875" fill="#ffffff" fontWeight="bold">SDA</text>
+                <text x="99" y="77" textAnchor="end" fontSize="4.875" fill="#ffffff" fontWeight="bold">VCC</text>
+                <text x="99" y="92" textAnchor="end" fontSize="4.875" fill="#ffffff" fontWeight="bold">GND</text>
+                <text x="99" y="107" textAnchor="end" fontSize="4.875" fill="#ffffff" fontWeight="bold">BAT</text>
 
                 {/* Crystal (X1) */}
                 <rect x="40.5" y="18.75" width="10.5" height="25.5" rx="5.25" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="1.1" />
