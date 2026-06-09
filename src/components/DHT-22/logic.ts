@@ -12,19 +12,33 @@ export class DHT22Logic extends BaseComponent {
     private dataBits: boolean[] = [];
     private bitIndex: number = 0;
 
-    // Injected by execute.ts
+    // Guard: true while DHT is actively driving the DATA pin.
+    // Prevents re-entrant onPinStateChange callbacks caused by the
+    // repropagateAllVoltages feedback loop from disrupting the state machine.
+    private _drivingBus: boolean = false;
+
+    // Guard: prevents nested _simUpdatePhysics calls (re-entrancy protection).
+    private _physicsCallDepth: number = 0;
+
+    // Injected by execute.ts / avr-runner.ts
     private _simCpu?: any;
     private _simUpdatePhysics?: () => void;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
         
-        this.temperature = this.state?.temperature ?? 24.0;
-        this.humidity = this.state?.humidity ?? 50.0;
+        // Read initial values from manifest.attrs — these are available immediately
+        // at construction time. this.state is empty at this point because avr-runner
+        // merges cDef.attrs into inst.state AFTER calling new LogicClass().
+        const attrs = manifest?.attrs || {};
+        this.temperature = Number(attrs.temperature ?? this.state?.temperature ?? 24.0);
+        this.humidity = Number(attrs.humidity ?? this.state?.humidity ?? 50.0);
         
-        // Sensor has internal pull-up resistor (mostly) or requires external. 
-        // Emulate idle high.
-        this.setPinVoltage('SDA', 5.0);
+        // Sync into state so telemetry sees the values immediately.
+        this.setState({ temperature: this.temperature, humidity: this.humidity });
+        
+        // Sensor holds DATA high when idle (open-drain with pull-up).
+        this.setPinVoltage('DATA', 5.0);
     }
 
     onEvent(event: any) {
@@ -38,47 +52,72 @@ export class DHT22Logic extends BaseComponent {
     }
 
     onPinStateChange(pin: string, isHigh: boolean, cycles: number) {
-        if (pin === 'SDA') {
+        // Ignore all external pin-state changes while we are actively driving
+        // the bus (ACKING or SENDING). The repropagateAllVoltages feedback loop
+        // can echo our own driven levels back to us, which would corrupt the
+        // state machine (e.g. re-detecting a "wake" signal we drove ourselves).
+        if (pin === 'DATA' && this._drivingBus) {
+            return;
+        }
+
+        if (pin === 'DATA') {
             if (!isHigh && this.protocolState === 'IDLE') {
-                // Arduino pulled LOW to initiate start signal
+                // MCU pulled DATA LOW → start of a read request.
                 this.protocolState = 'WAKE_WAIT';
                 this.wakeStartCycles = cycles;
                 
             } else if (isHigh && this.protocolState === 'WAKE_WAIT') {
-                // Arduino released line. Calculate duration.
+                // MCU released the line (went HIGH/input).  Measure LOW duration.
+                // At 16 MHz, 1 cpu cycle ≈ 62.5 ns → divide by 16 to get µs.
+                // DHT22 spec: master holds LOW ≥ 1 ms (1000 µs).
+                // We accept ≥ 500 µs to tolerate timing jitter in simulation.
                 const wakeUs = (cycles - this.wakeStartCycles) / 16;
                 
-                // DHT22 requests > 1ms (1000us) LOW logic. Some libraries do 1-2ms.
-                // If it's over 800us, we consider it a valid wake request.
-                if (wakeUs > 800) {
+                if (wakeUs >= 500) {
                     this.startAckSequence();
                 } else {
-                    this.protocolState = 'IDLE'; // False trigger
+                    // Too short — not a valid start signal. Reset.
+                    this.protocolState = 'IDLE';
                 }
             }
         }
+    }
+
+    private safeUpdatePhysics() {
+        if (!this._simUpdatePhysics) return;
+        if (this._physicsCallDepth > 0) return; // Already in a propagation pass.
+        this._physicsCallDepth++;
+        try {
+            this._simUpdatePhysics();
+        } finally {
+            this._physicsCallDepth--;
+        }
+    }
+
+    private setDataPin(voltage: number) {
+        this._drivingBus = true;
+        this.setPinVoltage('DATA', voltage);
+        this.safeUpdatePhysics();
     }
 
     private startAckSequence() {
         if (!this._simCpu) return;
         this.protocolState = 'ACKING';
 
-        // Wait 20-40us for the master to release the bus completely before replying
+        // DHT22 spec: sensor waits 20–40 µs after master releases bus,
+        // then responds with its own 80 µs LOW + 80 µs HIGH acknowledgement.
         this._simCpu.addClockEvent(() => this.sendAckLow(), 30 * 16);
     }
 
     private sendAckLow() {
-        // DHT pulls LOW for 80us
-        this.setPinVoltage('SDA', 0);
-        this._simUpdatePhysics?.();
-        
+        // DHT pulls DATA LOW for 80 µs.
+        this.setDataPin(0);
         this._simCpu.addClockEvent(() => this.sendAckHigh(), 80 * 16);
     }
 
     private sendAckHigh() {
-        // DHT pulls HIGH for 80us
-        this.setPinVoltage('SDA', 5.0);
-        this._simUpdatePhysics?.();
+        // DHT pulls DATA HIGH for 80 µs.
+        this.setDataPin(5.0);
         
         this._simCpu.addClockEvent(() => {
             this.prepareDataBits();
@@ -88,7 +127,10 @@ export class DHT22Logic extends BaseComponent {
     }
 
     private prepareDataBits() {
-        // DHT22 format
+        // DHT22 40-bit format:
+        //   Byte 0–1: Humidity × 10 (16-bit unsigned, MSB first)
+        //   Byte 2–3: Temperature × 10 (16-bit, bit15 = sign, MSB first)
+        //   Byte 4:   Checksum = (b0 + b1 + b2 + b3) & 0xFF
         const h = Math.round(this.humidity * 10);
         const tObj = Math.round(Math.abs(this.temperature) * 10);
         const tSign = this.temperature < 0 ? 0x80 : 0x00;
@@ -113,28 +155,27 @@ export class DHT22Logic extends BaseComponent {
         if (!this._simCpu) return;
 
         if (this.bitIndex >= 40) {
-            // Transmission finished. 50us LOW to end, then pull up to VCC (idle)
-            this.setPinVoltage('SDA', 0);
-            this._simUpdatePhysics?.();
+            // All 40 bits sent. End transmission: 50 µs LOW, then release bus HIGH.
+            this.setDataPin(0);
             
             this._simCpu.addClockEvent(() => {
                 this.protocolState = 'IDLE';
-                this.setPinVoltage('SDA', 5.0);
-                this._simUpdatePhysics?.();
+                this._drivingBus = false;   // Release the bus guard BEFORE going HIGH
+                                             // so the CPU can detect the final HIGH.
+                this.setPinVoltage('DATA', 5.0);
+                this.safeUpdatePhysics();
             }, 50 * 16);
             return;
         }
 
         const bit = this.dataBits[this.bitIndex++];
         
-        // Every bit starts with a 50us LOW signal
-        this.setPinVoltage('SDA', 0);
-        this._simUpdatePhysics?.();
+        // Each bit starts with a 50 µs LOW pulse.
+        this.setDataPin(0);
         
         this._simCpu.addClockEvent(() => {
-            // Data payload: 28us HIGH for '0', 70us HIGH for '1'
-            this.setPinVoltage('SDA', 5.0);
-            this._simUpdatePhysics?.();
+            // Then goes HIGH: 26–28 µs for '0', 70 µs for '1'.
+            this.setDataPin(5.0);
             
             const highUs = bit ? 70 : 28;
             this._simCpu.addClockEvent(() => {
