@@ -65,7 +65,7 @@ export const MotorUI = ({ state, attrs }: { state: any, attrs: any }) => {
                     <circle cx="92" cy="25" r="8" fill="#ECEFF1" stroke="#CFD8DC" strokeWidth="1" />
                     {/* Gear Teeth / Cross Indicator for visibility */}
                     <line x1="92" y1="17" x2="92" y2="33" stroke="#90A4AE" strokeWidth="2" />
-                    <line x1="84" y1="25" x2="100" y2="25" stroke="#90A4AE" strokeWidth="2" />
+                    <line x1="84" y1="25" x2="100" y2="25" stroke="#FBBF24" strokeWidth="2" />
                     <circle cx="92" cy="25" r="3" fill="#607D8B" />
                 </g>
             </svg>
