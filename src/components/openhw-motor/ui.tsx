@@ -1,7 +1,7 @@
 import React from 'react';
 
 // Standard Motor dimensions mapping to manifest
-export const BOUNDS = { x: 0, y: 0, w: 100, h: 50 };
+export const BOUNDS = { x: 0, y: 0, w: 200, h: 100 };
 
 export const MotorUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const speed = state?.speed || 0;
@@ -10,7 +10,7 @@ export const MotorUI = ({ state, attrs }: { state: any, attrs: any }) => {
 
     return (
         <div style={{ position: 'relative', width: BOUNDS.w, height: BOUNDS.h, pointerEvents: 'none' }}>
-            <svg width="100" height="50" viewBox="0 0 100 50">
+            <svg width="200" height="100" viewBox="0 0 100 50">
                 <defs>
                     <linearGradient id="metalBody" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#E0E0E0" />
@@ -59,7 +59,7 @@ export const MotorUI = ({ state, attrs }: { state: any, attrs: any }) => {
 
                 {/* Rotating Pinion Gear Indicator (SVG Group to Rotate) */}
                 <g style={{
-                    transformOrigin: '92px 25px',
+                    transformOrigin: '92% 50%',
                     animation: speed !== 0 ? `spin ${animationDuration} linear infinite ${direction}` : 'none'
                 }}>
                     <circle cx="92" cy="25" r="8" fill="#ECEFF1" stroke="#CFD8DC" strokeWidth="1" />
