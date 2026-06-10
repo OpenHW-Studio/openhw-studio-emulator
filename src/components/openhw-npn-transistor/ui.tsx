@@ -1,11 +1,11 @@
 import React from 'react';
 
-// Bounding box: width 30, height 45
-export const BOUNDS = { x: 0, y: 0, w: 30, h: 45 };
+// Bounding box: width 60, height 90
+export const BOUNDS = { x: 0, y: 0, w: 60, h: 90 };
 
 export const NPNTransistorUI = ({ state, attrs }: { state: any, attrs: any }) => {
     return (
-        <svg width="30" height="45" viewBox="0 0 30 45" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible', pointerEvents: 'none' }}>
+        <svg width="100%" height="100%" viewBox="0 0 30 45" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible', pointerEvents: 'none' }}>
             <defs>
                 <linearGradient id="legGradient" x1="0" y1="0" x2="1" y2="0">
                     <stop offset="0%" stopColor="#9E9E9E" />

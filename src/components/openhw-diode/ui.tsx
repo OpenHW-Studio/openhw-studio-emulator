@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 30, h: 10 };
+export const BOUNDS = { x: 0, y: 0, w: 60, h: 20 };
 
 export const DiodeUI = ({ state, attrs }: { state: any, attrs: any }) => {
     return (
