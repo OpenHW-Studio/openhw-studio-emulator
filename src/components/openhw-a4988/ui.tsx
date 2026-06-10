@@ -97,7 +97,7 @@ export const A4988UI = ({ state, attrs }: { state: any, attrs: any }) => {
 
                 {/* Bottom Labels */}
                 {["GND", "VDD", "1B", "1A", "2A", "2B", "GND", "VMOT"].map((label, i) => (
-                    <text key={label} x={7.5 + i * 15} y="59" fill="white" fontSize="4.5" fontWeight="bold" textAnchor="middle">{label}</text>
+                    <text key={`${label}-${i}`} x={7.5 + i * 15} y="59" fill="white" fontSize="4.5" fontWeight="bold" textAnchor="middle">{label}</text>
                 ))}
             </svg>
         </div>
