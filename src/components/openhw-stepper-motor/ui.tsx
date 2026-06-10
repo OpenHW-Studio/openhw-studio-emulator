@@ -5,6 +5,7 @@ const mmToPix = 15 / 2.54; // Exact ratio for 15px pitch per 0.1 inch (2.54mm)
 
 export const StepperMotorUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const angle = state?.angle ?? 0;
+    const arrowColor = state?.arrow || attrs?.arrow || '#4a36ba';
     
     // NEMA 23 Default Spec
     const frameSize = 57.3;
@@ -132,7 +133,7 @@ export const StepperMotorUI = ({ state, attrs }: { state: any, attrs: any }) => 
                             <path
                                 id="arrow-path"
                                 transform={`rotate(${angle}, ${halfFrame},${halfFrame}) translate(${halfFrame} ${halfFrame})`}
-                                fill="transparent"
+                                fill={arrowColor}
                                 d={`m 0 0 l -${shaftRadius} 0 l ${shaftRadius} -${halfFrame - 3} l ${shaftRadius} ${halfFrame - 3} z`}
                             />
                             <path
