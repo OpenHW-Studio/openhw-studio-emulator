@@ -5,7 +5,7 @@ export const BOUNDS = { x: 0, y: 0, w: 50, h: 90 };
 
 export const Wokwi7SegmentUI = ({ state, attrs }: { state: any, attrs: any }) => {
     // Parse attributes
-    const digits = parseInt(attrs?.digits || '4', 10);
+    const digits = parseInt(attrs?.digits || '1', 10);
     const hasColon = attrs?.colon === '1' || attrs?.colon === 'true';
     const activeColor = attrs?.color || 'red';
     const offColor = '#333333';
