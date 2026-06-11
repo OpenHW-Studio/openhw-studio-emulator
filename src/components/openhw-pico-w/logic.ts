@@ -182,8 +182,9 @@ export class PicoWLogic extends BaseComponent {
         const sm = pio.machines[machineIndex];
         const tx = sm.txFIFO;
         if (!tx) continue;
+        const smLabel = `PIO${pioIndex} SM${machineIndex}`;
 
-        console.log(`[PicoW] CYW43 Emulator attached to PIO${pioIndex} state machine ${machineIndex}.`);
+        console.log(`[PicoW] CYW43 Emulator attached to ${smLabel}.`);
 
         const origTxPush = tx.push.bind(tx);
         tx.push = (value: number) => {
@@ -192,20 +193,30 @@ export class PicoWLogic extends BaseComponent {
           for (const ev of this.cyw43Sniffer!.feedWord(value)) {
             if (ev.kind === 'header' && ev.cmd.length > 0) {
               const fn = ['F0', 'F1', 'F2', 'F3'][ev.cmd.function];
-              console.log(`[PicoW SPI] ${ev.cmd.write ? 'WR' : 'RD'} ${fn} Addr=0x${ev.cmd.address.toString(16)} Len=${ev.cmd.length}`);
+              console.log(`[PicoW SPI] ${smLabel} ${ev.cmd.write ? 'WR' : 'RD'} ${fn} Addr=0x${ev.cmd.address.toString(16)} Len=${ev.cmd.length} q=${this.cyw43RxQueue.length}`);
+              if (!ev.cmd.write) {
+                const leadDummyWords = ev.cmd.function === 1 ? 4 : 1;
+                const reply = this.cyw43!.onCommand(ev.cmd, new Uint8Array(0));
+                if (reply && reply.length > 0) {
+                  console.log(`[PicoW SPI RX] ${smLabel} ${fn} Addr=0x${ev.cmd.address.toString(16)} reply ${reply.length}B leadDummy=${leadDummyWords}: [ ${Array.from(reply.slice(0, 8)).map(b => b.toString(16).padStart(2, '0')).join(' ')}${reply.length > 8 ? '...' : ''} ]`);
+                  this._queueCyw43Reply(reply, leadDummyWords);
+                  console.log(`[PicoW SPI RXQ] ${smLabel} queued=${this.cyw43RxQueue.length} words`);
+                }
+              }
             } else if (ev.kind === 'payload') {
               if (ev.cmd.write && ev.payload.length > 0) {
-                console.log(`[PicoW SPI TX] ${['F0','F1','F2','F3'][ev.cmd.function]} Addr=0x${ev.cmd.address.toString(16)} ${ev.payload.length}B: [ ${Array.from(ev.payload.slice(0, 16)).map(b => b.toString(16).padStart(2, '0')).join(' ')}${ev.payload.length > 16 ? '...' : ''} ]`);
-              }
-              const reply = this.cyw43!.onCommand(ev.cmd, ev.payload);
-              if (reply && reply.length > 0) {
-                console.log(`[PicoW SPI RX] ${['F0','F1','F2','F3'][ev.cmd.function]} Addr=0x${ev.cmd.address.toString(16)} reply ${reply.length}B: [ ${Array.from(reply.slice(0, 8)).map(b => b.toString(16).padStart(2, '0')).join(' ')}${reply.length > 8 ? '...' : ''} ]`);
-                this._queueCyw43Reply(reply);
+                console.log(`[PicoW SPI TX] ${smLabel} ${['F0','F1','F2','F3'][ev.cmd.function]} Addr=0x${ev.cmd.address.toString(16)} ${ev.payload.length}B: [ ${Array.from(ev.payload.slice(0, 16)).map(b => b.toString(16).padStart(2, '0')).join(' ')}${ev.payload.length > 16 ? '...' : ''} ]`);
+                const reply = this.cyw43!.onCommand(ev.cmd, ev.payload);
+                if (reply && reply.length > 0) {
+                  console.log(`[PicoW SPI RX] ${smLabel} ${['F0','F1','F2','F3'][ev.cmd.function]} Addr=0x${ev.cmd.address.toString(16)} reply ${reply.length}B: [ ${Array.from(reply.slice(0, 8)).map(b => b.toString(16).padStart(2, '0')).join(' ')}${reply.length > 8 ? '...' : ''} ]`);
+                  this._queueCyw43Reply(reply, 0);
+                  console.log(`[PicoW SPI RXQ] ${smLabel} queued=${this.cyw43RxQueue.length} words`);
+                }
               }
             }
           }
           // Drain any queued reply words into rxFIFOs (Velxio pattern).
-          this._drainCyw43Rx(rp2040);
+          this._drainCyw43Rx(sm, smLabel);
           return origTxPush(value);
         };
 
@@ -216,7 +227,10 @@ export class PicoWLogic extends BaseComponent {
     console.log(`[PicoW] CYW43 Emulator hooked ${hookedCount} PIO state machines.`);
   }
 
-  private _queueCyw43Reply(reply: Uint8Array): void {
+  private _queueCyw43Reply(reply: Uint8Array, leadDummyWords = 0): void {
+    for (let i = 0; i < leadDummyWords; i++) {
+      this.cyw43RxQueue.push(0);
+    }
     for (let i = 0; i + 4 <= reply.length; i += 4) {
       const w = ((reply[i + 3] << 24) | (reply[i + 2] << 16) | (reply[i + 1] << 8) | reply[i]) >>> 0;
       this.cyw43RxQueue.push(w);
@@ -229,18 +243,19 @@ export class PicoWLogic extends BaseComponent {
     }
   }
 
-  private _drainCyw43Rx(rp2040: any): void {
+  private _drainCyw43Rx(sm: any, smLabel = 'unknown-sm', maxWords = Number.POSITIVE_INFINITY): void {
     if (this.cyw43RxQueue.length === 0) return;
-    const pios: any[] = rp2040.pio;
-    for (const pio of pios) {
-      for (const sm of pio.machines as any[]) {
-        const rx = sm.rxFIFO;
-        if (!rx) continue;
-        while (this.cyw43RxQueue.length > 0 && !rx.full) {
-          rx.push(this.cyw43RxQueue.shift()!);
-        }
-        if (this.cyw43RxQueue.length === 0) return;
-      }
+    const rx = sm?.rxFIFO;
+    if (!rx) return;
+
+    let drained = 0;
+    while (this.cyw43RxQueue.length > 0 && !rx.full && drained < maxWords) {
+      rx.push(this.cyw43RxQueue.shift()!);
+      drained++;
+    }
+
+    if (drained > 0 || this.cyw43RxQueue.length > 0) {
+      console.log(`[PicoW SPI RXQ] ${smLabel} drained=${drained} remaining=${this.cyw43RxQueue.length} rxFull=${!!rx.full}`);
     }
   }
 

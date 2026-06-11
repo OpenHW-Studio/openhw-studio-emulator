@@ -197,6 +197,7 @@ export class Cyw43Emulator {
       this.readTestPrimed = true;
       writeU32Swap(out, 0, value);
       this.chipReady = true;
+      console.log(`[PicoW SPI CORE] F0 READ_TEST -> 0x${value.toString(16).padStart(8, '0')} chipReady=${this.chipReady}`);
     } else {
       const idx = cmd.address >>> 2;
       if (idx >= 0 && idx < this.f0Regs.length) {

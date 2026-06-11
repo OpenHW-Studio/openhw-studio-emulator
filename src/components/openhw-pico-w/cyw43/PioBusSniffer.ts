@@ -81,6 +81,7 @@ export type SnifferEvent =
 export class PioBusSniffer {
   private pendingCmd: Cyw43Cmd | null = null;
   private pendingPayload: number[] = [];
+  private pendingReadWords = 0;
 
   *feedWord(rawWord: number): Generator<SnifferEvent> {
     const word = swap16x2(rawWord);
@@ -92,14 +93,22 @@ export class PioBusSniffer {
       this.pendingPayload = [];
       yield { kind: 'header', cmd };
 
-      // This integration observes host-to-chip TX FIFO words only. Reads do
-      // not carry host payload bytes here, so emit them immediately.
-      if (cmd.length === 0 || !cmd.write) {
+      if (!cmd.write) {
+        this.pendingReadWords = Math.max(1, Math.ceil(cmd.length / 4) + 1 + (cmd.function === 1 ? 4 : 0));
+        console.log(`[PicoW SNIF] read start fn=${cmd.function} addr=0x${cmd.address.toString(16)} len=${cmd.length} clockWords=${this.pendingReadWords}`);
         yield {
           kind: 'payload',
           cmd,
           payload: new Uint8Array(0),
         };
+      }
+      return;
+    }
+
+    if (!this.pendingCmd.write && this.pendingReadWords > 0) {
+      this.pendingReadWords--;
+      if (this.pendingReadWords === 0) {
+        console.log(`[PicoW SNIF] read complete fn=${this.pendingCmd.function} addr=0x${this.pendingCmd.address.toString(16)} len=${this.pendingCmd.length}`);
         this.pendingCmd = null;
       }
       return;
@@ -125,6 +134,7 @@ export class PioBusSniffer {
   reset(): void {
     this.pendingCmd = null;
     this.pendingPayload = [];
+    this.pendingReadWords = 0;
   }
 }
 
