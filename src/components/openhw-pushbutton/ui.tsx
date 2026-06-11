@@ -143,50 +143,33 @@ export const PushbuttonUI = ({ state, attrs, isRunning }: { state: any, attrs: a
                     xmlns="http://www.w3.org/2000/svg"
                 >
                     <defs>
-                        <linearGradient id={`grad-up-${uniqueId}`} x1="0" x2="1" y1="0" y2="1">
-                            <stop stopColor="#ffffff" offset="0" />
-                            <stop stopColor={btnColor.hex} offset="0.3" />
-                            <stop stopColor={btnColor.hex} offset="0.5" />
-                            <stop offset="1" stopColor="#000000" stopOpacity="0.5" />
+                        <linearGradient id={`grad-up-${uniqueId}`} x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0" stopColor="#ffffff" />
+                            <stop offset="0.3" stopColor={btnColor.hex} />
+                            <stop offset="0.5" stopColor={btnColor.hex} />
+                            <stop offset="1" stopColor="#000000" stopOpacity="0.4" />
                         </linearGradient>
-                        <linearGradient id={`grad-down-${uniqueId}`} x1="1" x2="0" y1="1" y2="0">
-                            <stop stopColor="#ffffff" offset="0" />
-                            <stop stopColor={btnColor.hex} offset="0.3" />
-                            <stop stopColor={btnColor.hex} offset="0.5" />
-                            <stop offset="1" stopColor="#000000" stopOpacity="0.5" />
+                        <linearGradient id={`grad-down-${uniqueId}`} x1="1" y1="1" x2="0" y2="0">
+                            <stop offset="0" stopColor="#ffffff" />
+                            <stop offset="0.3" stopColor={btnColor.hex} />
+                            <stop offset="0.5" stopColor={btnColor.hex} />
+                            <stop offset="1" stopColor="#000000" stopOpacity="0.4" />
                         </linearGradient>
                     </defs>
 
-                    {/* Metal Legs */}
-                    <g fill="#999">
-                        {/* Left Top (y=15) */}
-                        <rect x="12" y="11.5" width="1.5" height="7" />
-                        <rect x="0" y="14" width="12.5" height="2" rx="0.5" />
-                        
-                        {/* Left Bottom (y=45) */}
-                        <rect x="12" y="41.5" width="1.5" height="7" />
-                        <rect x="0" y="44" width="12.5" height="2" rx="0.5" />
-
-                        {/* Right Top (y=15) */}
-                        <rect x="61.5" y="11.5" width="1.5" height="7" />
-                        <rect x="62.5" y="14" width="12.5" height="2" rx="0.5" />
-
-                        {/* Right Bottom (y=45) */}
-                        <rect x="61.5" y="41.5" width="1.5" height="7" />
-                        <rect x="62.5" y="44" width="12.5" height="2" rx="0.5" />
+                    {/* Stamped Metal Legs */}
+                    <g fill="#b3b3b3">
+                        <rect x="0" y="13.5" width="13.5" height="3" rx="0.5" />
+                        <rect x="0" y="43.5" width="13.5" height="3" rx="0.5" />
+                        <rect x="61.5" y="13.5" width="13.5" height="3" rx="0.5" />
+                        <rect x="61.5" y="43.5" width="13.5" height="3" rx="0.5" />
                     </g>
 
                     {/* Main Metal Body (48x48 centered in 75x60) */}
                     <rect x="13.5" y="6" width="48" height="48" rx="1.76" ry="1.76" fill="#464646" />
+                    
+                    {/* Metallic Inner Plate */}
                     <rect x="16.5" y="9" width="42" height="42" rx="0.84" ry="0.84" fill="#eaeaea" />
-
-                    {/* Corner Rivets */}
-                    <g fill="#1b1b1b">
-                        <circle cx="20.5" cy="13.1" r="1.48" />
-                        <circle cx="54.1" cy="13.1" r="1.48" />
-                        <circle cx="54.1" cy="46.7" r="1.48" />
-                        <circle cx="20.5" cy="46.7" r="1.48" />
-                    </g>
 
                     {/* Plunger */}
                     <g>

@@ -13,6 +13,7 @@ export { WiFiApLogic as openhwWifiAp, WiFiApLogic as wokwiWifiAp } from './openh
 export { default as openhwEsp32Cam } from './openhw-esp32-cam/index';
 export { default as openhwResistor } from './openhw-resistor';
 export { default as openhwPushbutton } from './openhw-pushbutton';
+export { default as openhw6mmPushbutton } from './openhw-6mm-pushbutton';
 export { default as openhwPowerSupply } from './openhw-power-supply';
 export { default as openhwNeopixelMatrix } from './openhw-neopixel-matrix';
 export { default as openhwBuzzer } from './openhw-buzzer';
