@@ -63,9 +63,15 @@ export const MotorUI = ({ state, attrs }: { state: any, attrs: any }) => {
                     animation: speed !== 0 ? `spin ${animationDuration} linear infinite ${direction}` : 'none'
                 }}>
                     <circle cx="92" cy="25" r="8" fill="#ECEFF1" stroke="#CFD8DC" strokeWidth="1" />
+                    {/* Background alternating quadrants */}
+                    <path d="M 92 25 L 100 25 A 8 8 0 0 1 92 33 Z" fill="#FBBF24" />
+                    <path d="M 92 25 L 92 33 A 8 8 0 0 1 84 25 Z" fill="#90A4AE" />
+                    <path d="M 92 25 L 84 25 A 8 8 0 0 1 92 17 Z" fill="#FBBF24" />
+                    <path d="M 92 25 L 92 17 A 8 8 0 0 1 100 25 Z" fill="#90A4AE" />
+                    
                     {/* Gear Teeth / Cross Indicator for visibility */}
-                    <line x1="92" y1="17" x2="92" y2="33" stroke="#90A4AE" strokeWidth="2" />
-                    <line x1="84" y1="25" x2="100" y2="25" stroke="#FBBF24" strokeWidth="2" />
+                    <line x1="92" y1="17" x2="92" y2="33" stroke="#37474F" strokeWidth="1" opacity="0.5" />
+                    <line x1="84" y1="25" x2="100" y2="25" stroke="#37474F" strokeWidth="1" opacity="0.5" />
                     <circle cx="92" cy="25" r="3" fill="#607D8B" />
                 </g>
             </svg>
