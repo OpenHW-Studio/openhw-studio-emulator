@@ -26,67 +26,82 @@ export const PhotoresistorContextMenu = ({ attrs, onUpdate }: { attrs: any, onUp
 };
 
 export const PhotoresistorUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning: boolean }) => {
-    // Safely parse lux to ensure we don't get NaN rendering issues
+    // Safely parse lux
     let rawLux = state?.lux ?? attrs?.lux ?? 500;
     let lux = typeof rawLux === 'number' ? rawLux : parseFloat(String(rawLux));
     if (isNaN(lux)) lux = 500;
 
     const luxRatio = Math.max(0, Math.min(1, lux / 1000));
 
-    const nativeW = 30;
-    const nativeH = 30;
-    const scale = BOUNDS.w / nativeW;
-
     return (
         <div style={{ position: 'relative', width: BOUNDS.w, height: BOUNDS.h, pointerEvents: 'none' }}>
             <svg 
-                width={nativeW} height={nativeH} viewBox="0 0 30 30" 
-                style={{ 
-                    display: 'block',
-                    transform: `scale(${scale})`,
-                    transformOrigin: '0 0'
-                }}
+                width="100%" height="100%" viewBox="0 0 22.5 22.5" 
+                style={{ display: 'block', overflow: 'visible' }}
                 xmlns="http://www.w3.org/2000/svg"
             >
                 <defs>
-                    <radialGradient id="ceramicGrad" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                        <stop offset="0%" style={{ stopColor: '#f9f9f9', stopOpacity: 1 }} />
-                        <stop offset="100%" style={{ stopColor: '#e0e0e0', stopOpacity: 1 }} />
+                    <radialGradient id="epoxy" cx="40%" cy="30%" r="60%">
+                        <stop offset="0%" stopColor="rgba(255,255,255,0.8)" />
+                        <stop offset="40%" stopColor="rgba(255,255,255,0.1)" />
+                        <stop offset="80%" stopColor="rgba(0,0,0,0.15)" />
+                        <stop offset="100%" stopColor="rgba(255,255,255,0.3)" />
                     </radialGradient>
-                    <linearGradient id="pinGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" style={{ stopColor: '#bdc3c7', stopOpacity: 1 }} />
-                        <stop offset="50%" style={{ stopColor: '#ecf0f1', stopOpacity: 1 }} />
-                        <stop offset="100%" style={{ stopColor: '#95a5a6', stopOpacity: 1 }} />
+                    
+                    <linearGradient id="legMetal" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#9CA3AF" />
+                        <stop offset="50%" stopColor="#F3F4F6" />
+                        <stop offset="100%" stopColor="#6B7280" />
                     </linearGradient>
+
+                    <radialGradient id="luxGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="rgba(241, 196, 15, 0.5)" />
+                        <stop offset="50%" stopColor="rgba(241, 196, 15, 0.2)" />
+                        <stop offset="100%" stopColor="rgba(241, 196, 15, 0)" />
+                    </radialGradient>
+                    
+                    <filter id="trackShadow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="0.2" stdDeviation="0.2" floodColor="#000" floodOpacity="0.4" />
+                    </filter>
                 </defs>
 
-                {/* Pins */}
-                <rect x="4" y="15" width="2" height="15" fill="url(#pinGrad)" />
-                <rect x="24" y="15" width="2" height="15" fill="url(#pinGrad)" />
+                {/* Metallic Legs curving to the 15px pitch anchor points */}
+                <path d="M 8.5 13 L 8.5 17 Q 8.5 20 3.75 22.5" fill="none" stroke="url(#legMetal)" strokeWidth="1.2" strokeLinecap="round" />
+                <path d="M 14 13 L 14 17 Q 14 20 18.75 22.5" fill="none" stroke="url(#legMetal)" strokeWidth="1.2" strokeLinecap="round" />
 
-                {/* Ambient Light Overlay */}
-                <circle cx="15" cy="15" r="14" fill="#f1c40f" opacity={luxRatio * 0.3} style={{ mixBlendMode: 'screen' }} />
+                {/* Connection points exactly at y=22.5 */}
+                <circle cx="3.75" cy="22.5" r="1.5" fill="#333" />
+                <circle cx="18.75" cy="22.5" r="1.5" fill="#333" />
 
-                {/* Ceramic Substrate */}
-                <circle cx="15" cy="15" r="10" fill="url(#ceramicGrad)" stroke="#bdc3c7" strokeWidth="0.5" />
-                <circle cx="15" cy="15" r="8" fill="none" stroke="#dcdde1" strokeWidth="1" strokeDasharray="1,1" />
+                {/* Ambient Lux Glow - placed behind the sensor head to act as a halo */}
+                {luxRatio > 0 && (
+                    <circle cx="11.25" cy="7" r={8 + (luxRatio * 6)} fill="url(#luxGlow)" opacity={luxRatio} style={{ mixBlendMode: 'screen' }} />
+                )}
 
-                {/* Light reflection on substrate depending on lux */}
-                <circle cx="15" cy="15" r="10" fill="#f1c40f" opacity={luxRatio * 0.25} />
-
-                {/* CdS Zigzag Track */}
-                <path 
-                    d="M 10 12 L 20 12 L 10 14 L 20 14 L 10 16 L 20 16 L 10 18 L 20 18" 
-                    fill="none" 
-                    stroke={`hsl(30, 100%, ${30 + luxRatio * 40}%)`} 
-                    strokeWidth="1.5" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                />
-                
-                {/* Metallic Electrodes */}
-                <path d="M 8 10 L 12 10" stroke="#7f8c8d" strokeWidth="2" strokeLinecap="round" />
-                <path d="M 18 20 L 22 20" stroke="#7f8c8d" strokeWidth="2" strokeLinecap="round" />
+                {/* LDR Head */}
+                <g transform="translate(11.25, 7)">
+                    {/* Ceramic Base */}
+                    <circle r="5.5" fill="#E8DCC4" stroke="#D1BFAE" strokeWidth="0.4" />
+                    
+                    {/* Electrodes (Metallic Silver Base) */}
+                    <circle r="4.8" fill="url(#legMetal)" />
+                    
+                    {/* CdS Interdigitated Track (Orange Serpentine) */}
+                    <path d="
+                        M -3.5 -3.5 
+                        L 3.5 -3.5 A 0.5 0.5 0 0 1 3.5 -2.5
+                        L -3.5 -2.5 A 0.5 0.5 0 0 0 -3.5 -1.5
+                        L 3.5 -1.5 A 0.5 0.5 0 0 1 3.5 -0.5
+                        L -3.5 -0.5 A 0.5 0.5 0 0 0 -3.5 0.5
+                        L 3.5 0.5 A 0.5 0.5 0 0 1 3.5 1.5
+                        L -3.5 1.5 A 0.5 0.5 0 0 0 -3.5 2.5
+                        L 3.5 2.5 A 0.5 0.5 0 0 1 3.5 3.5
+                        L -3.5 3.5
+                    " fill="none" stroke="#D35400" strokeWidth="0.5" filter="url(#trackShadow)" />
+                    
+                    {/* Glossy Clear Epoxy Dome Coating */}
+                    <circle r="5.5" fill="url(#epoxy)" />
+                </g>
             </svg>
         </div>
     );

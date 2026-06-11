@@ -20,7 +20,7 @@ export class ILI9341Logic extends SPIProtocol {
     private firstByteValue = 0;
 
     // FULL VRAM BUFFER (240 * 320 * 3 bytes for RGB)
-    private vram = new Uint8Array(240 * 320 * 3);
+    private vram = new Uint8Array(typeof SharedArrayBuffer !== 'undefined' ? new SharedArrayBuffer(240 * 320 * 3) : 240 * 320 * 3);
     private vramDirty = false;
     private lastSync = 0;
     private powerOn = true;

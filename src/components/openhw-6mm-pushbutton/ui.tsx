@@ -94,10 +94,10 @@ export const Pushbutton6mmUI = ({ state, attrs, isRunning }: { state: any, attrs
                     position: 'relative',
                     width: nativeW,
                     height: nativeH,
-                    transition: 'transform 0.05s ease, filter 0.05s',
-                    transform: `scale(${scaleX}, ${scaleY}) ${pressed ? 'scale(0.94)' : ''}`,
+                    transition: 'filter 0.05s',
+                    transform: `scale(${scaleX}, ${scaleY})`,
                     transformOrigin: '50% 50%',
-                    filter: pressed ? 'brightness(0.85) drop-shadow(0 1px 2px rgba(0,0,0,0.4))' : 'drop-shadow(0 3px 4px rgba(0,0,0,0.25))',
+                    filter: pressed ? 'brightness(0.9) drop-shadow(0 1px 1px rgba(0,0,0,0.5))' : 'drop-shadow(0 2px 3px rgba(0,0,0,0.3))',
                     cursor: 'pointer',
                     pointerEvents: isRunning ? 'auto' : 'none'
                 }}>
@@ -108,48 +108,56 @@ export const Pushbutton6mmUI = ({ state, attrs, isRunning }: { state: any, attrs
                     xmlns="http://www.w3.org/2000/svg"
                 >
                     <defs>
-                        <linearGradient id={`base-grad-${uniqueId}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stopColor="#2c2c2e" />
-                            <stop offset="100%" stopColor="#121212" />
+                        <linearGradient id={`grad-up-${uniqueId}`} x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0" stopColor="#ffffff" />
+                            <stop offset="0.3" stopColor={btnColor.primary} />
+                            <stop offset="0.5" stopColor={btnColor.primary} />
+                            <stop offset="1" stopColor={btnColor.dark} />
                         </linearGradient>
-                        <linearGradient id={`metal-grad-${uniqueId}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="#f3f4f6" />
-                            <stop offset="50%" stopColor="#e5e7eb" />
-                            <stop offset="100%" stopColor="#9ca3af" />
+                        <linearGradient id={`grad-down-${uniqueId}`} x1="1" y1="1" x2="0" y2="0">
+                            <stop offset="0" stopColor="#ffffff" />
+                            <stop offset="0.3" stopColor={btnColor.primary} />
+                            <stop offset="0.5" stopColor={btnColor.primary} />
+                            <stop offset="1" stopColor={btnColor.dark} />
                         </linearGradient>
-                        <linearGradient id={`leg-grad-${uniqueId}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#d1d5db" />
-                            <stop offset="100%" stopColor="#9ca3af" />
-                        </linearGradient>
-                        <radialGradient id={`plunger-grad-${uniqueId}`} cx="40%" cy="40%" r="60%">
-                            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.4" />
-                            <stop offset="25%" stopColor={btnColor.primary} />
-                            <stop offset="100%" stopColor={btnColor.dark} />
-                        </radialGradient>
                     </defs>
 
-                    <path d="M 5.5 15 H 3 Q 0 15 0 17" stroke={`url(#leg-grad-${uniqueId})`} strokeWidth="3" strokeLinecap="round" fill="none" />
-                    <path d="M 5.5 45 H 3 Q 0 45 0 43" stroke={`url(#leg-grad-${uniqueId})`} strokeWidth="3" strokeLinecap="round" fill="none" />
+                    {/* Stamped Metal Legs */}
+                    <rect x="0" y="13.5" width="5.5" height="3" rx="0.5" fill="#b3b3b3" />
+                    <rect x="0" y="43.5" width="5.5" height="3" rx="0.5" fill="#b3b3b3" />
+                    <rect x="39.5" y="13.5" width="5.5" height="3" rx="0.5" fill="#b3b3b3" />
+                    <rect x="39.5" y="43.5" width="5.5" height="3" rx="0.5" fill="#b3b3b3" />
 
-                    <path d="M 39.5 15 H 45 Q 45 15 45 17" stroke={`url(#leg-grad-${uniqueId})`} strokeWidth="3" strokeLinecap="round" fill="none" />
-                    <path d="M 39.5 45 H 45 Q 45 45 45 43" stroke={`url(#leg-grad-${uniqueId})`} strokeWidth="3" strokeLinecap="round" fill="none" />
+                    {/* Breadboard contact pins (invisible functional snap points) */}
+                    <circle cx="0" cy="15" r="1.5" fill="#333" opacity="0.3" />
+                    <circle cx="0" cy="45" r="1.5" fill="#333" opacity="0.3" />
+                    <circle cx="45" cy="15" r="1.5" fill="#333" opacity="0.3" />
+                    <circle cx="45" cy="45" r="1.5" fill="#333" opacity="0.3" />
 
-                    <circle cx="0" cy="15" r="1.5" fill="#9ca3af" />
-                    <circle cx="0" cy="45" r="1.5" fill="#9ca3af" />
-                    <circle cx="45" cy="15" r="1.5" fill="#9ca3af" />
-                    <circle cx="45" cy="45" r="1.5" fill="#9ca3af" />
+                    {/* Dark Gray Outer Housing */}
+                    <rect x="4.5" y="12" width="36" height="36" rx="1.5" fill="#464646" />
+                    
+                    {/* Metallic Inner Plate */}
+                    <rect x="6.75" y="14.25" width="31.5" height="31.5" rx="1" fill="#eaeaea" />
 
-                    <rect x="4.5" y="10" width="36" height="40" rx="3" fill={`url(#base-grad-${uniqueId})`} stroke="#000000" strokeWidth="0.8" />
-                    <rect x="7.5" y="13" width="30" height="34" rx="2" fill={`url(#metal-grad-${uniqueId})`} stroke="#4b5563" strokeWidth="0.6" />
-
-                    <circle cx="10" cy="15.5" r="1" fill="#1f2937" />
-                    <circle cx="35" cy="15.5" r="1" fill="#1f2937" />
-                    <circle cx="10" cy="44.5" r="1" fill="#1f2937" />
-                    <circle cx="35" cy="44.5" r="1" fill="#1f2937" />
-
-                    <circle cx="22.5" cy="30" r="11" fill="#1f2937" opacity="0.15" />
-                    <circle cx="22.5" cy="30" r="10" fill="#4b5563" stroke="#374151" strokeWidth="0.5" />
-                    <circle cx="22.5" cy="30" r="8.5" fill={`url(#plunger-grad-${uniqueId})`} stroke="#1f2937" strokeWidth="0.5" />
+                    {/* Button Plunger */}
+                    <circle 
+                        cx="22.5" 
+                        cy="30" 
+                        r="11.5" 
+                        fill={pressed ? `url(#grad-down-${uniqueId})` : `url(#grad-up-${uniqueId})`} 
+                    />
+                    
+                    {/* Inner Plunger Ring */}
+                    <circle 
+                        cx="22.5" 
+                        cy="30" 
+                        r="8.5" 
+                        fill={btnColor.primary} 
+                        stroke="#2f2f2f" 
+                        strokeOpacity="0.47" 
+                        strokeWidth="0.5" 
+                    />
                 </svg>
             </div>
         </div>

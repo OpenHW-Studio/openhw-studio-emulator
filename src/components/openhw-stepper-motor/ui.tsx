@@ -1,18 +1,19 @@
 import React from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 345, h: 375 };
+export const BOUNDS = { x: 0, y: 0, w: 135, h: 165 };
 const mmToPix = 15 / 2.54; // Exact ratio for 15px pitch per 0.1 inch (2.54mm)
 
 export const StepperMotorUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const angle = state?.angle ?? 0;
+    const arrowColor = state?.arrow || attrs?.arrow || '#4a36ba';
     
-    // NEMA 23 Default Spec
-    const frameSize = 57.3;
-    const holeRadius = 2.5;
-    const shaftRadius = 6.35;
-    const cornerRadius = 5;
-    const cornerOffset = 5.5;
-    const bodyRadius = 19.5;
+    // NEMA 8 Spec
+    const frameSize = 20.3;
+    const holeRadius = 1;
+    const shaftRadius = 2;
+    const cornerRadius = 2;
+    const cornerOffset = 2.5;
+    const bodyRadius = 8;
     
     const halfShaft = shaftRadius / 2;
     const halfFrame = frameSize / 2;
@@ -23,9 +24,9 @@ export const StepperMotorUI = ({ state, attrs }: { state: any, attrs: any }) => 
     // shaft radius offset, needed for transform
     const rOff = Math.sqrt(0.75 * Math.pow(shaftRadius, 2));
 
-    // Calculate exact offsets to snap the pins to exactly (150, 375), etc.
-    const offsetX = 150 - (24.9 * mmToPix);
-    const offsetY = 375 - (62.35 * mmToPix);
+    // Calculate exact offsets to snap the pins to exactly (45, 165), etc.
+    const offsetX = 45 - ((halfFrame - 3.81) * mmToPix);
+    const offsetY = 165 - ((frameSize + 5.05) * mmToPix);
 
     const width = BOUNDS.w;
     const height = BOUNDS.h;
@@ -132,7 +133,7 @@ export const StepperMotorUI = ({ state, attrs }: { state: any, attrs: any }) => 
                             <path
                                 id="arrow-path"
                                 transform={`rotate(${angle}, ${halfFrame},${halfFrame}) translate(${halfFrame} ${halfFrame})`}
-                                fill="transparent"
+                                fill={arrowColor}
                                 d={`m 0 0 l -${shaftRadius} 0 l ${shaftRadius} -${halfFrame - 3} l ${shaftRadius} ${halfFrame - 3} z`}
                             />
                             <path

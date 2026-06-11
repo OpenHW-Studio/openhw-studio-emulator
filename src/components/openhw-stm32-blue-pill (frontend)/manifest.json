@@ -1,7 +1,7 @@
 {
-  "type": "openhw-stm32-blue-pill",
-  "label": "STM32 Blue Pill",
-  "description": "STM32F103C8T6 Blue Pill development board with external pin headers and power rails.",
+  "type": "openhw-stm32-blue-pill (frontend)",
+  "label": "STM32 Blue Pill (frontend)",
+  "description": "STM32F103C8T6 Blue Pill development board running on frontend engine.",
   "group": "Boards",
   "w": 170,
   "h": 440,
