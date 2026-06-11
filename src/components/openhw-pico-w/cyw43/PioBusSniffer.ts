@@ -76,6 +76,7 @@ export function swap16x2(word: number): number {
  */
 export type SnifferEvent =
   | { kind: 'header'; cmd: Cyw43Cmd }
+  | { kind: 'read-ready'; cmd: Cyw43Cmd }
   | { kind: 'payload'; cmd: Cyw43Cmd; payload: Uint8Array };
 
 export class PioBusSniffer {
@@ -108,6 +109,7 @@ export class PioBusSniffer {
       console.log(`[PicoW SNIF] read turn-around consume pending=${this.pendingReadWords}`);
       this.pendingReadWords--;
       if (this.pendingReadWords === 0) {
+        yield { kind: 'read-ready', cmd: this.pendingCmd };
         this.pendingCmd = null;
       }
       return;

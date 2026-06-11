@@ -88,6 +88,7 @@ export class Cyw43Emulator {
 
   // ── Bus state ────────────────────────────────────────────────────
   private f0Regs = new Uint32Array(16);
+  private cccrRegs = new Map<number, number>();
   private clockCsr = ClockCsr.ALP_AVAIL;
   private readTestPrimed = false;
   private f1Window = 0;
@@ -184,6 +185,10 @@ export class Cyw43Emulator {
       const word = readU32LE(payload, 0);
       const idx = cmd.address >>> 2;
       if (idx >= 0 && idx < this.f0Regs.length) this.f0Regs[idx] = word;
+      else if (cmd.address < 0x80) {
+        // SDIO CCCR byte writes
+        this.cccrRegs.set(cmd.address, payload[0]);
+      }
       if (cmd.address === F0.RESET_BP) this.f1Window = 0;
       // Writing 1s to interrupt register clears (RW1C).
       if (cmd.address === F0.INTERRUPT) {
@@ -195,9 +200,19 @@ export class Cyw43Emulator {
     if (cmd.address === F0.READ_TEST) {
       const value = this.readTestPrimed ? TEST_PATTERN : 0;
       this.readTestPrimed = true;
-      writeU32Swap(out, 0, value);
+      writeU32LE(out, 0, value); // fixed TEST_PATTERN order
       this.chipReady = true;
       console.log(`[PicoW SPI CORE] F0 READ_TEST -> 0x${value.toString(16).padStart(8, '0')} chipReady=${this.chipReady}`);
+    } else if (cmd.address < 0x80 && cmd.address !== F0.STATUS_ENABLE) {
+      // SDIO CCCR space
+      let val = this.cccrRegs.get(cmd.address) ?? 0;
+      if (cmd.address === 0x02) val = 0x02; // SDIOD_CCCR_IOEN
+      if (cmd.address === 0x03) val = 0x02; // SDIOD_CCCR_IORDY
+      if (cmd.address === 0x07) val = 0x02; // SDIOD_CCCR_BICTRL
+      if (cmd.address === 0x08) val = 0x20; // SPI_STATUS_REGISTER
+      if (cmd.address === 0x10) val = 0x40; // SDIOD_CCCR_BLKSIZE_0
+      if (cmd.address === 0x13) val = 0x03; // SDIOD_CCCR_SPEED_CONTROL
+      out[0] = val;
     } else {
       const idx = cmd.address >>> 2;
       if (idx >= 0 && idx < this.f0Regs.length) {

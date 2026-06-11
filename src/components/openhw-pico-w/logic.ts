@@ -23,6 +23,7 @@ export class PicoWLogic extends BaseComponent {
   public cyw43Sniffer: PioBusSniffer | null = null;
   private cyw43Sniffers = new Map<string, PioBusSniffer>();
   private cyw43RxQueues = new Map<string, number[]>();
+  private cyw43PendingReadCmds = new Map<string, Cyw43Cmd>();
   private cyw43HookedFifos: Array<{ restore: () => void }> = [];
 
   constructor(id: string, manifest: any) {
@@ -65,6 +66,7 @@ export class PicoWLogic extends BaseComponent {
     for (const sniffer of this.cyw43Sniffers.values()) sniffer.reset();
     this.cyw43Sniffers.clear();
     this.cyw43RxQueues.clear();
+    this.cyw43PendingReadCmds.clear();
     this.cyw43Sniffer = null;
   }
 
@@ -232,18 +234,14 @@ export class PicoWLogic extends BaseComponent {
           // Feed every TX FIFO push to the gSPI sniffer (Velxio pattern).
           // swap16x2 is applied unconditionally inside feedWord.
           for (const ev of sniffer.feedWord(value)) {
+            console.log(`[DEBUG] sniffer yielded ev.kind=${ev.kind}`);
             if (ev.kind === 'header' && ev.cmd.length > 0) {
               const fn = ['F0', 'F1', 'F2', 'F3'][ev.cmd.function];
               const queue = this._getCyw43Queue(smLabel);
               console.log(`[PicoW SPI] ${smLabel} ${ev.cmd.write ? 'WR' : 'RD'} ${fn} Addr=0x${ev.cmd.address.toString(16)} Len=${ev.cmd.length} q=${queue.length}`);
               if (!ev.cmd.write) {
-                const leadDummyWords = ev.cmd.function === 1 ? 4 : 1;
-                const reply = this.cyw43!.onCommand(ev.cmd, new Uint8Array(0));
-                if (reply && reply.length > 0) {
-                  console.log(`[PicoW SPI RX] ${smLabel} ${fn} Addr=0x${ev.cmd.address.toString(16)} reply ${reply.length}B leadDummy=${leadDummyWords}: [ ${Array.from(reply.slice(0, 8)).map(b => b.toString(16).padStart(2, '0')).join(' ')}${reply.length > 8 ? '...' : ''} ]`);
-                  this._queueCyw43Reply(smLabel, reply, leadDummyWords);
-                  console.log(`[PicoW SPI RXQ] ${smLabel} queued=${this._getCyw43Queue(smLabel).length} words`);
-                }
+                this.cyw43PendingReadCmds.set(smLabel, ev.cmd);
+                console.log(`[PicoW SPI RX] ${smLabel} ${fn} Addr=0x${ev.cmd.address.toString(16)} staged read cmd len=${ev.cmd.length}`);
               }
             } else if (ev.kind === 'payload') {
               const fn = ['F0', 'F1', 'F2', 'F3'][ev.cmd.function];
@@ -255,6 +253,27 @@ export class PicoWLogic extends BaseComponent {
                 console.log(`[PicoW SPI RX] ${smLabel} ${fn} Addr=0x${ev.cmd.address.toString(16)} reply ${reply.length}B: [ ${Array.from(reply.slice(0, 8)).map(b => b.toString(16).padStart(2, '0')).join(' ')}${reply.length > 8 ? '...' : ''} ]`);
                 this._queueCyw43Reply(smLabel, reply, 0);
                 console.log(`[PicoW SPI RXQ] ${smLabel} queued=${this._getCyw43Queue(smLabel).length} words`);
+              }
+            } else if (ev.kind === 'read-ready') {
+              console.log(`[DEBUG] inside read-ready, fetching pendingCmd for ${smLabel}`);
+              const pendingCmd = this.cyw43PendingReadCmds.get(smLabel);
+              console.log(`[DEBUG] pendingCmd is:`, pendingCmd);
+              if (pendingCmd) {
+                const fn = ['F0', 'F1', 'F2', 'F3'][pendingCmd.function];
+                const leadDummyWords = pendingCmd.function === 1 ? 4 : 1;
+                console.log(`[DEBUG] calling cyw43.onCommand for read-ready...`);
+                try {
+                  const reply = this.cyw43!.onCommand(pendingCmd, new Uint8Array(0));
+                  console.log(`[DEBUG] cyw43.onCommand returned:`, reply ? reply.length : 'null');
+                  if (reply && reply.length > 0) {
+                    console.log(`[PicoW SPI RX] ${smLabel} ${fn} Addr=0x${pendingCmd.address.toString(16)} committing reply ${reply.length}B leadDummy=${leadDummyWords}: [ ${Array.from(reply.slice(0, 8)).map(b => b.toString(16).padStart(2, '0')).join(' ')}${reply.length > 8 ? '...' : ''} ]`);
+                    this._queueCyw43Reply(smLabel, reply, leadDummyWords);
+                  }
+                } catch (e) {
+                  console.error(`[DEBUG] Exception in cyw43.onCommand:`, e);
+                }
+                console.log(`[PicoW SPI RXQ] ${smLabel} queued=${this._getCyw43Queue(smLabel).length} words`);
+                this.cyw43PendingReadCmds.delete(smLabel);
               }
             }
           }
