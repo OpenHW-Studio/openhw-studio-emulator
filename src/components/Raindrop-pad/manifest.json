@@ -3,8 +3,8 @@
     "label": "Rain Sensor Pad",
     "description": "Raindrop sensing pad — resistive PCB that detects water. Wire AOUT to the Raindrop Module's PAD+ pin.",
     "group": "Sensors",
-    "w": 300,
-    "h": 225,
+    "w": 247,
+    "h": 167,
     "attrs": {},
     "pins": [
         {
@@ -13,7 +13,7 @@
             "type": "analog",
             "description": "Analog signal output (wire to Raindrop Module PAD+)",
             "x": 240,
-            "y": 75
+            "y": 78
         },
         {
             "id": "GND",
@@ -24,15 +24,24 @@
             "y": 90
         }
     ],
+    "autowiring": {
+        "helpers": [
+            { "type": "openhw-raindrop-module", "id": "module" }
+        ],
+        "connections": [
+            { "from": "AOUT", "to": "helper:module:PAD+" },
+            { "from": "GND", "to": "helper:module:PAD-" },
+            { "from": "helper:module:VCC", "to": "arduino:5V" },
+            { "from": "helper:module:GND", "to": "arduino:GND" },
+            { "from": "helper:module:DO", "to": "arduino:2|3|4|5|6|7|8" },
+            { "from": "helper:module:AO", "to": "arduino:A0|A1|A2|A3|A4|A5" }
+        ]
+    },
     "autocoding": {
         "arduino": {
-            "setup": "// Raindrop Pad — connect AOUT to Raindrop Module PAD+\n// No direct GPIO connection needed for the pad itself.\nSerial.println(\"Raindrop Pad connected.\");",
-            "loop": "// Read is done by the Raindrop Module AO pin\ndelay(1000);"
+            "globals": "#define RAIN_AO_PIN_${COMP_SUFFIX} ${helper:module:AO}\n#define RAIN_DO_PIN_${COMP_SUFFIX} ${helper:module:DO}",
+            "setup": "pinMode(RAIN_DO_PIN_${COMP_SUFFIX}, INPUT);\nSerial.println(\"Raindrop Pad ${COMP_SUFFIX} ready.\");",
+            "loop": "int rainLevel_${COMP_SUFFIX} = analogRead(RAIN_AO_PIN_${COMP_SUFFIX});\nint doVal_${COMP_SUFFIX} = digitalRead(RAIN_DO_PIN_${COMP_SUFFIX});\nSerial.print(\"Rain Pad ${COMP_SUFFIX} Level: \");\nSerial.print(rainLevel_${COMP_SUFFIX});\nSerial.print(\"  DO: \");\nSerial.println(doVal_${COMP_SUFFIX} == LOW ? \"RAIN DETECTED\" : \"Dry\");\ndelay(1000);"
         }
-    },
-    "autowiring": {
-        "connections": [
-            { "from": "GND", "to": "esp32:GND.1" }
-        ]
     }
 }
