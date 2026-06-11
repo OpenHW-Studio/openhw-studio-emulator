@@ -14,6 +14,9 @@ export const RGBLEDUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const brightness = Math.max(ledRed, ledGreen, ledBlue);
     const opacity = brightness ? 0.2 + brightness * 0.6 : 0;
 
+    const bodyColor = brightness > 0 ? `rgb(${rVal}, ${gVal}, ${bVal})` : "#e6e6e6";
+    const bodyColorDarker = brightness > 0 ? `rgb(${Math.floor(rVal * 0.8)}, ${Math.floor(gVal * 0.8)}, ${Math.floor(bVal * 0.8)})` : "#d1d1d1";
+
     // Exact scale factor so 8.5 viewBox units = 15px
     const scale = 15 / 8.5;
     const svgWidth = 37.3425 * scale;
@@ -49,12 +52,12 @@ export const RGBLEDUI = ({ state, attrs }: { state: any, attrs: any }) => {
                 />
                 <path
                     d="m8.3435 5.65v-5.9126c0-3.9132-3.168-7.0884-7.0855-7.0884-3.9125 0-7.0877 3.1694-7.0877 7.0884v13.649c1.4738 1.651 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8594v-1.5235c-7.4e-4 -1.1426-0.47444-2.2039-1.283-3.1061z"
-                    fill="#e6e6e6"
+                    fill={bodyColor}
                     opacity=".5"
                 />
                 <path
                     d="m8.3435 5.65v3.1054c0 2.7389-3.1658 4.9651-7.0855 4.9651-3.9125 2e-5 -7.0877-2.219-7.0877-4.9651v4.6296c1.4738 1.6517 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8586l-4e-5 -1.5235c-7e-4 -1.1419-0.4744-2.2032-1.283-3.1054z"
-                    fill="#d1d1d1"
+                    fill={bodyColorDarker}
                     opacity=".9"
                 />
                 <g transform="translate(-5.8295 -7.351)">
@@ -101,46 +104,12 @@ export const RGBLEDUI = ({ state, attrs }: { state: any, attrs: any }) => {
                 <filter id={`ledFilter-${state?.id || 'default'}`} x="-0.8" y="-0.8" height="5.2" width="5.8">
                     <feGaussianBlur stdDeviation="4" />
                 </filter>
-                <filter id={`ledFilterRed-${state?.id || 'default'}`} x="-0.8" y="-0.8" height="5.2" width="5.8">
-                    <feGaussianBlur stdDeviation={ledRed * 3} />
-                </filter>
-                <filter id={`ledFilterGreen-${state?.id || 'default'}`} x="-0.8" y="-0.8" height="5.2" width="5.8">
-                    <feGaussianBlur stdDeviation={ledGreen * 3} />
-                </filter>
-                <filter id={`ledFilterBlue-${state?.id || 'default'}`} x="-0.8" y="-0.8" height="5.2" width="5.8">
-                    <feGaussianBlur stdDeviation={ledBlue * 3} />
-                </filter>
-
-                <circle
-                    cx="1.7"
-                    cy="3"
-                    r={ledRed * 5 + 2}
-                    fill="rgb(255, 0, 0)"
-                    opacity={Math.min(ledRed * 20, 0.3)}
-                    filter={`url(#ledFilterRed-${state?.id || 'default'})`}
-                />
-                <circle
-                    cx="2.7"
-                    cy="5"
-                    r={ledGreen * 5 + 2}
-                    fill="rgb(0, 255, 0)"
-                    opacity={Math.min(ledGreen * 20, 0.3)}
-                    filter={`url(#ledFilterGreen-${state?.id || 'default'})`}
-                />
-                <circle
-                    cx="0.7"
-                    cy="5"
-                    r={ledBlue * 5 + 2}
-                    fill="rgb(1,85,253)"
-                    opacity={Math.min(ledBlue * 20, 0.3)}
-                    filter={`url(#ledFilterBlue-${state?.id || 'default'})`}
-                />
 
                 <circle
                     cx="1.7"
                     cy="4"
                     r="10"
-                    fill={`rgb(${ledRed * 255}, ${ledGreen * 255 + ledBlue * 90}, ${ledBlue * 255})`}
+                    fill={`rgb(${rVal}, ${gVal}, ${bVal})`}
                     filter={`url(#ledFilter-${state?.id || 'default'})`}
                     opacity={opacity}
                 />
