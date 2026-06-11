@@ -2,28 +2,25 @@
     "type": "openhw-7segment",
     "label": "7-Segment Display",
     "group": "Outputs",
-    "w": 390,
-    "h": 105,
+    "w": 50,
+    "h": 90,
     "attrs": {
         "color": "red",
         "common": "cathode",
-        "digits": "4",
-        "colon": "1"
+        "digits": "1",
+        "colon": "false"
     },
     "pins": [
-        { "id": "A", "x": 135, "y": 0, "type": "digital" },
-        { "id": "B", "x": 150, "y": 0, "type": "digital" },
-        { "id": "C", "x": 165, "y": 0, "type": "digital" },
-        { "id": "D", "x": 180, "y": 0, "type": "digital" },
-        { "id": "E", "x": 195, "y": 0, "type": "digital" },
-        { "id": "F", "x": 210, "y": 0, "type": "digital" },
-        { "id": "G", "x": 225, "y": 0, "type": "digital" },
-        { "id": "DP", "x": 240, "y": 0, "type": "digital" },
-        { "id": "DIG1", "x": 150, "y": 105, "type": "digital" },
-        { "id": "DIG2", "x": 165, "y": 105, "type": "digital" },
-        { "id": "DIG3", "x": 180, "y": 105, "type": "digital" },
-        { "id": "DIG4", "x": 195, "y": 105, "type": "digital" },
-        { "id": "COLON", "x": 210, "y": 105, "type": "digital", "pull": "down" }
+        { "id": "G", "x": 10, "y": 0, "type": "digital" },
+        { "id": "F", "x": 17, "y": 0, "type": "digital" },
+        { "id": "COM.2", "x": 25, "y": 0, "type": "digital" },
+        { "id": "A", "x": 33, "y": 0, "type": "digital" },
+        { "id": "B", "x": 40, "y": 0, "type": "digital" },
+        { "id": "E", "x": 10, "y": 90, "type": "digital" },
+        { "id": "D", "x": 17, "y": 90, "type": "digital" },
+        { "id": "COM.1", "x": 25, "y": 90, "type": "digital" },
+        { "id": "C", "x": 33, "y": 90, "type": "digital" },
+        { "id": "DP", "x": 40, "y": 90, "type": "digital" }
     ],
     "telemetry": {
       "template": "Segments=(${state.a},${state.b},${state.c},${state.d},${state.e},${state.f},${state.g})",
@@ -39,18 +36,15 @@
         { "from": "F", "to": "arduino:7" },
         { "from": "G", "to": "arduino:8" },
         { "from": "DP", "to": "arduino:9" },
-        { "from": "DIG1", "to": "arduino:10" },
-        { "from": "DIG2", "to": "arduino:11" },
-        { "from": "DIG3", "to": "arduino:12" },
-        { "from": "DIG4", "to": "arduino:13" }
+        { "from": "COM.1", "to": "arduino:GND" }
       ]
     },
     "autocoding": {
       "libraries": ["SevSeg"],
       "arduino": {
         "globals": "#include \"SevSeg.h\"\nSevSeg sevseg_${COMP_SUFFIX};",
-        "setup": "byte numDigits = 4;\nbyte digitPins[] = {10, 11, 12, 13};\nbyte segmentPins[] = {2, 3, 4, 5, 6, 7, 8, 9};\nbool resistorsOnSegments = true;\nbyte hardwareConfig = COMMON_CATHODE;\nsevseg_${COMP_SUFFIX}.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments);\nsevseg_${COMP_SUFFIX}.setBrightness(90);",
-        "loop": "sevseg_${COMP_SUFFIX}.setNumber(1234, 1);\nsevseg_${COMP_SUFFIX}.refreshDisplay();"
+        "setup": "byte numDigits = 1;\nbyte digitPins[] = {10};\nbyte segmentPins[] = {2, 3, 4, 5, 6, 7, 8, 9};\nbool resistorsOnSegments = true;\nbyte hardwareConfig = COMMON_CATHODE;\nsevseg_${COMP_SUFFIX}.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments);\nsevseg_${COMP_SUFFIX}.setBrightness(90);",
+        "loop": "sevseg_${COMP_SUFFIX}.setNumber(4);\nsevseg_${COMP_SUFFIX}.refreshDisplay();"
       }
     }
 }
