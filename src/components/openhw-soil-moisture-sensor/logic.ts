@@ -23,6 +23,14 @@ export class SoilMoistureSensorLogic extends BaseComponent {
         this.setPinVoltage('SIG', outSig);
     }
 
+    onEvent(event: any) {
+        if (event && event.type === 'SET_MOISTURE') {
+            this.setState({ moisture: event.value });
+            this.stateChanged = true;
+            this.onPinStateChange();
+        }
+    }
+
     onCustomTelemetry() {
         const vcc = this.getPinVoltage('VCC') || this.getPinVoltage('5V');
         const sig = this.getPinVoltage('SIG');
