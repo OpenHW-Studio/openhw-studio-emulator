@@ -1,7 +1,6 @@
 import { BaseComponent } from '../BaseComponent';
 import type { WiFiConnectionStatus } from '../../protocol-handlers/wifi-environment';
 import { Cyw43Emulator } from './cyw43/Cyw43Emulator';
-import { PioBusSniffer } from './cyw43/PioBusSniffer';
 
 function normalizePicoPin(pinId: string): string {
   const s = String(pinId || '').toUpperCase();
@@ -20,16 +19,11 @@ export class PicoWLogic extends BaseComponent {
   private isWsOpen = false;
 
   public cyw43: Cyw43Emulator | null = null;
-  public cyw43Sniffer: PioBusSniffer | null = null;
-  private cyw43Sniffers = new Map<string, PioBusSniffer>();
-  private cyw43RxQueues = new Map<string, number[]>();
-  private cyw43PendingReadCmds = new Map<string, Cyw43Cmd>();
-  private cyw43HookedFifos: Array<{ restore: () => void }> = [];
+  private cyw43GpioHooks: Array<{ restore: () => void }> = [];
 
   constructor(id: string, manifest: any) {
     super(id, manifest);
     this.cyw43 = new Cyw43Emulator();
-    this.cyw43Sniffer = new PioBusSniffer();
     this.state = {
       txActive:       false,
       rxActive:       false,
@@ -63,11 +57,6 @@ export class PicoWLogic extends BaseComponent {
   }
 
   private _resetCyw43BusState(): void {
-    for (const sniffer of this.cyw43Sniffers.values()) sniffer.reset();
-    this.cyw43Sniffers.clear();
-    this.cyw43RxQueues.clear();
-    this.cyw43PendingReadCmds.clear();
-    this.cyw43Sniffer = null;
   }
 
   // ── Simulation lifecycle ─────────────────────────────────────────────────────
@@ -148,8 +137,8 @@ export class PicoWLogic extends BaseComponent {
     }
     this.isWsOpen = false;
     
-    for (const h of this.cyw43HookedFifos) h.restore();
-    this.cyw43HookedFifos = [];
+    for (const h of this.cyw43GpioHooks) h.restore();
+    this.cyw43GpioHooks = [];
     this._resetCyw43BusState();
     this.cyw43 = null;
 
@@ -164,133 +153,136 @@ export class PicoWLogic extends BaseComponent {
 
   // ── CYW43439 SPI Hooks ───────────────────────────────────────────────────────
 
-  attachPioHooks(rp2040: any): void {
+  attachGpioHooks(rp2040: any): void {
     if (!rp2040 || !this.cyw43) return;
     this.rp2040Ref = rp2040;
 
-    if (this.cyw43DrainTimer) {
-      clearInterval(this.cyw43DrainTimer);
-      this.cyw43DrainTimer = null;
-    }
+    const WL_D = 24;
+    const WL_CS = 25;
+    const WL_CLK = 29;
 
-    const pios: any[] = rp2040.pio;
-    let hookedCount = 0;
-    let pioIndex = -1;
+    let isSelected = false;
+    let shiftIn = 0;
+    let bitCount = 0;
+    
+    let currentCmd: any | null = null;
+    let writePayload = new Uint8Array(0);
+    let writeIdx = 0;
+    
+    let replyData = new Uint32Array(0);
+    let replyIdx = 0;
+    let shiftOut = 0;
 
-    // Log UART to catch panics!
-    const hookUart = (uart: any, name: string) => {
-      if (uart) {
-        let buffer = '';
-        uart.onByte = (byte: number) => {
-          const char = String.fromCharCode(byte);
-          if (char === '\n') {
-            console.log(`[PicoW ${name}] ${buffer}`);
-            buffer = '';
-          } else if (char !== '\r') {
-            buffer += char;
-          }
-        };
+    const transformValue = (x: number) => {
+      // Undo the half-word swap the driver did before transmitting
+      return (((x & 0xffff) << 16) | ((x >>> 16) & 0xffff)) >>> 0;
+    };
+
+    const parseCmd = (word: number) => {
+      // Basic Cyw43Cmd parse
+      return {
+        isWrite: (word & (1 << 31)) !== 0,
+        function: (word >>> 28) & 0x03,
+        address: (word >>> 11) & 0x1ffff,
+        length: word & 0x7ff
+      };
+    };
+
+    const csListener = (state: boolean) => {
+      isSelected = !state;
+      console.log(`[PicoW GPIO] CS = ${state ? 'HIGH' : 'LOW'}`);
+      if (!isSelected) {
+        // CS HIGH (idle) -> drive IRQ
+        rp2040.gpio[WL_D].setInputValue(this.cyw43!.irq);
+      } else {
+        // CS LOW (active) -> start transaction
+        rp2040.gpio[WL_D].setInputValue(false);
+        bitCount = 0;
+        shiftIn = 0;
+        replyData = new Uint32Array(0);
+        replyIdx = 0;
+        shiftOut = 0;
+        currentCmd = null;
       }
     };
-    hookUart(rp2040.uart[0], 'UART0');
-    hookUart(rp2040.uart[1], 'UART1');
+    rp2040.gpio[WL_CS].addListener(csListener);
+    this.cyw43GpioHooks.push({ restore: () => rp2040.gpio[WL_CS].removeListener?.(csListener) });
 
-    for (const pio of pios) {
-      pioIndex++;
+    const clkListener = (state: boolean) => {
+      if (!isSelected) return;
 
-      if (!(pio as any).__shiftCtrlHooked) {
-        const origPioWrite = pio.writeUint32.bind(pio);
-        pio.writeUint32 = (offset: number, value: number) => {
-          origPioWrite(offset, value);
-          // SHIFTCTRL register offsets for each SM: 0xd0, 0xe8, 0x100, 0x118
-          // pio_sm_clear_fifos toggles FJOIN_RX — rp2040js doesn't auto-clear, so we do it.
-            const smIdx = offset === 0xd0 ? 0 : offset === 0xe8 ? 1 : offset === 0x100 ? 2 : offset === 0x118 ? 3 : -1;
-          if (smIdx >= 0) {
-            const sm = pio.machines[smIdx];
-            for (const fifo of [sm.rxFIFO, sm.txFIFO]) {
-              if (!fifo) continue;
-              if (typeof fifo.clear === 'function') fifo.clear();
-              else { (fifo as any).used = 0; (fifo as any).start = 0; }
+      if (state) {
+        // RISING EDGE: Sample MOSI
+        const mosi = rp2040.gpio[WL_D].value ? 1 : 0;
+        shiftIn = ((shiftIn << 1) | mosi) >>> 0;
+        bitCount++;
+        
+        if (bitCount % 8 === 0) {
+            console.log(`[PicoW GPIO] CLK RISING, bitCount=${bitCount}, shiftIn=0x${shiftIn.toString(16)}`);
+        }
+
+        if (bitCount === 32) {
+          const word = transformValue(shiftIn);
+          console.log(`[PicoW SPI] Received word: 0x${word.toString(16).padStart(8, '0')} (raw shiftIn: 0x${shiftIn.toString(16).padStart(8, '0')})`);
+          
+          if (!currentCmd) {
+            currentCmd = parseCmd(word);
+            if (currentCmd.isWrite) {
+              writePayload = new Uint8Array(currentCmd.length || 4); // handles len=0 => 4 bytes
+              writeIdx = 0;
+            } else {
+              const rawReply = this.cyw43!.onCommand(currentCmd, new Uint8Array(0));
+              const wordCount = Math.ceil(rawReply.length / 4);
+              replyData = new Uint32Array(wordCount);
+              for (let i = 0; i < wordCount; i++) {
+                const b0 = rawReply[i*4] || 0;
+                const b1 = rawReply[i*4+1] || 0;
+                const b2 = rawReply[i*4+2] || 0;
+                const b3 = rawReply[i*4+3] || 0;
+                let w = ((b0 << 24) | (b1 << 16) | (b2 << 8) | b3) >>> 0;
+                replyData[i] = w;
+              }
+              replyIdx = 0;
+              if (replyIdx < replyData.length) {
+                shiftOut = replyData[replyIdx++];
+              }
             }
-            // Do NOT reset CYW43 bus state here! The driver calls clear_fifos in the
-            // middle of a read transaction, which destroys the queued reply.
-          }
-        };
-        (pio as any).__shiftCtrlHooked = true;
-      }
+          } else {
+            if (currentCmd.isWrite) {
+              if (writeIdx < writePayload.length) writePayload[writeIdx++] = (word >>> 24) & 0xff;
+              if (writeIdx < writePayload.length) writePayload[writeIdx++] = (word >>> 16) & 0xff;
+              if (writeIdx < writePayload.length) writePayload[writeIdx++] = (word >>> 8) & 0xff;
+              if (writeIdx < writePayload.length) writePayload[writeIdx++] = word & 0xff;
 
-      for (let machineIndex = 0; machineIndex < pio.machines.length; machineIndex++) {
-        const sm = pio.machines[machineIndex];
-        const tx = sm.txFIFO;
-        const rx = sm.rxFIFO;
-        if (!tx || !rx) continue;
-        const smLabel = `PIO${pioIndex} SM${machineIndex}`;
-        const sniffer = this._getCyw43Sniffer(smLabel);
-
-        console.log(`[PicoW] CYW43 Emulator attached to ${smLabel}.`);
-
-        const origRxPush = rx.push.bind(rx);
-        const origRxPull = rx.pull.bind(rx);
-        rx.pull = () => {
-          const val = origRxPull();
-          // After DMA pops one word, immediately push the next from our queue so
-          // the DMA DREQ stays active and the transfer continues uninterrupted.
-          const queue = this._getCyw43Queue(smLabel);
-          if (queue.length > 0 && !rx.full) {
-            origRxPush(queue.shift()!);
-            if (typeof sm.updateDMARx === 'function') sm.updateDMARx();
-          }
-          return val;
-        };
-
-        const origTxPush = tx.push.bind(tx);
-        tx.push = (value: number) => {
-          console.log(`[PicoW SPI TX DEBUG] ${smLabel} pushed 0x${value.toString(16).padStart(8, '0')}`);
-
-          for (const ev of sniffer.feedWord(value) as any) {
-            if (ev.kind === 'header' && ev.cmd.length > 0) {
-              const fn = ['F0', 'F1', 'F2', 'F3'][ev.cmd.function];
-              console.log(`[PicoW SPI] ${smLabel} ${ev.cmd.write ? 'WR' : 'RD'} ${fn} Addr=0x${ev.cmd.address.toString(16)} Len=${ev.cmd.length}`);
-              if (!ev.cmd.write) {
-                this.cyw43PendingReadCmds.set(smLabel, ev.cmd);
+              if (writeIdx >= writePayload.length) {
+                this.cyw43!.onCommand(currentCmd, writePayload);
+                // Can accept more if padded
               }
-            } else if (ev.kind === 'payload') {
-              const fn = ['F0', 'F1', 'F2', 'F3'][ev.cmd.function];
-              if (ev.cmd.write && ev.payload.length > 0) {
-                console.log(`[PicoW SPI TX] ${smLabel} ${fn} Addr=0x${ev.cmd.address.toString(16)} ${ev.payload.length}B`);
-              }
-              const reply = this.cyw43!.onCommand(ev.cmd, ev.payload);
-              if (reply && reply.length > 0) {
-                console.log(`[PicoW SPI RX] ${smLabel} ${fn} Addr=0x${ev.cmd.address.toString(16)} reply ${reply.length}B`);
-                this._queueCyw43Reply(smLabel, reply, 0);
-                this._drainCyw43Rx(sm, smLabel);
-              }
-            } else if (ev.kind === 'read-ready') {
-              const pendingCmd = this.cyw43PendingReadCmds.get(smLabel);
-              if (pendingCmd) {
-                const fn = ['F0', 'F1', 'F2', 'F3'][pendingCmd.function];
-                const reply = this.cyw43!.onCommand(pendingCmd, new Uint8Array(0));
-                if (reply && reply.length > 0) {
-                  console.log(`[PicoW SPI RX] ${smLabel} ${fn} Addr=0x${pendingCmd.address.toString(16)} committing reply ${reply.length}B`);
-                  this._queueCyw43Reply(smLabel, reply, 0);
-                  this._drainCyw43Rx(sm, smLabel);
-                }
-                this.cyw43PendingReadCmds.delete(smLabel);
+            } else {
+              if (replyIdx < replyData.length) {
+                shiftOut = replyData[replyIdx++];
+              } else {
+                shiftOut = 0;
               }
             }
           }
-          return origTxPush(value);
-        };
-
-        this.cyw43HookedFifos.push({ restore: () => {
-          tx.push = origTxPush;
-          rx.push = origRxPush;
-          rx.pull = origRxPull;
-        } });
-        hookedCount++;
+          shiftIn = 0;
+          bitCount = 0;
+        }
+      } else {
+        // FALLING EDGE: Drive MISO
+        if (currentCmd && !currentCmd.isWrite) {
+          const bit = (shiftOut & 0x80000000) !== 0;
+          // Set rawInputValue directly to avoid triggering rp2040js IRQ listeners during SPI
+          (rp2040.gpio[WL_D] as any).rawInputValue = bit;
+          shiftOut = (shiftOut << 1) >>> 0;
+        }
       }
-    }
-    console.log(`[PicoW] CYW43 Emulator hooked ${hookedCount} PIO state machines.`);
+    };
+    rp2040.gpio[WL_CLK].addListener(clkListener);
+    this.cyw43GpioHooks.push({ restore: () => rp2040.gpio[WL_CLK].removeListener?.(clkListener) });
+
+    console.log(`[PicoW] CYW43 Emulator attached via GPIO pins (Wokwi-style).`);
   }
 
   private _queueCyw43Reply(smLabel: string, reply: Uint8Array, leadDummyWords = 0): void {
@@ -313,44 +305,6 @@ export class PicoWLogic extends BaseComponent {
     }
   }
 
-  private _drainCyw43Rx(sm: any, smLabel = 'unknown-sm', maxWords = Number.POSITIVE_INFINITY): void {
-    const queue = this._getCyw43Queue(smLabel);
-    if (queue.length === 0) return;
-
-    const rx = sm?.rxFIFO;
-    if (!rx) return;
-
-    let drained = 0;
-    while (queue.length > 0 && !rx.full && drained < maxWords) {
-      rx.push(queue.shift()!);
-      drained++;
-    }
-
-    if (drained > 0) {
-      // Fire the PIO RX DREQ so the DMA engine sees data and starts its transfer.
-      if (typeof sm.updateDMARx === 'function') {
-        sm.updateDMARx();
-      }
-    }
-
-    if (drained > 0 || queue.length > 0) {
-      console.log(`[PicoW SPI RXQ] ${smLabel} drained=${drained} remaining=${queue.length} rxFull=${rx.full}`);
-    }
-  }
-
-  private _drainAllCyw43Rx(rp2040: any, maxWords = Number.POSITIVE_INFINITY): void {
-    const pios: any[] = rp2040?.pio || [];
-    if (pios.length === 0) return;
-
-    for (let pioIndex = 0; pioIndex < pios.length; pioIndex++) {
-      const pio = pios[pioIndex];
-      for (let machineIndex = 0; machineIndex < pio.machines.length; machineIndex++) {
-        const sm = pio.machines[machineIndex];
-        const smLabel = `PIO${pioIndex} SM${machineIndex}`;
-        this._drainCyw43Rx(sm, smLabel, maxWords);
-      }
-    }
-  }
 
   // ── Frame handling ────────────────────────────────────────────────────────────
 
