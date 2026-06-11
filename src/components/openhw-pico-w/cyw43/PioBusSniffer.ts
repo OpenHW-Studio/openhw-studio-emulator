@@ -80,62 +80,68 @@ export type SnifferEvent =
   | { kind: 'payload'; cmd: Cyw43Cmd; payload: Uint8Array };
 
 export class PioBusSniffer {
+  private state: 'TX_LEN' | 'RX_LEN' | 'HEADER' | 'PAYLOAD' = 'TX_LEN';
   private pendingCmd: Cyw43Cmd | null = null;
   private pendingPayload: number[] = [];
-  private pendingReadWords = 0;
 
   *feedWord(rawWord: number): Generator<SnifferEvent> {
     const word = swap16x2(rawWord);
 
-    if (this.pendingCmd === null) {
-      // First word of a transaction is always the header.
+    if (this.state === 'TX_LEN') {
+      this.state = 'RX_LEN';
+      return;
+    }
+
+    if (this.state === 'RX_LEN') {
+      this.state = 'HEADER';
+      return;
+    }
+
+    if (this.state === 'HEADER') {
       const cmd = decodeHeader(word);
       this.pendingCmd = cmd;
-      this.pendingPayload = [];
       yield { kind: 'header', cmd };
 
       if (!cmd.write) {
-        // This bus tap only sees TX FIFO words. Keep the read transaction
-        // open for the expected number of turn-around words so the next
-        // words are not mistaken for fresh headers.
-        this.pendingReadWords = Math.max(1, Math.ceil(cmd.length / 4) + (cmd.function === 1 ? 4 : 0));
-        console.log(`[PicoW SNIF] read hold fn=${cmd.function} addr=0x${cmd.address.toString(16)} len=${cmd.length} pending=${this.pendingReadWords}`);
-      }
-
-      return;
-    }
-
-    if (!this.pendingCmd.write && this.pendingReadWords > 0) {
-      console.log(`[PicoW SNIF] read turn-around consume pending=${this.pendingReadWords}`);
-      this.pendingReadWords--;
-      if (this.pendingReadWords === 0) {
-        yield { kind: 'read-ready', cmd: this.pendingCmd };
+        // For reads, there is no payload from the host.
+        // We are immediately ready to queue the reply into rxFIFO.
+        yield { kind: 'read-ready', cmd };
         this.pendingCmd = null;
+        this.state = 'TX_LEN';
+      } else {
+        this.pendingPayload = [];
+        // Zero-length writes complete immediately
+        if (cmd.length === 0) {
+          yield { kind: 'payload', cmd, payload: new Uint8Array(0) };
+          this.pendingCmd = null;
+          this.state = 'TX_LEN';
+        } else {
+          this.state = 'PAYLOAD';
+        }
       }
       return;
     }
 
-    // Payload follows. Each 32-bit word carries 4 payload bytes,
-    // little-endian on the wire (the PIO halfword-swap above already
-    // converted to "host byte order"; payload bytes are then byte-LSB
-    // first per pico-sdk's WORD swap macro on writes).
-    for (let i = 0; i < 4; i++) {
-      this.pendingPayload.push((word >>> (i * 8)) & 0xff);
-      if (this.pendingPayload.length >= this.pendingCmd.length) break;
-    }
+    if (this.state === 'PAYLOAD') {
+      for (let i = 0; i < 4; i++) {
+        this.pendingPayload.push((word >>> (i * 8)) & 0xff);
+        if (this.pendingPayload.length >= this.pendingCmd!.length) break;
+      }
 
-    if (this.pendingPayload.length >= this.pendingCmd.length) {
-      const payload = new Uint8Array(this.pendingPayload.slice(0, this.pendingCmd.length));
-      yield { kind: 'payload', cmd: this.pendingCmd, payload };
-      this.pendingCmd = null;
-      this.pendingPayload = [];
+      if (this.pendingPayload.length >= this.pendingCmd!.length) {
+        const payload = new Uint8Array(this.pendingPayload.slice(0, this.pendingCmd!.length));
+        yield { kind: 'payload', cmd: this.pendingCmd!, payload };
+        this.pendingCmd = null;
+        this.pendingPayload = [];
+        this.state = 'TX_LEN';
+      }
     }
   }
 
   reset(): void {
+    this.state = 'TX_LEN';
     this.pendingCmd = null;
     this.pendingPayload = [];
-    this.pendingReadWords = 0;
   }
 }
 

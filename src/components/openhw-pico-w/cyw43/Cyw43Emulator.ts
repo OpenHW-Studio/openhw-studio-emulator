@@ -200,7 +200,7 @@ export class Cyw43Emulator {
     if (cmd.address === F0.READ_TEST) {
       const value = this.readTestPrimed ? TEST_PATTERN : 0;
       this.readTestPrimed = true;
-      writeU32LE(out, 0, value); // fixed TEST_PATTERN order
+      writeU32Swap(out, 0, value);
       this.chipReady = true;
       console.log(`[PicoW SPI CORE] F0 READ_TEST -> 0x${value.toString(16).padStart(8, '0')} chipReady=${this.chipReady}`);
     } else if (cmd.address < 0x80 && cmd.address !== F0.STATUS_ENABLE) {
@@ -216,7 +216,7 @@ export class Cyw43Emulator {
     } else {
       const idx = cmd.address >>> 2;
       if (idx >= 0 && idx < this.f0Regs.length) {
-        writeU32LE(out, 0, this.f0Regs[idx]);
+        writeU32Swap(out, 0, this.f0Regs[idx]);
       }
     }
     return out;
@@ -249,7 +249,7 @@ export class Cyw43Emulator {
       out[0] = this.clockCsr & 0xff;
     } else if (cmd.address === F1.SDIO_INT_STATUS) {
       // Signal "F2 packet available" if we have queued frames for the host.
-      if (this.inboundEvents.length > 0) writeU32LE(out, 0, 0x40);
+      if (this.inboundEvents.length > 0) writeU32Swap(out, 0, 0x40);
     }
     if (cmd.increment) this.f1Window += cmd.length;
     return out;
@@ -545,11 +545,31 @@ function writeU32LE(buf: Uint8Array, off: number, value: number): void {
   buf[off + 2] = (value >>> 16) & 0xff;
   buf[off + 3] = (value >>> 24) & 0xff;
 }
+
+function writeU32BE(buf: Uint8Array, off: number, value: number): void {
+  buf[off] = (value >>> 24) & 0xff;
+  buf[off + 1] = (value >>> 16) & 0xff;
+  buf[off + 2] = (value >>> 8) & 0xff;
+  buf[off + 3] = value & 0xff;
+}
+
 function writeU32Swap(buf: Uint8Array, off: number, value: number): void {
   buf[off] = (value >>> 8) & 0xff;
   buf[off + 1] = value & 0xff;
   buf[off + 2] = (value >>> 24) & 0xff;
   buf[off + 3] = (value >>> 16) & 0xff;
+}
+
+// Wire encoding for 32-bit register reads:
+// CYW43439 puts bytes on SPI in [B2,B3,B0,B1] order.
+// PIO packs MSB-first => FIFO=0xedfeadbe for TEST_PATTERN.
+// DMA bswap => memory=0xbeadfeed.
+// Driver SWAP32 (__swap16x2) => 0xfeedbead == TEST_PATTERN. ✓
+function writeU32Wire(buf: Uint8Array, off: number, value: number): void {
+  buf[off]     = (value >>> 16) & 0xff;  // B2
+  buf[off + 1] = (value >>> 24) & 0xff;  // B3
+  buf[off + 2] = value & 0xff;           // B0
+  buf[off + 3] = (value >>> 8) & 0xff;   // B1
 }
 function readCString(buf: Uint8Array, off: number): string {
   let end = off;
