@@ -14,12 +14,15 @@ function normalizePicoPin(pinId: string): string {
 export class PicoWLogic extends BaseComponent {
   private txTimeout: any = null;
   private rxTimeout: any = null;
+  private cyw43DrainTimer: any = null;
+  private rp2040Ref: any = null;
   private ws: WebSocket | null = null;
   private isWsOpen = false;
 
   public cyw43: Cyw43Emulator | null = null;
   public cyw43Sniffer: PioBusSniffer | null = null;
-  private cyw43RxQueue: number[] = [];
+  private cyw43Sniffers = new Map<string, PioBusSniffer>();
+  private cyw43RxQueues = new Map<string, number[]>();
   private cyw43HookedFifos: Array<{ restore: () => void }> = [];
 
   constructor(id: string, manifest: any) {
@@ -37,6 +40,32 @@ export class PicoWLogic extends BaseComponent {
       wifiPacketCount: 0,
       ...this.state,
     };
+  }
+
+  private _getCyw43Sniffer(smLabel: string): PioBusSniffer {
+    let sniffer = this.cyw43Sniffers.get(smLabel);
+    if (!sniffer) {
+      sniffer = new PioBusSniffer();
+      this.cyw43Sniffers.set(smLabel, sniffer);
+      if (!this.cyw43Sniffer) this.cyw43Sniffer = sniffer;
+    }
+    return sniffer;
+  }
+
+  private _getCyw43Queue(smLabel: string): number[] {
+    let queue = this.cyw43RxQueues.get(smLabel);
+    if (!queue) {
+      queue = [];
+      this.cyw43RxQueues.set(smLabel, queue);
+    }
+    return queue;
+  }
+
+  private _resetCyw43BusState(): void {
+    for (const sniffer of this.cyw43Sniffers.values()) sniffer.reset();
+    this.cyw43Sniffers.clear();
+    this.cyw43RxQueues.clear();
+    this.cyw43Sniffer = null;
   }
 
   // ── Simulation lifecycle ─────────────────────────────────────────────────────
@@ -106,6 +135,11 @@ export class PicoWLogic extends BaseComponent {
   }
 
   override onSimulationStop(): void {
+    if (this.cyw43DrainTimer) {
+      clearInterval(this.cyw43DrainTimer);
+      this.cyw43DrainTimer = null;
+    }
+    this.rp2040Ref = null;
     if (this.ws) {
       this.ws.close();
       this.ws = null;
@@ -114,9 +148,8 @@ export class PicoWLogic extends BaseComponent {
     
     for (const h of this.cyw43HookedFifos) h.restore();
     this.cyw43HookedFifos = [];
-    this.cyw43RxQueue = [];
+    this._resetCyw43BusState();
     this.cyw43 = null;
-    this.cyw43Sniffer = null;
 
     this.setState({
       wirelessStatus:  'idle',
@@ -130,7 +163,15 @@ export class PicoWLogic extends BaseComponent {
   // ── CYW43439 SPI Hooks ───────────────────────────────────────────────────────
 
   attachPioHooks(rp2040: any): void {
-    if (!rp2040 || !this.cyw43 || !this.cyw43Sniffer) return;
+    if (!rp2040 || !this.cyw43) return;
+    this.rp2040Ref = rp2040;
+
+    if (!this.cyw43DrainTimer) {
+      this.cyw43DrainTimer = setInterval(() => {
+        if (!this.rp2040Ref) return;
+        this._drainAllCyw43Rx(this.rp2040Ref);
+      }, 5);
+    }
 
     const pios: any[] = rp2040.pio;
     let hookedCount = 0;
@@ -171,8 +212,7 @@ export class PicoWLogic extends BaseComponent {
               if (typeof fifo.clear === 'function') fifo.clear();
               else { (fifo as any).used = 0; (fifo as any).start = 0; }
             }
-            if (this.cyw43Sniffer) this.cyw43Sniffer.reset();
-            this.cyw43RxQueue = [];
+            this._resetCyw43BusState();
           }
         };
         (pio as any).__shiftCtrlHooked = true;
@@ -183,6 +223,7 @@ export class PicoWLogic extends BaseComponent {
         const tx = sm.txFIFO;
         if (!tx) continue;
         const smLabel = `PIO${pioIndex} SM${machineIndex}`;
+        const sniffer = this._getCyw43Sniffer(smLabel);
 
         console.log(`[PicoW] CYW43 Emulator attached to ${smLabel}.`);
 
@@ -190,28 +231,30 @@ export class PicoWLogic extends BaseComponent {
         tx.push = (value: number) => {
           // Feed every TX FIFO push to the gSPI sniffer (Velxio pattern).
           // swap16x2 is applied unconditionally inside feedWord.
-          for (const ev of this.cyw43Sniffer!.feedWord(value)) {
+          for (const ev of sniffer.feedWord(value)) {
             if (ev.kind === 'header' && ev.cmd.length > 0) {
               const fn = ['F0', 'F1', 'F2', 'F3'][ev.cmd.function];
-              console.log(`[PicoW SPI] ${smLabel} ${ev.cmd.write ? 'WR' : 'RD'} ${fn} Addr=0x${ev.cmd.address.toString(16)} Len=${ev.cmd.length} q=${this.cyw43RxQueue.length}`);
+              const queue = this._getCyw43Queue(smLabel);
+              console.log(`[PicoW SPI] ${smLabel} ${ev.cmd.write ? 'WR' : 'RD'} ${fn} Addr=0x${ev.cmd.address.toString(16)} Len=${ev.cmd.length} q=${queue.length}`);
               if (!ev.cmd.write) {
                 const leadDummyWords = ev.cmd.function === 1 ? 4 : 1;
                 const reply = this.cyw43!.onCommand(ev.cmd, new Uint8Array(0));
                 if (reply && reply.length > 0) {
                   console.log(`[PicoW SPI RX] ${smLabel} ${fn} Addr=0x${ev.cmd.address.toString(16)} reply ${reply.length}B leadDummy=${leadDummyWords}: [ ${Array.from(reply.slice(0, 8)).map(b => b.toString(16).padStart(2, '0')).join(' ')}${reply.length > 8 ? '...' : ''} ]`);
-                  this._queueCyw43Reply(reply, leadDummyWords);
-                  console.log(`[PicoW SPI RXQ] ${smLabel} queued=${this.cyw43RxQueue.length} words`);
+                  this._queueCyw43Reply(smLabel, reply, leadDummyWords);
+                  console.log(`[PicoW SPI RXQ] ${smLabel} queued=${this._getCyw43Queue(smLabel).length} words`);
                 }
               }
             } else if (ev.kind === 'payload') {
+              const fn = ['F0', 'F1', 'F2', 'F3'][ev.cmd.function];
               if (ev.cmd.write && ev.payload.length > 0) {
-                console.log(`[PicoW SPI TX] ${smLabel} ${['F0','F1','F2','F3'][ev.cmd.function]} Addr=0x${ev.cmd.address.toString(16)} ${ev.payload.length}B: [ ${Array.from(ev.payload.slice(0, 16)).map(b => b.toString(16).padStart(2, '0')).join(' ')}${ev.payload.length > 16 ? '...' : ''} ]`);
-                const reply = this.cyw43!.onCommand(ev.cmd, ev.payload);
-                if (reply && reply.length > 0) {
-                  console.log(`[PicoW SPI RX] ${smLabel} ${['F0','F1','F2','F3'][ev.cmd.function]} Addr=0x${ev.cmd.address.toString(16)} reply ${reply.length}B: [ ${Array.from(reply.slice(0, 8)).map(b => b.toString(16).padStart(2, '0')).join(' ')}${reply.length > 8 ? '...' : ''} ]`);
-                  this._queueCyw43Reply(reply, 0);
-                  console.log(`[PicoW SPI RXQ] ${smLabel} queued=${this.cyw43RxQueue.length} words`);
-                }
+                console.log(`[PicoW SPI TX] ${smLabel} ${fn} Addr=0x${ev.cmd.address.toString(16)} ${ev.payload.length}B: [ ${Array.from(ev.payload.slice(0, 16)).map(b => b.toString(16).padStart(2, '0')).join(' ')}${ev.payload.length > 16 ? '...' : ''} ]`);
+              }
+              const reply = this.cyw43!.onCommand(ev.cmd, ev.payload);
+              if (reply && reply.length > 0) {
+                console.log(`[PicoW SPI RX] ${smLabel} ${fn} Addr=0x${ev.cmd.address.toString(16)} reply ${reply.length}B: [ ${Array.from(reply.slice(0, 8)).map(b => b.toString(16).padStart(2, '0')).join(' ')}${reply.length > 8 ? '...' : ''} ]`);
+                this._queueCyw43Reply(smLabel, reply, 0);
+                console.log(`[PicoW SPI RXQ] ${smLabel} queued=${this._getCyw43Queue(smLabel).length} words`);
               }
             }
           }
@@ -227,35 +270,52 @@ export class PicoWLogic extends BaseComponent {
     console.log(`[PicoW] CYW43 Emulator hooked ${hookedCount} PIO state machines.`);
   }
 
-  private _queueCyw43Reply(reply: Uint8Array, leadDummyWords = 0): void {
+  private _queueCyw43Reply(smLabel: string, reply: Uint8Array, leadDummyWords = 0): void {
+    const queue = this._getCyw43Queue(smLabel);
     for (let i = 0; i < leadDummyWords; i++) {
-      this.cyw43RxQueue.push(0);
+      queue.push(0);
     }
     for (let i = 0; i + 4 <= reply.length; i += 4) {
       const w = ((reply[i + 3] << 24) | (reply[i + 2] << 16) | (reply[i + 1] << 8) | reply[i]) >>> 0;
-      this.cyw43RxQueue.push(w);
+      queue.push(w);
     }
     if (reply.length % 4 !== 0) {
       const tail = reply.subarray(reply.length - (reply.length % 4));
       let w = 0;
       for (let i = 0; i < tail.length; i++) w |= tail[i] << (i * 8);
-      this.cyw43RxQueue.push(w >>> 0);
+      queue.push(w >>> 0);
     }
   }
 
   private _drainCyw43Rx(sm: any, smLabel = 'unknown-sm', maxWords = Number.POSITIVE_INFINITY): void {
-    if (this.cyw43RxQueue.length === 0) return;
+    const queue = this._getCyw43Queue(smLabel);
+    if (queue.length === 0) return;
+
     const rx = sm?.rxFIFO;
     if (!rx) return;
 
     let drained = 0;
-    while (this.cyw43RxQueue.length > 0 && !rx.full && drained < maxWords) {
-      rx.push(this.cyw43RxQueue.shift()!);
+    while (queue.length > 0 && !rx.full && drained < maxWords) {
+      rx.push(queue.shift()!);
       drained++;
     }
 
-    if (drained > 0 || this.cyw43RxQueue.length > 0) {
-      console.log(`[PicoW SPI RXQ] ${smLabel} drained=${drained} remaining=${this.cyw43RxQueue.length} rxFull=${!!rx.full}`);
+    if (drained > 0 || queue.length > 0) {
+      console.log(`[PicoW SPI RXQ] ${smLabel} drained=${drained} remaining=${queue.length} rxFull=${rx.full}`);
+    }
+  }
+
+  private _drainAllCyw43Rx(rp2040: any, maxWords = Number.POSITIVE_INFINITY): void {
+    const pios: any[] = rp2040?.pio || [];
+    if (pios.length === 0) return;
+
+    for (let pioIndex = 0; pioIndex < pios.length; pioIndex++) {
+      const pio = pios[pioIndex];
+      for (let machineIndex = 0; machineIndex < pio.machines.length; machineIndex++) {
+        const sm = pio.machines[machineIndex];
+        const smLabel = `PIO${pioIndex} SM${machineIndex}`;
+        this._drainCyw43Rx(sm, smLabel, maxWords);
+      }
     }
   }
 
@@ -325,8 +385,7 @@ export class PicoWLogic extends BaseComponent {
       // Reset sniffer on falling edge (chip reset by host)
       if (!isHigh && wasHigh) {
         console.log(`[PicoW] WL_REG_ON falling edge — resetting CYW43 sniffer.`);
-        if (this.cyw43Sniffer) this.cyw43Sniffer.reset();
-        this.cyw43RxQueue = [];
+        this._resetCyw43BusState();
       }
     } else if (pin === 'GP25') {
       // The simulator UI still hooks GPIO25 for regular Pico. We can keep it or override with cyw43.onLed.

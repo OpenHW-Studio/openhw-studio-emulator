@@ -94,21 +94,20 @@ export class PioBusSniffer {
       yield { kind: 'header', cmd };
 
       if (!cmd.write) {
-        this.pendingReadWords = Math.max(1, Math.ceil(cmd.length / 4) + 1 + (cmd.function === 1 ? 4 : 0));
-        console.log(`[PicoW SNIF] read start fn=${cmd.function} addr=0x${cmd.address.toString(16)} len=${cmd.length} clockWords=${this.pendingReadWords}`);
-        yield {
-          kind: 'payload',
-          cmd,
-          payload: new Uint8Array(0),
-        };
+        // This bus tap only sees TX FIFO words. Keep the read transaction
+        // open for the expected number of turn-around words so the next
+        // words are not mistaken for fresh headers.
+        this.pendingReadWords = Math.max(1, Math.ceil(cmd.length / 4) + (cmd.function === 1 ? 4 : 0));
+        console.log(`[PicoW SNIF] read hold fn=${cmd.function} addr=0x${cmd.address.toString(16)} len=${cmd.length} pending=${this.pendingReadWords}`);
       }
+
       return;
     }
 
     if (!this.pendingCmd.write && this.pendingReadWords > 0) {
+      console.log(`[PicoW SNIF] read turn-around consume pending=${this.pendingReadWords}`);
       this.pendingReadWords--;
       if (this.pendingReadWords === 0) {
-        console.log(`[PicoW SNIF] read complete fn=${this.pendingCmd.function} addr=0x${this.pendingCmd.address.toString(16)} len=${this.pendingCmd.length}`);
         this.pendingCmd = null;
       }
       return;
