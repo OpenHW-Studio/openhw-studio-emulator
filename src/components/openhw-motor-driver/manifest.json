@@ -107,7 +107,7 @@
       },
       {
         "from": "IN1",
-        "to": "arduino:6"
+        "to": "arduino:15"
       },
       {
         "from": "IN2",
@@ -127,7 +127,7 @@
       },
       {
         "from": "5V",
-        "to": "arduino:15"
+        "to": "arduino:22"
       },
       {
         "from": "12V",
@@ -139,8 +139,16 @@
   },
   "autocoding": {
     "arduino": {
-      "setup": "pinMode(15, INPUT);\npinMode(${ENA},OUTPUT); pinMode(${IN1},OUTPUT); pinMode(${IN2},OUTPUT);\npinMode(${ENB},OUTPUT); pinMode(${IN3},OUTPUT); pinMode(${IN4},OUTPUT);\nanalogWrite(${ENA}, 200);\nanalogWrite(${ENB}, 200);",
+      "setup": "pinMode(22, INPUT);\npinMode(${ENA},OUTPUT); pinMode(${IN1},OUTPUT); pinMode(${IN2},OUTPUT);\npinMode(${ENB},OUTPUT); pinMode(${IN3},OUTPUT); pinMode(${IN4},OUTPUT);\nanalogWrite(${ENA}, 200);\nanalogWrite(${ENB}, 200);",
       "loop": "digitalWrite(${IN1},HIGH); digitalWrite(${IN2},LOW); delay(2000);\ndigitalWrite(${IN1},LOW); digitalWrite(${IN2},LOW); delay(500);\ndigitalWrite(${IN1},LOW); digitalWrite(${IN2},HIGH); delay(2000);\ndigitalWrite(${IN1},LOW); digitalWrite(${IN2},LOW); delay(500);"
+    }
+  },
+  "telemetry": {
+    "active": {
+      "type": "boolean",
+      "format": "boolean",
+      "source": "active",
+      "title": "Active"
     }
   }
 }

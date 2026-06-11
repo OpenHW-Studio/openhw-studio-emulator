@@ -21,6 +21,12 @@ export class MotorDriverLogic extends BaseComponent {
         data.lastCycle = cpuCycles;
     }
 
+    onPWM(pinId: string, meta: any) {
+        if (!meta || typeof meta.dutyCycle !== 'number') return;
+        const v = (Math.max(0, Math.min(100, meta.dutyCycle)) / 100.0) * 5.0;
+        this.setPinVoltage(pinId, v);
+    }
+
     private getAverageVoltage(pinId: string, currentCycles: number, elapsedCycles: number): number {
         const data = this.pinData[pinId];
         if (!data) return this.getPinVoltage(pinId);
