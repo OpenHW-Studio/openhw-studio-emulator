@@ -107,6 +107,7 @@ export { default as openhwMq2GasSensor } from './MQ2-gas-sensor';
 export { default as openhwPirMotionSensor } from './PIR-Motion-Sensor';
 export { default as openhwRaindropModule } from './Raindrop-module';
 export { default as openhwRaindropPad } from './Raindrop-pad';
+export { default as openhwDht22 } from './DHT-22';
 
 export { FullCircuitValidator, analyzeCodeHardwareSync, ProtocolAnalyzer, runUnifiedValidation } from '../circuit-validation/index.js';
 

@@ -162,9 +162,14 @@ export class DHT22Logic extends BaseComponent {
 
     update(cpuCycles: number, wires: any[], instances: BaseComponent[]) {
         super.update(cpuCycles, wires, instances);
-        const sdaPin = this.pins['SDA'];
-        if (sdaPin && sdaPin.voltage !== this._sdaOutputVoltage) {
-            this.setPinVoltage('SDA', this._sdaOutputVoltage);
+        
+        // Only enforce our SDA voltage when we are actively transmitting (ACK or Data)
+        // During IDLE or WAKE_WAIT, we let the Arduino drive the bus or rely on the internal/external pull-up.
+        if (this.protocolState === 'ACKING' || this.protocolState === 'SENDING') {
+            const sdaPin = this.pins['SDA'];
+            if (sdaPin && sdaPin.voltage !== this._sdaOutputVoltage) {
+                this.setPinVoltage('SDA', this._sdaOutputVoltage);
+            }
         }
     }
 }
