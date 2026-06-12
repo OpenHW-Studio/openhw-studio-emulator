@@ -24,9 +24,9 @@
     },
     "autowiring": {
         "connections": [
-            { "from": "VCC", "to": "arduino:3V3", "color": "red" },
-            { "from": "GND", "to": "arduino:GND", "color": "black" },
-            { "from": "DATA", "to": "arduino:4", "color": "green" }
+            { "from": "VCC", "to": "arduino:5V" },
+            { "from": "GND", "to": "arduino:GND" },
+            { "from": "DATA", "to": "arduino:4|5|6|7|8|9|10|11|12" }
         ]
     }
 }

@@ -32,6 +32,13 @@ export class HCSR04Logic extends PulseProtocol {
         }
     }
 
+    private driveEcho(voltage: number) {
+        this.setPinVoltage('ECHO', voltage);
+        if ((this as any)._simUpdatePhysics) {
+            (this as any)._simUpdatePhysics();
+        }
+    }
+
     private startEcho() {
         if (this.isEchoing) return;
 
@@ -39,8 +46,22 @@ export class HCSR04Logic extends PulseProtocol {
         const echoDurationUs = distance * 58;
 
         this.isEchoing = true;
-        // Output HIGH pulse on ECHO pin
-        this.sendPulse('ECHO', true, echoDurationUs, 0.0);
+        
+        // Wait ~200us before driving ECHO high to simulate 8-cycle 40kHz sonic burst.
+        // This gives the Arduino CPU enough time to hit the pulseIn() instruction.
+        const cpu = (this as any)._simCpu;
+        if (cpu && typeof cpu.addClockEvent === 'function') {
+            cpu.addClockEvent(() => {
+                this.driveEcho(5.0); // Start pulse
+                cpu.addClockEvent(() => {
+                    this.driveEcho(0.0); // End pulse
+                    this.isEchoing = false;
+                }, echoDurationUs * 16);
+            }, 200 * 16); // 200us at 16MHz
+        } else {
+            // Fallback for non-AVR runners
+            this.sendPulse('ECHO', true, echoDurationUs, 0.0);
+        }
     }
 
     update(cpuCycles: number, wires: any[], instances: BaseComponent[]) {
