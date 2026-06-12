@@ -19,6 +19,7 @@ export class PicoWLogic extends BaseComponent {
   private cyw43DrainTimer: any = null;
   private rp2040Ref: any = null;
   private cyw43GpioHooks: Array<{ restore: () => void }> = [];
+  private pcapBuffer: { timeUs: number; data: Uint8Array }[] = [];
 
   constructor(id: string, manifest: any) {
     super(id, manifest);
@@ -36,9 +37,8 @@ export class PicoWLogic extends BaseComponent {
   }
 
   override onSimulationStart(): void {
-    super.onSimulationStart();
     console.log('[PicoW] Initializing network gateway connection...');
-    
+    this.pcapBuffer = [];
     this.connectToGateway();
 
     // Drain timer to process any pending packets in the CYW43 emulator
@@ -56,7 +56,38 @@ export class PicoWLogic extends BaseComponent {
     }
 
     try {
-      this.ws = new WebSocket('ws://localhost:4444');
+      const isPrivate = this.attrs?.privateGateway === 'true' || this.attrs?.privateGateway === true;
+      const sessionId = this.attrs?.sessionId || '';
+
+      let wsUrl = '';
+      if (isPrivate) {
+        wsUrl = 'ws://127.0.0.1:5099/api/network-gateway';
+      } else {
+        // Resolve public URL dynamically
+        const locationObj = typeof window !== 'undefined' ? window.location : (typeof self !== 'undefined' ? self.location : null);
+        const isLocalhost = locationObj ? (locationObj.hostname === 'localhost' || locationObj.hostname === '127.0.0.1') : true;
+
+        let publicUrl = '';
+        if (isLocalhost) {
+          const defaultServer = 'wss://openhw-studio.fossee.in';
+          const viteUrl = (globalThis as any).import?.meta?.env?.VITE_PUBLIC_GATEWAY_URL || (globalThis as any).VITE_PUBLIC_GATEWAY_URL || defaultServer;
+          publicUrl = viteUrl + '/api/network-gateway';
+        } else if (locationObj) {
+          const protocol = locationObj.protocol === 'https:' ? 'wss:' : 'ws:';
+          publicUrl = `${protocol}//${locationObj.host}/api/network-gateway`;
+        } else {
+          publicUrl = 'wss://api.openhw-studio.com:5099/api/network-gateway';
+        }
+        wsUrl = publicUrl;
+      }
+
+      if (sessionId) {
+        wsUrl += `?sessionId=${encodeURIComponent(sessionId)}`;
+      }
+
+      console.log(`[PicoW] Connecting to network gateway URL: ${wsUrl} (privateGateway=${isPrivate}, sessionId="${sessionId}")`);
+
+      this.ws = new WebSocket(wsUrl);
       this.ws.binaryType = 'arraybuffer';
 
       this.ws.onopen = () => {
@@ -64,8 +95,8 @@ export class PicoWLogic extends BaseComponent {
         this.isWsOpen = true;
       };
 
-      this.ws.onclose = () => {
-        console.log('[PicoW] Gateway disconnected. Retrying in 5s...');
+      this.ws.onclose = (event) => {
+        console.warn(`[PicoW] Gateway WebSocket closed (code=${event.code}, reason=${event.reason || 'none'}). Retrying in 5s...`);
         this.isWsOpen = false;
         this.ws = null;
         if (!this.reconnectInterval) {
@@ -77,12 +108,13 @@ export class PicoWLogic extends BaseComponent {
       };
 
       this.ws.onerror = (e) => {
-        // Suppress noisy error logs to prevent console spam
+        console.error('[PicoW] Gateway WebSocket error:', e);
       };
 
       this.ws.onmessage = (event) => {
         if (event.data instanceof ArrayBuffer) {
           const frame = new Uint8Array(event.data);
+          this.pcapBuffer.push({ timeUs: performance.now() * 1000, data: frame });
           console.log(`[PicoW RX] Ethernet frame in (len=${frame.length}) <- Gateway`);
           if (this.cyw43Emulator) {
               this.cyw43Emulator.writeFrame(frame);
@@ -96,10 +128,50 @@ export class PicoWLogic extends BaseComponent {
   }
 
   public sendPacketToGateway(packet: Uint8Array): void {
-      if (!this.isWsOpen || !this.ws) return;
+      this.pcapBuffer.push({ timeUs: performance.now() * 1000, data: packet });
+      if (!this.isWsOpen || !this.ws) {
+          console.warn(`[PicoW TX] Cannot send packet: WebSocket is not open (len=${packet.length})`);
+          return;
+      }
       console.log(`[PicoW TX] Ethernet frame out (len=${packet.length}) -> Gateway`);
       this.setState({ wirelessPacketCount: (this.state.wirelessPacketCount || 0) + 1 });
-      this.ws.send(packet.buffer);
+      this.ws.send(packet.buffer.slice(packet.byteOffset, packet.byteOffset + packet.byteLength));
+  }
+
+  public getPcapBuffer(): ArrayBuffer | null {
+      if (this.pcapBuffer.length === 0) return null;
+
+      let totalLen = 24; // PCAP Global Header
+      for (const pkt of this.pcapBuffer) {
+          totalLen += 16 + pkt.data.length;
+      }
+
+      const buffer = new ArrayBuffer(totalLen);
+      const view = new DataView(buffer);
+      const u8 = new Uint8Array(buffer);
+      
+      // Global Header (Big-Endian format)
+      view.setUint32(0, 0xa1b2c3d4, false); // Magic 
+      view.setUint16(4, 2, false); // Major
+      view.setUint16(6, 4, false); // Minor
+      view.setInt32(8, 0, false); // Thiszone
+      view.setUint32(12, 0, false); // Sigfigs
+      view.setUint32(16, 65535, false); // Snaplen
+      view.setUint32(20, 1, false); // Network (Ethernet)
+
+      let offset = 24;
+      for (const pkt of this.pcapBuffer) {
+          const sec = Math.floor(pkt.timeUs / 1000000);
+          const usec = Math.floor(pkt.timeUs % 1000000);
+          view.setUint32(offset, sec, false);
+          view.setUint32(offset + 4, usec, false);
+          view.setUint32(offset + 8, pkt.data.length, false);
+          view.setUint32(offset + 12, pkt.data.length, false);
+          u8.set(pkt.data, offset + 16);
+          offset += 16 + pkt.data.length;
+      }
+
+      return buffer;
   }
 
   override onSimulationStop(): void {
@@ -128,7 +200,6 @@ export class PicoWLogic extends BaseComponent {
       wifiIp:          '',
       wifiPacketCount: 0,
     });
-    super.onSimulationStop();
   }
 
   // ── CYW43 GPIO Hooks (Exact Wokwi SPI Bit-Banging Match) ─────────────
@@ -195,7 +266,6 @@ export class PicoWLogic extends BaseComponent {
           if (++byteCount === 4) {
               if (!isReading) {
                   this.cyw43Emulator!.writeUint32(wordAcc);
-                  console.log(`[PicoW SPI] CMD WRITE 0x${wordAcc.toString(16).padStart(8, '0')}`);
                   
                   if (!(this as any)._loggedPio) {
                       (this as any)._loggedPio = true;
@@ -223,7 +293,6 @@ export class PicoWLogic extends BaseComponent {
               byteCount = 0;
               if (isReading) {
                   replyWord = this.cyw43Emulator!.readUint32();
-                  console.log(`[PicoW SPI] CMD READ 0x${replyWord.toString(16).padStart(8, '0')}`);
               }
           }
           spi.sendByte(replyWord & 255);
@@ -247,7 +316,6 @@ export class PicoWLogic extends BaseComponent {
           isSelected = (val === 0);
           if (!isSelected) {
               transactionCount++;
-              console.log(`[PicoW SPI] Transaction ${transactionCount} ended. CLK edges: ${clkEdgesInTransaction}`);
               clkEdgesInTransaction = 0;
               
               // RESET SPI state completely!

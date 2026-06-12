@@ -55,7 +55,7 @@ export class Cyw43Bridge {
     if (!this.wifiEnabled) return;
     if (this.socket && this.socket.readyState !== WebSocket.CLOSED) return;
 
-    const wsUrl = `ws://localhost:5099/api/network-gateway?sessionId=${encodeURIComponent(this.clientId)}`;
+    const wsUrl = `ws://127.0.0.1:5099/api/network-gateway?sessionId=${encodeURIComponent(this.clientId)}`;
     const socket = new WebSocket(wsUrl);
     socket.binaryType = 'arraybuffer';
     this.socket = socket;
