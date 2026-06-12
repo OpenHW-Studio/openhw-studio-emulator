@@ -215,11 +215,13 @@ export class DHT22Logic extends BaseComponent {
         }, 50 * US);
     }
 
-    // Watchdog: if stuck in ACKING/SENDING for >200ms (3.2M cycles), auto-reset.
-    update(cycles: number) {
+    update(cpuCycles: number, wires: any[], instances: BaseComponent[]) {
+        super.update(cpuCycles, wires, instances);
+        
+        // Watchdog: if stuck in ACKING/SENDING for >200ms (3.2M cycles), auto-reset.
         if ((this.protocolState === 'ACKING' || this.protocolState === 'SENDING') &&
             this._txStartCycle > 0 &&
-            (cycles - this._txStartCycle) > 3_200_000) {
+            (cpuCycles - this._txStartCycle) > 3_200_000) {
             console.warn(`[DHT22] Watchdog: stuck in ${this.protocolState} for too long, resetting.`);
             this._drivingBus = false;
             this.protocolState = 'IDLE';

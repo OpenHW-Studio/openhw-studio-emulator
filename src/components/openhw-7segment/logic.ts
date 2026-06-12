@@ -7,7 +7,7 @@ export class Wokwi7SegmentLogic extends BaseComponent {
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
-        this.numDigits = parseInt(manifest.attrs?.digits || '4', 10);
+        this.numDigits = parseInt(manifest.attrs?.digits || '1', 10);
         this.isAnode = manifest.attrs?.common === 'anode';
         
         this.state = this.getEmptyState();
@@ -22,17 +22,32 @@ export class Wokwi7SegmentLogic extends BaseComponent {
         };
     }
 
+    private isPinActive(voltage: number) {
+        return this.isAnode ? voltage > 2.5 : voltage < 2.5;
+    }
+
+    private isSegmentActive(voltage: number) {
+        return this.isAnode ? voltage < 2.5 : voltage > 2.5;
+    }
+
     private evaluateCurrentState() {
         for (let i = 0; i < this.numDigits; i++) {
-            const digPin = `DIG${i + 1}`;
-            const digActive = this.isAnode ? this.getPinVoltage(digPin) > 2.5 : this.getPinVoltage(digPin) < 2.5;
+            let digActive = false;
+            if (this.numDigits === 1) {
+                // For 1-digit, check COM.1 or COM.2
+                const com1 = this.getPinVoltage('COM.1');
+                const com2 = this.getPinVoltage('COM.2');
+                const dig1 = this.getPinVoltage('DIG1'); // Fallback
+                digActive = this.isPinActive(com1) || this.isPinActive(com2) || this.isPinActive(dig1);
+            } else {
+                const digPin = `DIG${i + 1}`;
+                digActive = this.isPinActive(this.getPinVoltage(digPin));
+            }
 
             if (digActive) {
                 this.segmentsList.forEach(seg => {
                     const segVoltage = this.getPinVoltage(seg);
-                    const segLit = this.isAnode ? segVoltage < 2.5 : segVoltage > 2.5;
-                    
-                    if (segLit) {
+                    if (this.isSegmentActive(segVoltage)) {
                         this.state.digitSegments[i][seg] = true;
                     }
                 });
@@ -40,8 +55,7 @@ export class Wokwi7SegmentLogic extends BaseComponent {
         }
 
         const colonVoltage = this.getPinVoltage('COLON');
-        const colonLit = this.isAnode ? colonVoltage < 2.5 : colonVoltage > 2.5;
-        if (colonLit) {
+        if (this.isSegmentActive(colonVoltage)) {
             this.state.colon = true;
         }
     }
