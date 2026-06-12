@@ -1,29 +1,52 @@
 export const validation = {
     rules: [
         {
-            name: 'NTC Module Power Check',
+            name: 'NTC Thermistor Connection Check',
             check: (component: any, graph: Map<string, string[]>) => {
-                const vcc = graph.get(`${component.id}.VCC`);
-                const gnd = graph.get(`${component.id}.GND`);
-                if (!vcc || vcc.length === 0) {
-                    return `⚠️ [NTC Module ${component.id}] Power (VCC) is missing. Connect VCC to 5V or 3.3V.`;
+                const pinA = graph.get(`${component.id}.A`);
+                const pinB = graph.get(`${component.id}.B`);
+
+                if ((!pinA || pinA.length === 0) && (!pinB || pinB.length === 0)) {
+                    return `⚠️ [NTC ${component.id}] Not connected. Wire in a voltage divider: 5V → 10kΩ resistor → analog pin → NTC → GND.`;
                 }
-                if (!gnd || gnd.length === 0) {
-                    return `⚠️ [NTC Module ${component.id}] Ground (GND) is missing. Connect GND to the common ground.`;
+                if (!pinA || pinA.length === 0) {
+                    return `⚠️ [NTC ${component.id}] Terminal A is not connected.`;
+                }
+                if (!pinB || pinB.length === 0) {
+                    return `⚠️ [NTC ${component.id}] Terminal B is not connected.`;
                 }
                 return null;
-            }
+            },
         },
         {
-            name: 'NTC Module Signal Check',
+            name: 'NTC Thermistor Analog Pin Check',
             check: (component: any, graph: Map<string, string[]>) => {
-                const a0 = graph.get(`${component.id}.A0`);
-                const d0 = graph.get(`${component.id}.D0`);
-                if ((!a0 || a0.length === 0) && (!d0 || d0.length === 0)) {
-                    return `⚠️ [NTC Module ${component.id}] No signal pins are connected. Connect A0 for analog reading or D0 for digital threshold.`;
+                const all = [
+                    ...(graph.get(`${component.id}.A`) || []),
+                    ...(graph.get(`${component.id}.B`) || []),
+                ];
+                const hasAnalog = all.some((c: string) =>
+                    [':A0',':A1',':A2',':A3',':A4',':A5'].some(p => c.includes(p))
+                );
+                if (!hasAnalog) {
+                    return `⚠️ [NTC ${component.id}] Connect one terminal to an analog pin (A0–A5). Use analogRead() and the Beta equation to calculate temperature.`;
                 }
                 return null;
-            }
-        }
+            },
+        },
+        {
+            name: 'NTC Thermistor Pull-up Resistor Check',
+            check: (component: any, graph: Map<string, string[]>) => {
+                const all = [
+                    ...(graph.get(`${component.id}.A`) || []),
+                    ...(graph.get(`${component.id}.B`) || []),
+                ];
+                const hasResistor = all.some((c: string) => c.includes('openhw-resistor') || c.includes('openhw-resistor'));
+                if (!hasResistor) {
+                    return `⚠️ [NTC ${component.id}] NTC thermistors need a series resistor (10kΩ) to form a voltage divider. Without it, analogRead() will not give meaningful temperature values.`;
+                }
+                return null;
+            },
+        },
     ],
 };
