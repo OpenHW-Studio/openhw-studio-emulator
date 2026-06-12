@@ -1,6 +1,7 @@
 import { BaseComponent } from '../BaseComponent';
 import type { WiFiConnectionStatus } from '../../protocol-handlers/wifi-environment';
-import { Cyw43Emulator } from './cyw43/Cyw43Emulator';
+import { Cyw43Emulator } from './cyw43-emulator';
+import { SPIPeripheral } from './spi-peripheral';
 
 function normalizePicoPin(pinId: string): string {
   const s = String(pinId || '').toUpperCase();
@@ -11,19 +12,16 @@ function normalizePicoPin(pinId: string): string {
 }
 
 export class PicoWLogic extends BaseComponent {
-  private txTimeout: any = null;
-  private rxTimeout: any = null;
+  private ws: WebSocket | null = null;
+  private isWsOpen: boolean = false;
+  private reconnectInterval: any = null;
+  private cyw43Emulator: Cyw43Emulator | null = null;
   private cyw43DrainTimer: any = null;
   private rp2040Ref: any = null;
-  private ws: WebSocket | null = null;
-  private isWsOpen = false;
-
-  public cyw43: Cyw43Emulator | null = null;
   private cyw43GpioHooks: Array<{ restore: () => void }> = [];
 
   constructor(id: string, manifest: any) {
     super(id, manifest);
-    this.cyw43 = new Cyw43Emulator();
     this.state = {
       txActive:       false,
       rxActive:       false,
@@ -37,85 +35,57 @@ export class PicoWLogic extends BaseComponent {
     };
   }
 
-  private _getCyw43Sniffer(smLabel: string): PioBusSniffer {
-    let sniffer = this.cyw43Sniffers.get(smLabel);
-    if (!sniffer) {
-      sniffer = new PioBusSniffer();
-      this.cyw43Sniffers.set(smLabel, sniffer);
-      if (!this.cyw43Sniffer) this.cyw43Sniffer = sniffer;
-    }
-    return sniffer;
-  }
-
-  private _getCyw43Queue(smLabel: string): number[] {
-    let queue = this.cyw43RxQueues.get(smLabel);
-    if (!queue) {
-      queue = [];
-      this.cyw43RxQueues.set(smLabel, queue);
-    }
-    return queue;
-  }
-
-  private _resetCyw43BusState(): void {
-  }
-
-  // ── Simulation lifecycle ─────────────────────────────────────────────────────
-
   override onSimulationStart(): void {
-    const wirelessMode = String(this.attrs?.wirelessMode ?? 'full');
-    const wifiEnabled  = wirelessMode !== 'off';
-    const ssid         = String(this.attrs?.wirelessSsid    ?? '');
-    const sessionId    = String(this.attrs?.sessionId       ?? '');
+    super.onSimulationStart();
+    console.log('[PicoW] Initializing network gateway connection...');
+    
+    this.connectToGateway();
 
-    if (!wifiEnabled) return;
+    // Drain timer to process any pending packets in the CYW43 emulator
+    this.cyw43DrainTimer = setInterval(() => {
+        if (this.cyw43Emulator) {
+            let buf = new Uint32Array(1);
+            this.cyw43Emulator.busRead(8, buf);
+        }
+    }, 10);
+  }
 
-    if (this.cyw43) {
-      this.cyw43.onLed((ev) => {
-          console.log(`[PicoW] CYW43 LED = ${ev.on}`);
-          this.setState({ builtInLed: ev.on });
-      });
-      this.cyw43.onConnect((ev) => {
-          console.log(`[PicoW] CYW43 Connected to SSID: ${ev.ssid}`);
-          this.setState({ wirelessStatus: 'connected', wirelessSsid: ev.ssid });
-      });
-      this.cyw43.onPacketOut((ev) => {
-          if (!this.isWsOpen || !this.ws) return;
-          console.log(`[PicoW TX] Ethernet frame out (len=${ev.ether.length}) -> Gateway`);
-          this.setState({ wirelessPacketCount: (this.state.wirelessPacketCount || 0) + 1 });
-          this.ws.send(ev.ether.buffer);
-      });
+  private connectToGateway() {
+    if (this.ws && (this.ws.readyState === WebSocket.CONNECTING || this.ws.readyState === WebSocket.OPEN)) {
+      return;
     }
-
-    this.setState({ wirelessStatus: 'connecting', wirelessSsid: ssid });
-
-    let url = 'ws://localhost:5099/api/network-gateway';
-    if (sessionId) url += `?sessionId=${sessionId}`;
 
     try {
-      this.ws = new WebSocket(url);
+      this.ws = new WebSocket('ws://localhost:4444');
       this.ws.binaryType = 'arraybuffer';
 
       this.ws.onopen = () => {
-        console.log(`[PicoW] Connected to Private Go Gateway: ${url}`);
+        console.log('[PicoW] Connected to networking gateway');
         this.isWsOpen = true;
       };
 
       this.ws.onclose = () => {
-        console.log(`[PicoW] Disconnected from Gateway`);
+        console.log('[PicoW] Gateway disconnected. Retrying in 5s...');
         this.isWsOpen = false;
-        this.setState({ wirelessStatus: 'idle', wifiConnected: false });
+        this.ws = null;
+        if (!this.reconnectInterval) {
+          this.reconnectInterval = setTimeout(() => {
+            this.reconnectInterval = null;
+            this.connectToGateway();
+          }, 5000);
+        }
       };
 
       this.ws.onerror = (e) => {
-        console.error(`[PicoW] WebSocket Error:`, e);
+        // Suppress noisy error logs to prevent console spam
       };
 
       this.ws.onmessage = (event) => {
         if (event.data instanceof ArrayBuffer) {
           const frame = new Uint8Array(event.data);
           console.log(`[PicoW RX] Ethernet frame in (len=${frame.length}) <- Gateway`);
-          if (this.cyw43) {
-            this.cyw43.injectPacket(frame);
+          if (this.cyw43Emulator) {
+              this.cyw43Emulator.writeFrame(frame);
           }
           this._sniffDhcpAck(frame);
         }
@@ -125,22 +95,31 @@ export class PicoWLogic extends BaseComponent {
     }
   }
 
+  public sendPacketToGateway(packet: Uint8Array): void {
+      if (!this.isWsOpen || !this.ws) return;
+      console.log(`[PicoW TX] Ethernet frame out (len=${packet.length}) -> Gateway`);
+      this.setState({ wirelessPacketCount: (this.state.wirelessPacketCount || 0) + 1 });
+      this.ws.send(packet.buffer);
+  }
+
   override onSimulationStop(): void {
     if (this.cyw43DrainTimer) {
       clearInterval(this.cyw43DrainTimer);
       this.cyw43DrainTimer = null;
     }
-    this.rp2040Ref = null;
     if (this.ws) {
       this.ws.close();
       this.ws = null;
+    }
+    if (this.reconnectInterval) {
+      clearTimeout(this.reconnectInterval);
+      this.reconnectInterval = null;
     }
     this.isWsOpen = false;
     
     for (const h of this.cyw43GpioHooks) h.restore();
     this.cyw43GpioHooks = [];
-    this._resetCyw43BusState();
-    this.cyw43 = null;
+    this.cyw43Emulator = null;
 
     this.setState({
       wirelessStatus:  'idle',
@@ -149,199 +128,169 @@ export class PicoWLogic extends BaseComponent {
       wifiIp:          '',
       wifiPacketCount: 0,
     });
+    super.onSimulationStop();
   }
 
-  // ── CYW43439 SPI Hooks ───────────────────────────────────────────────────────
+  // ── CYW43 GPIO Hooks (Exact Wokwi SPI Bit-Banging Match) ─────────────
+  
+  public attachGpioHooks(rp2040: any) {
+      if (this.cyw43Emulator) return;
+      this.rp2040Ref = rp2040;
+      this.cyw43Emulator = new Cyw43Emulator();
 
-  attachGpioHooks(rp2040: any): void {
-    if (!rp2040 || !this.cyw43) return;
-    this.rp2040Ref = rp2040;
-
-    const WL_D = 24;
-    const WL_CS = 25;
-    const WL_CLK = 29;
-
-    let isSelected = false;
-    let shiftIn = 0;
-    let bitCount = 0;
-    
-    let currentCmd: any | null = null;
-    let writePayload = new Uint8Array(0);
-    let writeIdx = 0;
-    
-    let replyData = new Uint32Array(0);
-    let replyIdx = 0;
-    let shiftOut = 0;
-
-    const transformValue = (x: number) => {
-      // Undo the half-word swap the driver did before transmitting
-      return (((x & 0xffff) << 16) | ((x >>> 16) & 0xffff)) >>> 0;
-    };
-
-    const parseCmd = (word: number) => {
-      // Basic Cyw43Cmd parse
-      return {
-        isWrite: (word & (1 << 31)) !== 0,
-        function: (word >>> 28) & 0x03,
-        address: (word >>> 11) & 0x1ffff,
-        length: word & 0x7ff
-      };
-    };
-
-    const csListener = (state: boolean) => {
-      isSelected = !state;
-      console.log(`[PicoW GPIO] CS = ${state ? 'HIGH' : 'LOW'}`);
-      if (!isSelected) {
-        // CS HIGH (idle) -> drive IRQ
-        rp2040.gpio[WL_D].setInputValue(this.cyw43!.irq);
-      } else {
-        // CS LOW (active) -> start transaction
-        rp2040.gpio[WL_D].setInputValue(false);
-        bitCount = 0;
-        shiftIn = 0;
-        replyData = new Uint32Array(0);
-        replyIdx = 0;
-        shiftOut = 0;
-        currentCmd = null;
-      }
-    };
-    rp2040.gpio[WL_CS].addListener(csListener);
-    this.cyw43GpioHooks.push({ restore: () => rp2040.gpio[WL_CS].removeListener?.(csListener) });
-
-    const clkListener = (state: boolean) => {
-      if (!isSelected) return;
-
-      if (state) {
-        // RISING EDGE: Sample MOSI
-        const mosi = rp2040.gpio[WL_D].value ? 1 : 0;
-        shiftIn = ((shiftIn << 1) | mosi) >>> 0;
-        bitCount++;
-        
-        if (bitCount % 8 === 0) {
-            console.log(`[PicoW GPIO] CLK RISING, bitCount=${bitCount}, shiftIn=0x${shiftIn.toString(16)}`);
-        }
-
-        if (bitCount === 32) {
-          const word = transformValue(shiftIn);
-          console.log(`[PicoW SPI] Received word: 0x${word.toString(16).padStart(8, '0')} (raw shiftIn: 0x${shiftIn.toString(16).padStart(8, '0')})`);
-          
-          if (!currentCmd) {
-            currentCmd = parseCmd(word);
-            if (currentCmd.isWrite) {
-              writePayload = new Uint8Array(currentCmd.length || 4); // handles len=0 => 4 bytes
-              writeIdx = 0;
-            } else {
-              const rawReply = this.cyw43!.onCommand(currentCmd, new Uint8Array(0));
-              const wordCount = Math.ceil(rawReply.length / 4);
-              replyData = new Uint32Array(wordCount);
-              for (let i = 0; i < wordCount; i++) {
-                const b0 = rawReply[i*4] || 0;
-                const b1 = rawReply[i*4+1] || 0;
-                const b2 = rawReply[i*4+2] || 0;
-                const b3 = rawReply[i*4+3] || 0;
-                let w = ((b0 << 24) | (b1 << 16) | (b2 << 8) | b3) >>> 0;
-                replyData[i] = w;
+      // Fix RP2040 PIO StateMachine simulation stepping when disabled.
+      // In rp2040js, StateMachine.step() does not check if the machine is enabled,
+      // which causes disabled state machines to execute instructions and leak clock cycles.
+      // Because rp2040-runner.ts overrides machine.step on the instance level, we patch each instance directly.
+      try {
+          for (const pio of rp2040.pio) {
+              for (const machine of pio.machines) {
+                  if (!machine.__patchedForEnabled) {
+                      machine.__patchedForEnabled = true;
+                      const originalStep = machine.step;
+                      machine.step = function() {
+                          if (!this.enabled) return;
+                          originalStep.apply(this, arguments);
+                      };
+                  }
               }
-              replyIdx = 0;
-              if (replyIdx < replyData.length) {
-                shiftOut = replyData[replyIdx++];
-              }
-            }
-          } else {
-            if (currentCmd.isWrite) {
-              if (writeIdx < writePayload.length) writePayload[writeIdx++] = (word >>> 24) & 0xff;
-              if (writeIdx < writePayload.length) writePayload[writeIdx++] = (word >>> 16) & 0xff;
-              if (writeIdx < writePayload.length) writePayload[writeIdx++] = (word >>> 8) & 0xff;
-              if (writeIdx < writePayload.length) writePayload[writeIdx++] = word & 0xff;
-
-              if (writeIdx >= writePayload.length) {
-                this.cyw43!.onCommand(currentCmd, writePayload);
-                // Can accept more if padded
-              }
-            } else {
-              if (replyIdx < replyData.length) {
-                shiftOut = replyData[replyIdx++];
-              } else {
-                shiftOut = 0;
-              }
-            }
           }
-          shiftIn = 0;
-          bitCount = 0;
-        }
-      } else {
-        // FALLING EDGE: Drive MISO
-        if (currentCmd && !currentCmd.isWrite) {
-          const bit = (shiftOut & 0x80000000) !== 0;
-          // Set rawInputValue directly to avoid triggering rp2040js IRQ listeners during SPI
-          (rp2040.gpio[WL_D] as any).rawInputValue = bit;
-          shiftOut = (shiftOut << 1) >>> 0;
-        }
+          console.log('[PicoW] Patched all PIO StateMachine instances to check enabled state');
+      } catch (e: any) {
+          console.error('[PicoW] Failed to patch PIO StateMachine instances:', e.message, e.stack);
       }
-    };
-    rp2040.gpio[WL_CLK].addListener(clkListener);
-    this.cyw43GpioHooks.push({ restore: () => rp2040.gpio[WL_CLK].removeListener?.(clkListener) });
 
-    console.log(`[PicoW] CYW43 Emulator attached via GPIO pins (Wokwi-style).`);
+      this.cyw43Emulator.onGPIOUpdated = (val: number) => {
+          this.setState({ builtInLed: !!(val & 1) });
+      };
+
+      this.cyw43Emulator.onPacketTx = (packet: Uint8Array) => {
+          this.sendPacketToGateway(packet);
+      };
+
+      const WL_D = 24;
+      const WL_CS = 25;
+      const WL_CLK = 29;
+
+      let isSelected = false; // Maps to Wokwi's `d` variable
+
+      this.cyw43Emulator.onIrqChanged = (irq: boolean) => {
+          if (!isSelected) {
+              rp2040.gpio[WL_D].setInputValue(irq);
+          }
+      };
+
+      const spi = new SPIPeripheral(
+          () => !!rp2040.gpio[WL_D].value, // get MOSI
+          (bit) => { (rp2040.gpio[WL_D] as any).rawInputValue = bit; } // set MISO directly
+      );
+
+      let byteCount = 0; // r
+      let wordAcc = 0;   // n
+      let isReading = false; // h
+      let replyWord = 0; // l
+
+      spi.onTransmit = (x: number) => {
+          wordAcc |= (x << (byteCount * 8));
+          if (++byteCount === 4) {
+              if (!isReading) {
+                  this.cyw43Emulator!.writeUint32(wordAcc);
+                  console.log(`[PicoW SPI] CMD WRITE 0x${wordAcc.toString(16).padStart(8, '0')}`);
+                  
+                  if (!(this as any)._loggedPio) {
+                      (this as any)._loggedPio = true;
+                      try {
+                          const insts = [];
+                          for (let i = 0; i < 32; i++) {
+                              insts.push(rp2040.pio[1].instructions[i].toString(16).padStart(4, '0'));
+                          }
+                          console.log(`[PIO1] Instructions: ${insts.join(', ')}`);
+                          
+                          const insts0 = [];
+                          for (let i = 0; i < 32; i++) {
+                              insts0.push(rp2040.pio[0].instructions[i].toString(16).padStart(4, '0'));
+                          }
+                          console.log(`[PIO0] Instructions: ${insts0.join(', ')}`);
+                      } catch (e) { console.error('Failed to log PIO', e); }
+                  }
+                  
+                  byteCount = 0;
+                  wordAcc = 0;
+                  if (!this.cyw43Emulator!.cmd) {
+                      isReading = true;
+                  }
+              }
+              byteCount = 0;
+              if (isReading) {
+                  replyWord = this.cyw43Emulator!.readUint32();
+                  console.log(`[PicoW SPI] CMD READ 0x${replyWord.toString(16).padStart(8, '0')}`);
+              }
+          }
+          spi.sendByte(replyWord & 255);
+          // console.log(`[PicoW SPI] TX Byte: 0x${(replyWord & 255).toString(16)} | RX Byte: 0x${x.toString(16)}`);
+          replyWord >>>= 8;
+      };
+
+      let transactionCount = 0;
+      let clkEdgesInTransaction = 0;
+
+      const clkListener = (val: number) => {
+          if (isSelected) {
+              clkEdgesInTransaction++;
+          }
+          spi.onClockEdge(val !== 0);
+      };
+      rp2040.gpio[WL_CLK].addListener(clkListener);
+      this.cyw43GpioHooks.push({ restore: () => rp2040.gpio[WL_CLK].removeListener?.(clkListener) });
+
+      const csListener = (val: number) => {
+          isSelected = (val === 0);
+          if (!isSelected) {
+              transactionCount++;
+              console.log(`[PicoW SPI] Transaction ${transactionCount} ended. CLK edges: ${clkEdgesInTransaction}`);
+              clkEdgesInTransaction = 0;
+              
+              // RESET SPI state completely!
+              byteCount = 0;
+              wordAcc = 0;
+              isReading = false;
+              spi.disable();
+          } else {
+              clkEdgesInTransaction = 0;
+              spi.enable();
+          }
+
+          this.cyw43Emulator!.setSelected(isSelected);
+      };
+      rp2040.gpio[WL_CS].addListener(csListener);
+      this.cyw43GpioHooks.push({ restore: () => rp2040.gpio[WL_CS].removeListener?.(csListener) });
+
+      console.log('[PicoW] Attached standalone Cyw43Emulator to GPIO24/25/29 (Wokwi-style)');
   }
-
-  private _queueCyw43Reply(smLabel: string, reply: Uint8Array, leadDummyWords = 0): void {
-    const queue = this._getCyw43Queue(smLabel);
-    for (let i = 0; i < leadDummyWords; i++) {
-      queue.push(0);
-    }
-    for (let i = 0; i + 4 <= reply.length; i += 4) {
-      // The PIO shifts data in from the SPI wire with shift_right=false (MSB first).
-      // So the first byte received (reply[i]) becomes the most-significant byte in the ISR.
-      const w = ((reply[i] << 24) | (reply[i + 1] << 16) | (reply[i + 2] << 8) | reply[i + 3]) >>> 0;
-      queue.push(w);
-    }
-    if (reply.length % 4 !== 0) {
-      const tail = reply.subarray(reply.length - (reply.length % 4));
-      const pad = [0, 0, 0, 0];
-      for (let i = 0; i < tail.length; i++) pad[i] = tail[i];
-      const w = ((pad[0] << 24) | (pad[1] << 16) | (pad[2] << 8) | pad[3]) >>> 0;
-      queue.push(w);
-    }
-  }
-
 
   // ── Frame handling ────────────────────────────────────────────────────────────
 
-
-  /**
-   * Sniff incoming packets for DHCP ACK to extract the assigned IP address.
-   */
   private _sniffDhcpAck(frame: Uint8Array): void {
-    if (frame.length < 300) return; // Too small for DHCP
-    
-    // Check if it's IPv4 (EtherType 0x0800)
+    if (frame.length < 300) return;
     if (frame[12] !== 0x08 || frame[13] !== 0x00) return;
-    
-    // IP Header Length
     const ipHeaderLen = (frame[14] & 0x0F) * 4;
-    
-    // Protocol (17 = UDP)
     if (frame[23] !== 17) return;
     
     const udpOffset = 14 + ipHeaderLen;
-    // DHCP Server Port = 67, Client Port = 68
     const srcPort = (frame[udpOffset] << 8) | frame[udpOffset + 1];
     const dstPort = (frame[udpOffset + 2] << 8) | frame[udpOffset + 3];
     
     if (srcPort === 67 && dstPort === 68) {
-      const dhcpOffset = udpOffset + 8; // Skip UDP header
-      // op = 2 (BootReply)
+      const dhcpOffset = udpOffset + 8;
       if (frame[dhcpOffset] === 2) {
-        // Extract yiaddr (Your IP Address) at offset 16 from DHCP header
         const ipOffset = dhcpOffset + 16;
         const ipStr = `${frame[ipOffset]}.${frame[ipOffset + 1]}.${frame[ipOffset + 2]}.${frame[ipOffset + 3]}`;
         
         if (ipStr !== "0.0.0.0") {
            this.setState({
-             wirelessStatus: 'got_ip',
-             wirelessConnected: true,
-             wirelessIp: ipStr
+             wirelessStatus: 'connected',
+             wifiConnected: true,
+             wifiIp: ipStr
            });
            console.log(`[PicoW] Sniffed DHCP ACK! Assigned IP: ${ipStr}`);
         }
@@ -349,41 +298,36 @@ export class PicoWLogic extends BaseComponent {
     }
   }
 
-  /** Download the PCAP capture (browser only). Async — network worker sends PCAP_DATA back. */
-  downloadPcap(): void {
-    console.warn(`[PicoW] PCAP download on frontend is delegated to backend or requires PcapWriter.`);
-  }
-
   // ── GPIO / UART ───────────────────────────────────────────────────────────────
 
   onPinStateChange(pinId: string, isHigh: boolean, _cpuCycles: number) {
     const pin = normalizePicoPin(pinId);
-    if (pin === 'GP1' || pin === 'GP5') {
-      this.setState({ rxActive: true });
-      if (this.rxTimeout) clearTimeout(this.rxTimeout);
-      this.rxTimeout = setTimeout(() => { this.setState({ rxActive: false }); this.rxTimeout = null; }, 100);
-    } else if (pin === 'GP0' || pin === 'GP4') {
-      this.setState({ txActive: true });
-      if (this.txTimeout) clearTimeout(this.txTimeout);
-      this.txTimeout = setTimeout(() => { this.setState({ txActive: false }); this.txTimeout = null; }, 100);
-    } else if (pin === 'GP23') {
+    if (pin === 'GP23') {
       const wasHigh = (this as any)._lastGp23High !== false;
       (this as any)._lastGp23High = isHigh;
-      // Reset sniffer on falling edge (chip reset by host)
       if (!isHigh && wasHigh) {
-        console.log(`[PicoW] WL_REG_ON falling edge — resetting CYW43 sniffer.`);
-        this._resetCyw43BusState();
+        console.log('[PicoW] WL_REG_ON falling edge — resetting CYW43 emulator.');
+        setTimeout(() => {
+            try {
+                const insts = [];
+                for (let i = 0; i < 32; i++) {
+                    insts.push(this.rp2040Ref.pio[1].instructions[i].toString(16).padStart(4, '0'));
+                }
+                console.log(`[PIO1] Instructions: ${insts.join(', ')}`);
+                
+                const insts0 = [];
+                for (let i = 0; i < 32; i++) {
+                    insts0.push(this.rp2040Ref.pio[0].instructions[i].toString(16).padStart(4, '0'));
+                }
+                console.log(`[PIO0] Instructions: ${insts0.join(', ')}`);
+            } catch (e) { console.error('Failed to log PIO', e); }
+        }, 100);
       }
     } else if (pin === 'GP25') {
-      // The simulator UI still hooks GPIO25 for regular Pico. We can keep it or override with cyw43.onLed.
-      // If cyw43 is active, builtInLed is driven by cyw43.
-      if (!this.cyw43) {
-        this.setState({ builtInLed: !!isHigh });
-      }
+      // Handled by attachPioHooks
     }
   }
 
   update(_cpuCycles: number, _currentWires: any[], _allComponentsInstances: BaseComponent[]) {
-    // Runtime CPU integration for RP2040 is handled in worker runners.
   }
 }
