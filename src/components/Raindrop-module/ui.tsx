@@ -1,8 +1,8 @@
 import React from 'react';
 import moduleImage from './RainDropModule.png';
 
-import { BOUNDS } from './constants';
 const W = 97, H = 227;
+export const BOUNDS = { x: 0, y: 0, w: 70, h: 160 };
 
 export const RaindropModuleContextMenu = ({
     attrs, onUpdate,
@@ -22,6 +22,7 @@ export const RaindropModuleContextMenu = ({
 export const RaindropModuleUI = ({
     state, attrs, isRunning,
 }: { state: any; attrs: any; isRunning: boolean }) => {
+    const isSidebar = !attrs?.id;
     const rainLevel = typeof state?.rainLevel === 'number' ? state.rainLevel : 0;
     const rainDetected = state?.rainDetected === true;
     const padVoltage = typeof state?.padVoltage === 'number' ? state.padVoltage : 5;
@@ -39,19 +40,16 @@ export const RaindropModuleUI = ({
         }
     }, [threshold]);
 
-    // Unscale original image (was scaled by 0.7) and map 40px visual span to 45px (1.125 scale)
-    const S = 1.125;
-    const TX = 11.25;
-    const TY = 6;
-
     return (
         <div style={{
             pointerEvents: 'none',
             position: 'absolute',
             inset: 0,
+            transform: isSidebar ? 'scale(.7)' : 'none',
+            transformOrigin: 'top left'
         }}>
             <div style={{
-                position: 'relative', width: BOUNDS.w, height: BOUNDS.h,
+                position: 'relative', width: W, height: H,
                 pointerEvents: 'none',
                 borderRadius: 6,
                 boxShadow: rainDetected
@@ -59,34 +57,32 @@ export const RaindropModuleUI = ({
                     : '0 0 0 0 transparent',
                 transition: 'box-shadow 0.2s',
             }}>
-                <svg viewBox={`0 0 ${BOUNDS.w} ${BOUNDS.h}`} width="100%" height="100%"
-                    style={{ display: 'block', borderRadius: 6, overflow: 'visible' }}>
-                    <g transform={`translate(${TX}, ${TY}) scale(${S})`}>
-                        <image href={moduleImage} x={0} y={0}
-                            width={W} height={H} preserveAspectRatio="xMidYMin meet" />
+                <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H}
+                    style={{ display: 'block', borderRadius: 6, overflow: 'hidden' }}>
+                    <image href={moduleImage} x={0} y={0}
+                        width={W} height={H} preserveAspectRatio="xMidYMin meet" />
 
-                        {/* PWR LED */}
-                        {isRunning && (
-                            <>
-                                <circle cx={W * 0.75} cy={H * 0.82} r={3} fill="rgba(34,197,94,0.65)" style={{ filter: 'blur(1.5px)' }} />
-                                <circle cx={W * 0.75} cy={H * 0.82} r={2} fill="#22c55e" opacity={0.95} />
-                            </>
-                        )}
+                    {/* PWR LED */}
+                    {isRunning && (
+                        <>
+                            <circle cx={W * 0.75} cy={H * 0.82} r={3} fill="rgba(34,197,94,0.65)" style={{ filter: 'blur(1.5px)' }} />
+                            <circle cx={W * 0.75} cy={H * 0.82} r={2} fill="#22c55e" opacity={0.95} />
+                        </>
+                    )}
 
-                        {/* DO LED — blue when rain detected */}
-                        {rainDetected && (
-                            <>
-                                <circle cx={W * 0.25} cy={H * 0.82} r={3.5} fill="rgba(59,130,246,0.65)" style={{ filter: 'blur(2px)' }} />
-                                <circle cx={W * 0.25} cy={H * 0.82} r={2.5} fill="#3b82f6" opacity={0.95} />
-                            </>
-                        )}
-                    </g>
+                    {/* DO LED — blue when rain detected */}
+                    {rainDetected && (
+                        <>
+                            <circle cx={W * 0.25} cy={H * 0.82} r={3.5} fill="rgba(59,130,246,0.65)" style={{ filter: 'blur(2px)' }} />
+                            <circle cx={W * 0.25} cy={H * 0.82} r={2.5} fill="#3b82f6" opacity={0.95} />
+                        </>
+                    )}
                 </svg>
 
                 {/* Status panel */}
                 {isRunning && (
                     <div style={{
-                        position: 'absolute', top: BOUNDS.h + 10, left: '50%', transform: 'translateX(-50%)',
+                        position: 'absolute', top: H + 10, left: '50%', transform: 'translateX(-50%)',
                         minWidth: 150, background: '#1e1e2e',
                         border: `1.5px solid ${borderColor}`,
                         borderRadius: 8, padding: '6px 10px',
