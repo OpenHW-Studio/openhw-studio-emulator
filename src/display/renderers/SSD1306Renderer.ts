@@ -60,7 +60,7 @@ export class SSD1306Renderer implements IDisplayRenderer {
             return;
         }
 
-        if (!vram || !Array.isArray(vram)) return;
+        if (!vram || !(Array.isArray(vram) || vram instanceof Uint8Array)) return;
 
         const data = this.imgData.data;
 

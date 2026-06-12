@@ -2,14 +2,14 @@ import manifest from './manifest.json';
 import { DHT22Logic } from './logic';
 import { DHT22UI } from './ui';
 import { BOUNDS } from './constants';
-import { validateConnections } from './validation';
+import { validation } from './validation';
 
-const wokwiDht22 = {
+const openhwDht22 = {
     manifest,
-    Logic: DHT22Logic,
+    LogicClass: DHT22Logic,
     UI: DHT22UI,
     BOUNDS,
-    validateConnections
+    validation
 };
 
-export default wokwiDht22;
+export default openhwDht22;

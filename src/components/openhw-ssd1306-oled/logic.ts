@@ -1,8 +1,7 @@
 import { BaseComponent } from '../BaseComponent';
 import { I2CProtocol } from '../../protocol-handlers/index';
-
 export class SSD1306Logic extends I2CProtocol {
-  private vram: number[];
+  private vram: Uint8Array;
 
   private awaitingControlByte = true;
   private isDataMode = false;
@@ -40,13 +39,13 @@ export class SSD1306Logic extends I2CProtocol {
 
   constructor(id: string, manifest: any) {
     super(id, manifest);
-    this.vram = new Array(1024).fill(0);
+    this.vram = new Uint8Array(typeof SharedArrayBuffer !== 'undefined' ? new SharedArrayBuffer(1024) : 1024);
 
 
 
     this.state = {
       ...this.state,
-      vram: [...this.vram],
+      vram: this.vram,
       invert: false,
       allOn: false,
       displayOn: true,
@@ -75,7 +74,7 @@ export class SSD1306Logic extends I2CProtocol {
         this.vramDirty = false;
         this.stateUpdateCount += 1;
         this.setState({
-          vram: [...this.vram],
+          vram: this.vram,
           invert: this.invert,
           allOn: this.allOn,
           displayOn: this.displayOn,

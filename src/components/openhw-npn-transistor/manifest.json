@@ -24,5 +24,15 @@
             "y": 90,
             "type": "digital"
         }
-    ]
+    ],
+    "autocoding": {
+        "arduino": {
+            "setup": "pinMode(${B}, OUTPUT);",
+            "loop": "digitalWrite(${B}, HIGH);\ndelay(1000);\ndigitalWrite(${B}, LOW);\ndelay(1000);"
+        },
+        "micropython": {
+            "setup": "from machine import Pin\nimport time\ntransistor = Pin(${B}, Pin.OUT)",
+            "loop": "transistor.value(1)\ntime.sleep(1)\ntransistor.value(0)\ntime.sleep(1)"
+        }
+    }
 }
