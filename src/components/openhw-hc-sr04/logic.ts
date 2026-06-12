@@ -4,34 +4,38 @@ import { PulseProtocol } from '../../protocol-handlers/index';
 export class HCSR04Logic extends PulseProtocol {
     private isEchoing = false;
 
-    /** Tracks the sensor's own ECHO output voltage separately from what the BFS may set. */
-    private _echoOutputVoltage = 0;
-
-    /** Returns the sensor's actual ECHO output voltage (5V when echoing, 0V when idle). */
-    get echoOutputVoltage(): number {
-        return this._echoOutputVoltage;
-    }
-
     constructor(id: string, manifest: any) {
         super(id, manifest);
         this.attrs = manifest.attrs || {};
-        this.state = { 
+        this.state = {
             ...this.state,
-            distance: parseFloat(this.attrs.distance || '100') 
+            distance: parseFloat(this.attrs.distance || '100')
         };
     }
 
-    sendPulse(pinId: string, isHigh: boolean, durationUs: number, idleVoltage: number = 0): void {
-        super.sendPulse(pinId, isHigh, durationUs, idleVoltage);
-        if (pinId === 'ECHO') {
-            this._echoOutputVoltage = isHigh ? 5.0 : 0.0;
+    onPulseReceived(pinId: string, isHighPulse: boolean, durationUs: number): void {
+        // HC-SR04 triggers when TRIG pin receives a HIGH pulse.
+        // Standard trigger is 10us, but check >= 8us to handle clock cycle/precision variations on AVR boards
+        if (pinId === 'TRIG' && isHighPulse && durationUs >= 8) {
+            this.startEcho();
         }
     }
 
-    onPulseReceived(pinId: string, isHighPulse: boolean, durationUs: number): void {
-        // HC-SR04 triggers when TRIG pin receives a HIGH pulse of at least 10us
-        if (pinId === 'TRIG' && isHighPulse && durationUs >= 10) {
-            this.startEcho();
+    onEvent(event: any) {
+        if (event.type === 'SET_ATTR') {
+            this.attrs = this.attrs || {};
+            this.attrs[event.key] = String(event.value);
+            if (event.key === 'distance') {
+                this.state.distance = String(event.value);
+            }
+            this.stateChanged = true;
+        }
+    }
+
+    private driveEcho(voltage: number) {
+        this.setPinVoltage('ECHO', voltage);
+        if ((this as any)._simUpdatePhysics) {
+            (this as any)._simUpdatePhysics();
         }
     }
 
@@ -42,25 +46,26 @@ export class HCSR04Logic extends PulseProtocol {
         const echoDurationUs = distance * 58;
 
         this.isEchoing = true;
-        // Output HIGH pulse on ECHO pin
-        this.sendPulse('ECHO', true, echoDurationUs, 0.0);
-    }
-
-    onEvent(event: any) {
-        if (event?.type === 'input' && event.value !== undefined) {
-            this.attrs.distance = String(event.value);
-            this.state.distance = event.value;
-            this.stateChanged = true;
+        
+        // Wait ~200us before driving ECHO high to simulate 8-cycle 40kHz sonic burst.
+        // This gives the Arduino CPU enough time to hit the pulseIn() instruction.
+        const cpu = (this as any)._simCpu;
+        if (cpu && typeof cpu.addClockEvent === 'function') {
+            cpu.addClockEvent(() => {
+                this.driveEcho(5.0); // Start pulse
+                cpu.addClockEvent(() => {
+                    this.driveEcho(0.0); // End pulse
+                    this.isEchoing = false;
+                }, echoDurationUs * 16);
+            }, 200 * 16); // 200us at 16MHz
+        } else {
+            // Fallback for non-AVR runners
+            this.sendPulse('ECHO', true, echoDurationUs, 0.0);
         }
     }
 
     update(cpuCycles: number, wires: any[], instances: BaseComponent[]) {
         super.update(cpuCycles, wires, instances);
-        // Track ECHO voltage set by pulse end
-        const echoPin = this.pins['ECHO'];
-        if (echoPin) {
-            this._echoOutputVoltage = echoPin.voltage;
-        }
         // If ECHO pin went low, echoing is done
         if (this.isEchoing && this.getPinVoltage('ECHO') < 2.5) {
             this.isEchoing = false;
@@ -70,7 +75,7 @@ export class HCSR04Logic extends PulseProtocol {
     onCustomTelemetry() {
         const distance = parseFloat(this.attrs?.distance || '100');
         const echoDurationUs = distance * 58; // Speed of sound: 340 m/s
-        
+
         this.setCustomTelemetry({
             configuredDistance: distance,
             echoDurationUs: Number(echoDurationUs.toFixed(1)),
