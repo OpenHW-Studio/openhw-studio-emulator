@@ -32,7 +32,7 @@
       { "from": "GND", "to": "arduino:GND" },
       { "from": "CLK", "to": "arduino:SCK" },
       { "from": "DIN", "to": "arduino:MOSI" },
-      { "from": "CS", "to": "arduino:10" }
+      { "from": "CS", "to": "arduino:SS" }
     ]
   },
   "autocoding": {
@@ -40,6 +40,11 @@
     "arduino": {
       "globals": "#include <LedControl.h>\n\nLedControl lc_${COMP_SUFFIX} = LedControl(${DIN}, ${CLK}, ${CS}, 1);",
       "setup": "lc_${COMP_SUFFIX}.shutdown(0, false);\nlc_${COMP_SUFFIX}.setIntensity(0, 8);\nlc_${COMP_SUFFIX}.clearDisplay(0);\n// Welcome Message (H)\nlc_${COMP_SUFFIX}.setRow(0,0,0b01100110);\nlc_${COMP_SUFFIX}.setRow(0,1,0b01100110);\nlc_${COMP_SUFFIX}.setRow(0,2,0b01100110);\nlc_${COMP_SUFFIX}.setRow(0,3,0b01111110);\nlc_${COMP_SUFFIX}.setRow(0,4,0b01111110);\nlc_${COMP_SUFFIX}.setRow(0,5,0b01100110);\nlc_${COMP_SUFFIX}.setRow(0,6,0b01100110);\nlc_${COMP_SUFFIX}.setRow(0,7,0b01100110);\ndelay(2000);",
+      "loop": "// Dot Matrix ready for animation."
+    },
+    "pico": {
+      "globals": "#include <LedControl.h>\n\nLedControl lc_${COMP_SUFFIX} = LedControl(${DIN}, ${CLK}, ${CS}, 1);",
+      "setup": "lc_${COMP_SUFFIX}.shutdown(0, false);\nlc_${COMP_SUFFIX}.setIntensity(0, 8);\nlc_${COMP_SUFFIX}.clearDisplay(0);\n// Welcome Message (H)\nlc_${COMP_SUFFIX}.setRow(0,0,B01100110);\nlc_${COMP_SUFFIX}.setRow(0,1,B01100110);\nlc_${COMP_SUFFIX}.setRow(0,2,B01100110);\nlc_${COMP_SUFFIX}.setRow(0,3,B01111110);\nlc_${COMP_SUFFIX}.setRow(0,4,B01111110);\nlc_${COMP_SUFFIX}.setRow(0,5,B01100110);\nlc_${COMP_SUFFIX}.setRow(0,6,B01100110);\nlc_${COMP_SUFFIX}.setRow(0,7,B01100110);\ndelay(2000);",
       "loop": "// Dot Matrix ready for animation."
     }
   }

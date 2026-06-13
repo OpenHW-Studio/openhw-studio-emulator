@@ -2,7 +2,7 @@ import React from 'react';
 
 export const BOUNDS = { x: 0, y: 0, w: 270, h: 90 };
 
-export const SoilMoistureSensorUI = ({ state, attrs }: { state: any, attrs: any }) => {
+export const SoilMoistureSensorUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning: boolean }) => {
     const moisture = state?.moisture ?? 50;
     
     // The probe extends from x=85 to x=260 (175px long)
@@ -11,7 +11,6 @@ export const SoilMoistureSensorUI = ({ state, attrs }: { state: any, attrs: any 
 
     return (
         <div style={{
-            pointerEvents: 'none',
             width: BOUNDS.w,
             height: BOUNDS.h,
             position: 'relative'
@@ -20,7 +19,7 @@ export const SoilMoistureSensorUI = ({ state, attrs }: { state: any, attrs: any 
                 width="100%"
                 height="100%"
                 viewBox="0 0 270 90"
-                style={{ display: 'block' }}
+                style={{ display: 'block', pointerEvents: 'none' }}
                 xmlns="http://www.w3.org/2000/svg"
             >
                 <defs>
@@ -131,6 +130,44 @@ export const SoilMoistureSensorUI = ({ state, attrs }: { state: any, attrs: any 
                     </g>
                 )}
             </svg>
+
+            {/* Interactive Moisture Slider Panel */}
+            {isRunning && (
+                <div style={{
+                    position: 'absolute',
+                    top: '8px',
+                    left: '85px', // Start right after the word "MAX" line
+                    background: 'rgba(26, 32, 44, 0.85)',
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    border: '1px solid #4A5568',
+                    pointerEvents: 'auto',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+                    backdropFilter: 'blur(2px)'
+                }}>
+                    <span style={{ color: '#E2E8F0', fontSize: '11px', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                        {Math.round(moisture).toString().padStart(3, ' ')}%
+                    </span>
+                    <input 
+                        type="range" 
+                        min="0" max="100" 
+                        value={moisture} 
+                        onChange={(e) => {
+                            if (attrs?.onInteract) {
+                                attrs.onInteract({ type: 'SET_MOISTURE', value: parseFloat(e.target.value) });
+                            }
+                        }}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onTouchStart={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        style={{ width: '80px', cursor: 'pointer', margin: 0 }} 
+                    />
+                </div>
+            )}
         </div>
     );
 };
