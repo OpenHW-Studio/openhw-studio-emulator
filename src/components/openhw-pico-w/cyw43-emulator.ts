@@ -90,7 +90,7 @@ export class Cyw43Emulator {
     private lastIrq = false;
     checkIrq() {
         const current = this.irq;
-        console.log(`[Cyw43Emulator] checkIrq: current=${current}, int=0x${this.int.toString(16)}, intEnable=0x${this.intEnable.toString(16)}`);
+        // console.log(`[Cyw43Emulator] checkIrq: current=${current}, int=0x${this.int.toString(16)}, intEnable=0x${this.intEnable.toString(16)}`);
         if (current !== this.lastIrq) {
             this.lastIrq = current;
             this.onIrqChanged(current);
@@ -126,7 +126,7 @@ export class Cyw43Emulator {
                 break;
             case 20:
                 e[0] = 4276993709; // 0xFEEDBEAD
-                console.log(`[Cyw43Emulator] READ TEST_PATTERN 0xFEEDBEAD from bpAddr=${this.bpAddr.toString(16)}`);
+                // console.log(`[Cyw43Emulator] READ TEST_PATTERN 0xFEEDBEAD from bpAddr=${this.bpAddr.toString(16)}`);
                 break;
         }
     }
@@ -220,7 +220,7 @@ export class Cyw43Emulator {
         if (e === 0) channelName = "IOCTL_RESPONSE";
         else if (e === 1) channelName = "ASYNC_EVENT";
         else if (e === 2) channelName = "ETHERNET_DATA";
-        console.log(`[Cyw43Emulator] wlanEvent: Queued packet (channel ${e} = ${channelName}, length: ${f.length} bytes)`);
+        // console.log(`[Cyw43Emulator] wlanEvent: Queued packet (channel ${e} = ${channelName}, length: ${f.length} bytes)`);
         
         this.updateInterrupts();
     }
@@ -229,7 +229,7 @@ export class Cyw43Emulator {
         let f = new Uint8Array(4 + e.byteLength);
         f.set(e, 4);
         const hex = Array.from(e.slice(0, 48)).map(b => b.toString(16).padStart(2, '0')).join(' ');
-        console.log(`[Cyw43Emulator] writeFrame (DATA IN): len=${e.length} hex=${hex}`);
+        // console.log(`[Cyw43Emulator] writeFrame (DATA IN): len=${e.length} hex=${hex}`);
         this.wlanEvent(f, 2);
     }
 
@@ -304,7 +304,7 @@ export class Cyw43Emulator {
         x.readUint16();
         let f = x.readUint32();
         x.readUint32();
-        console.log(`[Cyw43Emulator] handleControl IOCTL: cmd=${e}, len=${f}`);
+        // console.log(`[Cyw43Emulator] handleControl IOCTL: cmd=${e}, len=${f}`);
         switch (e) {
             case 2:
             case 20:
@@ -339,14 +339,14 @@ export class Cyw43Emulator {
             case 262: {
                 let t = x.readNullTerminated();
                 let d = this.vars[t];
-                console.log(`[Cyw43Emulator] IOCTL 262 (WLC_GET_VAR): '${t}'`);
+                // console.log(`[Cyw43Emulator] IOCTL 262 (WLC_GET_VAR): '${t}'`);
                 this.ioctlResult(e, f, d);
                 break;
             }
             case 263: {
                 let t = x.readNullTerminated();
                 let d = x.readBytes(x.remaining);
-                console.log(`[Cyw43Emulator] IOCTL 263 (WLC_SET_VAR): '${t}' with ${d.length} bytes`);
+                // console.log(`[Cyw43Emulator] IOCTL 263 (WLC_SET_VAR): '${t}' with ${d.length} bytes`);
                 this.vars[t] = d;
                 this.ioctlResult(e, f);
                 if (t === "gpioout") {
@@ -393,7 +393,7 @@ export class Cyw43Emulator {
     wlanRead(x: number, e: Uint32Array) {
         let f = this.events[0];
         if (f) {
-            console.log(`[Cyw43Emulator] wlanRead: requested ${e.length * 4} bytes. Event has ${f.byteLength} bytes left.`);
+            // console.log(`[Cyw43Emulator] wlanRead: requested ${e.length * 4} bytes. Event has ${f.byteLength} bytes left.`);
             try {
                 // Calculate how many 32-bit words we can copy
                 let wordsToCopy = Math.min(e.length, f.byteLength / 4);
@@ -420,7 +420,7 @@ export class Cyw43Emulator {
     }
 
     wlanWrite(x: number, e: Uint32Array) {
-        console.log(`[Cyw43Emulator] wlanWrite called with buffer size: ${e.buffer.byteLength}, e.length: ${e.length}, x: ${x}`);
+        // console.log(`[Cyw43Emulator] wlanWrite called with buffer size: ${e.buffer.byteLength}, e.length: ${e.length}, x: ${x}`);
         try {
             let f = new BufferReader(new Uint8Array(e.buffer));
             let t = f.readUint16();
@@ -438,11 +438,11 @@ export class Cyw43Emulator {
             f.readUint16();
             switch (a) {
                 case 0:
-                    console.log(`[Cyw43Emulator] wlanWrite: control packet received`);
+                    // console.log(`[Cyw43Emulator] wlanWrite: control packet received`);
                     this.handleControl(f);
                     break;
                 case 2:
-                    console.log(`[Cyw43Emulator] wlanWrite: data packet (ethernet) received`);
+                    // console.log(`[Cyw43Emulator] wlanWrite: data packet (ethernet) received`);
                     f.skip(6);
                     // Extract exactly the Ethernet packet
                     this.onPacketTx(f.readBytes(f.remaining));
@@ -513,7 +513,7 @@ export class Cyw43Emulator {
                 addr: (e & 268433408) >>> 11,
                 sz: e & 2047
             };
-            console.log(`[Cyw43Emulator] SPI Command: write=${this.cmd.write}, fn=${this.cmd.fn}, addr=${this.cmd.addr}, sz=${this.cmd.sz}`);
+            // console.log(`[Cyw43Emulator] SPI Command: write=${this.cmd.write}, fn=${this.cmd.fn}, addr=${this.cmd.addr}, sz=${this.cmd.sz}`);
             this.buf = new Uint32Array((this.cmd.sz + 3) >> 2);
             this.bufIndex = 0;
             this.backplaneRead = false;

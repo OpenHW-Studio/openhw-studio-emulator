@@ -115,7 +115,7 @@ export class PicoWLogic extends BaseComponent {
         if (event.data instanceof ArrayBuffer) {
           const frame = new Uint8Array(event.data);
           this.pcapBuffer.push({ timeUs: performance.now() * 1000, data: frame });
-          console.log(`[PicoW RX] Ethernet frame in (len=${frame.length}) <- Gateway`);
+          // console.log(`[PicoW RX] Ethernet frame in (len=${frame.length}) <- Gateway`);
           if (this.cyw43Emulator) {
               this.cyw43Emulator.writeFrame(frame);
           }
@@ -133,7 +133,7 @@ export class PicoWLogic extends BaseComponent {
           console.warn(`[PicoW TX] Cannot send packet: WebSocket is not open (len=${packet.length})`);
           return;
       }
-      console.log(`[PicoW TX] Ethernet frame out (len=${packet.length}) -> Gateway`);
+      // console.log(`[PicoW TX] Ethernet frame out (len=${packet.length}) -> Gateway`);
       this.setState({ wirelessPacketCount: (this.state.wirelessPacketCount || 0) + 1 });
       this.ws.send(packet.buffer.slice(packet.byteOffset, packet.byteOffset + packet.byteLength));
   }
@@ -254,11 +254,11 @@ export class PicoWLogic extends BaseComponent {
               pin.setInputValue(true);
           }
           if (this.rp2040Ref && this.cyw43Emulator) {
-              // Pulse every 1ms (1000us) of simulated time if IRQ is still pending
-              this.rp2040Ref.clock.createTimer(1000, pulseIrq);
+              // Pulse every 10us of simulated time if IRQ is still pending
+              this.rp2040Ref.clock.createTimer(10, pulseIrq);
           }
       };
-      rp2040.clock.createTimer(1000, pulseIrq);
+      rp2040.clock.createTimer(10, pulseIrq);
 
       this.cyw43Emulator.onIrqChanged = (irq: boolean) => {
           if (!isSelected) {
@@ -303,13 +303,13 @@ export class PicoWLogic extends BaseComponent {
                           for (let i = 0; i < 32; i++) {
                               insts.push(rp2040.pio[1].instructions[i].toString(16).padStart(4, '0'));
                           }
-                          console.log(`[PIO1] Instructions: ${insts.join(', ')}`);
+                          // console.log(`[PIO1] Instructions: ${insts.join(', ')}`);
                           
                           const insts0 = [];
                           for (let i = 0; i < 32; i++) {
                               insts0.push(rp2040.pio[0].instructions[i].toString(16).padStart(4, '0'));
                           }
-                          console.log(`[PIO0] Instructions: ${insts0.join(', ')}`);
+                          // console.log(`[PIO0] Instructions: ${insts0.join(', ')}`);
                       } catch (e) { console.error('Failed to log PIO', e); }
                   }
                   
@@ -322,7 +322,7 @@ export class PicoWLogic extends BaseComponent {
               byteCount = 0;
               if (isReading) {
                   replyWord = this.cyw43Emulator!.readUint32();
-                  console.log(`[PicoW SPI] Fetching readUint32: 0x${replyWord.toString(16).padStart(8, '0')}`);
+                  // console.log(`[PicoW SPI] Fetching readUint32: 0x${replyWord.toString(16).padStart(8, '0')}`);
               }
           }
           // console.log(`[PicoW SPI] TX Byte: 0x${(replyWord & 255).toString(16)} | RX Byte: 0x${x.toString(16)}`);
@@ -430,13 +430,13 @@ export class PicoWLogic extends BaseComponent {
                 for (let i = 0; i < 32; i++) {
                     insts.push(this.rp2040Ref.pio[1].instructions[i].toString(16).padStart(4, '0'));
                 }
-                console.log(`[PIO1] Instructions: ${insts.join(', ')}`);
+                // console.log(`[PIO1] Instructions: ${insts.join(', ')}`);
                 
                 const insts0 = [];
                 for (let i = 0; i < 32; i++) {
                     insts0.push(this.rp2040Ref.pio[0].instructions[i].toString(16).padStart(4, '0'));
                 }
-                console.log(`[PIO0] Instructions: ${insts0.join(', ')}`);
+                // console.log(`[PIO0] Instructions: ${insts0.join(', ')}`);
             } catch (e) { console.error('Failed to log PIO', e); }
         }, 100);
       }
