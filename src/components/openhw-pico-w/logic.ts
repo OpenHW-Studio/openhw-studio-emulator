@@ -1,5 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
-import type { WiFiConnectionStatus } from '../../protocol-handlers/wifi-environment';
+
 import { Cyw43Emulator } from './cyw43-emulator';
 import { SPIPeripheral } from './spi-peripheral';
 
@@ -27,7 +27,7 @@ export class PicoWLogic extends BaseComponent {
       txActive:       false,
       rxActive:       false,
       builtInLed:     false,
-      wirelessStatus: 'idle' as WiFiConnectionStatus,
+      wirelessStatus: 'idle',
       wifiConnected:  false,
       wifiSsid:       '',
       wifiIp:         '',
@@ -226,7 +226,7 @@ export class PicoWLogic extends BaseComponent {
                   }
               }
           }
-          console.log('[PicoW] Patched all PIO StateMachine instances to check enabled state');
+          console.log('[PicoW] Patched all PIO StateMachine instances');
       } catch (e: any) {
           console.error('[PicoW] Failed to patch PIO StateMachine instances:', e.message, e.stack);
       }
@@ -247,7 +247,20 @@ export class PicoWLogic extends BaseComponent {
 
       this.cyw43Emulator.onIrqChanged = (irq: boolean) => {
           if (!isSelected) {
-              rp2040.gpio[WL_D].setInputValue(irq);
+              const pin = rp2040.gpio[WL_D];
+              
+              // 1. Force digital input buffer
+              pin.padValue |= 0x40; // IE bit
+              
+              // 2. Force the raw IRQ hardware flags inside the IO BANK
+              if (irq) {
+                  pin.irqForceMask |= 0x0A; // Force IRQ_LEVEL_HIGH and IRQ_EDGE_HIGH
+              } else {
+                  pin.irqForceMask &= ~0x0A;
+              }
+              
+              // 3. Set the simulated input value
+              pin.setInputValue(irq);
           }
       };
 
@@ -286,17 +299,18 @@ export class PicoWLogic extends BaseComponent {
                   
                   byteCount = 0;
                   wordAcc = 0;
-                  if (!this.cyw43Emulator!.cmd) {
+                  if (!this.cyw43Emulator!.cmd || !this.cyw43Emulator!.cmd.write) {
                       isReading = true;
                   }
               }
               byteCount = 0;
               if (isReading) {
                   replyWord = this.cyw43Emulator!.readUint32();
+                  console.log(`[PicoW SPI] Fetching readUint32: 0x${replyWord.toString(16).padStart(8, '0')}`);
               }
           }
-          spi.sendByte(replyWord & 255);
           // console.log(`[PicoW SPI] TX Byte: 0x${(replyWord & 255).toString(16)} | RX Byte: 0x${x.toString(16)}`);
+          spi.sendByte(replyWord & 255);
           replyWord >>>= 8;
       };
 
@@ -323,6 +337,25 @@ export class PicoWLogic extends BaseComponent {
               wordAcc = 0;
               isReading = false;
               spi.disable();
+
+              // Propagate the interrupt state since CS went high (Wokwi-style)
+              if (this.cyw43Emulator) {
+                  const pin = rp2040.gpio[WL_D];
+                  const irq = this.cyw43Emulator.irq;
+                  
+                  // 1. Force digital input buffer
+                  pin.padValue |= 0x40; // IE bit
+                  
+                  // 2. Force the raw IRQ hardware flags inside the IO BANK
+                  if (irq) {
+                      pin.irqForceMask |= 0x0A; // Force IRQ_LEVEL_HIGH and IRQ_EDGE_HIGH
+                  } else {
+                      pin.irqForceMask &= ~0x0A;
+                  }
+                  
+                  // 3. Set the simulated input value
+                  pin.setInputValue(irq);
+              }
           } else {
               clkEdgesInTransaction = 0;
               spi.enable();
