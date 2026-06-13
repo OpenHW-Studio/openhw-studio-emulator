@@ -245,6 +245,21 @@ export class PicoWLogic extends BaseComponent {
 
       let isSelected = false; // Maps to Wokwi's `d` variable
 
+      const pulseIrq = () => {
+          if (this.cyw43Emulator && this.cyw43Emulator.irq && !isSelected) {
+              const pin = rp2040.gpio[WL_D];
+              // Briefly drop and raise the pin to force an edge transition 
+              // for rp2040js to re-evaluate the level interrupt if it was masked.
+              pin.setInputValue(false);
+              pin.setInputValue(true);
+          }
+          if (this.rp2040Ref && this.cyw43Emulator) {
+              // Pulse every 1ms (1000us) of simulated time if IRQ is still pending
+              this.rp2040Ref.clock.createTimer(1000, pulseIrq);
+          }
+      };
+      rp2040.clock.createTimer(1000, pulseIrq);
+
       this.cyw43Emulator.onIrqChanged = (irq: boolean) => {
           if (!isSelected) {
               const pin = rp2040.gpio[WL_D];
@@ -255,12 +270,13 @@ export class PicoWLogic extends BaseComponent {
               // 2. Force the raw IRQ hardware flags inside the IO BANK
               if (irq) {
                   pin.irqForceMask |= 0x0A; // Force IRQ_LEVEL_HIGH and IRQ_EDGE_HIGH
+                  // Also pulse immediately
+                  pin.setInputValue(false);
+                  pin.setInputValue(true);
               } else {
                   pin.irqForceMask &= ~0x0A;
+                  pin.setInputValue(false);
               }
-              
-              // 3. Set the simulated input value
-              pin.setInputValue(irq);
           }
       };
 

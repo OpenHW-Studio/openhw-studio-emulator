@@ -228,6 +228,8 @@ export class Cyw43Emulator {
     writeFrame(e: Uint8Array) {
         let f = new Uint8Array(4 + e.byteLength);
         f.set(e, 4);
+        const hex = Array.from(e.slice(0, 48)).map(b => b.toString(16).padStart(2, '0')).join(' ');
+        console.log(`[Cyw43Emulator] writeFrame (DATA IN): len=${e.length} hex=${hex}`);
         this.wlanEvent(f, 2);
     }
 
@@ -401,6 +403,9 @@ export class Cyw43Emulator {
                 // Check if we consumed the whole event
                 if (wordsToCopy * 4 >= f.byteLength) {
                     this.events.shift(); // fully consumed
+                    if (this.events.length === 0) {
+                        this.int &= ~32; // Clear F2_INT_VALUE
+                    }
                 } else {
                     // Update the event to keep the remaining bytes for the next read
                     this.events[0] = new Uint8Array(f.buffer, f.byteOffset + wordsToCopy * 4, f.byteLength - wordsToCopy * 4);
