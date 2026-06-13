@@ -41,13 +41,7 @@ export class PicoWLogic extends BaseComponent {
     this.pcapBuffer = [];
     this.connectToGateway();
 
-    // Drain timer to process any pending packets in the CYW43 emulator
-    this.cyw43DrainTimer = setInterval(() => {
-        if (this.cyw43Emulator) {
-            let buf = new Uint32Array(1);
-            this.cyw43Emulator.busRead(8, buf);
-        }
-    }, 10);
+    // (Timer moved to attachGpioHooks)
   }
 
   private connectToGateway() {
@@ -175,10 +169,7 @@ export class PicoWLogic extends BaseComponent {
   }
 
   override onSimulationStop(): void {
-    if (this.cyw43DrainTimer) {
-      clearInterval(this.cyw43DrainTimer);
-      this.cyw43DrainTimer = null;
-    }
+    this.cyw43DrainTimer = null;
     if (this.ws) {
       this.ws.close();
       this.ws = null;
@@ -220,8 +211,9 @@ export class PicoWLogic extends BaseComponent {
                       machine.__patchedForEnabled = true;
                       const originalStep = machine.step;
                       machine.step = function() {
-                          if (!this.enabled) return;
-                          originalStep.apply(this, arguments);
+                          if (this.enabled) {
+                              originalStep.call(this);
+                          }
                       };
                   }
               }
@@ -254,11 +246,23 @@ export class PicoWLogic extends BaseComponent {
               pin.setInputValue(true);
           }
           if (this.rp2040Ref && this.cyw43Emulator) {
-              // Pulse every 10us of simulated time if IRQ is still pending
-              this.rp2040Ref.clock.createTimer(10, pulseIrq);
+              // Pulse every 500us of simulated time if IRQ is still pending
+              this.rp2040Ref.clock.createTimer(500, pulseIrq);
           }
       };
-      rp2040.clock.createTimer(10, pulseIrq);
+      rp2040.clock.createTimer(500, pulseIrq);
+
+      const drainCyw43 = () => {
+          if (this.cyw43Emulator) {
+              let buf = new Uint32Array(1);
+              this.cyw43Emulator.busRead(8, buf);
+          }
+          if (this.rp2040Ref) {
+              this.rp2040Ref.clock.createTimer(10000, drainCyw43);
+          }
+      };
+      rp2040.clock.createTimer(10000, drainCyw43);
+      this.cyw43DrainTimer = drainCyw43;
 
       this.cyw43Emulator.onIrqChanged = (irq: boolean) => {
           if (!isSelected) {
@@ -297,20 +301,6 @@ export class PicoWLogic extends BaseComponent {
                   this.cyw43Emulator!.writeUint32(wordAcc);
                   
                   if (!(this as any)._loggedPio) {
-                      (this as any)._loggedPio = true;
-                      try {
-                          const insts = [];
-                          for (let i = 0; i < 32; i++) {
-                              insts.push(rp2040.pio[1].instructions[i].toString(16).padStart(4, '0'));
-                          }
-                          // console.log(`[PIO1] Instructions: ${insts.join(', ')}`);
-                          
-                          const insts0 = [];
-                          for (let i = 0; i < 32; i++) {
-                              insts0.push(rp2040.pio[0].instructions[i].toString(16).padStart(4, '0'));
-                          }
-                          // console.log(`[PIO0] Instructions: ${insts0.join(', ')}`);
-                      } catch (e) { console.error('Failed to log PIO', e); }
                   }
                   
                   byteCount = 0;
@@ -424,21 +414,6 @@ export class PicoWLogic extends BaseComponent {
       (this as any)._lastGp23High = isHigh;
       if (!isHigh && wasHigh) {
         console.log('[PicoW] WL_REG_ON falling edge — resetting CYW43 emulator.');
-        setTimeout(() => {
-            try {
-                const insts = [];
-                for (let i = 0; i < 32; i++) {
-                    insts.push(this.rp2040Ref.pio[1].instructions[i].toString(16).padStart(4, '0'));
-                }
-                // console.log(`[PIO1] Instructions: ${insts.join(', ')}`);
-                
-                const insts0 = [];
-                for (let i = 0; i < 32; i++) {
-                    insts0.push(this.rp2040Ref.pio[0].instructions[i].toString(16).padStart(4, '0'));
-                }
-                // console.log(`[PIO0] Instructions: ${insts0.join(', ')}`);
-            } catch (e) { console.error('Failed to log PIO', e); }
-        }, 100);
       }
     } else if (pin === 'GP25') {
       // Handled by attachPioHooks
