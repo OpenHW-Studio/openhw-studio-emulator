@@ -2,8 +2,8 @@
     "type": "openhw-7segment",
     "label": "7-Segment Display",
     "group": "Outputs",
-    "w": 60,
-    "h": 90,
+    "w": 76,
+    "h": 113,
     "attrs": {
         "color": "red",
         "common": "cathode",
@@ -11,16 +11,16 @@
         "colon": "false"
     },
     "pins": [
-        { "id": "G", "x": 0, "y": 0, "type": "digital" },
-        { "id": "F", "x": 15, "y": 0, "type": "digital" },
-        { "id": "COM.2", "x": 30, "y": 0, "type": "digital" },
-        { "id": "A", "x": 45, "y": 0, "type": "digital" },
-        { "id": "B", "x": 60, "y": 0, "type": "digital" },
-        { "id": "E", "x": 0, "y": 90, "type": "digital" },
-        { "id": "D", "x": 15, "y": 90, "type": "digital" },
-        { "id": "COM.1", "x": 30, "y": 90, "type": "digital" },
-        { "id": "C", "x": 45, "y": 90, "type": "digital" },
-        { "id": "DP", "x": 60, "y": 90, "type": "digital" }
+        { "id": "G", "x": 7, "y": 11, "type": "digital" },
+        { "id": "F", "x": 22, "y": 11, "type": "digital" },
+        { "id": "COM.2", "x": 37, "y": 11, "type": "digital" },
+        { "id": "A", "x": 52, "y": 11, "type": "digital" },
+        { "id": "B", "x": 68, "y": 11, "type": "digital" },
+        { "id": "E", "x": 7, "y": 102, "type": "digital" },
+        { "id": "D", "x": 22, "y": 102, "type": "digital" },
+        { "id": "COM.1", "x": 37, "y": 102, "type": "digital" },
+        { "id": "C", "x": 52, "y": 102, "type": "digital" },
+        { "id": "DP", "x": 68, "y": 102, "type": "digital" }
     ],
     "telemetry": {
       "template": "Segments=(${state.a},${state.b},${state.c},${state.d},${state.e},${state.f},${state.g})",
