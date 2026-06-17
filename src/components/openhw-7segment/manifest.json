@@ -43,7 +43,7 @@
       "libraries": ["SevSeg"],
       "arduino": {
         "globals": "#include \"SevSeg.h\"\nSevSeg sevseg_${COMP_SUFFIX};",
-        "setup": "byte numDigits = 1;\nbyte digitPins[] = {10};\nbyte segmentPins[] = {2, 3, 4, 5, 6, 7, 8, 9};\nbool resistorsOnSegments = true;\nbyte hardwareConfig = COMMON_CATHODE;\nsevseg_${COMP_SUFFIX}.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments);\nsevseg_${COMP_SUFFIX}.setBrightness(90);",
+        "setup": "byte numDigits = 1;\nbyte digitPins[] = {10};\nbyte segmentPins[] = {2, 3, 4, 5, 6, 7, 8, 9};\nbool resistorsOnSegments = true;\nbyte hardwareConfig = (String(\"${common}\") == \"anode\") ? COMMON_ANODE : COMMON_CATHODE;\nsevseg_${COMP_SUFFIX}.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments);\nsevseg_${COMP_SUFFIX}.setBrightness(90);",
         "loop": "sevseg_${COMP_SUFFIX}.setNumber(4);\nsevseg_${COMP_SUFFIX}.refreshDisplay();"
       }
     }
