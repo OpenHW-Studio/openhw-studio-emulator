@@ -32,6 +32,10 @@ export class PicoWLogic extends BaseComponent {
       wifiSsid:       '',
       wifiIp:         '',
       wifiPacketCount: 0,
+      boardIp:        '',
+      portForward:    '',
+      txBytes:        0,
+      rxBytes:        0,
       ...this.state,
     };
   }
@@ -109,11 +113,24 @@ export class PicoWLogic extends BaseComponent {
         if (event.data instanceof ArrayBuffer) {
           const frame = new Uint8Array(event.data);
           this.pcapBuffer.push({ timeUs: performance.now() * 1000, data: frame });
-          // console.log(`[PicoW RX] Ethernet frame in (len=${frame.length}) <- Gateway`);
+          this.state.rxBytes += frame.length;
           if (this.cyw43Emulator) {
               this.cyw43Emulator.writeFrame(frame);
           }
           this._sniffDhcpAck(frame);
+          this._emitWifiStats();
+        } else if (typeof event.data === 'string') {
+          const msg = event.data as string;
+          if (msg.startsWith('BOARD_IP:')) {
+            const ip = msg.substring(9);
+            this.setState({ boardIp: ip });
+            this._emitWifiStats();
+          } else if (msg.startsWith('PORT_FORWARD:')) {
+            const pf = msg.substring(13);
+            this.setState({ portForward: pf });
+            this._emitWifiStats();
+          }
+          console.log(`[PicoW] Gateway: ${msg}`);
         }
       };
     } catch (e) {
@@ -127,8 +144,9 @@ export class PicoWLogic extends BaseComponent {
           console.warn(`[PicoW TX] Cannot send packet: WebSocket is not open (len=${packet.length})`);
           return;
       }
-      // console.log(`[PicoW TX] Ethernet frame out (len=${packet.length}) -> Gateway`);
+      this.state.txBytes += packet.length;
       this.setState({ wirelessPacketCount: (this.state.wirelessPacketCount || 0) + 1 });
+      this._emitWifiStats();
       this.ws.send(packet.buffer.slice(packet.byteOffset, packet.byteOffset + packet.byteLength));
   }
 
@@ -190,7 +208,12 @@ export class PicoWLogic extends BaseComponent {
       wifiSsid:        '',
       wifiIp:          '',
       wifiPacketCount: 0,
+      boardIp:         '',
+      portForward:     '',
+      txBytes:         0,
+      rxBytes:         0,
     });
+    this._emitWifiStats();
   }
 
   // ── CYW43 GPIO Hooks (Exact Wokwi SPI Bit-Banging Match) ─────────────
@@ -376,6 +399,21 @@ export class PicoWLogic extends BaseComponent {
   }
 
   // ── Frame handling ────────────────────────────────────────────────────────────
+
+  private _emitWifiStats(): void {
+    if (typeof window === 'undefined') return;
+    window.dispatchEvent(new CustomEvent('OPENHW_WIFI_STATS', {
+      detail: {
+        boardId: this.id,
+        status: {
+          txBytes: this.state.txBytes || 0,
+          rxBytes: this.state.rxBytes || 0,
+          ip: this.state.boardIp || '',
+          portForward: this.state.portForward || '',
+        }
+      }
+    }));
+  }
 
   private _sniffDhcpAck(frame: Uint8Array): void {
     if (frame.length < 300) return;
