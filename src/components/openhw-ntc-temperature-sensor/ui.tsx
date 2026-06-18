@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from 'react';
 
 export const NtcUI = ({ state, attrs, isRunning, onEvent }: { state: any, attrs: any, isRunning: boolean, onEvent?: (event: any) => void }) => {
-    const temp = state?.temperature ?? attrs?.temperature ?? 25;
+    const externalTemp = state?.temperature ?? attrs?.temperature ?? 25;
+    const [localTemp, setLocalTemp] = useState(externalTemp);
+
+    useEffect(() => {
+        setLocalTemp(externalTemp);
+    }, [externalTemp]);
 
     const handleSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = parseFloat(e.target.value);
+        setLocalTemp(val);
         if (onEvent) {
-            onEvent({ type: 'temperature', value: parseFloat(e.target.value) });
+            onEvent({ type: 'temperature', value: val });
         }
     };
 
     // Calculate dynamic color for the thermal aura based on temperature (-40 to 125)
-    const tempRatio = Math.max(0, Math.min(1, (temp + 40) / 165));
+    const tempRatio = Math.max(0, Math.min(1, (localTemp + 40) / 165));
     // Hue ranges from 240 (Blue/Cold) to 0 (Red/Hot)
     const hue = (1 - tempRatio) * 240; 
 
@@ -103,13 +110,13 @@ export const NtcUI = ({ state, attrs, isRunning, onEvent }: { state: any, attrs:
                 >
                     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                         <span>Temp</span>
-                        <span>{temp}°C</span>
+                        <span>{localTemp}°C</span>
                     </div>
                     <input 
                         type="range" 
                         min="-40" 
                         max="125" 
-                        value={temp} 
+                        value={localTemp} 
                         onChange={handleSlider}
                         style={{ width: '80px', height: '4px', cursor: 'pointer' }}
                     />
