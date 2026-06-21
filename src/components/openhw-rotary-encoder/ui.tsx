@@ -7,17 +7,12 @@ export const RotaryEncoderUI = ({ state, attrs, isRunning }: { state: any, attrs
     const pressed = state?.sw || false;
     const lastAngle = React.useRef<number | null>(null);
 
-    const nativeW = 66;
-    const nativeH = 50;
-    const scaleX = BOUNDS.w / nativeW;
-    const scaleY = BOUNDS.h / nativeH;
-
     const handleRotate = (e: React.PointerEvent) => {
         if (!attrs.onInteract || lastAngle.current === null) return;
 
         const rect = e.currentTarget.getBoundingClientRect();
-        // Scale the center coordinates as well
-        const cx = rect.left + (rect.width * (46 / 66)); 
+        // The knob center is at x=60 in a 99px wide box.
+        const cx = rect.left + (rect.width * (60 / 99)); 
         const cy = rect.top + rect.height / 2;
         const angle = Math.atan2(e.clientY - cy, e.clientX - cx) * (180 / Math.PI);
 
@@ -35,12 +30,10 @@ export const RotaryEncoderUI = ({ state, attrs, isRunning }: { state: any, attrs
     return (
         <div style={{ position: 'relative', width: BOUNDS.w, height: BOUNDS.h, cursor: isRunning ? 'pointer' : 'default' }}>
             <svg
-                width={nativeW} height={nativeH} viewBox="0 0 66 50"
+                width="100%" height="100%" viewBox="0 0 99 75"
                 style={{ 
                     pointerEvents: isRunning ? 'auto' : 'none',
-                    display: 'block',
-                    transform: `scale(${scaleX}, ${scaleY})`,
-                    transformOrigin: '0 0'
+                    display: 'block'
                 }}
                 onPointerDown={(e) => {
                     if (!isRunning) return;
@@ -48,11 +41,14 @@ export const RotaryEncoderUI = ({ state, attrs, isRunning }: { state: any, attrs
                     e.preventDefault();
 
                     const rect = e.currentTarget.getBoundingClientRect();
-                    const cx = rect.left + (rect.width * (46 / 66));
+                    const cx = rect.left + (rect.width * (60 / 99));
                     const cy = rect.top + rect.height / 2;
                     const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
+                    
+                    const ratio = 99 / rect.width;
+                    const svgDist = dist * ratio;
 
-                    if (dist < 8 * scaleX) { // Center button click (scaled threshold)
+                    if (svgDist < 14) { // Center button click (radius < 14)
                         if (attrs.onInteract) attrs.onInteract('press');
                         (e.currentTarget as any).setPointerCapture(e.pointerId);
                     } else { // Knob rotation start
@@ -77,22 +73,58 @@ export const RotaryEncoderUI = ({ state, attrs, isRunning }: { state: any, attrs
                     lastAngle.current = null;
                 }}
             >
-                <rect width="66" height="50" fill="#34495e" rx="4" />
-                <circle cx="46" cy="25" r="16" fill="#bdc3c7" />
+                {/* PCB Base */}
+                <rect x="0" y="0" width="99" height="75" rx="4" fill="#064e3b" stroke="#047857" strokeWidth="1" />
+                <rect x="2" y="2" width="95" height="71" rx="3" fill="none" stroke="#34d399" strokeWidth="0.5" opacity="0.4" />
 
-                <g transform={`rotate(${rot}, 46, 25)`}>
-                    <circle cx="46" cy="25" r="14" fill={pressed ? "#95a5a6" : "#ecf0f1"} />
-                    {/* Grip marks */}
-                    {Array.from({ length: 12 }).map((_, i) => (
-                        <line key={i} x1="46" y1="12" x2="46" y2="15" stroke="#7f8c8d" strokeWidth="1.5" transform={`rotate(${i * 30}, 46, 25)`} />
-                    ))}
+                {/* Pull-up Resistors */}
+                <g transform="translate(25, 20)">
+                    <rect x="0" y="0" width="4" height="6" fill="#111" />
+                    <rect x="0" y="0" width="4" height="1.5" fill="#94a3b8" />
+                    <rect x="0" y="4.5" width="4" height="1.5" fill="#94a3b8" />
+                    <text x="2" y="4" fontSize="1.8" fill="#fff" textAnchor="middle" transform="rotate(-90 2 3)">103</text>
+                </g>
+                <g transform="translate(32, 20)">
+                    <rect x="0" y="0" width="4" height="6" fill="#111" />
+                    <rect x="0" y="0" width="4" height="1.5" fill="#94a3b8" />
+                    <rect x="0" y="4.5" width="4" height="1.5" fill="#94a3b8" />
+                    <text x="2" y="4" fontSize="1.8" fill="#fff" textAnchor="middle" transform="rotate(-90 2 3)">103</text>
+                </g>
+                <g transform="translate(25, 30)">
+                    <rect x="0" y="0" width="4" height="6" fill="#111" />
+                    <rect x="0" y="0" width="4" height="1.5" fill="#94a3b8" />
+                    <rect x="0" y="4.5" width="4" height="1.5" fill="#94a3b8" />
+                    <text x="2" y="4" fontSize="1.8" fill="#fff" textAnchor="middle" transform="rotate(-90 2 3)">103</text>
                 </g>
 
-                {/* Pins */}
+                {/* Encoder Metal Base */}
+                <g transform="translate(40, 17.5)">
+                    <rect x="0" y="0" width="40" height="40" rx="2" fill="#94a3b8" stroke="#64748b" strokeWidth="1" />
+                    <circle cx="4" cy="4" r="1.5" fill="#e2e8f0" />
+                    <circle cx="36" cy="4" r="1.5" fill="#e2e8f0" />
+                    <circle cx="4" cy="36" r="1.5" fill="#e2e8f0" />
+                    <circle cx="36" cy="36" r="1.5" fill="#e2e8f0" />
+                    <circle cx="20" cy="20" r="15" fill="#cbd5e1" stroke="#94a3b8" />
+                    <circle cx="20" cy="20" r="12" fill="#e2e8f0" stroke="#cbd5e1" />
+                </g>
+
+                {/* Rotating Knob */}
+                <g transform={`rotate(${rot}, 60, 37.5)`}>
+                    <circle cx="60" cy="37.5" r="18" fill="#1f2937" stroke="#111" strokeWidth="1" />
+                    {Array.from({ length: 24 }).map((_, i) => (
+                        <line key={i} x1="60" y1="19.5" x2="60" y2="23" stroke="#4b5563" strokeWidth="1.5" transform={`rotate(${i * 15}, 60, 37.5)`} />
+                    ))}
+                    <circle cx="60" cy="37.5" r="14" fill={pressed ? "#374151" : "#4b5563"} />
+                    <circle cx="60" cy="26" r="2.5" fill="#ef4444" />
+                </g>
+
+                {/* Pins and Labels */}
                 {['CLK', 'DT', 'SW', 'VCC', 'GND'].map((l, i) => (
                     <g key={l}>
-                        <circle cx="5" cy={5 + i * 10} r="2" fill="#ecf0f1" />
-                        <text x="9" y={6 + i * 10} fontSize="3" fill="white" style={{ fontWeight: 'bold' }}>{l}</text>
+                        <circle cx="7.5" cy={7.5 + i * 15} r="4" fill="#ca8a04" />
+                        <circle cx="7.5" cy={7.5 + i * 15} r="3" fill="#fef08a" />
+                        <circle cx="7.5" cy={7.5 + i * 15} r="1.5" fill="#111" />
+                        <text x="14" y={7.5 + i * 15 + 1.5} fontSize="4.5" fill="#fff" fontFamily="monospace" fontWeight="bold">{l}</text>
                     </g>
                 ))}
             </svg>

@@ -10,40 +10,29 @@ export const validation: { rules: ComponentValidationRule[] } = {
             priority: 10,
             description: 'Warn when the common pin or segment resistors are missing.',
             check: (component: any, graph: Map<string, string[]>, validator: any) => {
-                const com1 = `${component.id}.COM.1`;
-                const com2 = `${component.id}.COM.2`;
+                const numDigits = parseInt(component.attrs?.digits || '4', 10);
                 const issues = [];
                 
-                const hasCom1 = validator.getNeighbors(com1).length > 0;
-                const hasCom2 = validator.getNeighbors(com2).length > 0;
+                let anyDigConnected = false;
+                for (let i = 1; i <= numDigits; i++) {
+                    if (validator.getNeighbors(`${component.id}.DIG${i}`).length > 0) {
+                        anyDigConnected = true;
+                        break;
+                    }
+                }
 
-                if (!hasCom1 && !hasCom2) {
+                if (!anyDigConnected) {
                     issues.push(createValidationIssue({
                         ruleId: '7segment-common-and-segment-check',
                         severity: 'warn',
-                        message: `⚠️ [7-Segment ${component.id}] Common pin (COM) is not connected. The display will not light up.`,
+                        message: `⚠️ [7-Segment ${component.id}] Digit common pins (DIG1${numDigits > 1 ? '-DIG' + numDigits : ''}) are not connected. The display will not light up.`,
                         compIds: [component.id],
-                        remediation: 'Connect one of the common pins to the correct rail.',
+                        remediation: 'Connect the digit common pins to control them.',
                         autoFix: true,
                     }));
                 }
 
-                const segments = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'DP'];
-                const unprotectedSegments = segments.filter(seg => {
-                    const node = `${component.id}.${seg}`;
-                    return validator.getNeighbors(node).length > 0 && validator.findSeriesResistance(node) === 0;
-                });
 
-                if (unprotectedSegments.length > 0) {
-                    issues.push(createValidationIssue({
-                        ruleId: '7segment-common-and-segment-check',
-                        severity: 'warn',
-                        message: `⚠️ [7-Segment ${component.id}] Warning: Segments ${unprotectedSegments.join(', ')} are connected without series resistors. Pins may be overloaded.`,
-                        compIds: [component.id],
-                        remediation: 'Add a series resistor for each lit segment.',
-                        autoFix: true,
-                    }));
-                }
 
                 return issues.length > 0 ? issues : null;
             }

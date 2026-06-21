@@ -2,7 +2,7 @@
   "type": "openhw-ldr-module",
   "label": "LDR Sensor Module (4-pin)",
   "group": "Sensors",
-  "w": 187.5,
+  "w": 180,
   "h": 75,
   "attrs": {},
   "contextMenuDuringRun": true,
@@ -10,28 +10,28 @@
   "pins": [
     {
       "id": "VCC",
-      "x": 187.5,
+      "x": 180,
       "y": 15,
       "type": "power",
       "description": "Positive power supply"
     },
     {
       "id": "GND",
-      "x": 187.5,
+      "x": 180,
       "y": 30,
       "type": "power",
       "description": "Ground"
     },
     {
       "id": "DO",
-      "x": 187.5,
+      "x": 180,
       "y": 45,
       "type": "output",
       "description": "Digital output"
     },
     {
       "id": "AO",
-      "x": 187.5,
+      "x": 180,
       "y": 60,
       "type": "analog",
       "description": "Analog output"

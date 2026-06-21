@@ -3,8 +3,8 @@
     "label": "Rotary Potentiometer",
     "description": "Rotary potentiometer (variable resistor). Outputs an analog voltage proportional to the knob's rotation angle. Use with analogRead() on an Arduino analog pin.",
     "group": "Sensors",
-    "w": 112.5,
-    "h": 112.5,
+    "w": 120,
+    "h": 120,
     "attrs": {
         "value": "50",
         "breadboard": {
@@ -20,22 +20,22 @@
     "pins": [
         {
             "id": "1",
-            "x": 22.5,
-            "y": 102,
+            "x": 45,
+            "y": 108,
             "type": "power",
             "description": "GND"
         },
         {
             "id": "SIG",
-            "x": 37.5,
-            "y": 102,
+            "x": 60,
+            "y": 108,
             "type": "analog",
             "description": "SIG"
         },
         {
             "id": "2",
-            "x": 52.5,
-            "y": 102,
+            "x": 75,
+            "y": 108,
             "type": "power",
             "description": "VCC"
         }
@@ -44,13 +44,13 @@
         "connections": [
             { "from": "1",   "to": "arduino:GND" },
             { "from": "SIG", "to": "arduino:A0" },
-            { "from": "2",   "to": "arduino:5V" }
+            { "from": "2",   "to": "arduino:3V3" }
         ]
     },
     "autocoding": {
         "arduino": {
-            "setup": "Serial.begin(9600);\n// Potentiometer connected to ${SIG}",
-            "loop": "int potVal_${COMP_SUFFIX} = analogRead(${SIG});\nfloat voltage_${COMP_SUFFIX} = potVal_${COMP_SUFFIX} * (5.0 / 1023.0);\nSerial.print(\"Pot: \");\nSerial.print(potVal_${COMP_SUFFIX});\nSerial.print(\" | \");\nSerial.print(voltage_${COMP_SUFFIX}, 2);\nSerial.println(\" V\");\ndelay(200);"
+            "setup": "// Potentiometer connected to ${SIG}",
+            "loop": "int potVal_${COMP_SUFFIX} = analogRead(${SIG});\nfloat voltage_${COMP_SUFFIX} = potVal_${COMP_SUFFIX} * (3.3 / 1023.0);\nSerial.print(\"Pot: \");\nSerial.print(potVal_${COMP_SUFFIX});\nSerial.print(\" | \");\nSerial.print(voltage_${COMP_SUFFIX}, 2);\nSerial.println(\" V\");\ndelay(200);"
         }
     }
 }

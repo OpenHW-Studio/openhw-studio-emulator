@@ -2,8 +2,8 @@
     "type": "openhw-rgb-led",
     "label": "RGB LED (4-pin)",
     "group": "Outputs",
-    "w": 64.2,
-    "h": 64.2,
+    "w": 75,
+    "h": 105,
     "attrs": {
         "common": "cathode",
         "breadboard": {
@@ -13,26 +13,26 @@
     "pins": [
         {
             "id": "R",
-            "x": 10.7,
-            "y": 64.2,
+            "x": 15,
+            "y": 60,
             "type": "digital"
         },
         {
             "id": "COM",
-            "x": 25.7,
-            "y": 64.2,
+            "x": 30,
+            "y": 75,
             "type": "digital"
         },
         {
             "id": "G",
-            "x": 40.7,
-            "y": 64.2,
+            "x": 45,
+            "y": 60,
             "type": "digital"
         },
         {
             "id": "B",
-            "x": 55.7,
-            "y": 64.2,
+            "x": 60,
+            "y": 60,
             "type": "digital"
         }
     ],

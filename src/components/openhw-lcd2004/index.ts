@@ -1,16 +1,12 @@
-import manifest from './manifest.json';
-import { Lcd2004Logic } from './logic';
-import { Lcd2004UI, BOUNDS } from './ui';
-import { validation } from './validation';
+import { BaseComponent } from '../BaseComponent';
+import { Lcd2004UI } from './ui';
 
-// @ts-ignore
-const doc = '';
+export default class OpenHWLcd2004 extends BaseComponent {
+    constructor() {
+        super(require('./manifest.json'));
+    }
 
-export default {
-    manifest,
-    LogicClass: Lcd2004Logic,
-    UI: Lcd2004UI,
-    BOUNDS,
-    validation,
-    doc
-};
+    getUI() {
+        return Lcd2004UI;
+    }
+}

@@ -3,7 +3,7 @@
     "label": "Slide Switch",
     "description": "Standard Single Pole Double Throw (SPDT) slide switch.",
     "group": "Inputs",
-    "w": 34,
+    "w": 45,
     "h": 32,
     "attrs": {
         "value": "",
@@ -18,24 +18,38 @@
     "pins": [
         {
             "id": "1",
-            "x": 6,
+            "x": 7.5,
             "y": 32,
             "type": "passive",
             "description": "Left terminal"
         },
         {
             "id": "2",
-            "x": 17,
+            "x": 22.5,
             "y": 32,
             "type": "passive",
             "description": "Common terminal"
         },
         {
             "id": "3",
-            "x": 28,
+            "x": 37.5,
             "y": 32,
             "type": "passive",
             "description": "Right terminal"
         }
-    ]
+    ],
+    "autowiring": {
+        "connections": [
+            { "from": "1", "to": "arduino:5V" },
+            { "from": "2", "to": "arduino:2" },
+            { "from": "3", "to": "arduino:GND" }
+        ]
+    },
+    "autocoding": {
+        "arduino": {
+            "globals": "bool lastSwitchState_${COMP_SUFFIX} = false;",
+            "setup": "Serial.begin(9600);\npinMode(${2}, INPUT);\npinMode(13, OUTPUT);\nSerial.println(\"Slide Switch Ready\");",
+            "loop": "bool switchState_${COMP_SUFFIX} = digitalRead(${2});\nif (switchState_${COMP_SUFFIX} != lastSwitchState_${COMP_SUFFIX}) {\n  Serial.print(\"Switch: \");\n  Serial.println(switchState_${COMP_SUFFIX} ? \"ON\" : \"OFF\");\n  digitalWrite(13, switchState_${COMP_SUFFIX} ? HIGH : LOW);\n  lastSwitchState_${COMP_SUFFIX} = switchState_${COMP_SUFFIX};\n}\ndelay(50);"
+        }
+    }
 }

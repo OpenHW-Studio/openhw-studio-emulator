@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 60, h: 60 };
+export const BOUNDS = { x: 0, y: 0, w: 90, h: 60 };
 
 export const UI = ({ state, attrs }: { state: any, attrs: any }) => {
   const peakAmplitude = (state?.peakAmplitude as number) || 0;
@@ -83,36 +83,34 @@ export const UI = ({ state, attrs }: { state: any, attrs: any }) => {
     <div style={{ position: 'relative', width: BOUNDS.w, height: BOUNDS.h, pointerEvents: 'none' }}>
       <svg width={BOUNDS.w} height={BOUNDS.h} viewBox={`0 0 ${BOUNDS.w} ${BOUNDS.h}`} style={{ display: 'block', overflow: 'visible' }}>
         {/* Round mic breakout board */}
-        <circle cx="30" cy="30" r="28" fill="#111155" stroke="#000033" strokeWidth="2" />
+        <circle cx="45" cy="25" r="25" fill="#111155" stroke="#000033" strokeWidth="2" />
         
         {/* Microphone Hole */}
-        <circle cx="30" cy="30" r="8" fill="#000" />
-        <circle cx="30" cy="30" r="6" fill="#222" />
+        <circle cx="45" cy="25" r="8" fill="#000" />
+        <circle cx="45" cy="25" r="6" fill="#222" />
         
         {/* Activity LED */}
-        <circle cx="15" cy="15" r="3" fill={`rgba(0, 255, 0, ${ledBrightness})`} stroke="#004400" />
+        <circle cx="30" cy="12" r="3" fill={`rgba(0, 255, 0, ${ledBrightness})`} stroke="#004400" />
         
         {/* Pins - Bottom edge */}
-        <g transform="translate(0, 50)">
-          <rect x="5" y="0" width="8" height="6" fill="#E6C200" />
-          <rect x="15" y="0" width="8" height="6" fill="#E6C200" />
-          <rect x="25" y="0" width="8" height="6" fill="#E6C200" />
-          <rect x="35" y="0" width="8" height="6" fill="#E6C200" />
-          <rect x="45" y="0" width="8" height="6" fill="#E6C200" />
+        <g>
+          {[7.5, 22.5, 37.5, 52.5, 67.5, 82.5].map((x) => (
+            <React.Fragment key={x}>
+              <rect x={x - 2} y="52.5" width="4" height="7.5" fill="#E6C200" />
+              <circle cx={x} cy="52.5" r="1.5" fill="#2C3E50" />
+            </React.Fragment>
+          ))}
           
-          <text x="9" y="-2" fill="#fff" fontSize="4" textAnchor="middle">VDD</text>
-          <text x="19" y="-2" fill="#fff" fontSize="4" textAnchor="middle">GND</text>
-          <text x="29" y="-2" fill="#fff" fontSize="4" textAnchor="middle">SEL</text>
-          <text x="39" y="-2" fill="#fff" fontSize="4" textAnchor="middle">LRCL</text>
-          <text x="49" y="-2" fill="#fff" fontSize="4" textAnchor="middle">BCLK</text>
+          <text x="7.5" y="48" fill="#fff" fontSize="4" textAnchor="middle">3V</text>
+          <text x="22.5" y="48" fill="#fff" fontSize="4" textAnchor="middle">GND</text>
+          <text x="37.5" y="48" fill="#fff" fontSize="4" textAnchor="middle">BCLK</text>
+          <text x="52.5" y="48" fill="#fff" fontSize="4" textAnchor="middle">DOUT</text>
+          <text x="67.5" y="48" fill="#fff" fontSize="4" textAnchor="middle">LRCL</text>
+          <text x="82.5" y="48" fill="#fff" fontSize="4" textAnchor="middle">SEL</text>
         </g>
-        
-        {/* SD Pin - Top Edge */}
-        <rect x="26" y="2" width="8" height="6" fill="#E6C200" />
-        <text x="30" y="14" fill="#fff" fontSize="4" textAnchor="middle">DOUT</text>
 
         {!liveMicEnabled && (
-          <text x="30" y="45" fill="#f55" fontSize="4" textAnchor="middle">Mocked Audio</text>
+          <text x="45" y="45" fill="#f55" fontSize="4" textAnchor="middle">Mocked Audio</text>
         )}
       </svg>
     </div>

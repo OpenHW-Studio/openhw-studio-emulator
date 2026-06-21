@@ -1,18 +1,26 @@
 import React from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 64.2, h: 64.2 };
+export const BOUNDS = { x: 0, y: 0, w: 75, h: 105 };
 
 export const RGBLEDUI = ({ state, attrs }: { state: any, attrs: any }) => {
-    const r = state?.r || 0;
-    const g = state?.g || 0;
-    const b = state?.b || 0;
-    const isActive = r > 0 || g > 0 || b > 0;
-    const baseColor = isActive ? `rgb(${r}, ${g}, ${b})` : '#e0e0e0';
+    const rVal = state?.r || 0;
+    const gVal = state?.g || 0;
+    const bVal = state?.b || 0;
 
-    const nativeW = 30;
-    const nativeH = 30;
-    const scaleX = BOUNDS.w / nativeW;
-    const scaleY = BOUNDS.h / nativeH;
+    const ledRed = rVal / 255;
+    const ledGreen = gVal / 255;
+    const ledBlue = bVal / 255;
+    
+    const brightness = Math.max(ledRed, ledGreen, ledBlue);
+    const opacity = brightness ? 0.2 + brightness * 0.6 : 0;
+
+    const bodyColor = brightness > 0 ? `rgb(${rVal}, ${gVal}, ${bVal})` : "#e6e6e6";
+    const bodyColorDarker = brightness > 0 ? `rgb(${Math.floor(rVal * 0.8)}, ${Math.floor(gVal * 0.8)}, ${Math.floor(bVal * 0.8)})` : "#d1d1d1";
+
+    // Exact scale factor so 8.5 viewBox units = 15px
+    const scale = 15 / 8.5;
+    const svgWidth = 37.3425 * scale;
+    const svgHeight = 57.5115 * scale;
 
     return (
         <div style={{
@@ -22,63 +30,103 @@ export const RGBLEDUI = ({ state, attrs }: { state: any, attrs: any }) => {
             position: 'relative'
         }}>
             <svg
-                width={nativeW}
-                height={nativeH}
-                viewBox="0 0 30 30"
-                style={{
-                    display: 'block',
-                    transform: `scale(${scaleX}, ${scaleY})`,
-                    transformOrigin: '0 0'
-                }}
+                width={svgWidth}
+                height={svgHeight}
+                version="1.2"
+                viewBox="-17 -10 37.3425 57.5115"
+                style={{ display: 'block', transformOrigin: '0 0' }}
                 xmlns="http://www.w3.org/2000/svg"
             >
-                <defs>
-                    <radialGradient id={`led-body-${state.id || 'default'}`} cx="50%" cy="40%" r="50%" fx="35%" fy="35%">
-                        <stop offset="0%" stopColor="white" stopOpacity="0.4" />
-                        <stop offset="40%" stopColor={baseColor} stopOpacity="1" />
-                        <stop offset="100%" stopColor={baseColor} stopOpacity="0.8" />
-                    </radialGradient>
-                    <linearGradient id={`leg-shadow-${state.id || 'default'}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#7f8c8d" />
-                        <stop offset="50%" stopColor="#bdc3c7" />
-                        <stop offset="100%" stopColor="#95a5a6" />
-                    </linearGradient>
-                </defs>
-
-                <g transform="translate(15, 12)">
-                    {/* Legs */}
-                    <rect x="-10.5" y="3" width="1" height="15" fill={`url(#leg-shadow-${state.id || 'default'})`} />
-                    <rect x="-3.5" y="0" width="1.5" height="18" fill={`url(#leg-shadow-${state.id || 'default'})`} />
-                    <rect x="3.5" y="3" width="1" height="15" fill={`url(#leg-shadow-${state.id || 'default'})`} />
-                    <rect x="10.5" y="3" width="1" height="15" fill={`url(#leg-shadow-${state.id || 'default'})`} />
-
-                    {/* Main Dome Body */}
-                    <path
-                        d="M -8 3 A 8 8 0 0 1 8 3 L 8 7 L -8 7 Z"
-                        fill={`url(#led-body-${state.id || 'default'})`}
-                        stroke="rgba(0,0,0,0.1)"
-                        strokeWidth="0.5"
-                    />
-                    <rect x="-9" y="7" width="18" height="2" rx="0.5" fill={baseColor} stroke="rgba(0,0,0,0.15)" strokeWidth="0.5" />
-
-                    {/* Glossy Top Highlight */}
-                    <path d="M -5 -2 A 5 5 0 0 1 2 -3" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.4" />
-
-                    {/* Active glow effects */}
-                    {isActive && (
-                        <g opacity="0.6">
-                            <circle cx="0" cy="0" r="14" fill={baseColor} style={{ filter: 'blur(5px)' }} />
-                            <circle cx="0" cy="0" r="8" fill="white" style={{ filter: 'blur(4px)' }} opacity="0.3" />
-                        </g>
-                    )}
+                {/* LED Legs perfectly aligned to 15px grid */}
+                <g fill="none" stroke="#9D9999" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5px">
+                    <path d="M -4.3 14.18 L -8.5 19 L -8.5 24.0" />
+                    <path d="M -1.1 15.60 L 0.0 19 L 0.0 32.5" />
+                    <path d="M 4.1 15.33 L 8.5 19 L 8.5 24.0" />
+                    <path d="M 8.0 14.40 L 17.0 19 L 17.0 24.0" />
                 </g>
 
-                {/* Pin Indicators */}
-                <circle cx="5" cy="30" r="1.5" fill="#e74c3c" />
-                <circle cx="12" cy="30" r="1.5" fill="#34495e" />
-                <circle cx="19" cy="30" r="1.5" fill="#2ecc71" />
-                <circle cx="26" cy="30" r="1.5" fill="#3498db" />
+                {/* LED Body */}
+                <path
+                    d="m8.3435 5.65v-5.9126c0-3.9132-3.168-7.0884-7.0855-7.0884-3.9125 0-7.0877 3.1694-7.0877 7.0884v13.649c1.4738 1.651 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8594v-1.5235c-7.4e-4 -1.1426-0.47444-2.2039-1.283-3.1061z"
+                    opacity=".3"
+                />
+                <path
+                    d="m8.3435 5.65v-5.9126c0-3.9132-3.168-7.0884-7.0855-7.0884-3.9125 0-7.0877 3.1694-7.0877 7.0884v13.649c1.4738 1.651 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8594v-1.5235c-7.4e-4 -1.1426-0.47444-2.2039-1.283-3.1061z"
+                    fill={bodyColor}
+                    opacity=".5"
+                />
+                <path
+                    d="m8.3435 5.65v3.1054c0 2.7389-3.1658 4.9651-7.0855 4.9651-3.9125 2e-5 -7.0877-2.219-7.0877-4.9651v4.6296c1.4738 1.6517 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8586l-4e-5 -1.5235c-7e-4 -1.1419-0.4744-2.2032-1.283-3.1054z"
+                    fill={bodyColorDarker}
+                    opacity=".9"
+                />
+                <g transform="translate(-5.8295 -7.351)">
+                    <path
+                        d="m14.173 13.001v3.1054c0 2.7389-3.1658 4.9651-7.0855 4.9651-3.9125 2e-5 -7.0877-2.219-7.0877-4.9651v4.6296c1.4738 1.6517 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8586l-4e-5 -1.5235c-7e-4 -1.1419-0.4744-2.2032-1.283-3.1054z"
+                        opacity=".7"
+                    />
+                    <path
+                        d="m14.173 13.001v3.1054c0 2.7389-3.1658 4.9651-7.0855 4.9651-3.9125 2e-5 -7.0877-2.219-7.0877-4.9651v3.1054c1.4738 1.6502 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8586-7.4e-4 -1.1412-0.47444-2.2025-1.283-3.1047z"
+                        opacity=".25"
+                    />
+                    <ellipse cx="7.0877" cy="16.106" rx="7.087" ry="4.9608" opacity=".25" />
+                </g>
+                <polygon
+                    transform="translate(-5.8295 -7.351)"
+                    points="3.1961 13.095 6.0156 13.095 10.012 8.8049 3.407 8.8049 2.2032 9.648 2.2032 16.107 3.1961 16.107"
+                    fill="#666"
+                />
+                <polygon
+                    transform="translate(-5.8295 -7.351)"
+                    points="11.06 13.095 11.06 16.107 11.974 16.107 11.974 8.5241 10.778 8.5241 11.215 9.0338 7.4117 13.095"
+                    fill="#666"
+                />
+                <path
+                    d="m8.3435 5.65v-5.9126c0-3.9132-3.168-7.0884-7.0855-7.0884-3.9125 0-7.0877 3.1694-7.0877 7.0884v13.649c1.4738 1.651 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8594v-1.5235c-7.4e-4 -1.1426-0.47444-2.2039-1.283-3.1061z"
+                    fill="white"
+                    opacity=".65"
+                />
+                <g transform="translate(-5.8295 -7.351)" fill="#fff">
+                    <path
+                        d="m10.388 3.7541 1.4364-0.2736c-0.84168-1.1318-2.0822-1.9577-3.5417-2.2385l0.25416 1.0807c0.76388 0.27072 1.4068 0.78048 1.8511 1.4314z"
+                        opacity=".5"
+                    />
+                    <path
+                        d="m0.76824 19.926v1.5199c0.64872 0.5292 1.4335 0.97632 2.3076 1.3169v-1.525c-0.8784-0.33624-1.6567-0.78194-2.3076-1.3118z"
+                        opacity=".5"
+                    />
+                    <path
+                        d="m11.073 20.21c-0.2556 0.1224-0.52992 0.22968-0.80568 0.32976-0.05832 0.01944-0.11736 0.04032-0.17784 0.05832-0.56376 0.17928-1.1614 0.31896-1.795 0.39456-0.07488 0.0094-0.1512 0.01872-0.22464 0.01944-0.3204 0.03024-0.64368 0.05832-0.97056 0.05832-0.14832 0-0.30744-0.01512-0.4716-0.02376-1.2002-0.05688-2.3306-0.31464-3.2976-0.73944l-2e-5 -8.3895v-4.8254c0-1.471 0.84816-2.7295 2.0736-3.3494l-0.02232-0.05328-1.2478-1.512c-1.6697 1.003-2.79 2.8224-2.79 4.9118v11.905c-0.04968-0.04968-0.30816-0.30888-0.48024-0.52992l-0.30744 0.6876c1.4011 1.4818 3.8088 2.4617 6.5426 2.4617 1.6798 0 3.2371-0.37368 4.5115-1.0022l-0.52704-0.40896-0.01006 0.0072z"
+                        opacity=".5"
+                    />
+                </g>
+
+                <filter id={`ledFilter-${state?.id || 'default'}`} x="-0.8" y="-0.8" height="5.2" width="5.8">
+                    <feGaussianBlur stdDeviation="4" />
+                </filter>
+
+                <circle
+                    cx="1.7"
+                    cy="4"
+                    r="10"
+                    fill={`rgb(${rVal}, ${gVal}, ${bVal})`}
+                    filter={`url(#ledFilter-${state?.id || 'default'})`}
+                    opacity={opacity}
+                />
+
+                {/* Grey hollow around the LED */}
+                <circle
+                    cx="1.7"
+                    cy="4"
+                    r="13"
+                    stroke="#666"
+                    strokeWidth="1"
+                    fill="none"
+                    filter={`url(#ledFilter-${state?.id || 'default'})`}
+                    opacity={opacity}
+                />
             </svg>
         </div>
     );
 };
+

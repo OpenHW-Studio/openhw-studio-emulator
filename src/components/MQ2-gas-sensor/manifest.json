@@ -11,10 +11,10 @@
         "threshold": 300
     },
     "pins": [
-        { "id": "VCC", "label": "VCC", "x": 135, "y": 46, "type": "power" },
-        { "id": "GND", "label": "GND", "x": 135, "y": 36, "type": "power" },
-        { "id": "DO",  "label": "D0",  "x": 135, "y": 26, "type": "digital" },
-        { "id": "AO",  "label": "A0",  "x": 135, "y": 17, "type": "analog" }
+        { "id": "VCC", "label": "VCC", "x": 135, "y": 50, "type": "power" },
+        { "id": "GND", "label": "GND", "x": 135, "y": 35, "type": "power" },
+        { "id": "DO",  "label": "D0",  "x": 135, "y": 20, "type": "digital" },
+        { "id": "AO",  "label": "A0",  "x": 135, "y": 5, "type": "analog" }
     ],
     "autocoding": {
         "arduino": {

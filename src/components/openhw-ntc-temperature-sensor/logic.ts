@@ -60,4 +60,12 @@ export class NtcLogic extends BaseComponent {
             resistance: (this.state.resistance / 1000).toFixed(1) + ' kΩ'
         });
     }
+
+    onEvent(event: any) {
+        if (event && event.type === 'temperature' && event.value !== undefined) {
+            this.attrs.temperature = String(event.value);
+            this.update();
+            this.stateChanged = true;
+        }
+    }
 }

@@ -2,8 +2,8 @@
     "type": "openhw-mpu6050",
     "label": "MPU6050 IMU Sensor",
     "group": "Sensors",
-    "w": 94.5,
-    "h": 135,
+    "w": 135,
+    "h": 105,
     "attrs": {
         "accelX": "0",
         "accelY": "0",
@@ -14,14 +14,14 @@
         "temperature": "25"
     },
     "pins": [
-        { "id": "VCC", "x": 6, "y": 15,  "type": "input",         "description": "Power (3.3V or 5V)" },
-        { "id": "GND", "x": 6, "y": 30,  "type": "input",         "description": "Ground" },
-        { "id": "SCL", "x": 6, "y": 45,  "type": "input",         "description": "I2C Clock (Arduino A5)" },
-        { "id": "SDA", "x": 6, "y": 60,  "type": "bidirectional", "description": "I2C Data (Arduino A4)" },
-        { "id": "XDA", "x": 6, "y": 75, "type": "bidirectional", "description": "Auxiliary I2C Data" },
-        { "id": "XCL", "x": 6, "y": 90, "type": "output",        "description": "Auxiliary I2C Clock" },
-        { "id": "ADO", "x": 6, "y": 105, "type": "input",         "description": "I2C Slave Address LSB" },
-        { "id": "INT", "x": 6, "y": 120, "type": "output",        "description": "Interrupt output" }
+        { "id": "INT", "x": 15,  "y": 15, "type": "output",        "description": "Interrupt output" },
+        { "id": "AD0", "x": 30,  "y": 15, "type": "input",         "description": "I2C Slave Address LSB" },
+        { "id": "XCL", "x": 45,  "y": 15, "type": "output",        "description": "Auxiliary I2C Clock" },
+        { "id": "XDA", "x": 60,  "y": 15, "type": "bidirectional", "description": "Auxiliary I2C Data" },
+        { "id": "SDA", "x": 75,  "y": 15, "type": "bidirectional", "description": "I2C Data" },
+        { "id": "SCL", "x": 90,  "y": 15, "type": "input",         "description": "I2C Clock" },
+        { "id": "GND", "x": 105, "y": 15, "type": "input",         "description": "Ground" },
+        { "id": "VCC", "x": 120, "y": 15, "type": "input",         "description": "Power (3.3V or 5V)" }
     ],
     "telemetry": {
       "template": "A=(${state.ax},${state.ay},${state.az}) G=(${state.gx},${state.gy},${state.gz}) T=${state.temp}",

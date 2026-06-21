@@ -38,6 +38,8 @@ export class DFlipFlopLogic extends BaseComponent {
     }
 
     private propagatePin(pinId: string, voltage: number, wires: any[], instances: BaseComponent[]) {
+        if (!this.pins[pinId]) this.pins[pinId] = { voltage: 0, mode: 'OUTPUT' };
+        this.pins[pinId].voltage = voltage;
         const pinKey = `${this.id}:${pinId}`;
         const visited = new Set<string>();
         visited.add(pinKey);

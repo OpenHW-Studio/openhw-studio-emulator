@@ -1,14 +1,35 @@
 import React from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 75, h: 75 };
+export const BOUNDS = { x: 0, y: 0, w: 135, h: 165 };
+const mmToPix = 15 / 2.54; // Exact ratio for 15px pitch per 0.1 inch (2.54mm)
 
 export const StepperMotorUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const angle = state?.angle ?? 0;
+    const arrowColor = state?.arrow || attrs?.arrow || '#4a36ba';
+    
+    // NEMA 8 Spec
+    const frameSize = 20.3;
+    const holeRadius = 1;
+    const shaftRadius = 2;
+    const cornerRadius = 2;
+    const cornerOffset = 2.5;
+    const bodyRadius = 8;
+    
+    const halfShaft = shaftRadius / 2;
+    const halfFrame = frameSize / 2;
+    
+    const innerHoleRadius = holeRadius * 0.9;
+    const outerHoleRadius = holeRadius * 1.1;
+    
+    // shaft radius offset, needed for transform
+    const rOff = Math.sqrt(0.75 * Math.pow(shaftRadius, 2));
 
-    const nativeW = 50;
-    const nativeH = 50;
-    const scaleX = BOUNDS.w / nativeW;
-    const scaleY = BOUNDS.h / nativeH;
+    // Calculate exact offsets to snap the pins to exactly (45, 165), etc.
+    const offsetX = 45 - ((halfFrame - 3.81) * mmToPix);
+    const offsetY = 165 - ((frameSize + 5.05) * mmToPix);
+
+    const width = BOUNDS.w;
+    const height = BOUNDS.h;
 
     return (
         <div style={{
@@ -18,29 +39,114 @@ export const StepperMotorUI = ({ state, attrs }: { state: any, attrs: any }) => 
             position: 'relative'
         }}>
             <svg
-                width={nativeW}
-                height={nativeH}
-                viewBox="0 0 50 50"
-                style={{
-                    display: 'block',
-                    transform: `scale(${scaleX}, ${scaleY})`,
-                    transformOrigin: '0 0'
-                }}
+                width={width}
+                height={height}
+                version="1.1"
+                viewBox={`0 0 ${width} ${height}`}
+                xmlns="http://www.w3.org/2000/svg"
+                style={{ display: 'block', overflow: 'visible' }}
             >
-                <rect width="50" height="50" fill="#bdc3c7" rx="5" />
-                <circle cx="25" cy="25" r="20" fill="#7f8c8d" />
+                <defs>
+                    <linearGradient
+                        id="frame-gradient"
+                        x1={`-${frameSize * 0.2}`}
+                        x2={`${frameSize * 2}`}
+                        y1={`${frameSize}`}
+                        y2={`${frameSize}`}
+                        gradientUnits="userSpaceOnUse"
+                    >
+                        <stop stopColor="#666" offset="0" />
+                        <stop stopColor="#fff" offset="1" />
+                    </linearGradient>
+                    <linearGradient
+                        id="shaft-gradient"
+                        x1="0"
+                        x2="0"
+                        y1="-5"
+                        y2="5"
+                        gradientUnits="userSpaceOnUse"
+                    >
+                        <stop stopColor="#9d9d9d" offset="0" />
+                        <stop stopColor="#9d9d9d" stopOpacity="0" offset="1" />
+                    </linearGradient>
+                    <linearGradient
+                        id="body-gradient"
+                        x1={`${frameSize * 0.1}`}
+                        x2={`${frameSize * 0.7}`}
+                        y1={`${frameSize}`}
+                        y2={`${frameSize}`}
+                        gradientUnits="userSpaceOnUse"
+                    >
+                        <stop stopColor="#9d9d9d" offset="0" />
+                        <stop stopColor="#fdfafa" offset=".29501" />
+                        <stop offset="1" stopColor="#2a2a2a" />
+                    </linearGradient>
+                    <path
+                        id="pin"
+                        transform={`translate(${halfFrame - 3.75} ${frameSize})`}
+                        fill="#9f9f9f"
+                        d="m 0 0 c .5 0 .5 0 .5 .5 v 4.55 c -.5 .5 -.5 .5 -1 0 v -4.5 c 0 -.5 0 -.5 .5 -.5"
+                    />
+                </defs>
+                {/* Body */}
+                <g transform={`translate(${offsetX},${offsetY})`}>
+                    <g transform={`scale(${mmToPix})`}>
+                        {/* Pins */}
+                        <use href="#pin" x="0" />
+                        <use href="#pin" x="2.54" />
+                        <use href="#pin" x="5.08" />
+                        <use href="#pin" x="7.62" />
 
-                <g transform={`rotate(${angle}, 25, 25)`} style={{ transition: 'transform 0.05s linear' }}>
-                    <circle cx="25" cy="25" r="8" fill="#95a5a6" />
-                    <circle cx="25" cy="25" r="3" fill="#2c3e50" />
-                    <line x1="25" y1="25" x2="25" y2="10" stroke="#e74c3c" strokeWidth="2" strokeLinecap="round" />
+                        <g strokeLinecap="round" strokeLinejoin="round">
+                            <rect
+                                width={frameSize}
+                                height={frameSize}
+                                rx={cornerRadius}
+                                ry={cornerRadius}
+                                fill="url(#frame-gradient)"
+                                stroke="#000"
+                                strokeWidth=".3245"
+                            />
+                            <circle cx={cornerOffset} cy={cornerOffset} r={outerHoleRadius} fill="#666" />
+                            <circle cx={cornerOffset} cy={cornerOffset} r={innerHoleRadius} fill="#e6e6e6" />
+                            <circle cx={frameSize - cornerOffset} cy={cornerOffset} r={outerHoleRadius} fill="#666" />
+                            <circle cx={frameSize - cornerOffset} cy={cornerOffset} r={innerHoleRadius} fill="#e6e6e6" />
+                            <circle cx={cornerOffset} cy={frameSize - cornerOffset} r={outerHoleRadius} fill="#666" />
+                            <circle cx={cornerOffset} cy={frameSize - cornerOffset} r={innerHoleRadius} fill="#e6e6e6" />
+                            <circle cx={frameSize - cornerOffset} cy={frameSize - cornerOffset} r={outerHoleRadius} fill="#666" />
+                            <circle cx={frameSize - cornerOffset} cy={frameSize - cornerOffset} r={innerHoleRadius} fill="#e6e6e6" />
+                        </g>
+
+                        {/* motor body */}
+                        <circle
+                            cx={halfFrame}
+                            cy={halfFrame}
+                            r={bodyRadius}
+                            fill="#868686"
+                            fillOpacity=".89602"
+                            opacity=".73"
+                            stroke="url(#body-gradient)"
+                            strokeWidth="1.41429"
+                        />
+                        {/* Rotator */}
+                        <g>
+                            <path
+                                id="arrow-path"
+                                transform={`rotate(${angle}, ${halfFrame},${halfFrame}) translate(${halfFrame} ${halfFrame})`}
+                                fill={arrowColor}
+                                d={`m 0 0 l -${shaftRadius} 0 l ${shaftRadius} -${halfFrame - 3} l ${shaftRadius} ${halfFrame - 3} z`}
+                            />
+                            <path
+                                id="shaft-path"
+                                transform={`translate(${halfFrame}, ${halfFrame}) rotate(${angle}) translate(0, 0)`}
+                                d={`m -${halfShaft} -${rOff} a ${shaftRadius} ${shaftRadius} 0 1 0 ${shaftRadius} 0 z`}
+                                fill="#4d4d4d"
+                                stroke="url(#shaft-gradient)"
+                                strokeWidth=".57968"
+                            />
+                        </g>
+                    </g>
                 </g>
-
-                {/* Pins */}
-                <circle cx="10" cy="50" r="2.5" fill="#34495e" />
-                <circle cx="20" cy="50" r="2.5" fill="#34495e" />
-                <circle cx="30" cy="50" r="2.5" fill="#34495e" />
-                <circle cx="40" cy="50" r="2.5" fill="#34495e" />
             </svg>
         </div>
     );

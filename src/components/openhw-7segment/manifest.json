@@ -2,93 +2,25 @@
     "type": "openhw-7segment",
     "label": "7-Segment Display",
     "group": "Outputs",
-    "w": 386.3,
-    "h": 104,
+    "w": 76,
+    "h": 113,
     "attrs": {
         "color": "red",
         "common": "cathode",
-        "digits": "4",
-        "colon": "1"
+        "digits": "1",
+        "colon": "false"
     },
     "pins": [
-        {
-            "id": "A",
-            "x": 0,
-            "y": 0,
-            "type": "digital"
-        },
-        {
-            "id": "B",
-            "x": 14.9,
-            "y": 0,
-            "type": "digital"
-        },
-        {
-            "id": "C",
-            "x": 29.7,
-            "y": 0,
-            "type": "digital"
-        },
-        {
-            "id": "D",
-            "x": 44.6,
-            "y": 0,
-            "type": "digital"
-        },
-        {
-            "id": "E",
-            "x": 59.4,
-            "y": 0,
-            "type": "digital"
-        },
-        {
-            "id": "F",
-            "x": 74.3,
-            "y": 0,
-            "type": "digital"
-        },
-        {
-            "id": "G",
-            "x": 89.2,
-            "y": 0,
-            "type": "digital"
-        },
-        {
-            "id": "DP",
-            "x": 104,
-            "y": 0,
-            "type": "digital"
-        },
-        {
-            "id": "DIG1",
-            "x": 0,
-            "y": 104,
-            "type": "digital"
-        },
-        {
-            "id": "DIG2",
-            "x": 14.9,
-            "y": 104,
-            "type": "digital"
-        },
-        {
-            "id": "DIG3",
-            "x": 29.7,
-            "y": 104,
-            "type": "digital"
-        },
-        {
-            "id": "DIG4",
-            "x": 44.6,
-            "y": 104,
-            "type": "digital"
-        },
-        {
-            "id": "COLON",
-            "x": 59.4,
-            "y": 104,
-            "type": "digital"
-        }
+        { "id": "G", "x": 8, "y": 11, "type": "digital" },
+        { "id": "F", "x": 23, "y": 11, "type": "digital" },
+        { "id": "COM.2", "x": 38, "y": 11, "type": "digital" },
+        { "id": "A", "x": 53, "y": 11, "type": "digital" },
+        { "id": "B", "x": 68, "y": 11, "type": "digital" },
+        { "id": "E", "x": 8, "y": 101, "type": "digital" },
+        { "id": "D", "x": 23, "y": 101, "type": "digital" },
+        { "id": "COM.1", "x": 38, "y": 101, "type": "digital" },
+        { "id": "C", "x": 53, "y": 101, "type": "digital" },
+        { "id": "DP", "x": 68, "y": 101, "type": "digital" }
     ],
     "telemetry": {
       "template": "Segments=(${state.a},${state.b},${state.c},${state.d},${state.e},${state.f},${state.g})",
@@ -96,7 +28,6 @@
     },
     "autowiring": {
       "connections": [
-        { "from": "COM", "to": "arduino:GND" },
         { "from": "A", "to": "arduino:2" },
         { "from": "B", "to": "arduino:3" },
         { "from": "C", "to": "arduino:4" },
@@ -104,15 +35,16 @@
         { "from": "E", "to": "arduino:6" },
         { "from": "F", "to": "arduino:7" },
         { "from": "G", "to": "arduino:8" },
-        { "from": "DP", "to": "arduino:9" }
+        { "from": "DP", "to": "arduino:9" },
+        { "from": "COM.1", "to": "arduino:GND" }
       ]
     },
     "autocoding": {
-      "libraries": [],
+      "libraries": ["SevSeg"],
       "arduino": {
-        "globals": "int pins_${COMP_SUFFIX}[] = {2, 3, 4, 5, 6, 7, 8, 9};",
-        "setup": "for(int i=0; i<8; i++) pinMode(pins_${COMP_SUFFIX}[i], OUTPUT);",
-        "loop": "for(int i=0; i<8; i++) digitalWrite(pins_${COMP_SUFFIX}[i], HIGH);\ndelay(500);\nfor(int i=0; i<8; i++) digitalWrite(pins_${COMP_SUFFIX}[i], LOW);\ndelay(500);"
+        "globals": "#include \"SevSeg.h\"\nSevSeg sevseg_${COMP_SUFFIX};",
+        "setup": "byte numDigits = 1;\nbyte digitPins[] = {10};\nbyte segmentPins[] = {2, 3, 4, 5, 6, 7, 8, 9};\nbool resistorsOnSegments = true;\nbyte hardwareConfig = (String(\"${common}\") == \"anode\") ? COMMON_ANODE : COMMON_CATHODE;\nsevseg_${COMP_SUFFIX}.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments);\nsevseg_${COMP_SUFFIX}.setBrightness(90);",
+        "loop": "sevseg_${COMP_SUFFIX}.setNumber(4);\nsevseg_${COMP_SUFFIX}.refreshDisplay();"
       }
     }
 }

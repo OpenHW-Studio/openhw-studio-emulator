@@ -4,43 +4,58 @@
     "description": "Edge-triggered D Flip-Flop with active-HIGH asynchronous reset. On the rising edge of CLK, Q captures D. If R is HIGH, Q is forced LOW.",
     "group": "Logic",
     "w": 90,
-    "h": 80,
+    "h": 90,
     "attrs": {},
     "pins": [
         {
             "id": "D",
             "x": 0,
-            "y": 25,
+            "y": 30,
             "type": "digital",
             "description": "Data input"
         },
         {
             "id": "CLK",
             "x": 0,
-            "y": 55,
+            "y": 60,
             "type": "digital",
             "description": "Clock input (rising-edge triggered)"
         },
         {
             "id": "R",
             "x": 45,
-            "y": 80,
+            "y": 90,
             "type": "digital",
             "description": "Asynchronous Reset (Active HIGH)"
         },
         {
             "id": "Q",
             "x": 90,
-            "y": 25,
+            "y": 30,
             "type": "digital",
             "description": "Output"
         },
         {
             "id": "Qbar",
             "x": 90,
-            "y": 55,
+            "y": 60,
             "type": "digital",
             "description": "Inverted output"
         }
-    ]
+    ],
+    "autowiring": {
+        "connections": [
+            { "from": "D", "to": "arduino:D2" },
+            { "from": "CLK", "to": "arduino:D3" },
+            { "from": "Q", "to": "arduino:D4", "via": "openhw-resistor", "attrs": { "value": "220" } },
+            { "from": "Qbar", "to": "arduino:D5", "via": "openhw-resistor", "attrs": { "value": "220" } },
+            { "from": "R", "to": "arduino:D6" }
+        ]
+    },
+    "autocoding": {
+        "arduino": {
+            "setup": "Serial.begin(9600);\npinMode(${D}, OUTPUT);\npinMode(${CLK}, OUTPUT);\npinMode(${R}, OUTPUT);\npinMode(${Q}, INPUT);\npinMode(${Qbar}, INPUT);\nSerial.println(\"D Flip-Flop (Reset) ready\");",
+            "loop": "Serial.println(\"--- Testing with R=0 ---\");\ndigitalWrite(${R}, LOW);\nfor (int i=0; i<2; i++) {\n  digitalWrite(${D}, i?HIGH:LOW);\n  digitalWrite(${CLK}, LOW);\n  delay(5);\n  digitalWrite(${CLK}, HIGH);\n  delay(5);\n  Serial.print(\"D=\");\n  Serial.print(i);\n  Serial.print(\" Q=\");\n  Serial.print(digitalRead(${Q}));\n  Serial.print(\" Qbar=\");\n  Serial.println(digitalRead(${Qbar}));\n  delay(500);\n}\nSerial.println(\"--- Testing R=1 (reset) ---\");\ndigitalWrite(${R}, HIGH);\ndelay(10);\nSerial.print(\"After R=1: Q=\");\nSerial.print(digitalRead(${Q}));\nSerial.print(\" Qbar=\");\nSerial.println(digitalRead(${Qbar}));\ndelay(2000);"
+        }
+    }
 }

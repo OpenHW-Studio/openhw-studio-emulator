@@ -20,7 +20,7 @@ export class ILI9341Logic extends SPIProtocol {
     private firstByteValue = 0;
 
     // FULL VRAM BUFFER (240 * 320 * 3 bytes for RGB)
-    private vram = new Uint8Array(240 * 320 * 3);
+    private vram = new Uint8Array(typeof SharedArrayBuffer !== 'undefined' ? new SharedArrayBuffer(240 * 320 * 3) : 240 * 320 * 3);
     private vramDirty = false;
     private lastSync = 0;
     private powerOn = true;
@@ -106,8 +106,8 @@ export class ILI9341Logic extends SPIProtocol {
         }
 
         // Periodic Sync (10Hz heartbeat + dirty flag for immediate response)
-        // We sync if dirty OR at least every 100ms to keep heartbeats alive
-        if (this.vramDirty || (now - this.lastSync > 100)) {
+        // We sync if dirty (capped at ~30 FPS / 33ms to prevent telemetry flood) OR at least every 100ms
+        if ((this.vramDirty && (now - this.lastSync > 33)) || (now - this.lastSync > 100)) {
             this.lastSync = now;
             this.vramDirty = false;
             this.stateChanged = true;

@@ -6,10 +6,14 @@ export { default as openhwArduinoUno } from './openhw-arduino-uno';
 export { default as openhwPico } from './openhw-pico/index';
 export { default as openhwPicoW } from './openhw-pico-w/index';
 export { default as openhwEsp32 } from './ESP32/index';
-export { default as openhwEsp32Cam } from './openhw-esp32-cam/index';
 export { default as openhwStm32BluePill } from './openhw-stm32-bluepill/index';
+export { default as openhwStm32BluePillFrontend } from './openhw-stm32-blue-pill (frontend)/index';
+// WiFi Access Point — functional AP component (equivalent to wokwi-wifi-ap)
+export { WiFiApLogic as openhwWifiAp, WiFiApLogic as wokwiWifiAp } from './openhw-wifi-ap/index';
+export { default as openhwEsp32Cam } from './openhw-esp32-cam/index';
 export { default as openhwResistor } from './openhw-resistor';
 export { default as openhwPushbutton } from './openhw-pushbutton';
+export { default as openhw6mmPushbutton } from './openhw-6mm-pushbutton';
 export { default as openhwPowerSupply } from './openhw-power-supply';
 export { default as openhwNeopixelMatrix } from './openhw-neopixel-matrix';
 export { default as openhwBuzzer } from './openhw-buzzer';
@@ -21,7 +25,7 @@ export { default as openhwSlideSwitch } from './openhw-slide-switch';
 export { default as openhwPotentiometer } from './openhw-potentiometer';
 export { default as openhw74hc595 } from './openhw-74hc595';
 export { default as openhw74hc165 } from './openhw-74hc165';
-export { default as openhwOledDisplay18 } from './openhw-oled-display-1-8';
+
 export { default as openhwMax7219 } from './openhw-max7219';
 export { default as openhwSSD1306Oled } from './openhw-ssd1306-oled';
 export { default as openhw7Segment } from './openhw-7segment';
@@ -104,7 +108,8 @@ export { default as openhwMq2GasSensor } from './MQ2-gas-sensor';
 export { default as openhwPirMotionSensor } from './PIR-Motion-Sensor';
 export { default as openhwRaindropModule } from './Raindrop-module';
 export { default as openhwRaindropPad } from './Raindrop-pad';
-
+export { default as openhwDht22 } from './DHT-22';
+    // Removed duplicate export
 export { FullCircuitValidator, analyzeCodeHardwareSync, ProtocolAnalyzer, runUnifiedValidation } from '../circuit-validation/index.js';
 
 

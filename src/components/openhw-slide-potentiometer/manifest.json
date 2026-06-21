@@ -17,22 +17,22 @@
     "pins": [
         {
             "id": "GND",
-            "x": 200,
-            "y": 52.5,
+            "x": 195,
+            "y": 45,
             "type": "power",
             "description": "Ground"
         },
         {
             "id": "SIG",
-            "x": 5,
-            "y": 67.5,
+            "x": 0,
+            "y": 60,
             "type": "analog",
             "description": "Signal Output"
         },
         {
             "id": "VCC",
-            "x": 5,
-            "y": 52.5,
+            "x": 0,
+            "y": 45,
             "type": "power",
             "description": "5V Power"
         }

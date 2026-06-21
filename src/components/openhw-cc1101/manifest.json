@@ -3,8 +3,8 @@
   "label": "CC1101",
   "group": "Network",
   "description": "Sub-GHz RF Transceiver module.",
-  "w": 240,
-  "h": 114,
+  "w": 150,
+  "h": 75,
   "attrs": {
     "magicInterop": "false"
   },
@@ -17,14 +17,14 @@
     ]
   },
   "pins": [
-    { "id": "VCC",  "x": 110, "y": 120, "type": "power",   "description": "3.3V Power" },
-    { "id": "GND",  "x": 65,  "y": 120, "type": "power",   "description": "Ground" },
-    { "id": "MOSI", "x": 110, "y": 165, "type": "digital", "description": "SPI MOSI" },
-    { "id": "SCK",  "x": 65,  "y": 165, "type": "digital", "description": "SPI Clock" },
-    { "id": "MISO", "x": 110, "y": 210, "type": "digital", "description": "SPI MISO" },
-    { "id": "GDO2", "x": 65,  "y": 210, "type": "digital", "description": "General Digital Output 2" },
-    { "id": "GDO0", "x": 110, "y": 255, "type": "digital", "description": "General Digital Output 0" },
-    { "id": "CSN",  "x": 65,  "y": 255, "type": "digital", "description": "SPI Chip Select" }
+    { "id": "VCC",  "x": 22.5, "y": 15, "type": "power",   "description": "3.3V Power" },
+    { "id": "GND",  "x": 7.5,  "y": 15, "type": "power",   "description": "Ground" },
+    { "id": "MOSI", "x": 22.5, "y": 30, "type": "digital", "description": "SPI MOSI" },
+    { "id": "SCK",  "x": 7.5,  "y": 30, "type": "digital", "description": "SPI Clock" },
+    { "id": "MISO", "x": 22.5, "y": 45, "type": "digital", "description": "SPI MISO" },
+    { "id": "GDO2", "x": 7.5,  "y": 45, "type": "digital", "description": "General Digital Output 2" },
+    { "id": "GDO0", "x": 22.5, "y": 60, "type": "digital", "description": "General Digital Output 0" },
+    { "id": "CSN",  "x": 7.5,  "y": 60, "type": "digital", "description": "SPI Chip Select" }
   ],
   "autowiring": {
     "connections": [

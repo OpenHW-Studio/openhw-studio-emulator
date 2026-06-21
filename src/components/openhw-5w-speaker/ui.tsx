@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 80, h: 80 };
+export const BOUNDS = { x: 0, y: 0, w: 75, h: 90 };
 
 export const UI = ({ state, attrs }: { state: any, attrs: any }) => {
   const audioChunk = state?.audioChunk;
@@ -62,27 +62,27 @@ export const UI = ({ state, attrs }: { state: any, attrs: any }) => {
 
   return (
     <div style={{ position: 'relative', width: BOUNDS.w, height: BOUNDS.h }}>
-      <svg width={BOUNDS.w} height={BOUNDS.h}>
-        <g transform={`scale(${scale})`} style={{ transformOrigin: 'center center', transition: 'transform 0.05s linear' }}>
+      <svg width={BOUNDS.w} height={BOUNDS.h} viewBox="0 0 75 90" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }}>
+        <g transform={`translate(37.5, 37.5) scale(${scale})`} style={{ transformOrigin: '0 0', transition: 'transform 0.05s linear' }}>
           {/* Speaker Frame */}
-          <circle cx="40" cy="40" r="38" fill="#333" stroke="#555" strokeWidth="2" />
+          <circle cx="0" cy="0" r="35" fill="#333" stroke="#555" strokeWidth="2" />
           {/* Inner Cone */}
-          <circle cx="40" cy="40" r="30" fill="#222" />
-          <circle cx="40" cy="40" r="25" fill="#1a1a1a" />
+          <circle cx="0" cy="0" r="28" fill="#222" />
+          <circle cx="0" cy="0" r="22" fill="#1a1a1a" />
           {/* Dust Cap */}
-          <circle cx="40" cy="40" r="10" fill="#111" />
-          
-          {/* Terminals */}
-          <rect x="15" y="70" width="10" height="10" fill="#cc0000" />
-          <rect x="55" y="70" width="10" height="10" fill="#0000cc" />
-          
-          <text x="20" y="78" fill="#fff" fontSize="6" textAnchor="middle">+</text>
-          <text x="60" y="78" fill="#fff" fontSize="6" textAnchor="middle">-</text>
-
-          {/* Invisible pin hitboxes for the UI wiring */}
-          <circle cx="20" cy="75" r="5" fill="transparent" />
-          <circle cx="60" cy="75" r="5" fill="transparent" />
+          <circle cx="0" cy="0" r="9" fill="#111" />
         </g>
+        
+        {/* Terminal legs from body to pins */}
+        <line x1="27" y1="72" x2="30" y2="90" stroke="#cc0000" strokeWidth="1.5" />
+        <line x1="48" y1="72" x2="45" y2="90" stroke="#0000cc" strokeWidth="1.5" />
+        
+        {/* Terminal pads at pin positions */}
+        <circle cx="30" cy="90" r="3" fill="#cc0000" stroke="#900" strokeWidth="0.5" />
+        <circle cx="45" cy="90" r="3" fill="#0000cc" stroke="#009" strokeWidth="0.5" />
+        
+        <text x="30" y="85" fill="#fff" fontSize="6" textAnchor="middle">+</text>
+        <text x="45" y="85" fill="#fff" fontSize="6" textAnchor="middle">−</text>
       </svg>
       {isPlaying && (
         <div style={{

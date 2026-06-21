@@ -13,6 +13,8 @@ export class SlideSwitchLogic extends BaseComponent {
         const openCond = 1e-9;
         const isRight = this.state.value === "1" || this.state.value === 1;
 
+        console.log(`[SlideSwitchLogic] getMnaStamps() called. state.value=${this.state.value}, isRight=${isRight}`);
+
         return [
             // Left position: 1 <-> 2 shorted, 3 <-> 2 open
             // Right position: 1 <-> 2 open, 3 <-> 2 shorted
@@ -26,20 +28,23 @@ export class SlideSwitchLogic extends BaseComponent {
     }
 
     onEvent(event: any) {
-        // Handle both object-style events { type: 'input', value: ... }
-        // and direct toggle commands
-        if (event && typeof event === 'object' && event.type === 'input' && event.value !== undefined) {
+        console.log(`[SlideSwitchLogic] onEvent called with:`, event);
+        if (event === 'set_1') {
+            this.setState({ value: "1" });
+            this.stateChanged = true;
+        } else if (event === 'set_0') {
+            this.setState({ value: "0" });
+            this.stateChanged = true;
+        } else if (event && typeof event === 'object' && event.type === 'input' && event.value !== undefined) {
             const newValue = String(event.value);
             this.setState({ value: newValue });
             this.stateChanged = true;
-        } else if (typeof event === 'string') {
-            // Support simple 'toggle' event
-            if (event === 'toggle') {
-                const isRight = this.state.value === "1" || this.state.value === 1;
-                const newValue = isRight ? "" : "1";
-                this.setState({ value: newValue });
-                this.stateChanged = true;
-            }
+        } else if (event === 'toggle') {
+            const isRight = this.state.value === "1" || this.state.value === 1;
+            const newValue = isRight ? "0" : "1";
+            this.setState({ value: newValue });
+            this.stateChanged = true;
         }
+        console.log(`[SlideSwitchLogic] State updated to: ${this.state.value}`);
     }
 }

@@ -44,7 +44,14 @@ export function validateShortCircuits(validator) {
                             queue.push([nextNode, newVisited, resistance + addedResistance]);
                             continue;
                         }
-                    } else if (validator.isType(comp, 'potentiometer', 'openhw-potentiometer', 'openhw-slide-potentiometer', 'switch', 'openhw-pushbutton')) {
+                    } else if (validator.isType(comp, 'potentiometer', 'openhw-potentiometer', 'openhw-slide-potentiometer')) {
+                        const nextNode = validator.getOtherTerminalNode(comp, neighbor);
+                        if (nextNode) {
+                            // Potentiometers have a resistive track (typically 10kΩ) between VCC and GND
+                            queue.push([nextNode, newVisited, resistance + 10000]);
+                            continue;
+                        }
+                    } else if (validator.isType(comp, 'switch', 'openhw-pushbutton')) {
                         const nextNode = validator.getOtherTerminalNode(comp, neighbor);
                         if (nextNode) {
                             queue.push([nextNode, newVisited, resistance]);

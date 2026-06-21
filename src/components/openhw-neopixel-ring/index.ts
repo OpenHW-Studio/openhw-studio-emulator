@@ -1,4 +1,4 @@
-import * as manifest from './manifest.json';
+import manifest from './manifest.json';
 import { NeopixelRingLogic } from './logic';
 import { NeopixelRingUI, BOUNDS } from './ui';
 import { validation } from './validation';

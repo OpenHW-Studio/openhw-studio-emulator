@@ -2,27 +2,37 @@
     "type": "openhw-npn-transistor",
     "label": "NPN Transistor",
     "group": "Basic",
-    "w": 15,
-    "h": 25,
+    "w": 60,
+    "h": 90,
     "attrs": {},
     "pins": [
         {
             "id": "E",
             "x": 0,
-            "y": 25,
+            "y": 90,
             "type": "digital"
         },
         {
             "id": "B",
-            "x": 7.5,
-            "y": 25,
+            "x": 30,
+            "y": 90,
             "type": "digital"
         },
         {
             "id": "C",
-            "x": 15,
-            "y": 25,
+            "x": 60,
+            "y": 90,
             "type": "digital"
         }
-    ]
+    ],
+    "autocoding": {
+        "arduino": {
+            "setup": "pinMode(${B}, OUTPUT);",
+            "loop": "digitalWrite(${B}, HIGH);\ndelay(1000);\ndigitalWrite(${B}, LOW);\ndelay(1000);"
+        },
+        "micropython": {
+            "setup": "from machine import Pin\nimport time\ntransistor = Pin(${B}, Pin.OUT)",
+            "loop": "transistor.value(1)\ntime.sleep(1)\ntransistor.value(0)\ntime.sleep(1)"
+        }
+    }
 }

@@ -13,7 +13,7 @@ export const PushbuttonContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdat
     const current = attrs?.color ?? 'green';
     return (
         <>
-            <span style={{ fontSize: 12, color: 'var(--text2)' }}>Color:</span>
+            <span style={{ fontSize: 12, color: 'var(--text2)' }}>Button Color:</span>
             <select
                 value={current}
                 onChange={e => onUpdate('color', e.target.value)}
@@ -27,94 +27,48 @@ export const PushbuttonContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdat
     );
 };
 
-// Bounding box for the blue selection ring.
-// x, y: offset from comp.x/comp.y (top-left corner of the visual area)
-// w, h: width and height of the visual area
-export const BOUNDS = { x: 0, y: 0, w: 68, h: 44 };
+export const BOUNDS = { x: 0, y: 0, w: 75, h: 60 };
 
 export const PushbuttonUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning: boolean }) => {
-    const [buttonElement, setButtonElement] = useState<any>(null);
-
     // Local animation state for immediate feedback
     const [isPressed, setIsPressed] = useState(false);
     const isPressedRef = useRef(false);
     const attrsRef = useRef(attrs);
 
-    useLayoutEffect(() => {
-        attrsRef.current = attrs;
-    });
+    useLayoutEffect(() => { attrsRef.current = attrs; });
 
-    const nativeW = 68;
-    const nativeH = 44;
+    const nativeW = 75;
+    const nativeH = 60;
     const scaleX = BOUNDS.w / nativeW;
     const scaleY = BOUNDS.h / nativeH;
 
-    const color = attrs?.color || 'green';
+    const colorAttr = attrs?.color || 'green';
+    const btnColor = BTN_COLORS.find(c => c.value === colorAttr) ?? BTN_COLORS[0];
     const targetKey = attrs?.key;
 
     // Use local state as the primary source of truth for user interaction.
-    // This decouples the visual UI state from delayed/echoed worker messages, eliminating stickiness.
-    const pressed = isPressed;
-
-    // 1. Sync properties directly to the wokwi-pushbutton element (exactly like velxio-master)
-    useLayoutEffect(() => {
-        if (buttonElement) {
-            buttonElement.color = color;
-            buttonElement.pressed = pressed;
-            if (targetKey) {
-                buttonElement.key = String(targetKey);
-                buttonElement.setAttribute('key', String(targetKey));
-            }
-        }
-    }, [buttonElement, color, pressed, targetKey]);
+    const pressed = isPressed || state?.pressed;
 
     // Stable deduplicated handlers for press and release
-    const handlePress = (source: string) => {
-        console.log(`[Pushbutton UI Press] ID: ${attrsRef.current?.id || 'unknown'}, Source: ${source}, TargetKey: ${targetKey}, Current pressed: ${isPressedRef.current}`);
-        if (isPressedRef.current) {
-            return;
-        }
+    const handlePress = () => {
+        if (isPressedRef.current) return;
         isPressedRef.current = true;
         setIsPressed(true);
-        if (attrsRef.current?.onInteract) {
-            attrsRef.current.onInteract('press');
-        }
+        if (attrsRef.current?.onInteract) attrsRef.current.onInteract('press');
     };
 
-    const handleRelease = (source: string) => {
-        console.log(`[Pushbutton UI Release] ID: ${attrsRef.current?.id || 'unknown'}, Source: ${source}, TargetKey: ${targetKey}, Current pressed: ${isPressedRef.current}`);
-        if (!isPressedRef.current) {
-            return;
-        }
+    const handleRelease = () => {
+        if (!isPressedRef.current) return;
         isPressedRef.current = false;
         setIsPressed(false);
-        if (attrsRef.current?.onInteract) {
-            attrsRef.current.onInteract('release');
-        }
+        if (attrsRef.current?.onInteract) attrsRef.current.onInteract('release');
     };
 
-    // 2. Listen for 'button-press' and 'button-release' custom events from wokwi-pushbutton
-    useEffect(() => {
-        if (!buttonElement) return;
-
-        const onBtnPress = () => handlePress('button-press');
-        const onBtnRelease = () => handleRelease('button-release');
-
-        buttonElement.addEventListener('button-press', onBtnPress);
-        buttonElement.addEventListener('button-release', onBtnRelease);
-
-        return () => {
-            buttonElement.removeEventListener('button-press', onBtnPress);
-            buttonElement.removeEventListener('button-release', onBtnRelease);
-        };
-    }, [buttonElement]);
-
-    // 3. Window keyboard listeners for robust key interactivity
+    // Window keyboard listeners for robust key interactivity
     useEffect(() => {
         if (!isRunning || !targetKey) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
-            console.log(`[Pushbutton UI KeyDown Event] ID: ${attrsRef.current?.id || 'unknown'}, Key: ${e.key}, TargetKey: ${targetKey}`);
             if (e.repeat) return;
             const k = e.key;
             const t = String(targetKey);
@@ -122,24 +76,17 @@ export const PushbuttonUI = ({ state, attrs, isRunning }: { state: any, attrs: a
             if (k.toLowerCase() === t.toLowerCase()) match = true;
             else if (t.toLowerCase() === 'space' && k === ' ') match = true;
 
-            if (match) {
-                console.log(`[Pushbutton UI KeyDown MATCH] ID: ${attrsRef.current?.id || 'unknown'}, Key: ${e.key}, TargetKey: ${targetKey}`);
-                handlePress('keydown');
-            }
+            if (match) handlePress();
         };
 
         const handleKeyUp = (e: KeyboardEvent) => {
-            console.log(`[Pushbutton UI KeyUp Event] ID: ${attrsRef.current?.id || 'unknown'}, Key: ${e.key}, TargetKey: ${targetKey}`);
             const k = e.key;
             const t = String(targetKey);
             let match = false;
             if (k.toLowerCase() === t.toLowerCase()) match = true;
             else if (t.toLowerCase() === 'space' && k === ' ') match = true;
 
-            if (match) {
-                console.log(`[Pushbutton UI KeyUp MATCH] ID: ${attrsRef.current?.id || 'unknown'}, Key: ${e.key}, TargetKey: ${targetKey}`);
-                handleRelease('keyup');
-            }
+            if (match) handleRelease();
         };
 
         window.addEventListener('keydown', handleKeyDown);
@@ -148,7 +95,10 @@ export const PushbuttonUI = ({ state, attrs, isRunning }: { state: any, attrs: a
             window.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('keyup', handleKeyUp);
         };
-    }, [isRunning, targetKey]); // Only re-run when simulation state or targetKey changes
+    }, [isRunning, targetKey]);
+
+    const uniqueId = state?.id || Math.random().toString(36).substring(2, 9);
+    const buttonFill = pressed ? `url(#grad-down-${uniqueId})` : `url(#grad-up-${uniqueId})`;
 
     return (
         <div style={{ 
@@ -160,19 +110,84 @@ export const PushbuttonUI = ({ state, attrs, isRunning }: { state: any, attrs: a
         }}>
             <div
                 className={`btn-wrapper ${pressed ? 'pressed' : ''}`}
+                onPointerDown={(e) => {
+                    e.stopPropagation();
+                    if (e.currentTarget.setPointerCapture) {
+                        e.currentTarget.setPointerCapture(e.pointerId);
+                    }
+                    handlePress();
+                }}
+                onMouseDown={(e) => e.stopPropagation()}
+                onPointerUp={(e) => {
+                    e.stopPropagation();
+                    handleRelease();
+                }}
+                onPointerCancel={(e) => {
+                    e.stopPropagation();
+                    handleRelease();
+                }}
+                onLostPointerCapture={handleRelease}
                 style={{
                     position: 'relative',
                     width: nativeW,
                     height: nativeH,
                     transform: `scale(${scaleX}, ${scaleY})`,
-                    transformOrigin: '0 0',
+                    transformOrigin: '50% 50%',
                     cursor: 'pointer',
                     pointerEvents: isRunning ? 'auto' : 'none'
                 }}>
-                <wokwi-pushbutton
-                    ref={setButtonElement}
-                    style={{ pointerEvents: isRunning ? 'auto' : 'none', display: 'block', width: nativeW, height: nativeH }}
-                />
+                <svg
+                    width={nativeW}
+                    height={nativeH}
+                    viewBox="0 0 75 60"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <defs>
+                        <linearGradient id={`grad-up-${uniqueId}`} x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0" stopColor="#ffffff" />
+                            <stop offset="0.3" stopColor={btnColor.hex} />
+                            <stop offset="0.5" stopColor={btnColor.hex} />
+                            <stop offset="1" stopColor="#000000" stopOpacity="0.4" />
+                        </linearGradient>
+                        <linearGradient id={`grad-down-${uniqueId}`} x1="1" y1="1" x2="0" y2="0">
+                            <stop offset="0" stopColor="#ffffff" />
+                            <stop offset="0.3" stopColor={btnColor.hex} />
+                            <stop offset="0.5" stopColor={btnColor.hex} />
+                            <stop offset="1" stopColor="#000000" stopOpacity="0.4" />
+                        </linearGradient>
+                    </defs>
+
+                    {/* Stamped Metal Legs */}
+                    <g fill="#b3b3b3">
+                        <rect x="0" y="13.5" width="13.5" height="3" rx="0.5" />
+                        <rect x="0" y="43.5" width="13.5" height="3" rx="0.5" />
+                        <rect x="61.5" y="13.5" width="13.5" height="3" rx="0.5" />
+                        <rect x="61.5" y="43.5" width="13.5" height="3" rx="0.5" />
+                    </g>
+
+                    {/* Main Metal Body (48x48 centered in 75x60) */}
+                    <rect x="13.5" y="6" width="48" height="48" rx="1.76" ry="1.76" fill="#464646" />
+                    
+                    {/* Metallic Inner Plate */}
+                    <rect x="16.5" y="9" width="42" height="42" rx="0.84" ry="0.84" fill="#eaeaea" />
+
+                    {/* Plunger */}
+                    <g>
+                        {/* Outer gradient ring */}
+                        <circle cx="37.5" cy="30" r="15.28" fill={buttonFill} />
+                        
+                        {/* Inner colored circle */}
+                        <circle 
+                            cx="37.5" 
+                            cy="30" 
+                            r="11.6" 
+                            fill={btnColor.hex} 
+                            stroke="#2f2f2f" 
+                            strokeOpacity="0.47" 
+                            strokeWidth="0.32" 
+                        />
+                    </g>
+                </svg>
             </div>
         </div>
     );
