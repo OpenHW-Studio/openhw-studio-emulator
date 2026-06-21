@@ -37,7 +37,7 @@
         "libraries": ["Adafruit ADXL345", "Adafruit Unified Sensor"],
         "arduino": {
             "globals": "#include <Wire.h>\n#include <Adafruit_Sensor.h>\n#include <Adafruit_ADXL345_U.h>\n\nAdafruit_ADXL345_Unified accel_${COMP_SUFFIX} = Adafruit_ADXL345_Unified(12345);",
-            "setup": "if(!accel_${COMP_SUFFIX}.begin()) {\n  Serial.println(\"No ADXL345 detected\");\n  while(1);\n}",
+            "setup": "Wire.begin();\nif(!accel_${COMP_SUFFIX}.begin()) {\n  Serial.println(\"No ADXL345 detected\");\n  while(1) {\n    Serial.println(\"ADXL345 not found. Check wiring.\");\n    delay(1000);\n  }\n}",
             "loop": "sensors_event_t event_${COMP_SUFFIX};\naccel_${COMP_SUFFIX}.getEvent(&event_${COMP_SUFFIX});\nSerial.print(\"X: \"); Serial.print(event_${COMP_SUFFIX}.acceleration.x);\nSerial.print(\"  Y: \"); Serial.print(event_${COMP_SUFFIX}.acceleration.y);\nSerial.print(\"  Z: \"); Serial.print(event_${COMP_SUFFIX}.acceleration.z);\nSerial.println(\" m/s^2\");\ndelay(500);"
         }
     }

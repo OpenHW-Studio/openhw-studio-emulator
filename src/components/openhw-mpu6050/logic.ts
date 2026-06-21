@@ -68,7 +68,11 @@ export class MPU6050Logic extends I2CProtocol {
 
     // Override address detection to support AD0 pin
     onI2CStart(address: number, read: boolean): boolean {
-        if (!this.powered) return false;
+        // Note: We do NOT gate on this.powered here.
+        // The powered flag is set by the physics update() tick, but onI2CStart
+        // fires during the very first begin() call, before any physics tick has
+        // run. Gating on powered caused "Failed to find MPU6050 chip" even with
+        // correct wiring. Instead, we respond to any matching I2C address.
         // AD0 pin high → address 0x69
         const ad0 = this.getPinVoltage('ADO') > 2.0;
         const myAddr = ad0 ? 0x69 : 0x68;

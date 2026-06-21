@@ -20,15 +20,5 @@ export const validation = {
                 return null;
             },
         },
-        {
-            name: 'MPU6050 Wake Up Reminder',
-            check: (component: any, graph: Map<string, string[]>) => {
-                const sda = graph.get(`${component.id}.SDA`);
-                if (sda && sda.length > 0) {
-                    return `💡 [MPU6050 ${component.id}] Remember to call Wire.beginTransmission(0x68); Wire.write(0x6B); Wire.write(0); Wire.endTransmission(); in setup() to wake the MPU6050 from sleep mode.`;
-                }
-                return null;
-            },
-        },
     ],
 };

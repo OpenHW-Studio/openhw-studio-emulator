@@ -83,9 +83,13 @@ export class ADXL345Logic extends BaseComponent {
 
     update(cpuCycles: number, currentWires: any[], allComponentsInstances: BaseComponent[]) {
         const vcc = this.getPinVoltage('VCC');
-        // ADXL345 typical operating range is 2.0V to 3.6V, but since it's commonly used
-        // on 5V compatible breakout boards, we'll consider it powered if VCC is >= 2.0V.
-        this.powered = vcc >= 2.0;
+        // Consider powered if VCC >= 2.0V (covers 3.3V and 5V boards).
+        // We also treat it as powered if VCC is 0 but VCC pin is unconnected
+        // (getPinVoltage returns 0 for unconnected pins), to handle cases where
+        // power is supplied implicitly through the ESP32 3.3V rail without an
+        // explicit wire in the canvas.
+        const vccConnected = this.pins['VCC'] && this.pins['VCC'].voltage !== undefined;
+        this.powered = !vccConnected || vcc >= 2.0;
         if (this.state.powered !== this.powered) {
             this.setState({ powered: this.powered });
         }
@@ -98,8 +102,11 @@ export class ADXL345Logic extends BaseComponent {
     }
 
     onI2CStart(address: number, read: boolean): boolean {
-        if (!this.powered) return false;
-
+        // Note: We do NOT gate on this.powered here.
+        // The powered flag is set by the physics update() tick, but onI2CStart
+        // fires during the very first begin() call, before any physics tick has
+        // run. Gating on powered caused "No ADXL345 detected" even with correct
+        // wiring. Instead, we respond to any matching I2C address.
         const addr7 = (address > 0x7F) ? (address >> 1) : address;
         this.selected = (addr7 === this.getI2CAddress());
         this.expectingRegister = !read;

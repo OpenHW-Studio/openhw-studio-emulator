@@ -39,7 +39,7 @@
       "libraries": ["Adafruit MPU6050", "Adafruit Unified Sensor"],
       "arduino": {
         "globals": "#include <Wire.h>\n#include <Adafruit_MPU6050.h>\n#include <Adafruit_Sensor.h>\nAdafruit_MPU6050 mpu_${COMP_SUFFIX};",
-        "setup": "if (!mpu_${COMP_SUFFIX}.begin()) {\n  Serial.println(\"Failed to find MPU6050 chip\");\n  while (1);\n}",
+        "setup": "Wire.begin();\nWire.beginTransmission(0x68);\nWire.write(0x6B);\nWire.write(0);\nWire.endTransmission();\nif (!mpu_${COMP_SUFFIX}.begin()) {\n  Serial.println(\"Failed to find MPU6050 chip\");\n  while (1) {\n    Serial.println(\"MPU6050 not found. Check wiring.\");\n    delay(1000);\n  }\n}",
         "loop": "sensors_event_t a_${COMP_SUFFIX}, g_${COMP_SUFFIX}, temp_${COMP_SUFFIX};\nmpu_${COMP_SUFFIX}.getEvent(&a_${COMP_SUFFIX}, &g_${COMP_SUFFIX}, &temp_${COMP_SUFFIX});\nSerial.print(\"Accel X: \"); Serial.println(a_${COMP_SUFFIX}.acceleration.x);\ndelay(500);"
       }
     }
