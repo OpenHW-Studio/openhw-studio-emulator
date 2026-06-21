@@ -66,7 +66,6 @@ export const NtcUI = ({ state, attrs, isRunning, onEvent, onAttrChange }: { stat
         if (onAttrChange) {
             onAttrChange('temperature', val);
         }
-        }
     };
 
     // Calculate dynamic color for the thermal aura based on temperature (-40 to 125)
