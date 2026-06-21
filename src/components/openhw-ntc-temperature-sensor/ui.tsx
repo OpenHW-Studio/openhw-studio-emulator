@@ -1,16 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-export const NtcUI = ({ state, attrs, onAttrChange, isRunning }: { state: any, attrs: any, onAttrChange?: (key: string, val: any) => void, isRunning: boolean }) => {
-    const temp = attrs?.temperature ?? 25;
+export const NtcUI = ({ state, attrs, isRunning, onEvent }: { state: any, attrs: any, isRunning: boolean, onEvent?: (event: any) => void }) => {
+    const externalTemp = state?.temperature ?? attrs?.temperature ?? 25;
+    const [localTemp, setLocalTemp] = useState(externalTemp);
+
+    useEffect(() => {
+        setLocalTemp(externalTemp);
+    }, [externalTemp]);
 
     const handleSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (onAttrChange) {
-            onAttrChange('temperature', e.target.value);
+        const val = parseFloat(e.target.value);
+        setLocalTemp(val);
+        if (onEvent) {
+            onEvent({ type: 'temperature', value: val });
         }
     };
 
     // Calculate dynamic color for the thermal aura based on temperature (-40 to 125)
-    const tempRatio = Math.max(0, Math.min(1, (temp + 40) / 165));
+    const tempRatio = Math.max(0, Math.min(1, (localTemp + 40) / 165));
     // Hue ranges from 240 (Blue/Cold) to 0 (Red/Hot)
     const hue = (1 - tempRatio) * 240; 
 
@@ -93,17 +100,23 @@ export const NtcUI = ({ state, attrs, onAttrChange, isRunning }: { state: any, a
                     backdropFilter: 'blur(4px)',
                     border: '1px solid rgba(255,255,255,0.1)'
                 }}
+                onPointerDown={(e) => e.stopPropagation()}
+                onPointerMove={(e) => e.stopPropagation()}
                 onMouseDown={(e) => e.stopPropagation()}
+                onMouseMove={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
+                onTouchMove={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
                 >
                     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                         <span>Temp</span>
-                        <span>{temp}°C</span>
+                        <span>{localTemp}°C</span>
                     </div>
                     <input 
                         type="range" 
                         min="-40" 
                         max="125" 
-                        value={temp} 
+                        value={localTemp} 
                         onChange={handleSlider}
                         style={{ width: '80px', height: '4px', cursor: 'pointer' }}
                     />

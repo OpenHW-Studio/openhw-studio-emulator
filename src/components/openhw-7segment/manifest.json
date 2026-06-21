@@ -2,8 +2,8 @@
     "type": "openhw-7segment",
     "label": "7-Segment Display",
     "group": "Outputs",
-    "w": 60,
-    "h": 90,
+    "w": 76,
+    "h": 113,
     "attrs": {
         "color": "red",
         "common": "cathode",
@@ -11,16 +11,16 @@
         "colon": "false"
     },
     "pins": [
-        { "id": "G", "x": 0, "y": 0, "type": "digital" },
-        { "id": "F", "x": 15, "y": 0, "type": "digital" },
-        { "id": "COM.2", "x": 30, "y": 0, "type": "digital" },
-        { "id": "A", "x": 45, "y": 0, "type": "digital" },
-        { "id": "B", "x": 60, "y": 0, "type": "digital" },
-        { "id": "E", "x": 0, "y": 90, "type": "digital" },
-        { "id": "D", "x": 15, "y": 90, "type": "digital" },
-        { "id": "COM.1", "x": 30, "y": 90, "type": "digital" },
-        { "id": "C", "x": 45, "y": 90, "type": "digital" },
-        { "id": "DP", "x": 60, "y": 90, "type": "digital" }
+        { "id": "G", "x": 8, "y": 11, "type": "digital" },
+        { "id": "F", "x": 23, "y": 11, "type": "digital" },
+        { "id": "COM.2", "x": 38, "y": 11, "type": "digital" },
+        { "id": "A", "x": 53, "y": 11, "type": "digital" },
+        { "id": "B", "x": 68, "y": 11, "type": "digital" },
+        { "id": "E", "x": 8, "y": 101, "type": "digital" },
+        { "id": "D", "x": 23, "y": 101, "type": "digital" },
+        { "id": "COM.1", "x": 38, "y": 101, "type": "digital" },
+        { "id": "C", "x": 53, "y": 101, "type": "digital" },
+        { "id": "DP", "x": 68, "y": 101, "type": "digital" }
     ],
     "telemetry": {
       "template": "Segments=(${state.a},${state.b},${state.c},${state.d},${state.e},${state.f},${state.g})",
@@ -43,7 +43,7 @@
       "libraries": ["SevSeg"],
       "arduino": {
         "globals": "#include \"SevSeg.h\"\nSevSeg sevseg_${COMP_SUFFIX};",
-        "setup": "byte numDigits = 1;\nbyte digitPins[] = {10};\nbyte segmentPins[] = {2, 3, 4, 5, 6, 7, 8, 9};\nbool resistorsOnSegments = true;\nbyte hardwareConfig = COMMON_CATHODE;\nsevseg_${COMP_SUFFIX}.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments);\nsevseg_${COMP_SUFFIX}.setBrightness(90);",
+        "setup": "byte numDigits = 1;\nbyte digitPins[] = {10};\nbyte segmentPins[] = {2, 3, 4, 5, 6, 7, 8, 9};\nbool resistorsOnSegments = true;\nbyte hardwareConfig = (String(\"${common}\") == \"anode\") ? COMMON_ANODE : COMMON_CATHODE;\nsevseg_${COMP_SUFFIX}.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments);\nsevseg_${COMP_SUFFIX}.setBrightness(90);",
         "loop": "sevseg_${COMP_SUFFIX}.setNumber(4);\nsevseg_${COMP_SUFFIX}.refreshDisplay();"
       }
     }
