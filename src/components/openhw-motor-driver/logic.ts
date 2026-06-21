@@ -23,7 +23,7 @@ export class MotorDriverLogic extends BaseComponent {
 
     onPWM(pinId: string, meta: any) {
         if (!meta || typeof meta.dutyCycle !== 'number') return;
-        const v = (Math.max(0, Math.min(100, meta.dutyCycle)) / 100.0) * 5.0;
+        const v = Math.max(0, Math.min(1.0, meta.dutyCycle)) * 5.0;
         this.setPinVoltage(pinId, v);
     }
 

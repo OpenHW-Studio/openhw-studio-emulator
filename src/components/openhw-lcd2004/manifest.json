@@ -3,6 +3,7 @@
     "name": "LCD 2004 (Parallel)",
     "description": "20x4 Character LCD Display without I2C Backpack",
     "category": "Displays",
+    "group": "Displays",
     "dimensions": {
         "width": 375,
         "height": 195

@@ -53,28 +53,32 @@
       "id": "OUT1",
       "x": 20,
       "y": 80,
-      "type": "power",
+      "type": "analog",
+      "outputType": "push-pull",
       "description": "Output 1"
     },
     {
       "id": "OUT2",
       "x": 40,
       "y": 80,
-      "type": "power",
+      "type": "analog",
+      "outputType": "push-pull",
       "description": "Output 2"
     },
     {
       "id": "OUT3",
       "x": 60,
       "y": 80,
-      "type": "power",
+      "type": "analog",
+      "outputType": "push-pull",
       "description": "Output 3"
     },
     {
       "id": "OUT4",
       "x": 80,
       "y": 80,
-      "type": "power",
+      "type": "analog",
+      "outputType": "push-pull",
       "description": "Output 4"
     },
     {

@@ -186,7 +186,7 @@
         ],
         "arduino": {
             "globals": "// Outer motor on Step=${helper:driverOuter:STEP}, Dir=${helper:driverOuter:DIR}\n// Inner motor on Step=${helper:driverInner:STEP}, Dir=${helper:driverInner:DIR}\n#include <AccelStepper.h>\nAccelStepper stepperOuter_${COMP_SUFFIX}(AccelStepper::DRIVER, ${helper:driverOuter:STEP}, ${helper:driverOuter:DIR});\nAccelStepper stepperInner_${COMP_SUFFIX}(AccelStepper::DRIVER, ${helper:driverInner:STEP}, ${helper:driverInner:DIR});",
-            "setup": "stepperOuter_${COMP_SUFFIX}.setMaxSpeed(1000);\n  stepperOuter_${COMP_SUFFIX}.setAcceleration(500);\n  stepperInner_${COMP_SUFFIX}.setMaxSpeed(1000);\n  stepperInner_${COMP_SUFFIX}.setAcceleration(500);",
+            "setup": "pinMode(${helper:driverOuter:ENABLE}, OUTPUT);\n  digitalWrite(${helper:driverOuter:ENABLE}, LOW);\n  pinMode(${helper:driverInner:ENABLE}, OUTPUT);\n  digitalWrite(${helper:driverInner:ENABLE}, LOW);\n  stepperOuter_${COMP_SUFFIX}.setMaxSpeed(1000);\n  stepperOuter_${COMP_SUFFIX}.setAcceleration(500);\n  stepperInner_${COMP_SUFFIX}.setMaxSpeed(1000);\n  stepperInner_${COMP_SUFFIX}.setAcceleration(500);",
             "loop": "if (stepperOuter_${COMP_SUFFIX}.distanceToGo() == 0) {\n  stepperOuter_${COMP_SUFFIX}.moveTo(-stepperOuter_${COMP_SUFFIX}.currentPosition() + 200);\n}\nif (stepperInner_${COMP_SUFFIX}.distanceToGo() == 0) {\n  stepperInner_${COMP_SUFFIX}.moveTo(-stepperInner_${COMP_SUFFIX}.currentPosition() - 200);\n}\nstepperOuter_${COMP_SUFFIX}.run();\nstepperInner_${COMP_SUFFIX}.run();"
         }
     }
