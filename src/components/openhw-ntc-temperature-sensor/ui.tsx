@@ -14,6 +14,10 @@ export const NtcUI = ({ state, attrs, isRunning, onEvent }: { state: any, attrs:
         if (onEvent) {
             onEvent({ type: 'temperature', value: val });
         }
+        if (attrs && attrs.onInteract) {
+            attrs.onInteract({ type: 'temperature', value: val });
+            attrs.onInteract({ type: 'input', value: val });
+        }
     };
 
     return (

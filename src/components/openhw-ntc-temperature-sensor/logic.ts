@@ -28,7 +28,8 @@ export class NtcLogic extends BaseComponent {
 
     getPinVoltage(pinId: string): number {
         if (pinId === 'OUT') {
-            const tempC = parseFloat(String(this.state.temperature)) || 25;
+            const tempAttr = this.state.temperature ?? this.attrs?.temperature;
+            const tempC = tempAttr !== undefined ? parseFloat(String(tempAttr)) : 25;
             const beta = parseFloat(String(this.attrs?.beta || '3950'));
             const r25 = parseFloat(String(this.attrs?.r25 || '10000'));
             const tempK = tempC + 273.15;
@@ -37,7 +38,7 @@ export class NtcLogic extends BaseComponent {
             const resistance = r25 * Math.exp(beta * (1 / tempK - 1 / t0K));
             
             // voltage divider logic: VCC -> 10k fixed -> OUT -> NTC -> GND
-            const vIn = this.pins['VCC']?.voltage ?? 5.0; 
+            const vIn = 5.0; // Hardcode to 5V as physics solver may override passive VCC pin to 0
             const rFixed = 10000.0;
             return vIn * (resistance / (rFixed + resistance));
         }
@@ -45,7 +46,8 @@ export class NtcLogic extends BaseComponent {
     }
 
     update() {
-        const tempC = parseFloat(String(this.attrs?.temperature || '25'));
+        const tempAttr = this.state.temperature ?? this.attrs?.temperature;
+        const tempC = tempAttr !== undefined ? parseFloat(String(tempAttr)) : 25;
         const beta = parseFloat(String(this.attrs?.beta || '3950'));
         const r25 = parseFloat(String(this.attrs?.r25 || '10000'));
         
@@ -58,7 +60,7 @@ export class NtcLogic extends BaseComponent {
             temperature: tempC
         });
 
-        const vIn = this.pins['VCC']?.voltage ?? 5.0; 
+        const vIn = 5.0; // Hardcode to 5V as physics solver may override passive VCC pin to 0
         const rFixed = 10000.0;
         const vOut = vIn * (resistance / (rFixed + resistance));
 
@@ -73,7 +75,7 @@ export class NtcLogic extends BaseComponent {
     }
 
     onEvent(event: any) {
-        if (event && event.type === 'temperature' && event.value !== undefined) {
+        if (event && (event.type === 'temperature' || event.type === 'input') && event.value !== undefined) {
             this.attrs.temperature = String(event.value);
             this.state.temperature = event.value;
             this.update();
