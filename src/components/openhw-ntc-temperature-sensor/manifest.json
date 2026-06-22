@@ -1,48 +1,34 @@
 {
     "type": "openhw-ntc-temperature-sensor",
     "label": "Temperature Sensor (NTC)",
-    "description": "Negative Temperature Coefficient (NTC) thermistor. Resistance decreases as temperature increases. Used for precision temperature monitoring.",
+    "description": "Negative Temperature Coefficient (NTC) thermistor module. Outputs an analog voltage proportional to temperature.",
     "group": "Sensors",
-    "w": 22.5,
-    "h": 22.5,
+    "w": 135.4,
+    "h": 71.8,
     "attrs": {
         "temperature": "25",
         "beta": "3950",
         "r25": "10000",
         "breadboard": {
-            "anchorPin": "p1"
+            "anchorPin": "GND"
         }
     },
     "pins": [
-        {
-            "id": "p1",
-            "x": 3.75,
-            "y": 22.5,
-            "type": "passive"
-        },
-        {
-            "id": "p2",
-            "x": 18.75,
-            "y": 22.5,
-            "type": "passive"
-        }
+        { "id": "GND", "x": 135.0, "y": 26.2, "type": "passive" },
+        { "id": "VCC", "x": 135.0, "y": 35.8, "type": "passive" },
+        { "id": "OUT", "x": 135.0, "y": 45.5, "type": "passive" }
     ],
     "autowiring": {
         "connections": [
-            { "from": "p1", "to": "arduino:5V" },
-            { 
-                "from": "p2", 
-                "to": "arduino:A0|A1|A2|A3|A4|A5", 
-                "via": "openhw-resistor", 
-                "mode": "divider", 
-                "attrs": { "value": "10000", "dividerTarget": "arduino:GND" } 
-            }
+            { "from": "VCC", "to": "arduino:5V" },
+            { "from": "GND", "to": "arduino:GND" },
+            { "from": "OUT", "to": "arduino:A0|A1|A2|A3|A4|A5" }
         ]
     },
     "autocoding": {
         "arduino": {
             "setup": "Serial.begin(9600);",
-            "loop": "const float BETA_${COMP_SUFFIX} = 3950;\nint analogValue_${COMP_SUFFIX} = analogRead(${p2});\nfloat celsius_${COMP_SUFFIX} = 1 / (log(1 / (1023. / analogValue_${COMP_SUFFIX} - 1)) / BETA_${COMP_SUFFIX} + 1.0 / 298.15) - 273.15;\nSerial.print(\"Temperature: \");\nSerial.print(celsius_${COMP_SUFFIX});\nSerial.println(\" ℃\");\ndelay(500);"
+            "loop": "const float BETA_${COMP_SUFFIX} = 3950;\nint analogValue_${COMP_SUFFIX} = analogRead(${OUT});\nfloat celsius_${COMP_SUFFIX} = 1 / (log(1 / (1023. / analogValue_${COMP_SUFFIX} - 1)) / BETA_${COMP_SUFFIX} + 1.0 / 298.15) - 273.15;\nSerial.print(\"Temperature: \");\nSerial.print(celsius_${COMP_SUFFIX});\nSerial.println(\" ℃\");\ndelay(500);"
         }
     }
 }
