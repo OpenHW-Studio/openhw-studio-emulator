@@ -5,7 +5,9 @@ export class NtcLogic extends BaseComponent {
         super(id, manifest);
         this.state = {
             resistance: 10000,
-            temperature: parseFloat(manifest.attrs?.temperature || '25')
+            temperature: parseFloat(manifest.attrs?.temperature || '25'),
+            beta: parseFloat(manifest.attrs?.beta || '3950'),
+            r25: parseFloat(manifest.attrs?.r25 || '10000')
         };
         // Ensure frontend registry pins exist so setPinVoltage works
         if (!this.pins['OUT']) this.pins['OUT'] = { voltage: 0, mode: 'analog' };
@@ -14,33 +16,27 @@ export class NtcLogic extends BaseComponent {
     }
 
     getConductance() {
-        const tempC = parseFloat(this.attrs?.temperature || '25');
-        const beta = parseFloat(this.attrs?.beta || '3950');
-        const r25 = parseFloat(this.attrs?.r25 || '10000');
+        return 1e-12;
+    }
 
+    private computeResistance(): number {
+        const tempC = parseFloat(String(this.state.temperature ?? this.attrs?.temperature ?? '25'));
+        const beta = parseFloat(String(this.attrs?.beta || '3950'));
+        const r25 = parseFloat(String(this.attrs?.r25 || '10000'));
         const tempK = tempC + 273.15;
-        const t0K = 25 + 273.15;
-
-        // R = R25 * exp(Beta * (1/T - 1/T0))
-        const resistance = r25 * Math.exp(beta * (1 / tempK - 1 / t0K));
-        return 1 / resistance;
+        const t0K = 298.15;
+        return r25 * Math.exp(beta * (1 / tempK - 1 / t0K));
     }
 
     getPinVoltage(pinId: string): number {
         if (pinId === 'OUT') {
-            const tempAttr = this.state.temperature ?? this.attrs?.temperature;
-            const tempC = tempAttr !== undefined ? parseFloat(String(tempAttr)) : 25;
-            const beta = parseFloat(String(this.attrs?.beta || '3950'));
-            const r25 = parseFloat(String(this.attrs?.r25 || '10000'));
-            const tempK = tempC + 273.15;
-            const t0K = 25 + 273.15;
-            
-            const resistance = r25 * Math.exp(beta * (1 / tempK - 1 / t0K));
-            
-            // voltage divider logic: VCC -> 10k fixed -> OUT -> NTC -> GND
-            const vIn = 5.0; // Hardcode to 5V as physics solver may override passive VCC pin to 0
-            const rFixed = 10000.0;
-            return vIn * (resistance / (rFixed + resistance));
+            const r = this.state.resistance;
+            const pullup = parseFloat(String(this.attrs?.r25 || this.state.r25 || '10000'));
+            if (r && r > 1) {
+                return 5.0 * r / (pullup + r);
+            }
+            const freshR = this.computeResistance();
+            return 5.0 * freshR / (pullup + freshR);
         }
         return super.getPinVoltage(pinId);
     }
@@ -48,21 +44,15 @@ export class NtcLogic extends BaseComponent {
     update() {
         const tempAttr = this.state.temperature ?? this.attrs?.temperature;
         const tempC = tempAttr !== undefined ? parseFloat(String(tempAttr)) : 25;
-        const beta = parseFloat(String(this.attrs?.beta || '3950'));
-        const r25 = parseFloat(String(this.attrs?.r25 || '10000'));
-        
-        const tempK = tempC + 273.15;
-        const t0K = 25 + 273.15;
-        const resistance = r25 * Math.exp(beta * (1 / tempK - 1 / t0K));
+        const resistance = this.computeResistance();
+        const r25 = parseFloat(String(this.attrs?.r25 || this.state.r25 || '10000'));
 
         this.setState({
             resistance,
             temperature: tempC
         });
 
-        const vIn = 5.0; // Hardcode to 5V as physics solver may override passive VCC pin to 0
-        const rFixed = 10000.0;
-        const vOut = vIn * (resistance / (rFixed + resistance));
+        const vOut = 5.0 * resistance / (r25 + resistance);
 
         this.setPinVoltage('OUT', vOut);
     }

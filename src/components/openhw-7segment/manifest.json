@@ -36,7 +36,8 @@
         { "from": "F", "to": "arduino:7" },
         { "from": "G", "to": "arduino:8" },
         { "from": "DP", "to": "arduino:9" },
-        { "from": "COM.1", "to": "arduino:GND" }
+        { "from": "COM.1", "to": "arduino:GND" },
+        { "from": "COM.2", "to": "arduino:GND" }
       ]
     },
     "autocoding": {
