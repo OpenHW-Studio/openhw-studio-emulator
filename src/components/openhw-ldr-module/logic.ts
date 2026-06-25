@@ -5,7 +5,7 @@ export class LdrModuleLogic extends BaseComponent {
         super(id, manifest);
         // Sync initial attributes to state
         this.state = {
-            light: manifest.attrs?.lux ?? 500,
+            light: manifest.attrs?.lux ?? 100,
             threshold: manifest.attrs?.threshold ?? 500,
             pwrLed: false,
             dOut: false
@@ -22,8 +22,8 @@ export class LdrModuleLogic extends BaseComponent {
         }
     }
 
-    update() {
-        const vcc = this.getPinVoltage('5V');
+    update(cpuCycles: number, wires: any[], instances: BaseComponent[]) {
+        const vcc = this.getPinVoltage('VCC') || this.getPinVoltage('5V') || 5.0;
         const gnd = this.getPinVoltage('GND');
 
         if (vcc > 2.0 && gnd < 1.0) {
@@ -31,20 +31,20 @@ export class LdrModuleLogic extends BaseComponent {
 
             // Analog Output (AO): 0 Lux = 0V, 1000 Lux = VCC
             const aoVoltage = vcc * (this.state.light / 1000);
-            this.setPinVoltage('AO', aoVoltage);
+            this.propagatePin('AO', aoVoltage, wires, instances);
 
             // Digital Output (DO): High if light > threshold
             const thresholdVolts = vcc * (this.state.threshold / 1000);
             const isHigh = aoVoltage > thresholdVolts;
 
-            this.setPinVoltage('DO', isHigh ? vcc : 0);
+            this.propagatePin('DO', isHigh ? vcc : 0, wires, instances);
             this.state.dOut = isHigh;
             this.stateChanged = true;
         } else {
             this.state.pwrLed = false;
             this.state.dOut = false;
-            this.setPinVoltage('AO', 0);
-            this.setPinVoltage('DO', 0);
+            this.propagatePin('AO', 0, wires, instances);
+            this.propagatePin('DO', 0, wires, instances);
             this.stateChanged = true;
         }
     }

@@ -22,11 +22,11 @@ export const GasContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (key
 
 export const GasSensorUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning: boolean }) => {
     const [showCloud, setShowCloud] = useState(false);
-    const [cloudPos, setCloudPos] = useState({ x: 0, y: -150 });
+    const [cloudPos, setCloudPos] = useState({ x: 69, y: -68.5 });
     const [isDragging, setIsDragging] = useState(false);
     
     const svgRef = useRef<SVGSVGElement>(null);
-    const lastPos = useRef({ x: 0, y: -150 });
+    const lastPos = useRef({ x: 69, y: -68.5 });
 
     const triggerGasLevel = useCallback((level: number) => {
         if (attrs.onInteract) {
