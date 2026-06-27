@@ -1,0 +1,61 @@
+{
+  "type": "openhw-ir-transmitter",
+  "label": "IR Transmitter Module",
+  "group": "Inputs",
+  "description": "Programmable IR transmitter supporting NEC, Sony SIRC, RC-5, RC-6, Samsung, JVC, and Panasonic protocols. Broadcasts wirelessly to IR receivers within range.",
+  "w": 120,
+  "h": 130,
+  "attrs": {
+    "protocol": "NEC",
+    "address": "0",
+    "command": "64",
+    "toggleBit": "0",
+    "range": "300",
+    "coneAngle": "30"
+  },
+  "telemetry": {
+    "template": "Protocol=${state.protocol}, Addr=0x${state.addressHex}, Cmd=0x${state.commandHex}, Active=${state.active}",
+    "criticalKeys": [
+      "state.protocol",
+      "state.active"
+    ]
+  },
+  "pins": [
+    {
+      "id": "VCC",
+      "x": 60,
+      "y": 125,
+      "type": "power",
+      "description": "Power Supply 3.3V / 5V"
+    },
+    {
+      "id": "GND",
+      "x": 30,
+      "y": 125,
+      "type": "power",
+      "description": "Ground"
+    },
+    {
+      "id": "OUT",
+      "x": 90,
+      "y": 125,
+      "type": "digital",
+      "description": "Modulated IR signal output"
+    }
+  ],
+  "autowiring": {
+    "connections": [
+      { "from": "GND", "to": "arduino:GND", "color": "black" },
+      { "from": "VCC", "to": "arduino:5V", "color": "red" },
+      { "from": "OUT", "to": "arduino:3", "color": "yellow" }
+    ]
+  },
+  "autocoding": {
+    "libraries": ["IRremote"],
+    "arduino": {
+      "globals": "#include <IRremote.h>\n\nconst int IR_SEND_PIN_${COMP_SUFFIX} = ${OUT};\nIRsend irsend_${COMP_SUFFIX}(IR_SEND_PIN_${COMP_SUFFIX});",
+      "setup": "Serial.println(\"IR Transmitter Ready\");",
+      "loop": "// Example: send NEC code 0x00FF00FF every 5s\n// irsend_${COMP_SUFFIX}.sendNEC(0x00FF00FF, 32);\n// delay(5000);"
+    }
+  }
+}

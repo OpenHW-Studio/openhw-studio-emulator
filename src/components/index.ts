@@ -72,6 +72,7 @@ export { default as openhwKs2eMDc5 } from './openhw-ks2e-m-dc5';
 export { default as openhwHx711_5 } from './openhw-hx711_5';
 export { default as openhwHx711_50 } from './openhw-hx711_50';
 export { default as openhwIrRemote } from './openhw-ir-remote';
+export { default as openhwIrTransmitter } from './openhw-ir-transmitter';
 export { default as openhwEPaperDisplay } from './openhw-ePaperDisplay';
 export { default as openhwIli9341Touch } from './openhw-ili9341-touch';
 export { default as openhwPcm5102 } from './openhw-pcm5102';

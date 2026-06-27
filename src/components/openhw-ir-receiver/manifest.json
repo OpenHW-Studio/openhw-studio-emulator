@@ -2,18 +2,19 @@
   "type": "openhw-ir-receiver",
   "label": "IR Receiver",
   "group": "Sensors",
-  "description": "38 kHz infrared demodulator. Receives NEC protocol IR signals from a virtual remote control and outputs a clean digital signal.",
+  "description": "Multi-protocol IR demodulator. Receives NEC, Sony SIRC, RC-5, RC-6, Samsung, JVC, Panasonic signals from IR transmitters within range. Outputs a clean digital signal.",
   "w": 100,
   "h": 150,
   "attrs": {
     "frequency": "38"
   },
   "telemetry": {
-    "template": "Powered=${state.powered}, Transmitting=${state.transmitting}, LastButton=${state.lastButton}, LastHEX=${state.lastValue}",
+    "template": "Powered=${state.powered}, Transmitting=${state.transmitting}, Proto=${state.lastProtocol}, Addr=${state.lastAddress}, Cmd=${state.lastCommand}",
     "criticalKeys": [
       "state.powered",
       "state.transmitting",
-      "state.lastButton"
+      "state.lastProtocol",
+      "state.lastCommand"
     ]
   },
   "pins": [

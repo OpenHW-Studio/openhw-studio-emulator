@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-// Adjusted bounds for the vertical footprint
 export const BOUNDS = { x: 0, y: 0, w: 100, h: 150 };
 
 const REMOTE_BUTTONS = [
@@ -34,6 +33,10 @@ export const IRReceiverUI = ({ state, attrs, onEvent }: { state: any; attrs: any
     const powered      = state?.powered      ?? false;
     const transmitting = state?.transmitting ?? false;
     const lastButton   = state?.lastButton   ?? '';
+    const lastProtocol = state?.lastProtocol ?? '';
+    const lastAddress  = state?.lastAddress  ?? '';
+    const lastCommand  = state?.lastCommand  ?? '';
+    const signalStrength = state?.signalStrength ?? 0;
     const [showRemote, setShowRemote] = useState(false);
 
     const sendButton = (btn: string) => {
@@ -51,29 +54,23 @@ export const IRReceiverUI = ({ state, attrs, onEvent }: { state: any; attrs: any
             >
                 {/* PCB Base */}
                 <rect x="20" y="20" width="160" height="190" fill="#111318" rx="6" />
-                {/* Inner White Silkscreen Border */}
                 <rect x="25" y="25" width="150" height="180" fill="none" stroke="#f3f4f6" strokeWidth="2" rx="3" />
-                
+
                 {/* Mounting Holes */}
                 <circle cx="45" cy="45" r="10" fill="#374151" />
                 <circle cx="45" cy="45" r="5" fill="#e2e8f0" />
                 <circle cx="155" cy="185" r="10" fill="#374151" />
                 <circle cx="155" cy="185" r="5" fill="#e2e8f0" />
 
-                {/* IR Symbol (Top Right) */}
+                {/* IR Symbol */}
                 <path d="M 145 55 Q 155 45 165 55 M 140 45 Q 155 30 170 45 M 135 35 Q 155 15 175 35" fill="none" stroke="#f3f4f6" strokeWidth="2" strokeLinecap="round" />
 
-                {/* --- Bottom Pins --- */}
+                {/* Bottom Pins */}
                 <g>
-                    {/* Pin 1 (Left / G) */}
                     <rect x="66" y="230" width="8" height="60" fill="#9ca3af" rx="2" />
                     <rect x="66" y="230" width="3" height="60" fill="#f3f4f6" rx="1" />
-                    
-                    {/* Pin 2 (Middle / V) */}
                     <rect x="96" y="230" width="8" height="60" fill="#9ca3af" rx="2" />
                     <rect x="96" y="230" width="3" height="60" fill="#f3f4f6" rx="1" />
-
-                    {/* Pin 3 (Right / R) */}
                     <rect x="126" y="230" width="8" height="60" fill="#9ca3af" rx="2" />
                     <rect x="126" y="230" width="3" height="60" fill="#f3f4f6" rx="1" />
                 </g>
@@ -82,55 +79,67 @@ export const IRReceiverUI = ({ state, attrs, onEvent }: { state: any; attrs: any
                 <rect x="50" y="210" width="100" height="20" fill="#030712" rx="3" />
                 <rect x="55" y="200" width="90" height="10" fill="#1f2937" rx="2" />
 
-                {/* Silkscreen Pin Labels (G, V, R) */}
+                {/* Pin Labels */}
                 <text x="70" y="200" fill="#f3f4f6" fontSize="22" fontFamily="monospace" fontWeight="bold" textAnchor="middle">G</text>
                 <text x="100" y="200" fill="#f3f4f6" fontSize="22" fontFamily="monospace" fontWeight="bold" textAnchor="middle">V</text>
                 <text x="130" y="200" fill="#f3f4f6" fontSize="22" fontFamily="monospace" fontWeight="bold" textAnchor="middle">R</text>
 
-                {/* Silkscreen secondary labels (-, +, S) */}
+                {/* Secondary labels */}
                 <text x="70" y="145" fill="#f3f4f6" fontSize="18" fontFamily="sans-serif" fontWeight="bold" textAnchor="middle">-</text>
                 <text x="100" y="145" fill="#f3f4f6" fontSize="16" fontFamily="sans-serif" fontWeight="bold" textAnchor="middle">+</text>
                 <text x="130" y="145" fill="#f3f4f6" fontSize="16" fontFamily="sans-serif" fontWeight="bold" textAnchor="middle">S</text>
 
-                {/* Vias/Pads next to labels */}
+                {/* Vias/Pads */}
                 <circle cx="70" cy="165" r="8" fill="#9ca3af" />
                 <circle cx="70" cy="165" r="4" fill="#4b5563" />
                 <circle cx="100" cy="165" r="8" fill="#9ca3af" />
                 <circle cx="100" cy="165" r="4" fill="#4b5563" />
                 <circle cx="130" cy="165" r="8" fill="#9ca3af" />
                 <circle cx="130" cy="165" r="4" fill="#4b5563" />
-
-                {/* Vias Outline Box */}
                 <rect x="58" y="152" width="84" height="26" fill="none" stroke="#f3f4f6" strokeWidth="1.5" />
 
-                {/* Component Outlines (Left & Right) */}
+                {/* Component Outlines */}
                 <rect x="30" y="85" width="20" height="35" fill="none" stroke="#f3f4f6" strokeWidth="1.5" />
                 <rect x="150" y="85" width="20" height="35" fill="none" stroke="#f3f4f6" strokeWidth="1.5" />
-                
-                {/* SMD Resistor (102) - Left */}
+
+                {/* SMD Resistor */}
                 <rect x="34" y="90" width="12" height="25" fill="#1f2937" rx="1" />
                 <rect x="34" y="90" width="12" height="5" fill="#d1d5db" rx="1" />
                 <rect x="34" y="110" width="12" height="5" fill="#d1d5db" rx="1" />
                 <text x="40" y="105" fill="#e5e7eb" fontSize="8" fontFamily="monospace" textAnchor="middle" transform="rotate(-90 40 105)">102</text>
 
-                {/* SMD LED - Right - Tied to 'powered' state */}
+                {/* SMD LED - powered indicator */}
                 <rect x="154" y="90" width="12" height="25" fill="#f8fafc" rx="1" />
                 <rect x="154" y="90" width="12" height="5" fill="#d1d5db" rx="1" />
                 <rect x="154" y="110" width="12" height="5" fill="#d1d5db" rx="1" />
                 <circle cx="160" cy="102" r="4" fill={powered ? "#10b981" : "#064e3b"} />
 
-                {/* IR Receiver Component (VS1838B) - Top Center */}
-                {/* Base metal shield */}
+                {/* IR Receiver Component Dome */}
                 <rect x="60" y="85" width="80" height="50" fill="#4b5563" rx="3" stroke="#374151" strokeWidth="2" />
-                
-                {/* IR Dome - Tied to 'transmitting' state */}
                 <path d="M 70 85 C 70 50, 130 50, 130 85 Z" fill={transmitting ? '#ef4444' : '#1f2937'} />
                 <path d="M 80 85 C 80 60, 120 60, 120 85 Z" fill={transmitting ? '#fca5a5' : '#111827'} />
 
-                {/* 1838 Text inside metal shield */}
-                <text x="100" y="115" fill="#9ca3af" fontSize="18" fontFamily="monospace" fontWeight="bold" textAnchor="middle" letterSpacing="2">
-                    1838
-                </text>
+                {/* 1838 Text */}
+                <text x="100" y="115" fill="#9ca3af" fontSize="18" fontFamily="monospace" fontWeight="bold" textAnchor="middle" letterSpacing="2">1838</text>
+
+                {/* Protocol info overlay */}
+                {lastProtocol && transmitting && (
+                    <g>
+                        <rect x="92" y="30" width="78" height="42" rx="4" fill="#1f2937" fillOpacity="0.9" />
+                        <text x="131" y="42" fill="#22c55e" fontSize="8" fontFamily="monospace" fontWeight="bold" textAnchor="middle">{lastProtocol}</text>
+                        <text x="131" y="52" fill="#f3f4f6" fontSize="7" fontFamily="monospace" textAnchor="middle">{lastAddress}</text>
+                        <text x="131" y="62" fill="#f3f4f6" fontSize="7" fontFamily="monospace" textAnchor="middle">{lastCommand}</text>
+                    </g>
+                )}
+
+                {/* Signal strength bar */}
+                {transmitting && signalStrength > 0 && (
+                    <g>
+                        <rect x="158" y="172" width="6" height="18" rx="1" fill="#374151" />
+                        <rect x="159" y={190 - Math.round(signalStrength / 100 * 18)} width="4" height={Math.round(signalStrength / 100 * 18)} rx="1"
+                          fill={signalStrength > 50 ? '#22c55e' : signalStrength > 20 ? '#f59e0b' : '#ef4444'} />
+                    </g>
+                )}
             </svg>
 
             {/* Virtual remote popup */}
@@ -176,6 +185,13 @@ export const IRReceiverUI = ({ state, attrs, onEvent }: { state: any; attrs: any
                             ))}
                         </div>
                     ))}
+
+                    {/* Signal info */}
+                    {transmitting && lastProtocol && (
+                        <div style={{ fontSize: 8, color: '#22c55e', textAlign: 'center', marginTop: 4 }}>
+                            {lastProtocol} {lastAddress} {lastCommand}
+                        </div>
+                    )}
 
                     {!powered && (
                         <div style={{ fontSize: 9, color: '#e74c3c', textAlign: 'center', marginTop: 4 }}>

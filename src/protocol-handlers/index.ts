@@ -22,6 +22,16 @@ export { SimulationMonitorLogic } from './simulation-monitor';
 export { I2CProtocol as GenericI2CDevice } from './i2c-device';
 export { SPIProtocol as GenericSPIDevice } from './spi-device';
 
+// ── IR Environment ───────────────────────────────────────────────────────────
+export {
+  IREnvironment,
+  type IRTransceiver, type IRNode, type IRReceiverInfo, type IRTransmitterInfo,
+} from './ir-environment';
+export {
+  encodeIR, decodeIR, getIRProtocolSignal, formatIRValue,
+  type IRProtocol, type IRPulse, type IRSignal,
+} from './ir-protocols';
+
 // ── WiFi / Network stack ─────────────────────────────────────────────────────
 // WifiEnvironment: shared registry for all WiFi boards and AP components.
 export {

@@ -101,7 +101,7 @@ export class PicoWLogic extends BaseComponent {
           this.reconnectInterval = setTimeout(() => {
             this.reconnectInterval = null;
             this.connectToGateway();
-          }, 5000);
+          }, 1000);
         }
       };
 

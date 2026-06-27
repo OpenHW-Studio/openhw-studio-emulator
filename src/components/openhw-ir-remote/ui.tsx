@@ -1,6 +1,5 @@
 import React from 'react';
 
-// Common Button Component
 interface RemoteButtonProps {
     cx: number;
     cy: number;
@@ -17,8 +16,8 @@ interface RemoteButtonProps {
 
 const RemoteButton = ({ cx, cy, r=16, fill, stroke, textColor, text, icon, onClick, buttonName, pressed }: RemoteButtonProps) => {
     return (
-        <g 
-            transform={`translate(${cx}, ${cy}) ${pressed ? 'scale(0.95)' : ''}`} 
+        <g
+            transform={`translate(${cx}, ${cy}) ${pressed ? 'scale(0.95)' : ''}`}
             style={{cursor: 'pointer'}}
             onClick={() => onClick(buttonName)}
             onMouseDown={(e) => e.preventDefault()}
@@ -39,9 +38,9 @@ export const IRRemoteUI = ({ state, onEvent }) => {
         onEvent({ type: 'button_press', button: btnName });
     };
 
-    const isPressed = (btnName) => state.lastCommand === btnName; // Simple visualization, it won't unpress automatically, but good enough for click effect
+    const isPressed = (btnName) => state.lastCommand === btnName;
+    const wirelessTx = state?.wirelessTx ?? false;
 
-    // Helpers for icons
     const PowerIcon = <path d="M-4,-4 A 6 6 0 1 0 4,-4 M0,-7 L0,1" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" />;
     const PlusIcon = <path d="M-6,0 L6,0 M0,-6 L0,6" fill="none" stroke="white" strokeWidth="2" />;
     const MinusIcon = <path d="M-6,0 L6,0" fill="none" stroke="white" strokeWidth="2" />;
@@ -52,44 +51,52 @@ export const IRRemoteUI = ({ state, onEvent }) => {
 
     return (
         <svg width="130" height="310" viewBox="0 0 130 310">
+            {/* Wireless indicator */}
+            {wirelessTx && (
+                <g>
+                    <circle cx="115" cy="15" r="6" fill="#22c55e" opacity={0.8}>
+                        <animate attributeName="r" values="6;10;6" dur="0.6s" repeatCount="indefinite" />
+                    </circle>
+                    <text x="115" y="18" fill="white" fontSize="8" textAnchor="middle" fontWeight="bold">IR</text>
+                </g>
+            )}
+
             {/* Body */}
             <rect x="2" y="2" width="126" height="306" rx="15" fill="#f4f4f4" stroke="#2a2a2a" strokeWidth="4" />
-            
+
             {/* Row 1: Power, Menu */}
             <RemoteButton cx={25} cy={35} fill="#e32626" stroke="#b31212" icon={PowerIcon} onClick={handlePress} buttonName="Power" pressed={isPressed('Power')} />
             <RemoteButton cx={105} cy={35} fill="white" stroke="#333" textColor="#e32626" text="MENU" onClick={handlePress} buttonName="Menu" pressed={isPressed('Menu')} />
-            
+
             {/* Row 2: Test, +, Back */}
             <RemoteButton cx={25} cy={75} fill="white" stroke="#333" textColor="#e32626" text="TEST" onClick={handlePress} buttonName="Test" pressed={isPressed('Test')} />
             <RemoteButton cx={65} cy={75} fill="#1a1a1a" stroke="#000" icon={PlusIcon} onClick={handlePress} buttonName="Plus" pressed={isPressed('Plus')} />
             <RemoteButton cx={105} cy={75} fill="white" stroke="#333" icon={BackIcon} onClick={handlePress} buttonName="Back" pressed={isPressed('Back')} />
-            
+
             {/* Row 3: Prev, Play, Next */}
             <RemoteButton cx={25} cy={115} fill="#1a1a1a" stroke="#000" icon={PrevIcon} onClick={handlePress} buttonName="Previous" pressed={isPressed('Previous')} />
             <RemoteButton cx={65} cy={115} fill="white" stroke="#333" icon={PlayIcon} onClick={handlePress} buttonName="Play" pressed={isPressed('Play')} />
             <RemoteButton cx={105} cy={115} fill="#1a1a1a" stroke="#000" icon={NextIcon} onClick={handlePress} buttonName="Next" pressed={isPressed('Next')} />
-            
+
             {/* Row 4: 0, -, C */}
             <RemoteButton cx={25} cy={155} fill="white" stroke="#333" textColor="#0a5eb0" text="0" onClick={handlePress} buttonName="0" pressed={isPressed('0')} />
             <RemoteButton cx={65} cy={155} fill="#1a1a1a" stroke="#000" icon={MinusIcon} onClick={handlePress} buttonName="Minus" pressed={isPressed('Minus')} />
             <RemoteButton cx={105} cy={155} fill="white" stroke="#333" textColor="#0a5eb0" text="C" onClick={handlePress} buttonName="C" pressed={isPressed('C')} />
-            
+
             {/* Row 5: 1, 2, 3 */}
             <RemoteButton cx={25} cy={195} fill="white" stroke="#333" textColor="#0a5eb0" text="1" onClick={handlePress} buttonName="1" pressed={isPressed('1')} />
             <RemoteButton cx={65} cy={195} fill="white" stroke="#333" textColor="#0a5eb0" text="2" onClick={handlePress} buttonName="2" pressed={isPressed('2')} />
             <RemoteButton cx={105} cy={195} fill="white" stroke="#333" textColor="#0a5eb0" text="3" onClick={handlePress} buttonName="3" pressed={isPressed('3')} />
-            
+
             {/* Row 6: 4, 5, 6 */}
             <RemoteButton cx={25} cy={235} fill="white" stroke="#333" textColor="#0a5eb0" text="4" onClick={handlePress} buttonName="4" pressed={isPressed('4')} />
             <RemoteButton cx={65} cy={235} fill="white" stroke="#333" textColor="#0a5eb0" text="5" onClick={handlePress} buttonName="5" pressed={isPressed('5')} />
             <RemoteButton cx={105} cy={235} fill="white" stroke="#333" textColor="#0a5eb0" text="6" onClick={handlePress} buttonName="6" pressed={isPressed('6')} />
-            
+
             {/* Row 7: 7, 8, 9 */}
             <RemoteButton cx={25} cy={275} fill="white" stroke="#333" textColor="#0a5eb0" text="7" onClick={handlePress} buttonName="7" pressed={isPressed('7')} />
             <RemoteButton cx={65} cy={275} fill="white" stroke="#333" textColor="#0a5eb0" text="8" onClick={handlePress} buttonName="8" pressed={isPressed('8')} />
             <RemoteButton cx={105} cy={275} fill="white" stroke="#333" textColor="#0a5eb0" text="9" onClick={handlePress} buttonName="9" pressed={isPressed('9')} />
-
-            {/* Hidden interactive pins container if needed, OpenHW simulator automatically draws pins based on manifest */}
         </svg>
     );
 };

@@ -1,36 +1,38 @@
 import { BaseComponent } from '../BaseComponent';
+import { IREnvironment } from '../../protocol-handlers/ir-environment';
+import { getIRProtocolSignal } from '../../protocol-handlers/ir-protocols';
 
 const NEC_CMD_MAP: Record<string, number> = {
-    'Power': 162,
-    'Menu': 226,
-    'Test': 34,
-    'Plus': 2,
-    'Back': 194,
-    'Previous': 224,
-    'Play': 168,
-    'Next': 144,
-    '0': 104,
-    'Minus': 152,
-    'C': 176,
-    '1': 48,
-    '2': 24,
-    '3': 122,
-    '4': 16,
-    '5': 56,
-    '6': 90,
-    '7': 66,
-    '8': 74,
-    '9': 82
+    'Power': 162, 'Menu': 226, 'Test': 34, 'Plus': 2,
+    'Back': 194, 'Previous': 224, 'Play': 168, 'Next': 144,
+    '0': 104, 'Minus': 152, 'C': 176,
+    '1': 48, '2': 24, '3': 122, '4': 16, '5': 56,
+    '6': 90, '7': 66, '8': 74, '9': 82,
 };
 
 export class IRRemoteLogic extends BaseComponent {
-    private transmissionQueue: { cycle: number, voltage: number }[] = [];
+    private transmissionQueue: { cycle: number; voltage: number }[] = [];
     private isTransmitting = false;
     private lastUpdateCycle = 0;
+    private registered = false;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
-        this.state = { lastCommand: 'None' };
+        this.state = { lastCommand: 'None', wirelessTx: false };
+    }
+
+    private ensureRegistered(): void {
+        if (this.registered) return;
+        this.registered = true;
+        IREnvironment.register({
+            id: this.id,
+            x: (this as any)._posX ?? 0,
+            y: (this as any)._posY ?? 0,
+            supportedProtocols: ['NEC'],
+            coneAngle: 30,
+            range: 300,
+            onIRSignalReceived: () => false,
+        });
     }
 
     onEvent(event: any) {
@@ -49,50 +51,55 @@ export class IRRemoteLogic extends BaseComponent {
         this.isTransmitting = true;
         this.transmissionQueue = [];
 
-        // Note: Standard IR receivers output ACTIVE LOW (Idle High)
-        // Mark = 0V, Space = 5V
-
         let currentCycles = this.lastUpdateCycle;
         const addPulse = (markUs: number, spaceUs: number) => {
-            // Mark (Active Low on receiver)
             this.transmissionQueue.push({ cycle: currentCycles, voltage: 0 });
             currentCycles += Math.floor(markUs * 16);
-            
-            // Space (Idle High on receiver)
             this.transmissionQueue.push({ cycle: currentCycles, voltage: 5 });
             currentCycles += Math.floor(spaceUs * 16);
         };
 
-        // Leader code: 9ms Mark, 4.5ms Space
+        // Leader
         addPulse(9000, 4500);
 
         const address = 0x00;
         const invAddress = (~address) & 0xFF;
         const invCommand = (~command) & 0xFF;
-
         const data = (address) | (invAddress << 8) | (command << 16) | (invCommand << 24);
 
-        // 32 bits of data. LSB first
         for (let i = 0; i < 32; i++) {
             const bit = (data >> i) & 1;
-            if (bit) {
-                addPulse(562.5, 1687.5);
-            } else {
-                addPulse(562.5, 562.5);
-            }
+            addPulse(562.5, bit ? 1687.5 : 562.5);
         }
 
         // Stop bit
-        addPulse(562.5, 0); // Mark then stay idle (5V)
+        addPulse(562.5, 0);
         this.transmissionQueue.push({ cycle: currentCycles, voltage: 5 });
+
+        // ── Wireless broadcast via IREnvironment ──
+        this.ensureRegistered();
+        const signal = getIRProtocolSignal('NEC', address, command);
+        IREnvironment.transmit(this.id, signal);
+        this.setState({ wirelessTx: true });
     }
 
     update(cpuCycles: number, wires: any[], instances: BaseComponent[]) {
         super.update(cpuCycles, wires, instances);
         this.lastUpdateCycle = cpuCycles;
 
+        this.ensureRegistered();
+
+        const posX = (this as any)._posX;
+        const posY = (this as any)._posY;
+        if (typeof posX === 'number' && typeof posY === 'number') {
+            IREnvironment.updatePosition(this.id, posX, posY);
+        }
+
         if (!this.isTransmitting && this.transmissionQueue.length === 0) {
-            this.setPinVoltage('DAT', 5); // Default idle state for IR receivers is HIGH
+            this.setPinVoltage('DAT', 5);
+            if ((this.state as any).wirelessTx) {
+                this.setState({ wirelessTx: false });
+            }
             return;
         }
 
@@ -111,7 +118,8 @@ export class IRRemoteLogic extends BaseComponent {
     onCustomTelemetry() {
         this.setCustomTelemetry({
             lastCommand: this.state.lastCommand,
-            isTransmitting: this.isTransmitting
+            isTransmitting: this.isTransmitting,
+            wirelessTx: (this.state as any).wirelessTx,
         });
     }
 }

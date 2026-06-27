@@ -96,6 +96,7 @@ export class BaseComponent {
     pins: { [key: string]: { voltage: number, mode: string, isHigh?: boolean } };
     state: any;
     stateChanged: boolean;
+    suppressPinUiUpdates: boolean = false;
     telemetryEnabled: boolean = false;
     deepSiliconEnabled: boolean = false;
     attrs: any;
@@ -559,8 +560,19 @@ export class BaseComponent {
             this.pins[pinId].voltage = voltage;
             this.capturePinLogicLevel(pinId, Number(voltage) > 0.5);
             this.capturePowerSample(pinId, Number(voltage));
-            this.stateChanged = true;
+            if (!this.suppressPinUiUpdates) {
+                this.stateChanged = true;
+            }
         }
+    }
+
+    getCpuFrequencyHz(): number {
+        const r = (this as any)._runner;
+        if (!r) return 16000000;
+        if (typeof r.getRp2040ClockHz === 'function') return r.getRp2040ClockHz();
+        if (r.cpu && typeof r.cpu.clockHz === 'number') return r.cpu.clockHz;
+        if (r.cpu && typeof r.cpu.frequency === 'number') return r.cpu.frequency;
+        return 16000000; // default 16MHz
     }
 
     getPinVoltage(pinId: string): number {
