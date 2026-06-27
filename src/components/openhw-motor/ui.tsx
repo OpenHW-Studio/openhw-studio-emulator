@@ -1,63 +1,79 @@
 import React from 'react';
 
-// TT Gear motor dimensions
-export const BOUNDS = { x: 0, y: 0, w: 100, h: 50 };
+// Standard Motor dimensions mapping to manifest
+export const BOUNDS = { x: 0, y: 0, w: 200, h: 100 };
 
 export const MotorUI = ({ state, attrs }: { state: any, attrs: any }) => {
-    // state.speed gives rotations per second or speed factor (-1 to 1)
     const speed = state?.speed || 0;
     const animationDuration = speed === 0 ? '0s' : `${Math.abs(1 / speed)}s`;
     const direction = speed < 0 ? 'reverse' : 'normal';
 
     return (
         <div style={{ position: 'relative', width: BOUNDS.w, height: BOUNDS.h, pointerEvents: 'none' }}>
-            <svg width="100" height="50" viewBox="0 0 100 50">
-                {/* Rear Black Housing */}
-                <rect x="0" y="5" width="20" height="40" rx="3" fill="#222" />
-                {/* Yellow Plastic Gearbox Body */}
-                <rect x="20" y="5" width="60" height="40" rx="4" fill="#F1C40F" />
-                <rect x="25" y="10" width="10" height="30" rx="2" fill="#F39C12" />
-                <rect x="65" y="10" width="10" height="30" rx="2" fill="#F39C12" />
+            <svg width="200" height="100" viewBox="0 0 100 50">
+                <defs>
+                    <linearGradient id="metalBody" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#E0E0E0" />
+                        <stop offset="20%" stopColor="#FFFFFF" />
+                        <stop offset="50%" stopColor="#9E9E9E" />
+                        <stop offset="80%" stopColor="#616161" />
+                        <stop offset="100%" stopColor="#424242" />
+                    </linearGradient>
+                    <linearGradient id="plasticCap" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#D32F2F" />
+                        <stop offset="100%" stopColor="#B71C1C" />
+                    </linearGradient>
+                    <linearGradient id="shaftMetal" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#BDBDBD" />
+                        <stop offset="50%" stopColor="#EEEEEE" />
+                        <stop offset="100%" stopColor="#757575" />
+                    </linearGradient>
+                </defs>
 
-                {/* Rivets / Detail */}
-                <circle cx="28" cy="15" r="1.5" fill="#333" />
-                <circle cx="28" cy="35" r="1.5" fill="#333" />
-                <circle cx="72" cy="15" r="1.5" fill="#333" />
-                <circle cx="72" cy="35" r="1.5" fill="#333" />
+                {/* Drop Shadow Base */}
+                <rect x="15" y="10" width="70" height="34" rx="4" fill="rgba(0,0,0,0.3)" filter="blur(2px)" />
 
-                {/* Terminals (Red & Black) at 15 and 45 */}
-                <path d="M 0 15 L -10 15" stroke="#E74C3C" strokeWidth="2" strokeLinecap="round" />
-                <path d="M 0 45 L -10 45" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
+                {/* Terminals extending to x=0 */}
+                <path d="M 0 15 L 20 15" stroke="#BDBDBD" strokeWidth="4" strokeLinecap="round" />
+                <path d="M 0 45 L 20 45" stroke="#BDBDBD" strokeWidth="4" strokeLinecap="round" />
+                <circle cx="2" cy="15" r="1.5" fill="#333" />
+                <circle cx="2" cy="45" r="1.5" fill="#333" />
 
-                {/* White Plastic Shaft */}
-                <rect x="80" y="18" width="12" height="14" rx="2" fill="#ECF0F1" />
-                {/* Shaft Flat Ends */}
-                <rect x="85" y="15" width="2" height="20" fill="#BDC3C7" />
+                {/* Plastic End Cap (Rear) */}
+                <rect x="15" y="5" width="15" height="40" rx="3" fill="url(#plasticCap)" />
+                {/* Cap Details */}
+                <rect x="25" y="10" width="5" height="10" fill="#7F0000" />
+                <rect x="25" y="30" width="5" height="10" fill="#7F0000" />
 
-                {/* Rubber Tire Wheel Wrapper for CSS Animation */}
-                <foreignObject x="65" y="-10" width="70" height="70">
-                    <div style={{
-                        width: '100%', height: '100%',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center'
-                    }}>
-                        {/* Wheel Element */}
-                        <div style={{
-                            width: 60, height: 60,
-                            borderRadius: '50%',
-                            background: 'radial-gradient(circle, #E67E22 20%, #34495E 25%, #2C3E50 100%)',
-                            border: '5px solid #111',
-                            position: 'relative',
-                            boxShadow: '0 4px 10px rgba(0,0,0,0.5)',
-                            animation: speed !== 0 ? `spin ${animationDuration} linear infinite ${direction}` : 'none'
-                        }}>
-                            {/* Wheel Treads representing motion */}
-                            <div style={{ position: 'absolute', top: 5, left: '50%', width: 4, height: 10, background: '#111', marginLeft: -2 }} />
-                            <div style={{ position: 'absolute', bottom: 5, left: '50%', width: 4, height: 10, background: '#111', marginLeft: -2 }} />
-                            <div style={{ position: 'absolute', left: 5, top: '50%', width: 10, height: 4, background: '#111', marginTop: -2 }} />
-                            <div style={{ position: 'absolute', right: 5, top: '50%', width: 10, height: 4, background: '#111', marginTop: -2 }} />
-                        </div>
-                    </div>
-                </foreignObject>
+                {/* Metallic Motor Body */}
+                <rect x="30" y="5" width="50" height="40" rx="2" fill="url(#metalBody)" />
+                {/* Ventilation Slots on Body */}
+                <rect x="35" y="12" width="6" height="26" rx="3" fill="#333" />
+                <rect x="45" y="12" width="6" height="26" rx="3" fill="#333" />
+                
+                {/* Front Bearing/Housing */}
+                <rect x="80" y="15" width="5" height="20" rx="2" fill="#757575" />
+
+                {/* Output Shaft */}
+                <rect x="85" y="22" width="15" height="6" fill="url(#shaftMetal)" />
+
+                {/* Rotating Pinion Gear Indicator (SVG Group to Rotate) */}
+                <g style={{
+                    transformOrigin: '92% 50%',
+                    animation: speed !== 0 ? `spin ${animationDuration} linear infinite ${direction}` : 'none'
+                }}>
+                    <circle cx="92" cy="25" r="8" fill="#ECEFF1" stroke="#CFD8DC" strokeWidth="1" />
+                    {/* Background alternating quadrants */}
+                    <path d="M 92 25 L 100 25 A 8 8 0 0 1 92 33 Z" fill="#FBBF24" />
+                    <path d="M 92 25 L 92 33 A 8 8 0 0 1 84 25 Z" fill="#90A4AE" />
+                    <path d="M 92 25 L 84 25 A 8 8 0 0 1 92 17 Z" fill="#FBBF24" />
+                    <path d="M 92 25 L 92 17 A 8 8 0 0 1 100 25 Z" fill="#90A4AE" />
+                    
+                    {/* Gear Teeth / Cross Indicator for visibility */}
+                    <line x1="92" y1="17" x2="92" y2="33" stroke="#37474F" strokeWidth="1" opacity="0.5" />
+                    <line x1="84" y1="25" x2="100" y2="25" stroke="#37474F" strokeWidth="1" opacity="0.5" />
+                    <circle cx="92" cy="25" r="3" fill="#607D8B" />
+                </g>
             </svg>
 
             <style>

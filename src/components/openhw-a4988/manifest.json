@@ -40,8 +40,8 @@
     },
     "autocoding": {
         "arduino": {
-            "setup": "pinMode(${STEP}, OUTPUT);\npinMode(${DIR}, OUTPUT);\npinMode(${ENABLE}, OUTPUT);\ndigitalWrite(${ENABLE}, LOW);",
-            "loop": "digitalWrite(${DIR}, HIGH);\nfor(int i_${COMP_SUFFIX}=0;i_${COMP_SUFFIX}<200;i_${COMP_SUFFIX}++){digitalWrite(${STEP},HIGH);delayMicroseconds(1000);digitalWrite(${STEP},LOW);delayMicroseconds(1000);}\ndelay(500);\ndigitalWrite(${DIR}, LOW);\nfor(int i_${COMP_SUFFIX}=0;i_${COMP_SUFFIX}<200;i_${COMP_SUFFIX}++){digitalWrite(${STEP},HIGH);delayMicroseconds(1000);digitalWrite(${STEP},LOW);delayMicroseconds(1000);}\ndelay(500);"
+            "setup": "pinMode(${STEP}, OUTPUT);\npinMode(${DIR}, OUTPUT);\npinMode(${ENABLE}, OUTPUT);\ndigitalWrite(${ENABLE}, LOW);\nSerial.begin(9600);\nSerial.println(\"A4988 Stepper Driver Ready\");",
+            "loop": "digitalWrite(${DIR}, HIGH);\nSerial.println(\"Moving CW\");\nfor (int i_${COMP_SUFFIX} = 0; i_${COMP_SUFFIX} < 200; i_${COMP_SUFFIX}++) {\n  digitalWrite(${STEP}, HIGH);\n  delayMicroseconds(1000);\n  digitalWrite(${STEP}, LOW);\n  delayMicroseconds(1000);\n}\ndelay(500);\ndigitalWrite(${DIR}, LOW);\nSerial.println(\"Moving CCW\");\nfor (int i_${COMP_SUFFIX} = 0; i_${COMP_SUFFIX} < 200; i_${COMP_SUFFIX}++) {\n  digitalWrite(${STEP}, HIGH);\n  delayMicroseconds(1000);\n  digitalWrite(${STEP}, LOW);\n  delayMicroseconds(1000);\n}\ndelay(500);"
         }
     }
 }

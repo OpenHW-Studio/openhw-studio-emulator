@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 // Context Menu for live tuning
 export const LdrContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (key: string, value: any) => void }) => {
-    const lux = attrs?.lux ?? 500;
+    const lux = attrs?.lux ?? 100;
     const threshold = attrs?.threshold ?? 500;
 
     // Update manifest attributes AND send data to the running Web Worker
@@ -18,7 +18,7 @@ export const LdrContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (key
             <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <label style={{ fontSize: '10px', color: 'var(--text2)', marginBottom: '2px' }}>Lux: {lux}</label>
                 <input 
-                    type="range" min="0" max="1000" value={lux}
+                    type="range" min="0" max="1000" step="1" value={lux}
                     onChange={(e) => handleSlider('lux', parseFloat(e.target.value))}
                     onPointerDown={(e) => e.stopPropagation()}
                     style={{ width: '80px', cursor: 'pointer' }}
@@ -40,13 +40,31 @@ export const LdrContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (key
 // BOUNDS: covers the full visual area.
 export const BOUNDS = { x: 0, y: 0, w: 180, h: 75 };
 
-export const LdrModuleUI = ({ state, attrs }: { state: any, attrs: any }) => {
+export const LdrModuleUI = ({ state, attrs, isRunning, onEvent }: { state: any, attrs: any, isRunning?: boolean, onEvent?: (event: any) => void }) => {
     const pwrLed = state?.pwrLed || false;
     const doLed = state?.doLed || false;
 
+    const externalLight = state?.light ?? attrs?.lux ?? 100;
+    const [localLight, setLocalLight] = useState(externalLight);
+
+    useEffect(() => {
+        setLocalLight(externalLight);
+    }, [externalLight]);
+
+    const handleSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = Math.round(parseFloat(e.target.value));
+        setLocalLight(val);
+        if (onEvent) {
+            onEvent({ type: 'SET_ATTR', key: 'lux', value: val });
+        }
+        if (attrs && attrs.onInteract) {
+            attrs.onInteract({ type: 'SET_ATTR', key: 'lux', value: val });
+        }
+    };
+
     return (
-        <div style={{ pointerEvents: 'none', position: 'absolute', inset: 0 }}>
-            <svg width="100%" height="100%" viewBox="0 0 180 75" version="1.1" xmlns="http://www.w3.org/2000/svg">
+        <div style={{ position: 'relative', width: BOUNDS.w, height: BOUNDS.h }}>
+            <svg width="100%" height="100%" viewBox="0 0 180 75" version="1.1" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block', overflow: 'visible', pointerEvents: 'none' }}>
                 {/* Board */}
                 <path d="M 153 0 H 17 V 75 H 153 Z M 24 65.5 c 1.9 0 3.44 1.5 3.44 3.34 s -1.54 3.34 -3.44 3.34 -3.44 -1.5 -3.44 -3.34 1.54 -3.34 3.44 -3.34 Z M 122.3 22.2 c 4.17 0 7.55 3.38 7.55 7.55 s -3.38 7.55 -7.55 7.55 -7.55 -3.38 -7.55 -7.55 3.38 -7.55 7.55 -7.55 Z M 24 2.8 c 1.9 0 3.44 1.5 3.44 3.34 s -1.54 3.34 -3.44 3.34 -3.44 -1.5 -3.44 -3.34 1.54 -3.34 3.44 -3.34 Z" fill="#1c2546" />
 
@@ -147,6 +165,50 @@ export const LdrModuleUI = ({ state, attrs }: { state: any, attrs: any }) => {
                     <path d="m147 13.558 c-0.382 0-0.748 0.152-1.02 0.422-0.27 0.27-0.421 0.637-0.421 1.02s0.151 0.749 0.421 1.02c0.271 0.27 0.637 0.422 1.02 0.422h33c0.233 0 0.423-0.19 0.423-0.424v-2.03c0-0.234-0.19-0.424-0.423-0.424h-33z" />
                 </g>
             </svg>
+            {isRunning && (
+                <div style={{ 
+                    position: 'absolute', 
+                    top: '-35px', 
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    background: 'rgba(0,0,0,0.85)', 
+                    padding: '6px 10px', 
+                    borderRadius: '6px',
+                    color: 'white',
+                    fontSize: '10px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px',
+                    pointerEvents: 'auto',
+                    zIndex: 1000,
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+                    backdropFilter: 'blur(4px)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    whiteSpace: 'nowrap'
+                }}
+                onPointerDown={(e) => e.stopPropagation()}
+                onPointerMove={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+                onMouseMove={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
+                onTouchMove={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+                >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                        <span>Illumination</span>
+                        <span>{Math.round(localLight)} lux</span>
+                    </div>
+                    <input 
+                        type="range" 
+                        min="0" 
+                        max="1000" 
+                        step="1"
+                        value={localLight} 
+                        onChange={handleSlider}
+                        style={{ width: '80px', height: '4px', cursor: 'pointer' }}
+                    />
+                </div>
+            )}
         </div>
     );
 };

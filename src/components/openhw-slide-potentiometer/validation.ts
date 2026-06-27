@@ -11,21 +11,24 @@ export const validation: { rules: ComponentValidationRule[] } = {
             description: 'Detect when the slide potentiometer track would overheat.',
             check: (component: any, graph: Map<string, string[]>, validator: any) => {
                 const maxPower = 0.25;
-                const dangerousLowResistance = 10;
+                // Typical potentiometer track resistance (10kΩ). VCC-to-GND always has this
+                // full value regardless of wiper position, so a short between supply rails
+                // through a properly working potentiometer is physically impossible.
+                const trackResistance = 10000;
                 const vVCC = validator?.calculateVoltageAtNode(`${component.id}.VCC`);
                 const vGND = validator?.calculateVoltageAtNode(`${component.id}.GND`);
 
                 if (vVCC !== undefined && vGND !== undefined) {
                     const voltageDrop = Math.abs(vVCC - vGND);
-                    const worstCasePower = (voltageDrop ** 2) / dangerousLowResistance;
+                    const steadyStatePower = (voltageDrop ** 2) / trackResistance;
 
-                    if (worstCasePower > maxPower) {
+                    if (steadyStatePower > maxPower) {
                         return createValidationIssue({
                             ruleId: 'slide-potentiometer-power-dissipation',
                             severity: 'error',
-                            message: `🔥 [Slide Pot ${component.id}] DANGER: If sliding to 0Ω, track will dissipate ${worstCasePower.toFixed(2)}W. Add series resistor.`,
+                            message: `🔥 [Slide Pot ${component.id}] Track dissipates ${steadyStatePower.toFixed(2)}W. Use higher resistance pot or lower voltage.`,
                             compIds: [component.id],
-                            remediation: 'Add a series resistor to limit worst-case current.',
+                            remediation: 'Use a potentiometer with higher track resistance or reduce supply voltage.',
                             autoFix: false,
                         });
                     }

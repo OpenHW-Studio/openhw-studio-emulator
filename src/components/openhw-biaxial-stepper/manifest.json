@@ -2,8 +2,8 @@
     "type": "openhw-biaxial-stepper",
     "label": "Biaxial Stepper Motor",
     "group": "Outputs",
-    "w": 280,
-    "h": 280,
+    "w": 435,
+    "h": 435,
     "attrs": {
         "outerHandLength": "30",
         "outerHandColor": "gold",
@@ -16,50 +16,50 @@
     "pins": [
         {
             "id": "A1-",
-            "x": 80,
-            "y": 119,
+            "x": 75,
+            "y": 150,
             "type": "digital"
         },
         {
             "id": "A1+",
-            "x": 80,
-            "y": 129,
+            "x": 75,
+            "y": 165,
             "type": "digital"
         },
         {
             "id": "B1+",
-            "x": 80,
-            "y": 139,
+            "x": 75,
+            "y": 180,
             "type": "digital"
         },
         {
             "id": "B1-",
-            "x": 80,
-            "y": 148,
+            "x": 75,
+            "y": 195,
             "type": "digital"
         },
         {
             "id": "A2-",
-            "x": 80,
-            "y": 158,
+            "x": 75,
+            "y": 210,
             "type": "digital"
         },
         {
             "id": "A2+",
-            "x": 80,
-            "y": 167,
+            "x": 75,
+            "y": 225,
             "type": "digital"
         },
         {
             "id": "B2+",
-            "x": 80,
-            "y": 177,
+            "x": 75,
+            "y": 240,
             "type": "digital"
         },
         {
             "id": "B2-",
-            "x": 80,
-            "y": 187,
+            "x": 75,
+            "y": 255,
             "type": "digital"
         }
     ],
@@ -185,8 +185,9 @@
             "AccelStepper"
         ],
         "arduino": {
-            "setup": "// Outer motor on Step=8, Dir=9\n// Inner motor on Step=11, Dir=12\n#include <AccelStepper.h>\nAccelStepper stepperOuter(AccelStepper::DRIVER, 8, 9);\nAccelStepper stepperInner(AccelStepper::DRIVER, 11, 12);\n\nvoid setup() {\n  stepperOuter.setMaxSpeed(1000);\n  stepperOuter.setAcceleration(500);\n  stepperInner.setMaxSpeed(1000);\n  stepperInner.setAcceleration(500);\n}",
-            "loop": "if (stepperOuter.distanceToGo() == 0) {\n  stepperOuter.moveTo(-stepperOuter.currentPosition() + 200);\n}\nif (stepperInner.distanceToGo() == 0) {\n  stepperInner.moveTo(-stepperInner.currentPosition() - 200);\n}\nstepperOuter.run();\nstepperInner.run();"
+            "globals": "// Outer motor on Step=8, Dir=9\n// Inner motor on Step=11, Dir=12\n#include <AccelStepper.h>\nAccelStepper stepperOuter_${COMP_SUFFIX}(AccelStepper::DRIVER, 8, 9);\nAccelStepper stepperInner_${COMP_SUFFIX}(AccelStepper::DRIVER, 11, 12);",
+            "setup": "stepperOuter_${COMP_SUFFIX}.setMaxSpeed(1000);\nstepperOuter_${COMP_SUFFIX}.setAcceleration(500);\nstepperInner_${COMP_SUFFIX}.setMaxSpeed(1000);\nstepperInner_${COMP_SUFFIX}.setAcceleration(500);",
+            "loop": "if (stepperOuter_${COMP_SUFFIX}.distanceToGo() == 0) {\n  stepperOuter_${COMP_SUFFIX}.moveTo(-stepperOuter_${COMP_SUFFIX}.currentPosition() + 200);\n}\nif (stepperInner_${COMP_SUFFIX}.distanceToGo() == 0) {\n  stepperInner_${COMP_SUFFIX}.moveTo(-stepperInner_${COMP_SUFFIX}.currentPosition() - 200);\n}\nstepperOuter_${COMP_SUFFIX}.run();\nstepperInner_${COMP_SUFFIX}.run();"
         }
     }
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 240, h: 114 }; // Scaled down from 760x360
+export const BOUNDS = { x: 0, y: 0, w: 150, h: 75 }; // Scaled to fit 15px grid perfectly
 
 export const CC1101ContextMenu = ({
     attrs,
@@ -52,8 +52,9 @@ export const CC1101UI = ({ state, attrs }: { state: any, attrs: any }) => {
                     </g>
                 </defs>
 
-                <rect x="38" y="48" width="504" height="264" fill="#c49a46" rx="2" />
-                <rect x="40" y="50" width="500" height="260" fill="#1b548f" rx="1" />
+                {/* Extended PCB slightly left to fit pins */}
+                <rect x="18" y="48" width="524" height="264" fill="#c49a46" rx="2" />
+                <rect x="20" y="50" width="520" height="260" fill="#1b548f" rx="1" />
 
                 <g fill="none" stroke="#2d71b8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M 120 180 L 160 180 L 160 160 L 210 160" />
@@ -101,17 +102,15 @@ export const CC1101UI = ({ state, attrs }: { state: any, attrs: any }) => {
                 </g>
 
                 <g fill="#ffffff" fontFamily="sans-serif" fontSize="16" fontWeight="bold">
-                    <text x="60" y="85">1</text>
-                    <text x="100" y="85">2</text>
-                    <text x="60" y="295">7</text>
-                    <text x="100" y="295">8</text>
+                    <text x="35" y="45">1</text>
+                    <text x="105" y="45">2</text>
+                    <text x="35" y="325">7</text>
+                    <text x="105" y="325">8</text>
                     <text x="470" y="90" fontSize="20" letterSpacing="1">433M</text>
                     <text x="460" y="290" fontSize="18">V2.0</text>
                     
                     <g stroke="#ffffff" strokeWidth="2" fill="none">
-                    <path d="M 45 100 L 135 100 L 135 255 L 45 255 L 45 100" />
-                    <path d="M 45 140 L 135 140" />
-                    <path d="M 45 100 L 85 100 L 85 140 L 45 140 Z" />
+                    <path d="M 22 52 L 132 52 L 132 305 L 22 305 Z" />
                     
                     <circle cx="210" cy="130" r="2" fill="#ffffff" stroke="none" />
                     <path d="M 195 145 L 195 125 L 215 125" />
@@ -130,16 +129,14 @@ export const CC1101UI = ({ state, attrs }: { state: any, attrs: any }) => {
                     <circle cx="350" cy="275" r="10" fill="#c49a46" />
                 </g>
 
-                <rect x="51" y="106" width="28" height="28" fill="#d4d4d4" rx="2" />
-                <rect x="54" y="109" width="22" height="22" fill="#eeeeee" rx="1" />
-                <circle cx="65" cy="120" r="7" fill="#222222" />
-                <use href="#pth-round" x="110" y="120" />
-                <use href="#pth-round" x="65" y="165" />
-                <use href="#pth-round" x="110" y="165" />
-                <use href="#pth-round" x="65" y="210" />
-                <use href="#pth-round" x="110" y="210" />
-                <use href="#pth-round" x="65" y="255" />
-                <use href="#pth-round" x="110" y="255" />
+                <use href="#pth-round" x="114" y="72" />
+                <use href="#pth-round" x="38" y="72" />
+                <use href="#pth-round" x="114" y="144" />
+                <use href="#pth-round" x="38" y="144" />
+                <use href="#pth-round" x="114" y="216" />
+                <use href="#pth-round" x="38" y="216" />
+                <use href="#pth-round" x="114" y="288" />
+                <use href="#pth-round" x="38" y="288" />
 
                 <use href="#smd-v" x="160" y="145" />
                 <use href="#smd-v" x="160" y="215" />

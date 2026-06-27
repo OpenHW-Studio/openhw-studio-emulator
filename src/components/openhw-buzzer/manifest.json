@@ -3,8 +3,8 @@
     "label": "Buzzer",
     "description": "Piezoelectric buzzer that generates audio tones when driven by PWM or toggled digital signals. Frequency determines pitch; use tone() in Arduino.",
     "group": "Outputs",
-    "w": 36,
-    "h": 47.6,
+    "w": 105,
+    "h": 135,
     "attrs": {
         "volume": "50",
         "frequency": "440"
@@ -12,15 +12,15 @@
     "pins": [
         {
             "id": "GND",
-            "x": 10.1,
-            "y": 45.9,
+            "x": 45,
+            "y": 135,
             "type": "power",
             "description": "Negative"
         },
         {
             "id": "SIG",
-            "x": 25.1,
-            "y": 45.9,
+            "x": 60,
+            "y": 135,
             "type": "digital",
             "description": "Positive"
         }

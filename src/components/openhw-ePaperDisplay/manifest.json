@@ -3,7 +3,7 @@
     "label": "2.9\" e-Paper Display (beta)",
     "group": "Displays",
     "w": 220,
-    "h": 90,
+    "h": 135,
     "attrs": {
         "breadboard": {
             "anchorPin": "GND"
@@ -18,53 +18,61 @@
     "pins": [
         {
             "id": "VCC",
-            "x": 10,
-            "y": 20,
+            "x": 15,
+            "y": 15,
             "type": "power"
         },
         {
             "id": "GND",
-            "x": 10,
-            "y": 27,
+            "x": 15,
+            "y": 30,
             "type": "power"
         },
         {
             "id": "DIN",
-            "x": 10,
-            "y": 34,
+            "x": 15,
+            "y": 45,
             "type": "input"
         },
         {
             "id": "CLK",
-            "x": 10,
-            "y": 41,
+            "x": 15,
+            "y": 60,
             "type": "input"
         },
         {
             "id": "CS",
-            "x": 10,
-            "y": 48,
+            "x": 15,
+            "y": 75,
             "type": "input"
         },
         {
             "id": "DC",
-            "x": 10,
-            "y": 55,
+            "x": 15,
+            "y": 90,
             "type": "input"
         },
         {
             "id": "RST",
-            "x": 10,
-            "y": 62,
+            "x": 15,
+            "y": 105,
             "type": "input"
         },
         {
             "id": "BUSY",
-            "x": 10,
-            "y": 69,
+            "x": 15,
+            "y": 120,
             "type": "output"
         }
     ],
+    "autocoding": {
+        "libraries": ["GxEPD2"],
+        "arduino": {
+            "globals": "#include <GxEPD2_BW.h>\n#define EPD_CS ${CS}\n#define EPD_DC ${DC}\n#define EPD_RST ${RST}\n#define EPD_BUSY ${BUSY}\nGxEPD2_BW<GxEPD2_290_T94_V2, 16> epd(GxEPD2_290_T94_V2(EPD_CS, EPD_DC, EPD_RST, EPD_BUSY));",
+            "setup": "Serial.begin(9600);\nepd.init(115200);\nepd.setFullWindow();\nepd.fillScreen(GxEPD_WHITE);\nepd.setTextSize(2);\nepd.setTextColor(GxEPD_BLACK);\nepd.setCursor(20, 40);\nepd.println(\"Hello!\");\nepd.display();",
+            "loop": "epd.setFullWindow();\nepd.fillScreen(GxEPD_WHITE);\nepd.setTextSize(2);\nepd.setTextColor(GxEPD_BLACK);\nepd.setCursor(20, 30);\nepd.println(\"e-Paper\");\nepd.setCursor(20, 60);\nepd.println(\"Display\");\nepd.display();\ndelay(30000);"
+        }
+    },
     "autowiring": {
         "connections": [
             {

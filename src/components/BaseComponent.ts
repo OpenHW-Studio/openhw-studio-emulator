@@ -579,6 +579,38 @@ export class BaseComponent {
         return this.pins[pinId] ? this.pins[pinId].voltage : 0.0;
     }
 
+    protected propagatePin(pinId: string, voltage: number, wires: any[], instances: BaseComponent[]) {
+        if (!this.pins[pinId]) this.pins[pinId] = { voltage: 0, mode: 'OUTPUT' };
+        this.pins[pinId].voltage = voltage;
+        const pinKey = `${this.id}:${pinId}`;
+        const visited = new Set<string>();
+        visited.add(pinKey);
+        const propagate = (key: string, v: number) => {
+            for (const w of wires) {
+                const match = w.from === key || w.to === key;
+                if (!match) continue;
+                const otherKey = w.from === key ? w.to : w.from;
+                if (visited.has(otherKey)) continue;
+                visited.add(otherKey);
+                const [compId, compPin] = otherKey.split(':');
+                const inst = instances.find((i: BaseComponent) => i.id === compId);
+                if (!inst) continue;
+                if (!inst.pins[compPin]) inst.pins[compPin] = { voltage: 0, mode: 'INPUT' };
+                inst.setPinVoltage(compPin, v);
+                if (inst.type === 'openhw-resistor') {
+                    const otherPin = compPin === 'p1' ? 'p2' : 'p1';
+                    inst.setPinVoltage(otherPin, v);
+                    const forwardKey = `${compId}:${otherPin}`;
+                    if (!visited.has(forwardKey)) {
+                        visited.add(forwardKey);
+                        propagate(forwardKey, v);
+                    }
+                }
+            }
+        };
+        propagate(pinKey, voltage);
+    }
+
     update(cpuCycles: number, currentWires: any[], allComponentsInstances: BaseComponent[]) {
         // Override in subclasses
     }

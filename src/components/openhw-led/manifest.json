@@ -22,14 +22,14 @@
     "pins": [
         {
             "id": "A",
-            "x": 25.8,
+            "x": 40.8,
             "y": 72.4,
             "type": "input",
             "description": "Anode (+)"
         },
         {
             "id": "K",
-            "x": 40.8,
+            "x": 25.8,
             "y": 72.4,
             "type": "input",
             "description": "Cathode (-)"

@@ -1,59 +1,37 @@
 import React from 'react';
 
-export const BOUNDS = { x: 0, y: 0, w: 125, h: 100 };
+export const BOUNDS = { x: 0, y: 0, w: 75, h: 60 };
 
 export const ClockGeneratorUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const componentColor = '#9c27b0';
-    const wireColor = '#000000';
+    const wireColor = '#1e1e1e';
     
     let freq = attrs?.frequency || '10';
     let units = attrs?.units || 'KHz';
     const dispTxt = `${freq}${units.replace('Hz', '').toLowerCase()}`;
 
-    const nativeW = 80;
-    const nativeH = 60;
-    const scaleX = BOUNDS.w / nativeW;
-    const scaleY = BOUNDS.h / nativeH;
-
     return (
-        <div style={{
-            pointerEvents: 'none',
-            width: BOUNDS.w,
-            height: BOUNDS.h,
-            position: 'relative'
-        }}>
-            <svg
-                width={nativeW}
-                height={nativeH}
-                viewBox="0 0 80 60"
-                style={{
-                    display: 'block',
-                    transform: `scale(${scaleX}, ${scaleY})`,
-                    transformOrigin: '0 0'
-                }}
-            >
-
+        <svg width="75" height="60" viewBox="0 0 75 60" style={{ pointerEvents: 'none' }}>
             <rect
-                x="3" y="3" width="54" height="54"
+                x="5" y="5" width="50" height="50"
                 fill="#e0e0e0"
                 fillOpacity="0.4"
                 stroke={componentColor}
-                strokeWidth="3"
+                strokeWidth="2"
+                rx="4"
             />
             <path
-                d="M 3 40 L 11 40 L 11 15 L 25 15 L 25 40 L 35 40 L 35 15 L 49 15 L 49 40 L 57 40"
+                d="M 10 40 L 20 40 L 20 20 L 35 20 L 35 40 L 50 40"
                 fill="none"
                 stroke={componentColor}
-                strokeWidth="3"
+                strokeWidth="2"
                 strokeLinejoin="miter"
             />
-            <text x="30" y="53" fill="#000" fontSize="13" fontFamily="sans-serif" textAnchor="middle">
+            <text x="30" y="52" fill="#000" fontSize="10" fontFamily="sans-serif" textAnchor="middle">
                 {dispTxt}
             </text>
-            <line x1="57" y1="40" x2="80" y2="40" stroke={wireColor} strokeWidth="3" />
+            <line x1="55" y1="30" x2="75" y2="30" stroke={wireColor} strokeWidth="2" strokeLinecap="round" />
         </svg>
-    </div>
-
     );
 };
 

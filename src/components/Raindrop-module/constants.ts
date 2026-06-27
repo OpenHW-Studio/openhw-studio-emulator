@@ -1,1 +1,1 @@
-export const BOUNDS = { x: 0, y: 0, w: 135, h: 270 };
+export const BOUNDS = { x: 0, y: 0, w: 70, h: 160 };
