@@ -20,7 +20,7 @@ export const Wokwi7SegmentUI = ({ state, attrs }: { state: any, attrs: any }) =>
 
     const renderDigit = (x: number, digitIndex: number) => {
         return (
-            <g transform={`translate(${x}, 0)`}>
+            <g key={digitIndex} transform={`translate(${x}, 0)`}>
                 {/* DP */}
                 <circle cx="62" cy="91" r="4" fill={getFill(digitIndex, 'DP')} />
                 

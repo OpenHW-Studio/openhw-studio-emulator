@@ -78,24 +78,14 @@ export class NetworkWorkerProxy {
 
   private _boot(): void {
     try {
-      // Vite / webpack worker import
-      this._worker = new Worker(
-        new URL('../workers/network.worker.ts', import.meta.url),
-        { type: 'module', name: 'OpenHW-NetWorker' }
-      );
-
-      const channel = new MessageChannel();
-      this._port = channel.port1;
-      this._port.onmessage = (e) => this._onPortMessage(e);
-      this._port.start();
-
-      // Send port2 to the worker (same pattern as render worker)
-      this._worker.postMessage({ type: 'SET_NET_PORT', port: channel.port2 }, [channel.port2]);
-      this._ready = true;
-
-      console.log('[NetProxy] Network Worker started');
+      // In-browser environment, we rely on the host application (e.g. OpenHW Studio Frontend)
+      // to instantiate the network worker and manage connections.
+      // We no longer attempt to spawn a Worker from within this library because
+      // Vite throws MIME-type errors when import.meta.url resolves to node_modules.
+      console.log('[NetProxy] Network Worker is managed externally by the host application.');
+      this._ready = false;
     } catch (err) {
-      console.error('[NetProxy] Failed to start Network Worker — falling back to in-process:', err);
+      console.error('[NetProxy] Failed to initialize:', err);
       this._ready = false;
     }
   }
