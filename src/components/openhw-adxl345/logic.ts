@@ -108,7 +108,8 @@ export class ADXL345Logic extends BaseComponent {
         // run. Gating on powered caused "No ADXL345 detected" even with correct
         // wiring. Instead, we respond to any matching I2C address.
         const addr7 = (address > 0x7F) ? (address >> 1) : address;
-        this.selected = (addr7 === this.getI2CAddress());
+        // Accept both 0x53 and 0x1D since SDO might be floating or tied to a pull-up GPIO
+        this.selected = (addr7 === 0x53 || addr7 === 0x1D);
         this.expectingRegister = !read;
         return this.selected;
     }
