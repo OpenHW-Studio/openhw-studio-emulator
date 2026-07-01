@@ -39,11 +39,7 @@ export class GasSensorLogic extends BaseComponent {
         const vcc = this.getPinVoltage('VCC') || this.getPinVoltage('5V');
         const gnd = this.getPinVoltage('GND');
 
-        // Require both power pins to be physically connected — a floating GND
-        // pin defaults to 0 V, which would make (vcc - gnd) pass even unwired.
-        const vccConnected = this.state?.pins?.['VCC'] || this.state?.pins?.['5V'];
-        const gndConnected = this.state?.pins?.['GND'];
-        const hasPower = !!vccConnected && !!gndConnected && (vcc - gnd) >= 3.0;
+        const hasPower = (vcc - gnd) >= 3.0;
 
         // Output voltages
         // AO outputs voltage proportional to gasLevel (0 to 1023 corresponds to 0V to VCC)

@@ -14,78 +14,80 @@ export const NtcUI = ({ state, attrs, isRunning, onEvent }: { state: any, attrs:
         if (onEvent) {
             onEvent({ type: 'temperature', value: val });
         }
+        if (attrs && attrs.onInteract) {
+            attrs.onInteract({ type: 'temperature', value: val });
+            attrs.onInteract({ type: 'input', value: val });
+        }
     };
-
-    // Calculate dynamic color for the thermal aura based on temperature (-40 to 125)
-    const tempRatio = Math.max(0, Math.min(1, (localTemp + 40) / 165));
-    // Hue ranges from 240 (Blue/Cold) to 0 (Red/Hot)
-    const hue = (1 - tempRatio) * 240; 
 
     return (
         <div style={{ position: 'relative', width: BOUNDS.w, height: BOUNDS.h }}>
-            <svg 
-                width="100%" height="100%" viewBox="0 0 22.5 22.5" 
+            <svg
+                width="100%"
+                height="100%"
+                viewBox="0 0 135.4 71.782"
                 style={{ display: 'block', overflow: 'visible', pointerEvents: 'none' }}
                 xmlns="http://www.w3.org/2000/svg"
             >
                 <defs>
-                    <radialGradient id="ntcBody" cx="30%" cy="30%" r="60%">
-                        <stop offset="0%" stopColor="#4A5568" />
-                        <stop offset="60%" stopColor="#1A202C" />
-                        <stop offset="100%" stopColor="#000000" />
-                    </radialGradient>
-                    <radialGradient id="highlight" cx="30%" cy="30%" r="40%">
-                        <stop offset="0%" stopColor="rgba(255,255,255,0.5)" />
-                        <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-                    </radialGradient>
-                    <linearGradient id="legMetal" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stopColor="#9CA3AF" />
-                        <stop offset="50%" stopColor="#F3F4F6" />
-                        <stop offset="100%" stopColor="#6B7280" />
-                    </linearGradient>
+                    <clipPath id="a">
+                        <path d="m15.336 49.725c-0.945 0.682-2.127 1.088-3.411 1.088-3.104 0-5.612-2.374-5.612-5.281s2.508-5.281 5.612-5.281c1.038 0 2.009 0.266 2.842 0.728 2.108 0.79 3.314 1.004 5.699 0.917 0 0-2.134 1.335-1.968 2.97 0.149 1.458 3.053 2.494 3.053 2.494-2.438 0.388-4.177 1.403-6.215 2.365z" />
+                    </clipPath>
                 </defs>
-
-                {/* Thermal Aura (Color mapped to temperature) */}
-                <circle 
-                    cx="11.25" cy="10" r="9" 
-                    fill={`hsla(${hue}, 100%, 50%, 0.25)`} 
-                    style={{ mixBlendMode: 'screen', filter: 'blur(2px)' }} 
-                />
-
-                {/* Metallic Legs curving to the 15px pitch anchor points */}
-                <path d="M 9 14.5 L 9 17 Q 9 20 3.75 22.5" fill="none" stroke="url(#legMetal)" strokeWidth="1.2" strokeLinecap="round" />
-                <path d="M 13.5 14.5 L 13.5 17 Q 13.5 20 18.75 22.5" fill="none" stroke="url(#legMetal)" strokeWidth="1.2" strokeLinecap="round" />
-
-                {/* Connection points exactly at y=22.5 */}
-                <circle cx="3.75" cy="22.5" r="1.5" fill="#333" />
-                <circle cx="18.75" cy="22.5" r="1.5" fill="#333" />
-
-                {/* Epoxy Bead (Teardrop shape) */}
-                <path 
-                    d="M 7.25 7 
-                       A 4 4 0 0 1 15.25 7 
-                       C 15.25 11, 14 14, 13.5 15
-                       C 12 16, 10.5 16, 9 15
-                       C 8.5 14, 7.25 11, 7.25 7 Z"
-                    fill="url(#ntcBody)" 
-                />
-                
-                {/* Glossy White Reflection for Realism */}
-                <path 
-                    d="M 7.25 7 
-                       A 4 4 0 0 1 15.25 7 
-                       C 15.25 11, 14 14, 13.5 15
-                       C 12 16, 10.5 16, 9 15
-                       C 8.5 14, 7.25 11, 7.25 7 Z"
-                    fill="url(#highlight)" 
-                />
+                <path d="m115.3 0h-90.421v71.782h90.421zm-66.145 56.313c3.27 0 5.925 2.608 5.925 5.878s-2.655 5.924-5.925 5.924-5.925-2.654-5.925-5.924 2.655-5.878 5.925-5.878zm16.013-7.96c3.27 0 5.925 2.654 5.925 5.924s-2.655 5.925-5.925 5.925-5.924-2.655-5.924-5.925 2.654-5.924 5.924-5.924zm-33.698 1.324c2.29 0 4.149 1.859 4.149 4.148 0 2.29-1.859 4.149-4.149 4.149-2.289 0-4.148-1.859-4.148-4.149 0-2.289 1.859-4.148 4.148-4.148zm59.914 0.635c2.041 0 3.698 1.657 3.698 3.698s-1.657 3.698-3.698 3.698-3.698-1.657-3.698-3.698 1.657-3.698 3.698-3.698zm-11.4-8.143c2.041 0 3.698 1.657 3.698 3.698s-1.657 3.698-3.698 3.698-3.698-1.657-3.698-3.698 1.657-3.698 3.698-3.698zm-14.816-1.811c2.041 0 3.698 1.657 3.698 3.698s-1.657 3.698-3.698 3.698-3.698-1.657-3.698-3.698 1.657-3.698 3.698-3.698zm0-15.974c2.041 0 3.698 1.657 3.698 3.698s-1.657 3.698-3.698 3.698-3.698-1.657-3.698-3.698 1.657-3.698 3.698-3.698zm14.816-3.203c2.041 0 3.698 1.657 3.698 3.698s-1.657 3.698-3.698 3.698-3.698-1.657-3.698-3.698 1.657-3.698 3.698-3.698zm-14.816-9.601c3.27 0 5.925 2.654 5.925 5.924s-2.655 5.925-5.925 5.925-5.924-2.655-5.924-5.925 2.654-5.924 5.924-5.924zm-33.698 2.228c2.29 0 4.149 1.859 4.149 4.148 0 2.29-1.859 4.149-4.149 4.149-2.289 0-4.148-1.859-4.148-4.149 0-2.289 1.859-4.148 4.148-4.148zm59.914 0.288c2.041 0 3.698 1.657 3.698 3.698s-1.657 3.698-3.698 3.698-3.698-1.657-3.698-3.698 1.657-3.698 3.698-3.698zm-48.154-5.701c0-1.635 2.963-4.729 5.925-4.729s5.925 3.094 5.925 4.729c0 3.27-2.655 7.121-5.925 7.121s-5.925-3.851-5.925-7.121z" fill="#0f3661" />
+                <path d="m104.45 21.602v28.578h8.389v-28.578z" fill="none" stroke="#fff" strokeWidth=".9px" />
+                <g fill="#29261c">
+                    <path d="m105.37 42.328v6.554h6.554v-6.554z" />
+                    <path d="m105.37 32.604v6.554h6.554v-6.554z" />
+                    <path d="m105.37 22.865v6.554h6.554v-6.554z" />
+                </g>
+                <g fill="#9f9f9f">
+                    <path d="m108.85 44.165c-0.382 0-0.749 0.151-1.019 0.422-0.27 0.27-0.422 0.636-0.422 1.018v1e-3c0 0.382 0.152 0.748 0.422 1.018s0.637 0.422 1.019 0.422h26.131c0.234 0 0.424-0.189 0.424-0.423v-2.035c0-0.234-0.19-0.423-0.424-0.423h-26.131z" />
+                    <path d="m108.85 34.441c-0.382 0-0.749 0.151-1.019 0.422-0.27 0.27-0.422 0.636-0.422 1.018v1e-3c0 0.382 0.152 0.748 0.422 1.018s0.637 0.422 1.019 0.422h26.131c0.234 0 0.424-0.189 0.424-0.423v-2.035c0-0.234-0.19-0.423-0.424-0.423h-26.131z" />
+                    <path d="m108.85 24.701c-0.382 0-0.749 0.152-1.019 0.422-0.27 0.271-0.422 0.637-0.422 1.019s0.152 0.749 0.422 1.019 0.637 0.422 1.019 0.422h26.131c0.234 0 0.424-0.19 0.424-0.423v-2.035c0-0.234-0.19-0.424-0.424-0.424h-26.131z" />
+                </g>
+                <path d="m96.494 43.126v-14.495h-4.787v14.495z" fill="#bbb9b9" />
+                <path d="m96.661 39.537v-7.317h-5.121v7.317z" fill="#29261c" />
+                <g fill="none" stroke="#bbb9b9" strokeLinejoin="miter">
+                    <circle cx="31.465" cy="17.956" r="4.149" strokeWidth="2.5px" />
+                    <circle cx="31.465" cy="53.825" r="4.149" strokeWidth="2.5px" />
+                    <circle cx="65.163" cy="54.277" r="5.925" strokeWidth=".95px" />
+                    <circle cx="65.163" cy="17.504" r="5.925" strokeWidth=".95px" />
+                    <circle cx="65.163" cy="28.082" r="3.698" strokeWidth="2.23px" />
+                    <circle cx="65.163" cy="44.056" r="3.698" strokeWidth="2.23px" />
+                    <circle cx="49.15" cy="62.191" r="5.925" strokeWidth=".75px" />
+                    <circle cx="49.15" cy="9.591" r="5.925" strokeWidth=".75px" />
+                </g>
+                <ellipse cx="48.82" cy="25.397" rx="6.375" ry="4.839" fill="#bababa" />
+                <ellipse cx="48.82" cy="46.384" rx="6.375" ry="4.839" fill="#bbb9b9" />
+                <circle cx="48.82" cy="25.397" r="2.612" fill="#eceee9" />
+                <circle cx="48.82" cy="46.384" r="2.612" fill="#eceee9" />
+                <path d="m48.82 25.397c-8.828 4.288-19.813 9.008-38 11.393" fill="none" stroke="#d6d8d4" strokeLinejoin="miter" strokeWidth=".95px" />
+                <path d="m48.82 45.922c-9.482-5.223-20.452-6.013-38-4.789" fill="none" stroke="#d8d8d3" strokeLinejoin="miter" strokeWidth=".95px" />
+                <path d="m9.023 43.72c-0.945 0.682-2.127 1.088-3.411 1.088-3.104 0-5.612-2.374-5.612-5.281s2.508-5.281 5.612-5.281c1.038 0 2.009 0.266 2.842 0.728 2.108 0.79 3.314 1.004 5.699 0.917 0 0-2.134 1.335-1.968 2.97 0.149 1.458 3.053 2.494 3.053 2.494-2.438 0.388-4.177 1.403-6.215 2.365z" fill="#151312" />
+                <g transform="translate(-6.313,-6.005)" clipPath="url(#a)">
+                    <path d="m16.648 41.782c-0.617 0-1.284-0.077-1.895 0-2.276 0.284-4.755 1.806-6.429 3.282-0.732 0.645-1.351 1.332-1.854 2.171-0.172 0.287-0.363 0.562-0.527 0.852-8e-3 0.012-0.215 0.396-0.248 0.362-0.152-0.151-0.044-0.995-0.044-1.151 0-1.394 0.015-2.694 0.341-4.059 0.435-1.827 0.867-4.205 2.407-5.497 0.593-0.497 1.419-0.714 2.138-0.941 0.989-0.311 2.096-0.55 3.145-0.406 1.754 0.241 3.113 2.109 3.428 3.768 0.08 0.421-0.08 0.892-0.08 1.31" fill="#615a59" />
+                </g>
+                <g r="3.698" fill="none" stroke="#bbb9b9" strokeLinejoin="miter" strokeWidth="2.23px">
+                    <circle cx="91.379" cy="17.794" />
+                    <circle cx="91.379" cy="54.01" />
+                </g>
+                <path d="m79.979 41.028c3.519 0 6.375 2.168 6.375 4.839 0 2.67-2.856 4.839-6.375 4.839-3.518 0-6.375-2.169-6.375-4.839 0-2.671 2.857-4.839 6.375-4.839zm0 1.141c2.041 0 3.698 1.657 3.698 3.698s-1.657 3.698-3.698 3.698-3.698-1.657-3.698-3.698 1.657-3.698 3.698-3.698z" fill="#bbb9b9" />
+                <path d="m79.979 20.04c3.519 0 6.375 2.169 6.375 4.839 0 2.671-2.856 4.839-6.375 4.839-3.518 0-6.375-2.168-6.375-4.839 0-2.67 2.857-4.839 6.375-4.839zm0 1.141c2.041 0 3.698 1.657 3.698 3.698s-1.657 3.698-3.698 3.698-3.698-1.657-3.698-3.698 1.657-3.698 3.698-3.698z" fill="#bbb9b9" />
+                <path d="m89.905 44.462v-17.142h8.391v17.142z" fill="none" stroke="#fff" strokeLinejoin="miter" strokeWidth=".65px" />
+                <text fill="#fffefe" fontFamily="sans-serif" transform="rotate(-90)">
+                    <tspan x="-39.297 -37.036 -34.776" y="95.418" fontSize="3.735px">103</tspan>
+                    <tspan x="-61.485" y="111.57" fontSize="9.778px">S</tspan>
+                    <tspan x="-15.512" y="111.573" fontSize="15.828px">-</tspan>
+                </text>
             </svg>
-
             {/* Hidden simulation slider (only shows when running) */}
             {isRunning && (
                 <div style={{ 
                     position: 'absolute', 
-                    top: '-45px', 
+                    top: '-35px', 
+                    left: '50%',
+                    transform: 'translateX(-50%)',
                     background: 'rgba(0,0,0,0.85)', 
                     padding: '6px 10px', 
                     borderRadius: '6px',
@@ -126,4 +128,4 @@ export const NtcUI = ({ state, attrs, isRunning, onEvent }: { state: any, attrs:
     );
 };
 
-export const BOUNDS = { x: 0, y: 0, w: 22.5, h: 22.5 };
+export const BOUNDS = { x: 0, y: 0, w: 135.4, h: 71.8 };

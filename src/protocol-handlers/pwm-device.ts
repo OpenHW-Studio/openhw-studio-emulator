@@ -51,6 +51,11 @@ export class PWMProtocol extends BaseComponent {
     onPWM(pinId: string, meta: PWMMeta): void {
         if (!this.isMonitoredPin(pinId)) return;
 
+        // Track the last edge cycle for silence detection in update()
+        if ((meta as any).cycles !== undefined) {
+            (this as any)._lastEdgeCycle = (meta as any).cycles;
+        }
+
         // Ignore extremely fast glitches (e.g. noise > 1MHz or pulses < 1us)
         if (meta.pulseUs < 1 || meta.frequencyHz > 1000000) return;
 

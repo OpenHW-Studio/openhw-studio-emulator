@@ -5,36 +5,56 @@ export class NtcLogic extends BaseComponent {
         super(id, manifest);
         this.state = {
             resistance: 10000,
-            temperature: parseFloat(manifest.attrs?.temperature || '25')
+            temperature: parseFloat(manifest.attrs?.temperature || '25'),
+            beta: parseFloat(manifest.attrs?.beta || '3950'),
+            r25: parseFloat(manifest.attrs?.r25 || '10000')
         };
+        // Ensure frontend registry pins exist so setPinVoltage works
+        if (!this.pins['OUT']) this.pins['OUT'] = { voltage: 0, mode: 'analog' };
+        if (!this.pins['VCC']) this.pins['VCC'] = { voltage: 5, mode: 'power' };
+        if (!this.pins['GND']) this.pins['GND'] = { voltage: 0, mode: 'ground' };
     }
 
     getConductance() {
-        const tempC = parseFloat(this.attrs?.temperature || '25');
-        const beta = parseFloat(this.attrs?.beta || '3950');
-        const r25 = parseFloat(this.attrs?.r25 || '10000');
+        return 1e-12;
+    }
 
+    private computeResistance(): number {
+        const tempC = parseFloat(String(this.state.temperature ?? this.attrs?.temperature ?? '25'));
+        const beta = parseFloat(String(this.attrs?.beta || '3950'));
+        const r25 = parseFloat(String(this.attrs?.r25 || '10000'));
         const tempK = tempC + 273.15;
-        const t0K = 25 + 273.15;
+        const t0K = 298.15;
+        return r25 * Math.exp(beta * (1 / tempK - 1 / t0K));
+    }
 
-        // R = R25 * exp(Beta * (1/T - 1/T0))
-        const resistance = r25 * Math.exp(beta * (1 / tempK - 1 / t0K));
-        return 1 / resistance;
+    getPinVoltage(pinId: string): number {
+        if (pinId === 'OUT') {
+            const r = this.state.resistance;
+            const pullup = parseFloat(String(this.attrs?.r25 || this.state.r25 || '10000'));
+            if (r && r > 1) {
+                return 5.0 * r / (pullup + r);
+            }
+            const freshR = this.computeResistance();
+            return 5.0 * freshR / (pullup + freshR);
+        }
+        return super.getPinVoltage(pinId);
     }
 
     update() {
-        const tempC = parseFloat(this.attrs?.temperature || '25');
-        const beta = parseFloat(this.attrs?.beta || '3950');
-        const r25 = parseFloat(this.attrs?.r25 || '10000');
-        
-        const tempK = tempC + 273.15;
-        const t0K = 25 + 273.15;
-        const resistance = r25 * Math.exp(beta * (1 / tempK - 1 / t0K));
+        const tempAttr = this.state.temperature ?? this.attrs?.temperature;
+        const tempC = tempAttr !== undefined ? parseFloat(String(tempAttr)) : 25;
+        const resistance = this.computeResistance();
+        const r25 = parseFloat(String(this.attrs?.r25 || this.state.r25 || '10000'));
 
         this.setState({
             resistance,
             temperature: tempC
         });
+
+        const vOut = 5.0 * resistance / (r25 + resistance);
+
+        this.setPinVoltage('OUT', vOut);
     }
 
     onCustomTelemetry() {
@@ -45,8 +65,9 @@ export class NtcLogic extends BaseComponent {
     }
 
     onEvent(event: any) {
-        if (event && event.type === 'temperature' && event.value !== undefined) {
+        if (event && (event.type === 'temperature' || event.type === 'input') && event.value !== undefined) {
             this.attrs.temperature = String(event.value);
+            this.state.temperature = event.value;
             this.update();
             this.stateChanged = true;
         }
