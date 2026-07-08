@@ -15,6 +15,10 @@ export class A4988Logic extends BaseComponent {
     constructor(id: string, manifest: any) {
         super(id, manifest);
         this.state = { active: false };
+        if (this.pins['1A']) this.pins['1A'].mode = 'OUTPUT';
+        if (this.pins['1B']) this.pins['1B'].mode = 'OUTPUT';
+        if (this.pins['2A']) this.pins['2A'].mode = 'OUTPUT';
+        if (this.pins['2B']) this.pins['2B'].mode = 'OUTPUT';
     }
 
     onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number) {
