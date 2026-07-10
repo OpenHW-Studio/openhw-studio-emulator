@@ -17,6 +17,7 @@ export class DHT22Logic extends BaseComponent {
 
     // Guard: true while DHT actively drives DATA — prevents re-entrant onPinStateChange.
     private _drivingBus: boolean = false;
+    private _lastDrivenVoltage: number = 5.0;
 
     // Injected by avr-runner / execute.ts
     private _simCpu?: any;
@@ -113,6 +114,7 @@ export class DHT22Logic extends BaseComponent {
 
     private driveData(voltage: number) {
         this._drivingBus = true;
+        this._lastDrivenVoltage = voltage;
         this.setPinVoltage('DATA', voltage);
         const isHigh = voltage > 1.8;
         // Write directly to AVR pin register to avoid the full repropagateAllVoltages
@@ -133,6 +135,7 @@ export class DHT22Logic extends BaseComponent {
     }
 
     private releaseData() {
+        this._lastDrivenVoltage = 5.0;
         this._drivingBus = false;
         this.protocolState = 'IDLE';
         this._txStartCycle = 0;
