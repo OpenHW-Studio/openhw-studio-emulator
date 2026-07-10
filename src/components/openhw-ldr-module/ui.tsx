@@ -47,9 +47,16 @@ export const LdrModuleUI = ({ state, attrs, isRunning, onEvent }: { state: any, 
     const externalLight = state?.light ?? attrs?.lux ?? 100;
     const [localLight, setLocalLight] = useState(externalLight);
 
+    const externalThreshold = state?.threshold ?? attrs?.threshold ?? 500;
+    const [localThreshold, setLocalThreshold] = useState(externalThreshold);
+
     useEffect(() => {
         setLocalLight(externalLight);
     }, [externalLight]);
+
+    useEffect(() => {
+        setLocalThreshold(externalThreshold);
+    }, [externalThreshold]);
 
     const handleSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = Math.round(parseFloat(e.target.value));
@@ -62,8 +69,21 @@ export const LdrModuleUI = ({ state, attrs, isRunning, onEvent }: { state: any, 
         }
     };
 
+    const handleThresholdSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = Math.round(parseFloat(e.target.value));
+        setLocalThreshold(val);
+        if (onEvent) {
+            onEvent({ type: 'SET_ATTR', key: 'threshold', value: val });
+        }
+        if (attrs && attrs.onInteract) {
+            attrs.onInteract({ type: 'SET_ATTR', key: 'threshold', value: val });
+        }
+    };
+
     return (
-        <div style={{ position: 'relative', width: BOUNDS.w, height: BOUNDS.h }}>
+        <div style={{ position: 'relative', width: BOUNDS.w, height: BOUNDS.h }}
+             onClick={(e) => { if (isRunning) e.stopPropagation(); }}
+             onContextMenu={(e) => { if (isRunning) e.stopPropagation(); }}>
             <svg width="100%" height="100%" viewBox="0 0 180 75" version="1.1" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block', overflow: 'visible', pointerEvents: 'none' }}>
                 {/* Board */}
                 <path d="M 153 0 H 17 V 75 H 153 Z M 24 65.5 c 1.9 0 3.44 1.5 3.44 3.34 s -1.54 3.34 -3.44 3.34 -3.44 -1.5 -3.44 -3.34 1.54 -3.34 3.44 -3.34 Z M 122.3 22.2 c 4.17 0 7.55 3.38 7.55 7.55 s -3.38 7.55 -7.55 7.55 -7.55 -3.38 -7.55 -7.55 3.38 -7.55 7.55 -7.55 Z M 24 2.8 c 1.9 0 3.44 1.5 3.44 3.34 s -1.54 3.34 -3.44 3.34 -3.44 -1.5 -3.44 -3.34 1.54 -3.34 3.44 -3.34 Z" fill="#1c2546" />

@@ -17,6 +17,7 @@ export class DHT22Logic extends BaseComponent {
 
     // Guard: true while DHT actively drives DATA — prevents re-entrant onPinStateChange.
     private _drivingBus: boolean = false;
+    private _lastDrivenVoltage: number = 5.0;
 
     // Injected by avr-runner / execute.ts
     private _simCpu?: any;
@@ -61,9 +62,9 @@ export class DHT22Logic extends BaseComponent {
     }
 
     onPinStateChange(pin: string, isHigh: boolean, cycles: number) {
-        if (pin === 'DATA' && this._drivingBus) return;
+        if ((pin === 'DATA' || pin === 'SDA') && this._drivingBus) return;
 
-        if (pin === 'DATA') {
+        if (pin === 'DATA' || pin === 'SDA') {
             if (!isHigh && this.protocolState === 'IDLE') {
                 console.log(`[DHT22] WAKE_WAIT start (LOW) at ${cycles}`);
                 this.protocolState = 'WAKE_WAIT';
@@ -87,32 +88,33 @@ export class DHT22Logic extends BaseComponent {
     }
 
     private getBoardPin(): string | null {
-        if (this._boardPin !== undefined) return this._boardPin;
-        this._boardPin = null;
+        if (this._boardPin !== undefined && this._boardPin !== null) return this._boardPin;
         
         const cpu = this._simCpu as any;
         if (cpu?._avrRunner) {
             const runner = cpu._avrRunner;
-            const myNode = `${this.id}:DATA`;
-            const myNet = runner.pinToNet?.get(myNode);
-            
-            console.log(`[DHT22] getBoardPin: myNode=${myNode} myNet=${myNet}`);
+            const myNodeData = `${this.id}:DATA`;
+            const myNodeSda = `${this.id}:SDA`;
+            const myNet = runner.pinToNet?.get(myNodeData) ?? runner.pinToNet?.get(myNodeSda);
             
             if (myNet !== undefined) {
                 for (const [node, netId] of runner.pinToNet.entries()) {
                     if (netId === myNet && node.startsWith(runner.boardId + ':')) {
-                        this._boardPin = node.split(':')[1];
+                        let pinStr = node.split(':')[1];
+                        if (/^D\d+$/i.test(pinStr)) pinStr = pinStr.substring(1);
+                        this._boardPin = pinStr;
                         console.log(`[DHT22] getBoardPin: Found board pin! node=${node} pin=${this._boardPin}`);
                         break;
                     }
                 }
             }
         }
-        return this._boardPin;
+        return this._boardPin ?? null;
     }
 
     private driveData(voltage: number) {
         this._drivingBus = true;
+        this._lastDrivenVoltage = voltage;
         this.setPinVoltage('DATA', voltage);
         const isHigh = voltage > 1.8;
         // Write directly to AVR pin register to avoid the full repropagateAllVoltages
@@ -133,6 +135,7 @@ export class DHT22Logic extends BaseComponent {
     }
 
     private releaseData() {
+        this._lastDrivenVoltage = 5.0;
         this._drivingBus = false;
         this.protocolState = 'IDLE';
         this._txStartCycle = 0;
