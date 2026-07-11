@@ -22,7 +22,14 @@ export class MAX7219Logic extends SPIProtocol {
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
-        this.state = { ...this.state, matrix: [...this.matrixData], active: false };
+        this.state = { 
+            ...this.state, 
+            matrix: [...this.matrixData], 
+            active: false,
+            intensity: 8,
+            shutdown: true,
+            decodeMode: 0
+        };
     }
 
     // MAX7219 uses CS/LOAD active-LOW, latches on CS rising edge (deassert)
@@ -44,12 +51,25 @@ export class MAX7219Logic extends SPIProtocol {
     private _execute(address: number, value: number) {
         if (address >= 0x01 && address <= 0x08) {
             this.matrixData[address - 1] = value;
+        } else if (address === 0x09) {
+            this.state.decodeMode = value;
+        } else if (address === 0x0A) {
+            this.state.intensity = value;
+        } else if (address === 0x0B) {
+            this.state.scanLimit = value;
         } else if (address === 0x0C) {
             this.shutdown = (value === 0);
+            this.state.shutdown = this.shutdown;
         } else if (address === 0x0F) {
             this.matrixData.fill(value ? 0xFF : 0);
         }
-        this.setState({ matrix: [...this.matrixData], active: !this.shutdown });
+        this.setState({ 
+            matrix: [...this.matrixData], 
+            active: !this.shutdown,
+            intensity: this.state.intensity ?? 0,
+            decodeMode: this.state.decodeMode ?? 0,
+            shutdown: this.shutdown
+        });
     }
 
     // Bit-banging state for LedControl

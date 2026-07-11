@@ -2,8 +2,8 @@
     "type": "openhw-biaxial-stepper",
     "label": "Biaxial Stepper Motor",
     "group": "Outputs",
-    "w": 435,
-    "h": 435,
+    "w": 280,
+    "h": 280,
     "attrs": {
         "outerHandLength": "30",
         "outerHandColor": "gold",
@@ -16,50 +16,50 @@
     "pins": [
         {
             "id": "A1-",
-            "x": 75,
-            "y": 150,
+            "x": 80,
+            "y": 119,
             "type": "digital"
         },
         {
             "id": "A1+",
-            "x": 75,
-            "y": 165,
+            "x": 80,
+            "y": 129,
             "type": "digital"
         },
         {
             "id": "B1+",
-            "x": 75,
-            "y": 180,
+            "x": 80,
+            "y": 139,
             "type": "digital"
         },
         {
             "id": "B1-",
-            "x": 75,
-            "y": 195,
+            "x": 80,
+            "y": 148,
             "type": "digital"
         },
         {
             "id": "A2-",
-            "x": 75,
-            "y": 210,
+            "x": 80,
+            "y": 158,
             "type": "digital"
         },
         {
             "id": "A2+",
-            "x": 75,
-            "y": 225,
+            "x": 80,
+            "y": 167,
             "type": "digital"
         },
         {
             "id": "B2+",
-            "x": 75,
-            "y": 240,
+            "x": 80,
+            "y": 177,
             "type": "digital"
         },
         {
             "id": "B2-",
-            "x": 75,
-            "y": 255,
+            "x": 80,
+            "y": 187,
             "type": "digital"
         }
     ],
@@ -88,11 +88,11 @@
             },
             {
                 "from": "A1-",
-                "to": "helper:driverOuter:2A"
+                "to": "helper:driverOuter:1B"
             },
             {
                 "from": "B1+",
-                "to": "helper:driverOuter:1B"
+                "to": "helper:driverOuter:2A"
             },
             {
                 "from": "B1-",
@@ -104,11 +104,11 @@
             },
             {
                 "from": "A2-",
-                "to": "helper:driverInner:2A"
+                "to": "helper:driverInner:1B"
             },
             {
                 "from": "B2+",
-                "to": "helper:driverInner:1B"
+                "to": "helper:driverInner:2A"
             },
             {
                 "from": "B2-",
@@ -185,8 +185,8 @@
             "AccelStepper"
         ],
         "arduino": {
-            "globals": "// Outer motor on Step=8, Dir=9\n// Inner motor on Step=11, Dir=12\n#include <AccelStepper.h>\nAccelStepper stepperOuter_${COMP_SUFFIX}(AccelStepper::DRIVER, 8, 9);\nAccelStepper stepperInner_${COMP_SUFFIX}(AccelStepper::DRIVER, 11, 12);",
-            "setup": "stepperOuter_${COMP_SUFFIX}.setMaxSpeed(1000);\nstepperOuter_${COMP_SUFFIX}.setAcceleration(500);\nstepperInner_${COMP_SUFFIX}.setMaxSpeed(1000);\nstepperInner_${COMP_SUFFIX}.setAcceleration(500);",
+            "globals": "// Outer motor on Step=${helper:driverOuter:STEP}, Dir=${helper:driverOuter:DIR}\n// Inner motor on Step=${helper:driverInner:STEP}, Dir=${helper:driverInner:DIR}\n#include <AccelStepper.h>\nAccelStepper stepperOuter_${COMP_SUFFIX}(AccelStepper::DRIVER, ${helper:driverOuter:STEP}, ${helper:driverOuter:DIR});\nAccelStepper stepperInner_${COMP_SUFFIX}(AccelStepper::DRIVER, ${helper:driverInner:STEP}, ${helper:driverInner:DIR});",
+            "setup": "pinMode(${helper:driverOuter:ENABLE}, OUTPUT);\n  digitalWrite(${helper:driverOuter:ENABLE}, LOW);\n  pinMode(${helper:driverInner:ENABLE}, OUTPUT);\n  digitalWrite(${helper:driverInner:ENABLE}, LOW);\n  stepperOuter_${COMP_SUFFIX}.setMaxSpeed(1000);\n  stepperOuter_${COMP_SUFFIX}.setAcceleration(500);\n  stepperInner_${COMP_SUFFIX}.setMaxSpeed(1000);\n  stepperInner_${COMP_SUFFIX}.setAcceleration(500);",
             "loop": "if (stepperOuter_${COMP_SUFFIX}.distanceToGo() == 0) {\n  stepperOuter_${COMP_SUFFIX}.moveTo(-stepperOuter_${COMP_SUFFIX}.currentPosition() + 200);\n}\nif (stepperInner_${COMP_SUFFIX}.distanceToGo() == 0) {\n  stepperInner_${COMP_SUFFIX}.moveTo(-stepperInner_${COMP_SUFFIX}.currentPosition() - 200);\n}\nstepperOuter_${COMP_SUFFIX}.run();\nstepperInner_${COMP_SUFFIX}.run();"
         }
     }

@@ -40,9 +40,9 @@
     "autocoding": {
       "libraries": [],
       "arduino": {
-        "globals": "const int enA_${COMP_SUFFIX} = ${EN1,2};\nconst int in1_${COMP_SUFFIX} = ${IN1};\nconst int in2_${COMP_SUFFIX} = ${IN2};",
+        "globals": "const int enA_${COMP_SUFFIX} = 9;\nconst int in1_${COMP_SUFFIX} = 8;\nconst int in2_${COMP_SUFFIX} = 7;",
         "setup": "pinMode(enA_${COMP_SUFFIX}, OUTPUT);\npinMode(in1_${COMP_SUFFIX}, OUTPUT);\npinMode(in2_${COMP_SUFFIX}, OUTPUT);",
-        "loop": "digitalWrite(in1_${COMP_SUFFIX}, HIGH);\ndigitalWrite(in2_${COMP_SUFFIX}, LOW);\ndigitalWrite(enA_${COMP_SUFFIX}, HIGH);\ndelay(2000);\ndigitalWrite(in1_${COMP_SUFFIX}, LOW);\ndigitalWrite(in2_${COMP_SUFFIX}, HIGH);\ndigitalWrite(enA_${COMP_SUFFIX}, HIGH);\ndelay(2000);"
+        "loop": "digitalWrite(in1_${COMP_SUFFIX}, HIGH);\ndigitalWrite(in2_${COMP_SUFFIX}, LOW);\nanalogWrite(enA_${COMP_SUFFIX}, 200);\ndelay(2000);\ndigitalWrite(in1_${COMP_SUFFIX}, LOW);\ndigitalWrite(in2_${COMP_SUFFIX}, HIGH);\nanalogWrite(enA_${COMP_SUFFIX}, 200);\ndelay(2000);"
       }
     }
 }
