@@ -16,6 +16,7 @@
         { "id": "SDA", "x": 75, "y": 7.5, "type": "bidirectional" }
     ],
     "autowiring": {
+        "externalPullups": false,
         "connections": [
             { "from": "GND", "to": "arduino:GND" },
             { "from": "VCC", "to": "arduino:5V" },
