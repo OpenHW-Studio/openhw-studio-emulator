@@ -439,16 +439,71 @@ export class FullCircuitValidator {
         return ['5v', '3v3', '3.3v', 'vcc', 'vin', '12v', 'vbus', 'vsys'].includes(normalized);
     }
 
+    hasI2CBreakoutPullup(startNode) {
+        if (!startNode) return false;
+        const i2cBreakoutTypes = [
+            'openhw-lcd1602-i2c',
+            'openhw-lcd2004-i2c',
+            'openhw-ssd1306-oled',
+            'openhw-mpu6050',
+            'openhw-ds1307-rtc',
+            'openhw-pca9685',
+            'openhw-pca9865',
+            'openhw-bmp180-breakout',
+            'max30102'
+        ];
+        const queue = [startNode];
+        const visited = new Set(queue);
+
+        while (queue.length > 0) {
+            const current = queue.shift();
+            const comp = this.getComponent(current);
+            if (comp && comp.id !== this.getComponentIdFromNode(startNode)) {
+                const compType = (comp.type || '').toLowerCase();
+                const isI2cModule = i2cBreakoutTypes.some(t => compType.includes(t.toLowerCase()))
+                    || compType.includes('oled')
+                    || compType.includes('lcd1602')
+                    || compType.includes('lcd2004')
+                    || compType.includes('mpu6050')
+                    || compType.includes('ds1307')
+                    || compType.includes('pca9685')
+                    || compType.includes('pca9865')
+                    || comp.attrs?.externalPullups === false
+                    || comp.manifest?.autowiring?.externalPullups === false;
+
+                if (isI2cModule) {
+                    const { pinId } = this.getNodeParts(current);
+                    const upperPin = String(pinId || '').toUpperCase();
+                    if (upperPin.includes('SDA') || upperPin.includes('SCL') || upperPin === 'A4' || upperPin === 'A5' || upperPin === 'SDI' || upperPin === 'SCK') {
+                        return true;
+                    }
+                }
+            }
+
+            const neighbors = this.getNeighbors(current);
+            for (const nb of neighbors) {
+                if (!visited.has(nb)) {
+                    visited.add(nb);
+                    queue.push(nb);
+                }
+            }
+        }
+        return false;
+    }
+
     hasResistivePathToSupply(startNode) {
         const sources = this.collectVoltageSources(startNode);
         // A valid pull-up/down path must either:
         // 1. Go through a resistor (resistance > 0) and reach a supply (voltage > 0).
         // 2. Be directly connected to a REAL supply node (resistance 0, but isSupplyNode is true).
-        return sources.some(s => {
+        if (sources.some(s => {
             if (s.voltage <= 0) return false;
             if (s.resistance > 0) return true;
             return this.isSupplyNode(s.nodeId);
-        });
+        })) {
+            return true;
+        }
+        return this.hasI2CBreakoutPullup(startNode);
     }
 
     getComponentAttrNumber(component, attrName, fallbackValue = 0) {
