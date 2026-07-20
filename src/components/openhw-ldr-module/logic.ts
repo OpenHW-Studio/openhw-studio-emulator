@@ -33,8 +33,9 @@ export class LdrModuleLogic extends BaseComponent {
         if (vcc > 2.0 && gnd < 1.0) {
             this.state.pwrLed = true;
 
-            // Analog Output (AO): 0 Lux = 0V, 1000 Lux = VCC
-            const aoVoltage = vcc * (this.state.light / 1000);
+            // Analog Output (AO): Force analogRead() to perfectly equal the slider value (1:1 mapping)
+            const targetAdc = this.state.light;
+            const aoVoltage = vcc * ((targetAdc + 0.1) / 1023); // +0.1 prevents rounding down
             this.propagatePin('AO', aoVoltage, wires, instances);
 
             // Digital Output (DO): High if light is BELOW threshold (Darkness detection)
