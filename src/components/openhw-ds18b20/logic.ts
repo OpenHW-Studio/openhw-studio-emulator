@@ -53,7 +53,7 @@ export class DS18B20Logic extends OneWireProtocol {
 
     // Override ROM address — DS18B20 family code is 0x28
     getROMAddress(): number[] {
-        return [0x28, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x00];
+        return [0x28, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x0C];
     }
 
     // Called when the user changes temperature via slider in the UI
@@ -74,7 +74,8 @@ export class DS18B20Logic extends OneWireProtocol {
         const isPowered = vdd > 2.5;
 
         // DQ pin is pulled HIGH when idle (1-Wire requires pull-up resistor)
-        if (isPowered) {
+        // Do not overwrite DQ voltage if we are in the middle of driving a low pulse (presence or data bit)
+        if (isPowered && !this.isBusy()) {
             this.setPinVoltage('DQ', 5.0);
         }
 
