@@ -1,39 +1,77 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 // Defines the physical bounds for the simulator engine
 export const BOUNDS = { x: 0, y: 0, w: 60, h: 90 };
 
 // Context menu for part attributes (simulating temperature)
-export const DS18B20ContextMenu = ({ attrs, onUpdate }: { attrs: any; onUpdate: (key: string, value: any) => void }) => (
-    <>
-        <span style={{ fontSize: 12, color: 'var(--text2)' }}>Simulated Temp (°C):</span>
-        <input
-            type="number"
-            value={attrs?.temperature ?? '25'}
-            step="1"
-            onChange={e => onUpdate('temperature', e.target.value)}
-            style={{ background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 4, padding: 2, outline: 'none' }}
-        />
-        <span style={{ fontSize: 12, color: 'var(--text2)' }}>Resolution (bits):</span>
-        <select
-            value={attrs?.resolution ?? '12'}
-            onChange={e => onUpdate('resolution', e.target.value)}
-            style={{ background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 4, padding: 2, outline: 'none' }}
-        >
-            <option value="9">9-bit</option>
-            <option value="10">10-bit</option>
-            <option value="11">11-bit</option>
-            <option value="12">12-bit (default)</option>
-        </select>
-    </>
-);
+export const DS18B20ContextMenu = ({ attrs, onUpdate }: { attrs: any; onUpdate: (key: string, value: any) => void }) => {
+    const temp = Number(attrs?.temperature ?? 25);
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '4px' }} data-contextmenu="true">
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <label style={{ fontSize: '11px', color: 'var(--text2)', marginBottom: '4px' }}>
+                    Simulated Temp: <strong style={{ color: '#ff6b6b' }}>{temp.toFixed(1)} °C</strong>
+                </label>
+                <input
+                    type="range"
+                    min="-55"
+                    max="125"
+                    step="0.1"
+                    value={temp}
+                    onChange={e => {
+                        const val = parseFloat(e.target.value);
+                        onUpdate('temperature', val);
+                        if (attrs && attrs.onInteract) {
+                            attrs.onInteract({ type: 'temperature-change', value: val });
+                        }
+                    }}
+                    onPointerDown={e => e.stopPropagation()}
+                    style={{ width: '120px', cursor: 'pointer' }}
+                />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <label style={{ fontSize: '11px', color: 'var(--text2)', marginBottom: '4px' }}>Resolution:</label>
+                <select
+                    value={attrs?.resolution ?? '12'}
+                    onChange={e => onUpdate('resolution', e.target.value)}
+                    style={{ background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 4, padding: 4, outline: 'none' }}
+                >
+                    <option value="9">9-bit (0.5 °C)</option>
+                    <option value="10">10-bit (0.25 °C)</option>
+                    <option value="11">11-bit (0.125 °C)</option>
+                    <option value="12">12-bit (0.0625 °C)</option>
+                </select>
+            </div>
+        </div>
+    );
+};
 
-export const DS18B20UI = ({ state, attrs, onEvent }: { state: any; attrs: any; onEvent?: (event: any) => void }) => {
-    // BUG FIX: Ensure the value is cast to a Number so .toFixed() doesn't crash the app
-    const temperature = Number(state?.temperature ?? attrs?.temperature ?? 25.0);
+export const DS18B20UI = ({ state, attrs, isRunning, onEvent }: { state: any; attrs: any; isRunning?: boolean; onEvent?: (event: any) => void }) => {
+    // Ensure the value is cast to a Number so .toFixed() doesn't crash the app
+    const externalTemp = Number(state?.temperature ?? attrs?.temperature ?? 25.0);
+    const [temperature, setTemperature] = useState(externalTemp);
+
+    useEffect(() => {
+        setTemperature(externalTemp);
+    }, [externalTemp]);
+
+    const handleTempSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
+        e.stopPropagation();
+        const val = parseFloat(e.target.value);
+        setTemperature(val);
+        if (onEvent) {
+            onEvent({ type: 'temperature-change', value: val });
+        }
+        if (attrs && attrs.onInteract) {
+            attrs.onInteract({ type: 'temperature-change', value: val });
+        }
+    };
 
     return (
-        <div style={{ position: 'relative', width: 60, height: 90 }}>
+        <div
+            onMouseDown={(e: React.MouseEvent) => { if (isRunning) e.stopPropagation(); }}
+            style={{ position: 'relative', width: 60, height: 90 }}
+        >
             <svg
                 viewBox="0 0 60 90"
                 width="100%"
@@ -93,6 +131,46 @@ export const DS18B20UI = ({ state, attrs, onEvent }: { state: any; attrs: any; o
 
                 </g>
             </svg>
+
+            {/* Floating Control Sliders */}
+            {isRunning && (
+                <div style={{
+                    position: 'absolute',
+                    top: BOUNDS.h + 5,
+                    left: -30,
+                    width: 120,
+                    background: '#282c34',
+                    border: '1px solid #444',
+                    borderRadius: 6,
+                    padding: 8,
+                    color: 'white',
+                    fontFamily: 'sans-serif',
+                    fontSize: 10,
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+                    zIndex: 50,
+                    pointerEvents: 'auto'
+                }}
+                onPointerDown={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+                >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                        <span>Temp</span>
+                        <span style={{ color: '#ff6b6b' }}>{temperature.toFixed(1)}°C</span>
+                    </div>
+                    <input
+                        type="range"
+                        min="-55"
+                        max="125"
+                        step="0.1"
+                        value={temperature}
+                        onChange={handleTempSlider}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        style={{ width: '100%', cursor: 'pointer' }}
+                    />
+                </div>
+            )}
         </div>
     );
 };
+

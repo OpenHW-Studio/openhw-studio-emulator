@@ -36,14 +36,11 @@ export class PhotoresistorLogic extends BaseComponent {
     getPinVoltage(pinId: string): number {
         if (pinId === 'p2' || pinId === '2') {
             const lux = Number.parseFloat(String(this.state.lux)) || 0;
-            const gamma = Number.parseFloat(String(this.state.gamma)) || 0.7;
-            const r10 = Number.parseFloat(String(this.state.r10)) || 10000;
-            const resistance = lux > 0 ? r10 * Math.pow(10 / lux, gamma) : 1000000;
             
-            // internal voltage divider logic (assuming connected to 5V and GND via 10k resistor)
-            const vIn = 5.0; 
-            const rFixed = 10000.0;
-            return vIn * (rFixed / (rFixed + resistance));
+            // Linear 1:1 mapping for intuitive simulation
+            const targetAdc = lux;
+            const vOut = 5.0 * ((targetAdc + 0.1) / 1023.0);
+            return vOut;
         }
         return super.getPinVoltage(pinId);
     }
@@ -55,14 +52,10 @@ export class PhotoresistorLogic extends BaseComponent {
         }
 
         const lux = Number.parseFloat(String(this.state.lux)) || 0;
-        const gamma = Number.parseFloat(String(this.state.gamma)) || 0.7;
-        const r10 = Number.parseFloat(String(this.state.r10)) || 10000;
-        const resistance = lux > 0 ? r10 * Math.pow(10 / lux, gamma) : 1000000;
         
-        // internal voltage divider logic (assuming connected to 5V and GND via 10k resistor)
-        const vIn = 5.0; 
-        const rFixed = 10000.0;
-        const vOut = vIn * (rFixed / (rFixed + resistance));
+        // Linear 1:1 mapping for intuitive simulation
+        const targetAdc = lux;
+        const vOut = 5.0 * ((targetAdc + 0.1) / 1023.0);
 
         this.setPinVoltage('p2', vOut);
         this.setPinVoltage('2', vOut);
