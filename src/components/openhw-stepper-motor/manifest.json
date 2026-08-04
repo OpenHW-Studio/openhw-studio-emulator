@@ -2,34 +2,34 @@
     "type": "openhw-stepper-motor",
     "label": "Stepper Motor (Bipolar)",
     "group": "Actuators",
-    "w": 75,
-    "h": 75,
+    "w": 135,
+    "h": 165,
     "attrs": {
         "step_angle": "1.8"
     },
     "pins": [
         {
-            "id": "A+",
-            "x": 15,
-            "y": 75,
+            "id": "A-",
+            "x": 45,
+            "y": 165,
             "type": "digital"
         },
         {
-            "id": "A-",
-            "x": 30,
-            "y": 75,
+            "id": "A+",
+            "x": 60,
+            "y": 165,
             "type": "digital"
         },
         {
             "id": "B+",
-            "x": 45,
-            "y": 75,
+            "x": 75,
+            "y": 165,
             "type": "digital"
         },
         {
             "id": "B-",
-            "x": 60,
-            "y": 75,
+            "x": 90,
+            "y": 165,
             "type": "digital"
         }
     ],
@@ -47,19 +47,19 @@
             { "from": "helper:driver:STEP",      "to": "arduino:8" },
             { "from": "helper:driver:DIR",       "to": "arduino:9" },
             { "from": "helper:driver:ENABLE",    "to": "arduino:10" },
-            { "from": "helper:driver:VDD",       "to": "arduino:5V" },
+            { "from": "helper:driver:VDD",       "to": "arduino:3V3" },
             { "from": "helper:driver:GND_LOGIC", "to": "arduino:GND" },
             { "from": "helper:driver:VMOT",      "to": "helper:psu:5V" },
             { "from": "helper:driver:GND_MOT",   "to": "helper:psu:GND" },
-            { "from": "helper:driver:RESET",     "to": "arduino:5V" },
-            { "from": "helper:driver:SLEEP",     "to": "arduino:5V" }
+            { "from": "helper:driver:RESET",     "to": "arduino:3V3" },
+            { "from": "helper:driver:SLEEP",     "to": "arduino:3V3" }
         ]
     },
     "autocoding": {
         "libraries": ["AccelStepper"],
         "arduino": {
             "globals": "// Stepper setup with A4988 (Step=${helper:driver:STEP}, Dir=${helper:driver:DIR})\n#include <AccelStepper.h>\nAccelStepper stepper_${COMP_SUFFIX}(AccelStepper::DRIVER, ${helper:driver:STEP}, ${helper:driver:DIR});",
-            "setup": "pinMode(${helper:driver:ENABLE}, OUTPUT);\n  digitalWrite(${helper:driver:ENABLE}, LOW);\n  stepper_${COMP_SUFFIX}.setMaxSpeed(1000);\n  stepper_${COMP_SUFFIX}.setAcceleration(500);",
+            "setup": "pinMode(${helper:driver:STEP}, OUTPUT);\n  pinMode(${helper:driver:DIR}, OUTPUT);\n  pinMode(${helper:driver:ENABLE}, OUTPUT);\n  digitalWrite(${helper:driver:ENABLE}, LOW);\n  stepper_${COMP_SUFFIX}.setMinPulseWidth(20);\n  stepper_${COMP_SUFFIX}.setMaxSpeed(1000);\n  stepper_${COMP_SUFFIX}.setAcceleration(500);",
             "loop": "if (stepper_${COMP_SUFFIX}.distanceToGo() == 0) {\n  if (stepper_${COMP_SUFFIX}.currentPosition() == 0) {\n    stepper_${COMP_SUFFIX}.moveTo(200);\n  } else {\n    stepper_${COMP_SUFFIX}.moveTo(0);\n  }\n  delay(1000);\n}\nstepper_${COMP_SUFFIX}.run();"
         }
     },

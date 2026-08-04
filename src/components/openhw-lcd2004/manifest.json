@@ -1,128 +1,65 @@
 {
     "type": "openhw-lcd2004",
-    "label": "LCD 20x4",
-    "description": "20x4 Character LCD Display (Parallel)",
+    "name": "LCD 2004 (Parallel)",
+    "description": "20x4 Character LCD Display without I2C Backpack",
+    "category": "Displays",
     "group": "Displays",
-    "w": 360,
-    "h": 190,
-    "attrs": {
-        "color": "blue",
-        "breadboard": {
-            "anchorPin": "VSS"
-        }
+    "dimensions": {
+        "width": 375,
+        "height": 195
     },
     "pins": [
+        { "id": "VSS", "x": 75, "y": 15, "description": "Ground" },
+        { "id": "VDD", "x": 90, "y": 15, "description": "Power Supply (5V)" },
+        { "id": "V0", "x": 105, "y": 15, "description": "Contrast Adjustment" },
+        { "id": "RS", "x": 120, "y": 15, "description": "Register Select" },
+        { "id": "RW", "x": 135, "y": 15, "description": "Read/Write" },
+        { "id": "E", "x": 150, "y": 15, "description": "Enable" },
+        { "id": "D0", "x": 165, "y": 15, "description": "Data 0" },
+        { "id": "D1", "x": 180, "y": 15, "description": "Data 1" },
+        { "id": "D2", "x": 195, "y": 15, "description": "Data 2" },
+        { "id": "D3", "x": 210, "y": 15, "description": "Data 3" },
+        { "id": "D4", "x": 225, "y": 15, "description": "Data 4" },
+        { "id": "D5", "x": 240, "y": 15, "description": "Data 5" },
+        { "id": "D6", "x": 255, "y": 15, "description": "Data 6" },
+        { "id": "D7", "x": 270, "y": 15, "description": "Data 7" },
+        { "id": "A", "x": 285, "y": 15, "description": "Backlight Anode" },
+        { "id": "K", "x": 300, "y": 15, "description": "Backlight Cathode" }
+    ],
+    "properties": [
         {
-            "id": "VSS",
-            "x": 32.5,
-            "y": 174,
-            "type": "power",
-            "description": "Ground (GND)"
-        },
-        {
-            "id": "VDD",
-            "x": 41.9,
-            "y": 174,
-            "type": "power",
-            "description": "Power (5V)"
-        },
-        {
-            "id": "V0",
-            "x": 51.8,
-            "y": 174,
-            "type": "analog",
-            "description": "Contrast"
-        },
-        {
-            "id": "RS",
-            "x": 61,
-            "y": 174,
-            "type": "digital",
-            "description": "Register Select"
-        },
-        {
-            "id": "RW",
-            "x": 70.8,
-            "y": 174,
-            "type": "digital",
-            "description": "Read/Write"
-        },
-        {
-            "id": "E",
-            "x": 80.5,
-            "y": 174,
-            "type": "digital",
-            "description": "Enable"
-        },
-        {
-            "id": "D0",
-            "x": 90,
-            "y": 174,
-            "type": "digital",
-            "description": "Data 0"
-        },
-        {
-            "id": "D1",
-            "x": 99.5,
-            "y": 174,
-            "type": "digital",
-            "description": "Data 1"
-        },
-        {
-            "id": "D2",
-            "x": 109.5,
-            "y": 174,
-            "type": "digital",
-            "description": "Data 2"
-        },
-        {
-            "id": "D3",
-            "x": 119,
-            "y": 174,
-            "type": "digital",
-            "description": "Data 3"
-        },
-        {
-            "id": "D4",
-            "x": 128.5,
-            "y": 174,
-            "type": "digital",
-            "description": "Data 4"
-        },
-        {
-            "id": "D5",
-            "x": 138,
-            "y": 174,
-            "type": "digital",
-            "description": "Data 5"
-        },
-        {
-            "id": "D6",
-            "x": 147.5,
-            "y": 174,
-            "type": "digital",
-            "description": "Data 6"
-        },
-        {
-            "id": "D7",
-            "x": 157,
-            "y": 174,
-            "type": "digital",
-            "description": "Data 7"
-        },
-        {
-            "id": "A",
-            "x": 166.5,
-            "y": 174,
-            "type": "power",
-            "description": "Backlight Anode (+)"
-        },
-        {
-            "id": "K",
-            "x": 176,
-            "y": 174,
-            "type": "power",
-            "description": "Backlight Cathode (-)"
+            "name": "color",
+            "type": "select",
+            "options": ["green", "blue", "yellow", "white"],
+            "default": "blue",
+            "description": "Background color"
         }
-    ]
+    ],
+    "state": {
+        "lines": ["", "", "", ""],
+        "illuminated": true
+    },
+    "telemetry": {
+        "display": {
+            "type": "string",
+            "format": "text",
+            "source": "lines",
+            "multiple": true
+        }
+    },
+    "autocoding": {
+        "arduino": {
+            "includes": ["<LiquidCrystal.h>"],
+            "globals": "LiquidCrystal lcd({{RS}}, {{E}}, {{D4}}, {{D5}}, {{D6}}, {{D7}});",
+            "setup": "lcd.begin(20, 4);\nlcd.print(\"Hello, OpenHW!\");",
+            "loop": "",
+            "dependencies": ["LiquidCrystal"]
+        },
+        "micropython": {
+            "includes": ["from machine import Pin", "from gpio_lcd import GpioLcd"],
+            "globals": "lcd = GpioLcd(rs_pin=Pin({{RS}}),\n              enable_pin=Pin({{E}}),\n              d4_pin=Pin({{D4}}),\n              d5_pin=Pin({{D5}}),\n              d6_pin=Pin({{D6}}),\n              d7_pin=Pin({{D7}}),\n              num_lines=4, num_columns=20)",
+            "setup": "lcd.putstr('Hello, OpenHW!')",
+            "loop": ""
+        }
+    }
 }

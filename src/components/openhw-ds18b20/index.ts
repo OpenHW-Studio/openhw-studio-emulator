@@ -26,8 +26,8 @@ export default {
     LogicClass:               DS18B20Logic,
     BOUNDS,
     ContextMenu:              DS18B20ContextMenu,
-    contextMenuDuringRun:     true,   // slider is live-usable while running
-    contextMenuOnlyDuringRun: true,   // hide the menu when simulation is stopped
+    contextMenuDuringRun:     false,  // floating UI panel handles live slider while running
+    contextMenuOnlyDuringRun: false,  // context menu is accessible only when simulation is stopped
     validation,
     doc: docHtml,
 };

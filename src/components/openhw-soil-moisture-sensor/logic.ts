@@ -15,12 +15,20 @@ export class SoilMoistureSensorLogic extends BaseComponent {
 
         const m = Math.max(0, Math.min(100, this.state.moisture));
 
-        // Analog: VCC when dry, ~1.0V when completely submerged
+        // Analog: VCC when dry (1023), 0.0V when completely submerged (0)
         const dryVolt = vcc;
-        const wetVolt = 1.0;
+        const wetVolt = 0.0;
         const outSig = wetVolt + ((100 - m) / 100) * (dryVolt - wetVolt);
 
         this.setPinVoltage('SIG', outSig);
+    }
+
+    onEvent(event: any) {
+        if (event && event.type === 'SET_MOISTURE') {
+            this.setState({ moisture: event.value });
+            this.stateChanged = true;
+            this.onPinStateChange();
+        }
     }
 
     onCustomTelemetry() {

@@ -1,4 +1,4 @@
-export const BOUNDS = { x: 0, y: 0, w: 90, h: 90 };
+export const BOUNDS = { x: 0, y: 0, w: 140, h: 142 };
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 
@@ -31,9 +31,14 @@ const polarToCartesian = (cx: number, cy: number, r: number, angleDeg: number) =
     };
 };
 
+const SENSOR_CX = 72;
+const SENSOR_CY = 52;
+const SVG_OFFSET_X = 150;
+const SVG_OFFSET_Y = 250;
+
 const createConePath = () => {
-    const cx = 200; // SVG space center matching sensor center X
-    const cy = 300; // SVG space center matching sensor center Y
+    const cx = SVG_OFFSET_X + SENSOR_CX;
+    const cy = SVG_OFFSET_Y + SENSOR_CY;
     const r1 = 40;
     const r2 = 280;
     const startAngle = -135;
@@ -49,13 +54,18 @@ const createConePath = () => {
 
 export const PIRUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning: boolean }) => {
     const [showCone, setShowCone] = useState(false);
-    const [dotPos, setDotPos] = useState({ x: 50, y: -120 });
+    const [dotPos, setDotPos] = useState({ x: SENSOR_CX, y: SENSOR_CY - 170 });
     const [isDragging, setIsDragging] = useState(false);
 
     const svgRef = useRef<SVGSVGElement>(null);
-    const lastPos = useRef({ x: 50, y: -120 });
+    const lastPos = useRef({ x: SENSOR_CX, y: SENSOR_CY - 170 });
     const isMotionActive = useRef(false);
     const stopTimer = useRef<any>(null);
+
+    const nativeW = 90.7;
+    const nativeH = 92.4;
+    const scaleX = BOUNDS.w / nativeW;
+    const scaleY = BOUNDS.h / nativeH;
 
     // Ensure motion stops if the component is unmounted or simulation stops
     useEffect(() => {
@@ -73,8 +83,8 @@ export const PIRUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isR
     }, [attrs]);
 
     const checkMotion = useCallback((x: number, y: number) => {
-        const dx = x - 50;
-        const dy = y - 50;
+        const dx = x - SENSOR_CX;
+        const dy = y - SENSOR_CY;
         const dist = Math.sqrt(dx * dx + dy * dy);
         const angle = Math.atan2(dy, dx) * 180 / Math.PI;
 
@@ -116,8 +126,8 @@ export const PIRUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isR
         const svgX = ((e.clientX - rect.left) / rect.width) * 400;
         const svgY = ((e.clientY - rect.top) / rect.height) * 400;
 
-        const newX = svgX - 150;
-        const newY = svgY - 250;
+        const newX = svgX - SVG_OFFSET_X;
+        const newY = svgY - SVG_OFFSET_Y;
 
         setDotPos({ x: newX, y: newY });
         checkMotion(newX, newY);
@@ -149,7 +159,7 @@ export const PIRUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isR
         <div style={{ pointerEvents: 'none', position: 'absolute', inset: 0 }}>
             {showCone && isRunning && (
                 <div style={{ position: 'absolute', top: 0, left: 0, width: 0, height: 0, zIndex: 100, pointerEvents: 'none' }}>
-                    <svg ref={svgRef} style={{ position: 'absolute', left: -150, top: -250, width: 400, height: 400, overflow: 'visible', pointerEvents: 'none' }}>
+                    <svg ref={svgRef} style={{ position: 'absolute', left: -SVG_OFFSET_X, top: -SVG_OFFSET_Y, width: 400, height: 400, overflow: 'visible', pointerEvents: 'none' }}>
                         <path
                             d={createConePath()}
                             fill={isMotion ? "rgba(239, 68, 68, 0.35)" : "rgba(46, 204, 113, 0.15)"}
@@ -158,18 +168,18 @@ export const PIRUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isR
                             style={{ transition: 'fill 0.1s, stroke 0.1s' }}
                         />
                         <line
-                            x1={dotPos.x + 150}
-                            y1={dotPos.y + 250}
-                            x2={200}
-                            y2={300}
+                            x1={dotPos.x + SVG_OFFSET_X}
+                            y1={dotPos.y + SVG_OFFSET_Y}
+                            x2={SENSOR_CX + SVG_OFFSET_X}
+                            y2={SENSOR_CY + SVG_OFFSET_Y}
                             stroke={isDragging ? "#3b82f6" : "#008C9E"}
                             strokeWidth="2"
                             strokeDasharray="4,4"
                             opacity="0.6"
                         />
                         <circle
-                            cx={dotPos.x + 150}
-                            cy={dotPos.y + 250}
+                            cx={dotPos.x + SVG_OFFSET_X}
+                            cy={dotPos.y + SVG_OFFSET_Y}
                             r={14}
                             fill={isDragging ? "#2563eb" : "#008C9E"}
                             stroke="white"
@@ -193,23 +203,30 @@ export const PIRUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isR
                     cursor: isRunning ? 'pointer' : 'default',
                     pointerEvents: isRunning ? 'auto' : 'none',
                     minWidth: BOUNDS.w,
-                    minHeight: BOUNDS.h
+                    minHeight: BOUNDS.h,
+                    overflow: 'visible'
                 }}>
                 {React.createElement('wokwi-pir-motion-sensor', {
-                    style: { pointerEvents: 'none', width: '100%', height: '100%' },
+                    style: { 
+                        display: 'block', 
+                        width: nativeW, 
+                        height: nativeH,
+                        transform: `scale(${scaleX}, ${scaleY})`,
+                        transformOrigin: '0 0'
+                    },
                     ...attrs
                 })}
                 {/* Visual red indicator light showing active motion state */}
                 {isMotion && (
                     <div style={{
                         position: 'absolute',
-                        top: 25, left: '50%',
-                        transform: 'translateX(-50%)',
-                        width: 12, height: 12,
+                        top: SENSOR_CY, left: SENSOR_CX,
+                        transform: 'translate(-50%, -50%)',
+                        width: 14, height: 14,
                         borderRadius: '50%',
                         background: '#ef4444',
-                        boxShadow: '0 0 10px #ef4444',
-                        border: '2px solid white',
+                        boxShadow: '0 0 12px #ef4444',
+                        border: '2px solid rgba(255,255,255,0.8)',
                         zIndex: 10
                     }} />
                 )}

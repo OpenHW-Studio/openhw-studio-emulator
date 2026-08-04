@@ -22,7 +22,14 @@ export class MAX7219Logic extends SPIProtocol {
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
-        this.state = { ...this.state, matrix: [...this.matrixData], active: false };
+        this.state = { 
+            ...this.state, 
+            matrix: [...this.matrixData], 
+            active: false,
+            intensity: 8,
+            shutdown: true,
+            decodeMode: 0
+        };
     }
 
     // MAX7219 uses CS/LOAD active-LOW, latches on CS rising edge (deassert)
@@ -44,20 +51,63 @@ export class MAX7219Logic extends SPIProtocol {
     private _execute(address: number, value: number) {
         if (address >= 0x01 && address <= 0x08) {
             this.matrixData[address - 1] = value;
+        } else if (address === 0x09) {
+            this.state.decodeMode = value;
+        } else if (address === 0x0A) {
+            this.state.intensity = value;
+        } else if (address === 0x0B) {
+            this.state.scanLimit = value;
         } else if (address === 0x0C) {
             this.shutdown = (value === 0);
+            this.state.shutdown = this.shutdown;
         } else if (address === 0x0F) {
             this.matrixData.fill(value ? 0xFF : 0);
         }
-        this.setState({ matrix: [...this.matrixData], active: !this.shutdown });
+        this.setState({ 
+            matrix: [...this.matrixData], 
+            active: !this.shutdown,
+            intensity: this.state.intensity ?? 0,
+            decodeMode: this.state.decodeMode ?? 0,
+            shutdown: this.shutdown
+        });
     }
 
-    // Passthrough clock & CS to daisy-chain output
+    // Bit-banging state for LedControl
+    private clkLast = false;
+    private currentByte = 0;
+    private bitsReceived = 0;
+
+    // Passthrough clock & CS to daisy-chain output and decode bit-banging
     onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number) {
         super.onPinStateChange(pinId, isHigh, cpuCycles);
         const v = isHigh ? 5.0 : 0.0;
+        
         if (pinId === 'CS')  this.setPinVoltage('CS_OUT', v);
         if (pinId === 'CLK') this.setPinVoltage('CLK_OUT', v);
+
+        // Bit-banging decode (LedControl uses MSB first, latch on rising edge)
+        if (pinId === 'CLK') {
+            const rising = isHigh && !this.clkLast;
+            this.clkLast = isHigh;
+
+            if (rising && this.csActive) {
+                const dinBit = this.getPinVoltage('DIN') > 0.5 ? 1 : 0;
+                this.currentByte = ((this.currentByte << 1) | dinBit) & 0xFF;
+                this.bitsReceived++;
+
+                if (this.bitsReceived === 8) {
+                    this.onSPIByte(this.currentByte);
+                    this.bitsReceived = 0;
+                    this.currentByte = 0;
+                }
+            }
+        }
+
+        if (pinId === 'CS' && !isHigh) {
+            // Reset bit-banging state when CS goes active (LOW)
+            this.bitsReceived = 0;
+            this.currentByte = 0;
+        }
     }
 
     getSyncState() { return { ...this.state }; }

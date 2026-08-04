@@ -7,6 +7,7 @@ export class Lcd2004I2CLogic extends I2CProtocol {
     private lastByte = 0;
     private pendingSync = false;
     private lastFlushMs = 0;
+    private lastI2CActivityMs = 0;
 
     private static readonly FLUSH_INTERVAL_MS = 40;
 
@@ -19,6 +20,7 @@ export class Lcd2004I2CLogic extends I2CProtocol {
         this.lastByte = this.hd44780.feedI2CByte(value, this.lastByte);
         if (this.hd44780.stateChanged) {
             this.pendingSync = true;
+            this.lastI2CActivityMs = Date.now();
             this.hd44780.clearChanged();
         }
         return true;
@@ -28,7 +30,12 @@ export class Lcd2004I2CLogic extends I2CProtocol {
         if (!this.pendingSync) return;
 
         const now = Date.now();
-        if (this.lastFlushMs && (now - this.lastFlushMs) < Lcd2004I2CLogic.FLUSH_INTERVAL_MS) {
+        // Debounce: Wait until 40ms of silence since the last I2C byte
+        const isIdle = (now - this.lastI2CActivityMs) >= Lcd2004I2CLogic.FLUSH_INTERVAL_MS;
+        // Max Wait: Force flush every 200ms to prevent starvation if firmware spams
+        const isStarved = this.lastFlushMs && (now - this.lastFlushMs) >= 200;
+
+        if (!isIdle && !isStarved) {
             return;
         }
 

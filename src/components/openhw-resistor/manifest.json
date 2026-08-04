@@ -4,7 +4,7 @@
     "description": "Passive two-terminal component that limits current flow. Configurable resistance (Ω). Essential for current-limiting LEDs and voltage dividers.",
     "group": "Basic",
     "w": 60,
-    "h": 12,
+    "h": 15,
     "attrs": {
         "value": "220",
         "breadboard": {
@@ -21,14 +21,14 @@
         {
             "id": "p1",
             "x": 0,
-            "y": 10,
+            "y": 7.5,
             "type": "passive",
             "description": "Terminal 1"
         },
         {
             "id": "p2",
             "x": 60,
-            "y": 10,
+            "y": 7.5,
             "type": "passive",
             "description": "Terminal 2"
         }

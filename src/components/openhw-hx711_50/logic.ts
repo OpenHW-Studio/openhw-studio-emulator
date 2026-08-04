@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { BaseComponent } from '../BaseComponent';
 
 export class HX711Logic_50 extends BaseComponent {

@@ -88,11 +88,11 @@
             },
             {
                 "from": "A1-",
-                "to": "helper:driverOuter:2A"
+                "to": "helper:driverOuter:1B"
             },
             {
                 "from": "B1+",
-                "to": "helper:driverOuter:1B"
+                "to": "helper:driverOuter:2A"
             },
             {
                 "from": "B1-",
@@ -104,11 +104,11 @@
             },
             {
                 "from": "A2-",
-                "to": "helper:driverInner:2A"
+                "to": "helper:driverInner:1B"
             },
             {
                 "from": "B2+",
-                "to": "helper:driverInner:1B"
+                "to": "helper:driverInner:2A"
             },
             {
                 "from": "B2-",
@@ -185,8 +185,9 @@
             "AccelStepper"
         ],
         "arduino": {
-            "setup": "// Outer motor on Step=8, Dir=9\n// Inner motor on Step=11, Dir=12\n#include <AccelStepper.h>\nAccelStepper stepperOuter(AccelStepper::DRIVER, 8, 9);\nAccelStepper stepperInner(AccelStepper::DRIVER, 11, 12);\n\nvoid setup() {\n  stepperOuter.setMaxSpeed(1000);\n  stepperOuter.setAcceleration(500);\n  stepperInner.setMaxSpeed(1000);\n  stepperInner.setAcceleration(500);\n}",
-            "loop": "if (stepperOuter.distanceToGo() == 0) {\n  stepperOuter.moveTo(-stepperOuter.currentPosition() + 200);\n}\nif (stepperInner.distanceToGo() == 0) {\n  stepperInner.moveTo(-stepperInner.currentPosition() - 200);\n}\nstepperOuter.run();\nstepperInner.run();"
+            "globals": "// Outer motor on Step=${helper:driverOuter:STEP}, Dir=${helper:driverOuter:DIR}\n// Inner motor on Step=${helper:driverInner:STEP}, Dir=${helper:driverInner:DIR}\n#include <AccelStepper.h>\nAccelStepper stepperOuter_${COMP_SUFFIX}(AccelStepper::DRIVER, ${helper:driverOuter:STEP}, ${helper:driverOuter:DIR});\nAccelStepper stepperInner_${COMP_SUFFIX}(AccelStepper::DRIVER, ${helper:driverInner:STEP}, ${helper:driverInner:DIR});",
+            "setup": "pinMode(${helper:driverOuter:ENABLE}, OUTPUT);\n  digitalWrite(${helper:driverOuter:ENABLE}, LOW);\n  pinMode(${helper:driverInner:ENABLE}, OUTPUT);\n  digitalWrite(${helper:driverInner:ENABLE}, LOW);\n  stepperOuter_${COMP_SUFFIX}.setMaxSpeed(1000);\n  stepperOuter_${COMP_SUFFIX}.setAcceleration(500);\n  stepperInner_${COMP_SUFFIX}.setMaxSpeed(1000);\n  stepperInner_${COMP_SUFFIX}.setAcceleration(500);",
+            "loop": "if (stepperOuter_${COMP_SUFFIX}.distanceToGo() == 0) {\n  stepperOuter_${COMP_SUFFIX}.moveTo(-stepperOuter_${COMP_SUFFIX}.currentPosition() + 200);\n}\nif (stepperInner_${COMP_SUFFIX}.distanceToGo() == 0) {\n  stepperInner_${COMP_SUFFIX}.moveTo(-stepperInner_${COMP_SUFFIX}.currentPosition() - 200);\n}\nstepperOuter_${COMP_SUFFIX}.run();\nstepperInner_${COMP_SUFFIX}.run();"
         }
     }
 }

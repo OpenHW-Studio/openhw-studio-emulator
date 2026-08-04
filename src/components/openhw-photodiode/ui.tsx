@@ -26,37 +26,87 @@ export const PhotodiodeContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdat
     );
 };
 
-export const BOUNDS = { x: 0, y: 0, w: 20, h: 40 };
+export const BOUNDS = { x: 0, y: 0, w: 15, h: 45 };
 
 export const PhotodiodeUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const light = state?.light ?? 0;
 
     return (
         <div style={{ pointerEvents: 'none', position: 'absolute', inset: 0 }}>
-            <svg width="100%" height="100%" viewBox="-5 -5 30 55" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }}>
-                <g transform="translate(10, 10)">
-                    <path d="M -5 5 L -5 -2 A 5 5 0 0 1 5 -2 L 5 5 Z" fill="#2c3e50" opacity="0.8" />
-                    <rect x="-6" y="5" width="12" height="2" fill="#2c3e50" />
+            <svg width="100%" height="100%" viewBox="0 0 15 45" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }}>
+                <defs>
+                    <linearGradient id="legMetal" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#9CA3AF" />
+                        <stop offset="50%" stopColor="#F3F4F6" />
+                        <stop offset="100%" stopColor="#6B7280" />
+                    </linearGradient>
 
-                    {/* Simulated light collection area */}
-                    {light > 0 && (
-                        <circle cx="0" cy="0" r={2.5 + (light / 20)} fill="#f1c40f" opacity={light / 200} />
-                    )}
-                    <circle cx="0" cy="0" r="2.5" fill={light > 10 ? "#f1c40f" : "#7f8c8d"} />
-                </g>
+                    <linearGradient id="pdBody" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="rgba(20, 20, 20, 0.85)" />
+                        <stop offset="30%" stopColor="rgba(60, 60, 60, 0.9)" />
+                        <stop offset="70%" stopColor="rgba(20, 20, 20, 0.85)" />
+                        <stop offset="100%" stopColor="rgba(5, 5, 5, 0.9)" />
+                    </linearGradient>
+                    
+                    <linearGradient id="highlight" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+                        <stop offset="20%" stopColor="rgba(255,255,255,0.4)" />
+                        <stop offset="35%" stopColor="rgba(255,255,255,0)" />
+                    </linearGradient>
 
-                {/* Pins */}
-                <line x1="5" y1="17" x2="0" y2="40" stroke="#95a5a6" strokeWidth="1" />
-                <line x1="15" y1="17" x2="20" y2="40" stroke="#95a5a6" strokeWidth="1" />
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="1" />
+                    </filter>
+                </defs>
 
-                <circle cx="0" cy="40" r="1.5" fill="#ecf0f1" />
-                <circle cx="20" cy="40" r="1.5" fill="#ecf0f1" />
+                {/* Anode Leg (Left) */}
+                <path d="M 5.5 13 L 5.5 25 Q 5.5 35 0 45" fill="none" stroke="url(#legMetal)" strokeWidth="1.2" strokeLinecap="round" />
+                {/* Cathode Leg (Right) */}
+                <path d="M 9.5 13 L 9.5 25 Q 9.5 35 15 45" fill="none" stroke="url(#legMetal)" strokeWidth="1.2" strokeLinecap="round" />
 
-                {/* Flat spot indicating cathode commonly */}
-                <rect x="16" y="15" width="2" height="2" fill="#e74c3c" />
+                {/* Internal Lead Frame */}
+                {/* Anode Post */}
+                <rect x="5" y="8" width="1" height="6" fill="url(#legMetal)" />
+                <polygon points="5,8 6,8 5.5,5" fill="url(#legMetal)" />
+                {/* Cathode Anvil */}
+                <rect x="8.5" y="6" width="2" height="8" fill="url(#legMetal)" />
+                <polygon points="8.5,6 10.5,6 10,4 7.5,4 7.5,5 8.5,6" fill="url(#legMetal)" />
+                
+                {/* Silicon Die */}
+                <rect x="8" y="3.5" width="1.5" height="1.5" fill="#000" />
+                
+                {/* Golden Wire bond */}
+                <path d="M 5.5 5 Q 6.5 2.5 8.5 4" fill="none" stroke="#F5B041" strokeWidth="0.25" />
 
-                <text x="0" y="46" fontSize="4" fill="#f8fafc" textAnchor="middle">A</text>
-                <text x="20" y="46" fontSize="4" fill="#f8fafc" textAnchor="middle">C</text>
+                {/* Main plastic body (Dark tinted) */}
+                <path d="M 3 5 C 3 -1.5, 12 -1.5, 12 5 L 12 13 L 3 13 Z" fill="url(#pdBody)" />
+                <path d="M 3 5 C 3 -1.5, 12 -1.5, 12 5 L 12 13 L 3 13 Z" fill="url(#highlight)" />
+                
+                {/* Base Flange */}
+                <rect x="2.5" y="13" width="10" height="2" rx="0.5" fill="url(#pdBody)" />
+                <rect x="2.5" y="13" width="10" height="2" rx="0.5" fill="url(#highlight)" />
+                
+                {/* Flat spot indicating cathode */}
+                <rect x="12" y="13" width="0.5" height="2" fill="rgba(10,10,10,0.9)" />
+
+                {/* Dynamic light glow on the silicon die */}
+                {light > 0 && (
+                    <circle 
+                        cx="8.75" cy="4.25" 
+                        r={1 + (light / 30)} 
+                        fill="#F1C40F" 
+                        opacity={0.3 + (light / 150)} 
+                        filter="url(#glow)" 
+                    />
+                )}
+
+                {/* Connection points exactly at y=45 */}
+                <circle cx="0" cy="45" r="1.5" fill="#333" />
+                <circle cx="15" cy="45" r="1.5" fill="#333" />
+
+                {/* Labels floating slightly below */}
+                <text x="0" y="52" fontSize="4" fill="#555" fontFamily="sans-serif" textAnchor="middle" fontWeight="bold">A</text>
+                <text x="15" y="52" fontSize="4" fill="#555" fontFamily="sans-serif" textAnchor="middle" fontWeight="bold">C</text>
             </svg>
         </div>
     );

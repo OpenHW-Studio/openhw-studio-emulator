@@ -353,5 +353,25 @@ export const validationCases = [
                 { from: 'uno1.5V', to: 'oled.VCC' }
             ]
         }
+    },
+    {
+        name: 'valid_i2c_oled_direct',
+        expectPass: true,
+        project: {
+            components: [
+                makeUno('uno1'),
+                { 
+                    id: 'oled', 
+                    type: 'openhw-ssd1306-oled',
+                    pins: [{id: 'GND'}, {id: 'VCC'}, {id: 'SCL'}, {id: 'SDA'}]
+                }
+            ],
+            connections: [
+                { from: 'uno1.A4', to: 'oled.SDA' },
+                { from: 'uno1.A5', to: 'oled.SCL' },
+                { from: 'uno1.GND', to: 'oled.GND' },
+                { from: 'uno1.5V', to: 'oled.VCC' }
+            ]
+        }
     }
 ];

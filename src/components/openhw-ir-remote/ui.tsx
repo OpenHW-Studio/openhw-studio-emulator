@@ -1,7 +1,21 @@
 import React from 'react';
 
 // Common Button Component
-const RemoteButton = ({ cx, cy, r=16, fill, stroke, textColor, text, icon, onClick, buttonName, pressed }) => {
+interface RemoteButtonProps {
+    cx: number;
+    cy: number;
+    r?: number;
+    fill: string;
+    stroke: string;
+    textColor?: string;
+    text?: string;
+    icon?: any;
+    onClick: (name: string) => void;
+    buttonName: string;
+    pressed: boolean;
+}
+
+const RemoteButton = ({ cx, cy, r=16, fill, stroke, textColor, text, icon, onClick, buttonName, pressed }: RemoteButtonProps) => {
     return (
         <g 
             transform={`translate(${cx}, ${cy}) ${pressed ? 'scale(0.95)' : ''}`} 

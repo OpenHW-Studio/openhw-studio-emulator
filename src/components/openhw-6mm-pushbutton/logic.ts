@@ -9,6 +9,7 @@ export class Pushbutton6mmLogic extends BaseComponent {
         this.state = { pressed: false };
     }
 
+    getMnaPins() { return ['1A', '1B', '2A', '2B']; }
     getMnaStamps() {
         const switchConductance = this.state.pressed ? 1000 : 1e-9;
         return [
@@ -26,10 +27,6 @@ export class Pushbutton6mmLogic extends BaseComponent {
                 this.lastPressedState = true;
                 this.stateChanged = true;
             }
-            this.setPinVoltage('1A', 0);
-            this.setPinVoltage('1B', 0);
-            this.setPinVoltage('2A', 0);
-            this.setPinVoltage('2B', 0);
         } else if (event === 'release') {
             this.setState({ pressed: false });
             this.lastPressedState = false;

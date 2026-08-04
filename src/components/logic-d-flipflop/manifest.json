@@ -3,37 +3,51 @@
     "label": "D Flip-Flop",
     "description": "Edge-triggered D Flip-Flop. On the rising edge of CLK, Q captures the value of D. Qbar is the complement of Q.",
     "group": "Logic",
-    "w": 105.9,
-    "h": 94.1,
+    "w": 105,
+    "h": 90,
     "attrs": {},
     "pins": [
         {
             "id": "D",
             "x": 0,
-            "y": 25.9,
+            "y": 30,
             "type": "digital",
             "description": "Data input"
         },
         {
             "id": "CLK",
             "x": 0,
-            "y": 70.2,
+            "y": 60,
             "type": "digital",
             "description": "Clock input (rising-edge triggered)"
         },
         {
             "id": "Q",
-            "x": 104.9,
-            "y": 25.9,
+            "x": 105,
+            "y": 30,
             "type": "digital",
             "description": "Output"
         },
         {
             "id": "Qbar",
-            "x": 104.9,
-            "y": 71.2,
+            "x": 105,
+            "y": 60,
             "type": "digital",
             "description": "Inverted output"
         }
-    ]
+    ],
+    "autowiring": {
+        "connections": [
+            { "from": "D", "to": "arduino:D2" },
+            { "from": "CLK", "to": "arduino:D3" },
+            { "from": "Q", "to": "arduino:D4", "via": "openhw-resistor", "attrs": { "value": "220" } },
+            { "from": "Qbar", "to": "arduino:D5", "via": "openhw-resistor", "attrs": { "value": "220" } }
+        ]
+    },
+    "autocoding": {
+        "arduino": {
+            "setup": "Serial.begin(9600);\npinMode(${D}, OUTPUT);\npinMode(${CLK}, OUTPUT);\npinMode(${Q}, INPUT);\npinMode(${Qbar}, INPUT);\nSerial.println(\"D Flip-Flop ready\");",
+            "loop": "for (int i=0; i<2; i++) {\n  digitalWrite(${D}, i?HIGH:LOW);\n  digitalWrite(${CLK}, LOW);\n  delay(5);\n  digitalWrite(${CLK}, HIGH);\n  delay(5);\n  Serial.print(\"DFF | D=\");\n  Serial.print(i);\n  Serial.print(\" -> Q=\");\n  Serial.print(digitalRead(${Q}));\n  Serial.print(\" Qbar=\");\n  Serial.println(digitalRead(${Qbar}));\n  delay(1000);\n}"
+        }
+    }
 }

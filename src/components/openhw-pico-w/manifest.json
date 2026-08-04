@@ -1,16 +1,17 @@
 {
   "type": "openhw-pico-w",
   "label": "Raspberry Pi Pico W",
-  "description": "RP2040 Pico W board. Runtime uses RP2040 emulation with wireless compatibility stubs (status events only).",
+  "description": "RP2040 Pico W board with full WiFi simulation. Uses a complete L2\u2013L7 userspace network stack (ARP/DHCP/DNS/ICMP/TCP/UDP) providing real internet access. PCAP capture available.",
   "group": "Boards",
   "w": 124,
   "h": 314,
   "attrs": {
     "env": { "type": "string", "default": "" },
     "builder": { "type": "string", "default": "arduino-pico" },
-    "wirelessMode": { "type": "string", "default": "compat-stub" },
-    "wirelessSsid": { "type": "string", "default": "Velxio-GUEST" },
-    "wirelessIp": { "type": "string", "default": "192.168.4.2" }
+    "wirelessMode": { "type": "string", "default": "full", "enum": ["full", "compat-stub", "off"] },
+    "wirelessSsid": { "type": "string", "default": "OpenHW-GUEST" },
+    "wirelessPassword": { "type": "string", "default": "" },
+    "wirelessIp": { "type": "string", "default": "10.13.37.42" }
   },
   "pins": [
     { "id": "GP0", "description": "GP0", "x": 9.5, "y": 20.4, "type": "digital" },
@@ -53,6 +54,11 @@
     { "id": "GP18", "description": "GP18", "x": 114.5, "y": 260.4, "type": "digital" },
     { "id": "GND_6", "description": "GND", "x": 114.5, "y": 275.4, "type": "power" },
     { "id": "GP17", "description": "GP17", "x": 114.5, "y": 290.4, "type": "digital" },
-    { "id": "GP16", "description": "GP16", "x": 114.5, "y": 305.4, "type": "digital" }
+    { "id": "GP16", "description": "GP16", "x": 114.5, "y": 305.4, "type": "digital" },
+    { "id": "13", "description": "Alias for GP13", "x": 9.5, "y": 260.4, "type": "digital" },
+    { "id": "2", "description": "Alias for GP2", "x": 9.5, "y": 65.4, "type": "digital" },
+    { "id": "5V", "description": "Alias for VBUS", "x": 114.5, "y": 20.4, "type": "power" },
+    { "id": "A4", "description": "Alias for GP20", "x": 114.5, "y": 230.4, "type": "analog" },
+    { "id": "A5", "description": "Alias for GP21", "x": 114.5, "y": 215.4, "type": "analog" }
   ]
 }

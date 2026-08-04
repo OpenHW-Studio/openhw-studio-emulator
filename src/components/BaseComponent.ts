@@ -93,11 +93,13 @@ type TelemetryManifestConfig = {
 export class BaseComponent {
     id: string;
     type: string;
-    pins: { [key: string]: { voltage: number, mode: string } };
+    pins: { [key: string]: { voltage: number, mode: string, isHigh?: boolean } };
     state: any;
     stateChanged: boolean;
     telemetryEnabled: boolean = false;
     deepSiliconEnabled: boolean = false;
+    attrs: any;
+    manifest: any;
 
     private telemetryManifest: TelemetryManifestConfig | null = null;
     private telemetryRuntime = {
@@ -153,6 +155,8 @@ export class BaseComponent {
     constructor(id: string, manifest: any) {
         this.id = id;
         this.type = manifest.type;
+        this.manifest = manifest;
+        this.attrs = manifest.attrs || {};
         this.pins = {};
 
         // Initialize pins from manifest
@@ -464,7 +468,7 @@ export class BaseComponent {
         }
 
         if (ArrayBuffer.isView(value)) {
-            const view = value as ArrayLike<number> & { length?: number };
+            const view = (value as any) as ArrayLike<number> & { length?: number };
             const len = Number(view?.length || 0);
             const preview: number[] = [];
             for (let i = 0; i < Math.min(len, 24); i += 1) {
@@ -563,6 +567,38 @@ export class BaseComponent {
         return this.pins[pinId] ? this.pins[pinId].voltage : 0.0;
     }
 
+    protected propagatePin(pinId: string, voltage: number, wires: any[], instances: BaseComponent[]) {
+        if (!this.pins[pinId]) this.pins[pinId] = { voltage: 0, mode: 'OUTPUT' };
+        this.pins[pinId].voltage = voltage;
+        const pinKey = `${this.id}:${pinId}`;
+        const visited = new Set<string>();
+        visited.add(pinKey);
+        const propagate = (key: string, v: number) => {
+            for (const w of wires) {
+                const match = w.from === key || w.to === key;
+                if (!match) continue;
+                const otherKey = w.from === key ? w.to : w.from;
+                if (visited.has(otherKey)) continue;
+                visited.add(otherKey);
+                const [compId, compPin] = otherKey.split(':');
+                const inst = instances.find((i: BaseComponent) => i.id === compId);
+                if (!inst) continue;
+                if (!inst.pins[compPin]) inst.pins[compPin] = { voltage: 0, mode: 'INPUT' };
+                inst.setPinVoltage(compPin, v);
+                if (inst.type === 'openhw-resistor') {
+                    const otherPin = compPin === 'p1' ? 'p2' : 'p1';
+                    inst.setPinVoltage(otherPin, v);
+                    const forwardKey = `${compId}:${otherPin}`;
+                    if (!visited.has(forwardKey)) {
+                        visited.add(forwardKey);
+                        propagate(forwardKey, v);
+                    }
+                }
+            }
+        };
+        propagate(pinKey, voltage);
+    }
+
     update(cpuCycles: number, currentWires: any[], allComponentsInstances: BaseComponent[]) {
         // Override in subclasses
     }
@@ -587,7 +623,7 @@ export class BaseComponent {
 
     onPWM?(pinId: string, payload: any): void;
     onPwm?(pinId: string, payload: any): void;
-    onPWMSignal?(pinId: string, payload: any): void;
+    onPWMSignal?(pinId: string, frequencyHz: number, dutyCycle: number, pulseUs: number): void;
 
     onPIOPinChange?(pinId: string, isHigh: boolean, payload: any): void;
     onPioPinChange?(pinId: string, isHigh: boolean, payload: any): void;
@@ -717,9 +753,9 @@ export class BaseComponent {
         for (const [key, value] of Object.entries(snapshot)) {
             const lower = String(key || '').toLowerCase();
             if (/(error|fault|burned|panic|critical|failed)/.test(lower) && this.isLikelySignalActive(value)) {
-                addFinding('error', `State flag ${key} indicates an error condition.`);
+                addFinding(`State flag ${key} indicates an error condition.`, 'error');
             } else if (/(warn|degraded|timeout|unstable|retry)/.test(lower) && this.isLikelySignalActive(value)) {
-                addFinding('warn', `State flag ${key} indicates a warning condition.`);
+                addFinding(`State flag ${key} indicates a warning condition.`, 'warn');
             }
         }
 
@@ -729,13 +765,13 @@ export class BaseComponent {
         for (const key of criticalKeys) {
             const value = this.getPathValue(snapshot, key);
             if (value === undefined) {
-                addFinding('warn', `Critical telemetry key missing: ${key}`);
+                addFinding(`Critical telemetry key missing: ${key}`, 'warn');
                 continue;
             }
 
             const lower = String(key || '').toLowerCase();
             if (/(error|fault|burned|panic|critical|failed)/.test(lower) && this.isLikelySignalActive(value)) {
-                addFinding('error', `Critical key ${key} is active.`);
+                addFinding(`Critical key ${key} is active.`, 'error');
             }
         }
 
@@ -746,8 +782,8 @@ export class BaseComponent {
             Number(this.telemetryRuntime.createdAtMs || 0)
         );
         const idleMs = Math.max(0, Date.now() - lastActivityMs);
-        if (this.telemetryRuntime.updateCount > 40 && idleMs > 8000) {
-            addFinding('warn', `State has been stable for ${Math.round(idleMs)}ms while updates continue.`);
+        if (this.telemetryRuntime.updateCount > 40 && idleMs > 60000) {
+            addFinding(`State has been stable for ${Math.round(idleMs)}ms while updates continue.`, 'warn');
         }
 
         const vccSamples = this.telemetryRuntime.power.vccSamples;
@@ -755,31 +791,31 @@ export class BaseComponent {
         if (vccSamples > 0 || gndSamples > 0) {
             const delta = this.telemetryRuntime.power.vccCurrent - this.telemetryRuntime.power.gndCurrent;
             if (delta < 0.25) {
-                addFinding('warn', 'Power rail delta appears too small (possible underpower/unwired condition).');
+                addFinding('Power rail delta appears too small (possible underpower/unwired condition).', 'warn');
             }
         }
 
         const stateSize = this.safeSerializeState().length;
         if (stateSize > 256_000) {
-            addFinding('warn', `State payload is large (${stateSize} bytes).`);
+            addFinding(`State payload is large (${stateSize} bytes).`, 'warn');
         }
 
         const avgMs = this.telemetryRuntime.updateCount > 0 ? this.telemetryRuntime.totalUpdateTimeMs / this.telemetryRuntime.updateCount : 0;
         if (avgMs > 20.0) {
-            addFinding('error', `Critical update latency: ${avgMs.toFixed(2)}ms avg.`);
+            addFinding(`Critical update latency: ${avgMs.toFixed(2)}ms avg.`, 'error');
         } else if (avgMs > 5.0) {
-            addFinding('warn', `High update latency: ${avgMs.toFixed(2)}ms avg.`);
+            addFinding(`High update latency: ${avgMs.toFixed(2)}ms avg.`, 'warn');
         }
 
         if (this.telemetryRuntime.updateCount > 30 && this.telemetryRuntime.lastUpdateAtMs > 0) {
             const sinceLastUpdateMs = Math.max(0, Date.now() - this.telemetryRuntime.lastUpdateAtMs);
             if (sinceLastUpdateMs > 2000) {
-                addFinding('warn', `Component updates appear infrequent (last update ${Math.round(sinceLastUpdateMs)}ms ago).`);
+                addFinding(`Component updates appear infrequent (last update ${Math.round(sinceLastUpdateMs)}ms ago).`, 'warn');
             }
         }
 
         if (this.telemetryRuntime.updateCount > 30 && this.calcFreq() > 0 && this.calcFreq() < 2) {
-            addFinding('warn', `Component update frequency appears low (${this.calcFreq().toFixed(2)}Hz).`);
+            addFinding(`Component update frequency appears low (${this.calcFreq().toFixed(2)}Hz).`, 'warn');
         }
 
         if (
@@ -787,7 +823,7 @@ export class BaseComponent {
             this.telemetryRuntime.onEventCount === 0 &&
             this.telemetryRuntime.stateMutationCount === 0
         ) {
-            addFinding('warn', 'No events or state changes observed during runtime; component may be stale/inactive.');
+            addFinding('No events or state changes observed during runtime; component may be stale/inactive.', 'warn');
         }
 
         const result: TelemetryHeuristicResult = findings.length === 0 ? {

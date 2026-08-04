@@ -3,12 +3,12 @@
     "label": "DC Motor",
     "description": "DC motor that converts electrical energy to rotational motion. Automatically wires to an L298N driver for bidirectional control.",
     "group": "Outputs",
-    "w": 100,
-    "h": 50,
+    "w": 200,
+    "h": 100,
     "attrs": {},
     "pins": [
-        { "id": "1", "x": 0, "y": 15, "type": "power", "description": "Terminal 1" },
-        { "id": "2", "x": 0, "y": 45, "type": "power", "description": "Terminal 2" }
+        { "id": "1", "x": 0, "y": 30, "type": "power", "description": "Terminal 1" },
+        { "id": "2", "x": 0, "y": 90, "type": "power", "description": "Terminal 2" }
     ],
     "autowiring": {
         "helpers": [
@@ -18,19 +18,31 @@
         "connections": [
             { "from": "1", "to": "helper:driver:OUT1|OUT3", "color": "green" },
             { "from": "2", "to": "helper:driver:OUT2|OUT4", "color": "green" },
-            { "from": "helper:driver:IN1|IN3", "to": "arduino:6|4|8|10|12", "color": "orange" },
+            { "from": "helper:driver:IN1|IN3", "to": "arduino:15|4|8|10|12", "color": "orange" },
             { "from": "helper:driver:IN2|IN4", "to": "arduino:7|2|9|11|13", "color": "orange" },
             { "from": "helper:driver:ENA|ENB", "to": "arduino:5|3|A0|A1|A2", "color": "orange" },
             { "from": "helper:driver:12V", "to": "helper:psu:5V", "color": "red" },
-            { "from": "helper:driver:GND", "to": "helper:psu:GND", "color": "black" },
-            { "from": "helper:driver:5V",  "to": "arduino:5V", "color": "red" },
-            { "from": "helper:driver:GND", "to": "arduino:GND", "color": "black" }
+            { "from": "helper:driver:5V",  "to": "arduino:22", "color": "red" }
         ]
     },
     "autocoding": {
         "arduino": {
-            "setup": "pinMode(${helper:driver:ENA|ENB}, OUTPUT);\n  pinMode(${helper:driver:IN1|IN3}, OUTPUT);\n  pinMode(${helper:driver:IN2|IN4}, OUTPUT);\n  analogWrite(${helper:driver:ENA|ENB}, 200);",
+            "setup": "pinMode(22, INPUT);\n  pinMode(${helper:driver:ENA|ENB}, OUTPUT);\n  pinMode(${helper:driver:IN1|IN3}, OUTPUT);\n  pinMode(${helper:driver:IN2|IN4}, OUTPUT);\n  analogWrite(${helper:driver:ENA|ENB}, 200);",
             "loop": "digitalWrite(${helper:driver:IN1|IN3}, HIGH); digitalWrite(${helper:driver:IN2|IN4}, LOW);\n  delay(2000);\n  digitalWrite(${helper:driver:IN1|IN3}, LOW); digitalWrite(${helper:driver:IN2|IN4}, LOW);\n  delay(500);"
+        }
+    },
+    "telemetry": {
+        "speed": {
+            "type": "number",
+            "format": "percent",
+            "source": "speedPercent",
+            "title": "Speed"
+        },
+        "direction": {
+            "type": "string",
+            "format": "text",
+            "source": "direction",
+            "title": "Direction"
         }
     }
 }

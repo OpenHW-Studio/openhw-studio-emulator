@@ -10,8 +10,8 @@ export default {
     LogicClass: LdrModuleLogic,
     BOUNDS,
     ContextMenu: LdrContextMenu,
-    contextMenuDuringRun: true,
-    contextMenuOnlyDuringRun: true,
+    contextMenuDuringRun: false,
+    contextMenuOnlyDuringRun: false,
     validation,
     doc: doc
 };

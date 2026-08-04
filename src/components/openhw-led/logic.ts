@@ -2,6 +2,13 @@ import { BaseComponent } from '../BaseComponent';
 
 export class LEDLogic extends BaseComponent {
     voltageDrop = 1.8;
+    lastUpdateCycles: number;
+    totalCyclesSinceSync: number;
+    illuminatedCyclesSinceSync: number;
+    hasIlluminatedSinceSync: boolean;
+
+    private _pwmDutyCycle: number = -1;
+    private _pwmTimestamp: number = 0;
 
     private hasResistorInConnectedPath(currentWires: any[], allComponentsInstances: BaseComponent[]): boolean {
         const startNodes = new Set([`${this.id}:A`, `${this.id}:K`]);
@@ -52,14 +59,39 @@ export class LEDLogic extends BaseComponent {
         const vA = this.getPinVoltage('A');
         const vK = this.getPinVoltage('K');
         const vDiff = vA - vK;
-        if (vDiff >= 1.8) return 0.1; // Conducting (10 ohms equivalent)
-        if (vDiff >= 1.5) return 0.01; // Starting to conduct
-        if (vDiff <= -5.0) return 0.1; // Reverse breakdown conduction
-        return 1e-9; // Non-conducting
+        if (vDiff >= 1.8) return 0.1;
+        if (vDiff >= 1.5) return 0.01;
+        if (vDiff <= -5.0) return 0.1;
+        return 1e-9;
+    }
+
+    onPWM(pinId: string, payload: any): void {
+        const dutyCycle = payload?.dutyCycle ?? 0;
+        this._pwmDutyCycle = dutyCycle;
+        this._pwmTimestamp = Date.now();
+        const brightness = Math.min(255, Math.max(0, Math.round(dutyCycle * 255)));
+        this.setState({
+            illuminated: dutyCycle >= 0.01,
+            brightness,
+            glow: brightness > 50,
+        });
+    }
+
+    onPWMSignal(pinId: string, frequencyHz: number, dutyCycle: number, pulseUs: number): void {
+        this._pwmDutyCycle = dutyCycle;
+        this._pwmTimestamp = Date.now();
+        const brightness = Math.min(255, Math.max(0, Math.round(dutyCycle * 255)));
+        this.setState({
+            illuminated: dutyCycle >= 0.01,
+            brightness,
+            glow: brightness > 50,
+        });
     }
 
     update(cpuCycles: number, currentWires: any[], allComponentsInstances: BaseComponent[]) {
-        if (this.lastUpdateCycles === 0) this.lastUpdateCycles = cpuCycles;
+        if (this.lastUpdateCycles === 0) {
+            this.lastUpdateCycles = cpuCycles;
+        }
         const deltaCycles = cpuCycles - this.lastUpdateCycles;
         this.lastUpdateCycles = cpuCycles;
 
@@ -76,42 +108,45 @@ export class LEDLogic extends BaseComponent {
 
         const myPins = [`${this.id}:A`, `${this.id}:K`];
         const isWired = this.state.isWired ?? currentWires.some(w => myPins.includes(w.from) || myPins.includes(w.to));
-
         const hasResistor = this.state.hasResistor ?? this.hasResistorInConnectedPath(currentWires, allComponentsInstances);
 
-        // Forward burnout (Over-current)
         if (isWired && voltageDiff > 4.0 && !hasResistor) {
             this.setState({ illuminated: false, brightness: 0, burnedOut: true });
             return;
         }
 
-        // Reverse burnout (Breakdown)
         if (isWired && voltageDiff < -5.0) {
             this.setState({ illuminated: false, brightness: 0, burnedOut: true });
             return;
         }
 
-        const vDropActual = Math.max(0, Math.min(voltageDiff, this.voltageDrop));
-        
-        // Simple current estimation: If we have a resistor in the path, 
-        // the current is (TotalV - Vdrop) / R. 
-        // We'll show the voltage drop across the LED specifically.
-        if (voltageDiff >= 1.5) {
+        const now = Date.now();
+        const pwmActive = this._pwmDutyCycle >= 0 && (now - this._pwmTimestamp) < 500;
+
+        if (pwmActive) {
+            const brightness = Math.min(255, Math.max(0, Math.round(this._pwmDutyCycle * 255)));
+            this.setState({
+                illuminated: this._pwmDutyCycle >= 0.01,
+                brightness,
+                glow: brightness > 50,
+            });
+        } else if (voltageDiff >= 1.5) {
             const vHistory = [...(this.state.vHistory || []).slice(-19), voltageDiff];
             const current = Math.max(0, voltageDiff - 1.5) / 220;
-            this.setState({ 
-                illuminated: true, 
-                brightness: 255,
-                voltageDrop: vDropActual,
+            const brightnessVal = Math.min(255, Math.round((voltageDiff - 1.5) / 3.5 * 255));
+            this.setState({
+                illuminated: true,
+                brightness: brightnessVal,
+                voltageDrop: Math.max(0, Math.min(voltageDiff, this.voltageDrop)),
                 current: current,
-                glow: current > 0.015, // Glow if > 15mA
+                glow: current > 0.015,
                 vHistory
             });
             this.hasIlluminatedSinceSync = true;
         } else {
             const vHistory = [...(this.state.vHistory || []).slice(-19), voltageDiff > 0 ? voltageDiff : 0];
-            this.setState({ 
-                illuminated: false, 
+            this.setState({
+                illuminated: false,
                 brightness: 0,
                 voltageDrop: voltageDiff > 0 ? voltageDiff : 0,
                 current: 0,
@@ -123,32 +158,30 @@ export class LEDLogic extends BaseComponent {
 
     getSyncState() {
         const state = super.getSyncState() || {};
-        const res = { ...state };
-        
-        if (this.totalCyclesSinceSync > 0) {
+
+        const now = Date.now();
+        const pwmActive = this._pwmDutyCycle >= 0 && (now - this._pwmTimestamp) < 500;
+
+        if (pwmActive) {
+            state.illuminated = this._pwmDutyCycle >= 0.01;
+            state.brightness = Math.min(255, Math.max(0, Math.round(this._pwmDutyCycle * 255)));
+            state.glow = state.brightness > 50;
+        } else if (this.totalCyclesSinceSync > 0) {
             const dutyCycle = this.illuminatedCyclesSinceSync / this.totalCyclesSinceSync;
-            if (dutyCycle > 0.01 && dutyCycle < 0.99) {
-                // PWM Intensity Averaging
-                res.illuminated = true;
-                res.brightness = Math.round(dutyCycle * 255);
-                res.glow = res.brightness > 50;
-            } else if (dutyCycle <= 0.01 && this.hasIlluminatedSinceSync) {
-                // Pulse Stretching for split-second blinks
-                res.illuminated = true;
-                res.brightness = 255;
-                res.glow = true;
-            }
-        } else if (this.hasIlluminatedSinceSync) {
-            res.illuminated = true;
-            res.brightness = 255;
-            res.glow = true;
+            state.illuminated = dutyCycle >= 0.01;
+            state.brightness = Math.round(dutyCycle * 255);
+            state.glow = state.brightness > 50;
+        } else {
+            state.illuminated = false;
+            state.brightness = 0;
+            state.glow = false;
         }
 
         this.totalCyclesSinceSync = 0;
         this.illuminatedCyclesSinceSync = 0;
         this.hasIlluminatedSinceSync = false;
-        
-        return res;
+
+        return state;
     }
 
     onCustomTelemetry() {

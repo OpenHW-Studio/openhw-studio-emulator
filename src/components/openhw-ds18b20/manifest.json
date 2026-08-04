@@ -3,8 +3,8 @@
   "label": "DS18B20 Temperature Sensor",
   "group": "Sensors",
   "description": "1-Wire digital temperature sensor (DS18B20) breakout board. Measures temperature from -55°C to +125°C.",
-  "w": 50,
-  "h": 100,
+  "w": 60,
+  "h": 90,
   "attrs": {
     "temperature": "25",
     "resolution": "12"
@@ -19,22 +19,22 @@
   "pins": [
     {
       "id": "GND",
-      "x": 10.0,
-      "y": 87.5,
+      "x": 15.0,
+      "y": 15.0,
       "type": "power",
       "description": "Ground"
     },
     {
       "id": "DQ",
-      "x": 25.0,
-      "y": 87.5,
+      "x": 30.0,
+      "y": 15.0,
       "type": "bidirectional",
       "description": "Digital DQ Data line (1-Wire)"
     },
     {
       "id": "VCC",
-      "x": 40.0,
-      "y": 87.5,
+      "x": 45.0,
+      "y": 15.0,
       "type": "power",
       "description": "Voltage Input (3V - 5.5V)"
     }
@@ -50,7 +50,7 @@
     "libraries": ["OneWire", "DallasTemperature"],
     "arduino": {
       "globals": "#include <OneWire.h>\n#include <DallasTemperature.h>\n\n#define ONE_WIRE_BUS_${COMP_SUFFIX} ${DQ}\nOneWire oneWire_${COMP_SUFFIX}(ONE_WIRE_BUS_${COMP_SUFFIX});\nDallasTemperature sensors_${COMP_SUFFIX}(&oneWire_${COMP_SUFFIX});",
-      "setup": "Serial.begin(9600);\\nsensors_${COMP_SUFFIX}.begin();",
+      "setup": "Serial.begin(9600);\npinMode(ONE_WIRE_BUS_${COMP_SUFFIX}, INPUT_PULLUP);\nsensors_${COMP_SUFFIX}.begin();",
       "loop": "sensors_${COMP_SUFFIX}.requestTemperatures();\nfloat temp_${COMP_SUFFIX} = sensors_${COMP_SUFFIX}.getTempCByIndex(0);\nSerial.print(\"DS18B20 Temp: \");\nSerial.print(temp_${COMP_SUFFIX});\nSerial.println(\" C\");\ndelay(1000);"
     }
   }

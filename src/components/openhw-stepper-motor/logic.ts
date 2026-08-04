@@ -50,8 +50,8 @@ export class StepperMotorLogic extends BaseComponent {
                 this.state.angle = this.angle;
                 this.stateChanged = true;
             }
-        } else {
-            // Unpowered or freewheeling phase
+        } else if (phaseA === 0 && phaseB === 0) {
+            // Truly unpowered or freewheeling phase (both coils off)
             this.currentPhase = -1;
         }
     }

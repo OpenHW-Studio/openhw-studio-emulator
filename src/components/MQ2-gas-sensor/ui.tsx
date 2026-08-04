@@ -22,11 +22,11 @@ export const GasContextMenu = ({ attrs, onUpdate }: { attrs: any, onUpdate: (key
 
 export const GasSensorUI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning: boolean }) => {
     const [showCloud, setShowCloud] = useState(false);
-    const [cloudPos, setCloudPos] = useState({ x: 0, y: -150 });
+    const [cloudPos, setCloudPos] = useState({ x: 69, y: -68.5 });
     const [isDragging, setIsDragging] = useState(false);
     
     const svgRef = useRef<SVGSVGElement>(null);
-    const lastPos = useRef({ x: 0, y: -150 });
+    const lastPos = useRef({ x: 69, y: -68.5 });
 
     const triggerGasLevel = useCallback((level: number) => {
         if (attrs.onInteract) {
@@ -169,59 +169,90 @@ export const GasSensorUI = ({ state, attrs, isRunning }: { state: any, attrs: an
                     minWidth: BOUNDS.w,
                     minHeight: BOUNDS.h
                 }}>
-                <svg width="100%" height="100%" viewBox={`0 0 ${BOUNDS.w} ${BOUNDS.h}`} style={{ pointerEvents: 'none', position: 'absolute', top: 0, left: 0 }}>
-                    {/* PCB Base */}
-                    <rect x="5" y="5" width="120" height="53" rx="4" fill="#0369a1" />
-                    
-                    {/* Mounting holes */}
-                    <circle cx="15" cy="15" r="3" fill="#0f172a" />
-                    <circle cx="15" cy="48" r="3" fill="#0f172a" />
-                    
-                    {/* Sensor Head (Silver cylinder) */}
-                    <circle cx="45" cy="31" r="22" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="2" />
-                    <circle cx="45" cy="31" r="16" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
-                    <path d="M35 21 L55 41 M35 41 L55 21 M45 15 L45 47 M25 31 L65 31" stroke="#94a3b8" strokeWidth="1" opacity="0.5" />
-                    
-                    {/* Potentiometer (Threshold adjuster) */}
-                    <rect x="75" y="38" width="14" height="14" fill="#1e40af" rx="1" />
-                    <circle cx="82" cy="45" r="5" fill="#facc15" />
-                    <line x1="82" y1="41" x2="82" y2="49" stroke="#854d0e" strokeWidth="2" />
-                    
-                    {/* Status LEDs */}
-                    <circle cx="85" cy="15" r="2" fill="#22c55e" /> {/* Power LED */}
-                    <circle cx="95" cy="15" r="2" fill={isExceeded ? "#ef4444" : "#475569"} /> {/* DO LED */}
+                <svg width="100%" height="100%" viewBox="0 0 137 59.5" style={{ pointerEvents: 'none', position: 'absolute', top: 0, left: 0 }}>
+                  <defs>
+                    <pattern id="meshPattern2" width="4.1" height="4.1" patternUnits="userSpaceOnUse">
+                      <path
+                        d="m0 0v4.09h0.4v-0.85l0.42 0.381v0.469h0.4v-0.0996l0.109 0.0996h0.711v-0.799l0.42 0.379v0.42h0.398v-0.0488l0.0547 0.0488h0.766v-0.75l0.42 0.381v0.369h0.4v-4.09h-0.4v0.311l-0.334-0.311h-0.598l0.111 0.0996v0.9l-0.42-0.379v-0.621h-0.398v0.25l-0.277-0.25h-0.6l0.0566 0.0508v0.9l-0.42-0.381v-0.57h-0.4v0.201l-0.223-0.201zm0.4 0.359 0.42 0.381v0.9l-0.42-0.381zm1.64 0.0508 0.42 0.391v0.889l-0.42-0.379zm1.64 0.0605 0.42 0.379v0.891l-0.42-0.381zm-2.46 0.639 0.42 0.381v0.9l-0.42-0.381zm1.64 0.0508 0.42 0.381v0.898l-0.42-0.379zm-2.46 0.641 0.42 0.379v0.9l-0.42-0.379zm1.64 0.0488 0.42 0.381v0.9l-0.42-0.381zm1.64 0.0508 0.42 0.379v0.9l-0.42-0.379zm-2.46 0.65 0.42 0.379v0.9l-0.42-0.379zm1.64 0.0488 0.42 0.381v0.9l-0.42-0.381z"
+                        fill="#949392"
+                      />
+                    </pattern>
+                    <g id="wokwiPin">
+                      <path
+                        fill="#c6bf95"
+                        d="m29 4.6c0.382 0 0.748-0.152 1.02-0.422s0.422-0.636 0.422-1.02v-1e-3c0-0.382-0.152-0.748-0.422-1.02s-0.636-0.422-1.02-0.422h-26.1c-0.234 0-0.423 0.189-0.423 0.423v2.04c0 0.234 0.189 0.423 0.423 0.423h26.1z"
+                      />
+                      <rect x="0" y="0" width="6.9" height="6.9" />
+                    </g>
+                    <filter id="ledFilter">
+                      <feGaussianBlur stdDeviation="0.5" />
+                    </filter>
+                  </defs>
 
-                    {/* Component Label */}
-                    <text x="75" y="28" fill="#e0f2fe" fontSize="10" fontFamily="sans-serif" fontWeight="bold">MQ-2</text>
-                    
-                    {/* Header Pins Block */}
-                    <rect x="125" y="12" width="5" height="39" fill="#1e293b" />
-                    {/* Pins (Gold) */}
-                    <rect x="130" y="45" width="5" height="2" fill="#eab308" />
-                    <rect x="130" y="35" width="5" height="2" fill="#eab308" />
-                    <rect x="130" y="25" width="5" height="2" fill="#eab308" />
-                    <rect x="130" y="16" width="5" height="2" fill="#eab308" />
-                    
-                    {/* Pin Labels */}
-                    <text x="122" y="49" fill="#f8fafc" fontSize="7" fontFamily="monospace" textAnchor="end">VCC</text>
-                    <text x="122" y="39" fill="#f8fafc" fontSize="7" fontFamily="monospace" textAnchor="end">GND</text>
-                    <text x="122" y="29" fill="#f8fafc" fontSize="7" fontFamily="monospace" textAnchor="end">DO</text>
-                    <text x="122" y="20" fill="#f8fafc" fontSize="7" fontFamily="monospace" textAnchor="end">AO</text>
+                  {/* Board */}
+                  <path
+                    d="m113 0h-113v59.5h113zm-1.6 53.2c0 2.62-2.12 4.74-4.74 4.74s-4.74-2.12-4.74-4.74c0-2.62 2.12-4.74 4.74-4.74s4.74 2.12 4.74 4.74zm-110 0c0 2.62 2.12 4.74 4.74 4.74 2.62 0 4.74-2.12 4.74-4.74 0-2.62-2.12-4.74-4.74-4.74-2.62 0-4.74 2.12-4.74 4.74zm105-51.6c2.62 0 4.74 2.12 4.74 4.74 0 2.62-2.12 4.74-4.74 4.74s-4.74-2.12-4.74-4.74c0-2.62 2.12-4.74 4.74-4.74zm-101 0c-2.62 0-4.74 2.12-4.74 4.74 0 2.62 2.12 4.74 4.74 4.74 2.62 0 4.74-2.12 4.74-4.74 0-2.62-2.12-4.74-4.74-4.74z"
+                    fill="#0664af"
+                  />
+
+                  {/* Pins aligned to manifest y=5, 20, 35, 50 (pin center is y+4.6) */}
+                  <use href="#wokwiPin" x="107" y="0.4" />
+                  <use href="#wokwiPin" x="107" y="15.4" />
+                  <use href="#wokwiPin" x="107" y="30.4" />
+                  <use href="#wokwiPin" x="107" y="45.4" />
+
+                  {/* Sensor */}
+                  <circle cx="47.7" cy="29.8" r="31.2" fill="none" stroke="#fff" strokeWidth=".4px" />
+                  <circle cx="47.7" cy="29.8" r="28.8" fill="#dedede" />
+                  <circle cx="47.7" cy="29.8" r="25.8" fill="#d0ccc4" />
+                  <circle cx="47.7" cy="29.8" r="21.4" fill="#bab3ad" />
+                  <circle cx="47.7" cy="29.8" r="21.4" fill="url(#meshPattern2)" />
+
+                  <text fill="#ffffff" fontFamily="sans-serif" fontSize="3.72px">
+                    <tspan x="94.656" y="5.5">AOUT</tspan>
+                    <tspan x="94.656" y="20.5">DOUT</tspan>
+                    <tspan x="94.656" y="35.5">GND</tspan>
+                    <tspan x="94.656" y="50.5">VCC</tspan>
+                  </text>
+
+                  {/* LEDs */}
+                  <rect
+                    style={{ opacity:1, fill:'#999999', strokeWidth:1.5747 }}
+                    width="8.5262499"
+                    height="3.8281121"
+                    x="81.321793"
+                    y="5.8179226"
+                  />
+                  <rect
+                    style={{ opacity:1, fill:'#e6e6e6', strokeWidth:2.05589 }}
+                    width="4.8444595"
+                    height="3.8281121"
+                    x="83.162689"
+                    y="5.8179226"
+                  />
+                  <circle cx="85.5" cy="8" r="1.8" fill="#03f704" filter="url(#ledFilter)" />
+                  
+                  <rect
+                    style={{ fill:'#999999', strokeWidth:1.5747 }}
+                    width="8.5262499"
+                    height="3.8281121"
+                    x="81.018036"
+                    y="48.700188"
+                  />
+                  <rect
+                    style={{ fill:'#e6e6e6', strokeWidth:2.05589 }}
+                    width="4.8444595"
+                    height="3.8281121"
+                    x="82.858932"
+                    y="48.700188"
+                  />
+                  {isExceeded && <circle cx="85" cy="50" r="1.8" fill="#03f704" filter="url(#ledFilter)" />}
+                  
+                  <text fill="#ffffff" fontFamily="sans-serif" fontSize="3px">
+                    <tspan x="80.213432" y="4.7265162">PWR LED</tspan>
+                    <tspan x="80.463821" y="55.852409">D0 LED</tspan>
+                  </text>
                 </svg>
-                {/* Visual indicator light for Digital Threshold Output */}
-                {isExceeded && (
-                    <div style={{
-                        position: 'absolute',
-                        top: 10, left: '50%',
-                        transform: 'translateX(-50%)',
-                        width: 8, height: 8,
-                        borderRadius: '50%',
-                        background: '#ef4444',
-                        boxShadow: '0 0 8px #ef4444',
-                        border: '1px solid white',
-                        zIndex: 10
-                    }} />
-                )}
             </div>
         </div>
     );

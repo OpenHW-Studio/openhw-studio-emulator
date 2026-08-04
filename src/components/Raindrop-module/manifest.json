@@ -20,16 +20,22 @@
     ],
     "autocoding": {
         "arduino": {
-            "setup": "#define RAIN_AO_PIN ${AO}\n#define RAIN_DO_PIN ${DO}\npinMode(RAIN_DO_PIN, INPUT);\nSerial.println(\"Raindrop Module ready.\");",
-            "loop": "int rainLevel = analogRead(RAIN_AO_PIN);\nint doVal = digitalRead(RAIN_DO_PIN);\nSerial.print(\"Rain Level (AO): \");\nSerial.print(rainLevel);\nSerial.print(\"  DO: \");\nSerial.println(doVal == LOW ? \"RAIN DETECTED\" : \"Dry\");\ndelay(1000);"
+            "globals": "#define RAIN_AO_PIN_${COMP_SUFFIX} ${AO}\n#define RAIN_DO_PIN_${COMP_SUFFIX} ${DO}",
+            "setup": "pinMode(RAIN_DO_PIN_${COMP_SUFFIX}, INPUT);\nSerial.println(\"Raindrop Module ${COMP_SUFFIX} ready.\");",
+            "loop": "int rainLevel_${COMP_SUFFIX} = analogRead(RAIN_AO_PIN_${COMP_SUFFIX});\nint doVal_${COMP_SUFFIX} = digitalRead(RAIN_DO_PIN_${COMP_SUFFIX});\nSerial.print(\"Rain Module ${COMP_SUFFIX} Level: \");\nSerial.print(rainLevel_${COMP_SUFFIX});\nSerial.print(\"  DO: \");\nSerial.println(doVal_${COMP_SUFFIX} == LOW ? \"RAIN DETECTED\" : \"Dry\");\ndelay(1000);"
         }
     },
     "autowiring": {
+        "helpers": [
+            { "type": "openhw-raindrop-pad", "id": "pad" }
+        ],
         "connections": [
-            { "from": "VCC", "to": "esp32:3V3" },
-            { "from": "GND", "to": "esp32:GND.1" },
-            { "from": "DO",  "to": "esp32:26" },
-            { "from": "AO",  "to": "esp32:25" }
+            { "from": "VCC", "to": "arduino:5V" },
+            { "from": "GND", "to": "arduino:GND" },
+            { "from": "DO",  "to": "arduino:2|3|4|5|6|7|8" },
+            { "from": "AO",  "to": "arduino:A0|A1|A2|A3|A4|A5" },
+            { "from": "PAD+", "to": "helper:pad:AOUT" },
+            { "from": "PAD-", "to": "helper:pad:GND" }
         ]
     }
 }

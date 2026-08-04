@@ -3,8 +3,8 @@
     "label": "LED",
     "description": "Light-emitting diode. Emits light when current flows through it. Supports multiple colors via the color attribute.",
     "group": "Outputs",
-    "w": 38,
-    "h": 38,
+    "w": 65.3,
+    "h": 65.3,
     "attrs": {
         "color": "red",
         "breadboard": {
@@ -22,15 +22,15 @@
     "pins": [
         {
             "id": "A",
-            "x": 10,
-            "y": 40,
+            "x": 40.8,
+            "y": 72.4,
             "type": "input",
             "description": "Anode (+)"
         },
         {
             "id": "K",
-            "x": 25,
-            "y": 40,
+            "x": 25.8,
+            "y": 72.4,
             "type": "input",
             "description": "Cathode (-)"
         }
@@ -38,17 +38,27 @@
     "autocoding": {
         "arduino": {
             "setup": "pinMode(${A}, OUTPUT);",
-            "loop": "digitalWrite(${A}, HIGH);\ndelay(500);\ndigitalWrite(${A}, LOW);\ndelay(500);"
+            "loop": "digitalWrite(${A}, HIGH);\ndelay(1000);\ndigitalWrite(${A}, LOW);\ndelay(1000);"
         },
         "micropython": {
-            "setup": "from machine import Pin\nfrom time import sleep\nled = Pin(25, Pin.OUT)",
-            "loop": "while True:\n    led.toggle()\n    sleep(0.5)"
+            "setup": "from machine import Pin\nimport time\nled = Pin(${A}, Pin.OUT)",
+            "loop": "led.value(1)\ntime.sleep(1)\nled.value(0)\ntime.sleep(1)"
         }
     },
     "autowiring": {
         "connections": [
-            { "from": "A", "to": "arduino:13", "via": "openhw-resistor", "attrs": { "value": "220" } },
-            { "from": "K", "to": "arduino:GND" }
+            {
+                "from": "A",
+                "to": "arduino:13",
+                "via": "openhw-resistor",
+                "attrs": {
+                    "value": "220"
+                }
+            },
+            {
+                "from": "K",
+                "to": "arduino:GND"
+            }
         ]
     }
 }

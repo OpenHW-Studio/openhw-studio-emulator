@@ -2,36 +2,36 @@
   "type": "openhw-ldr-module",
   "label": "LDR Sensor Module (4-pin)",
   "group": "Sensors",
-  "w": 187.5,
+  "w": 180,
   "h": 75,
   "attrs": {},
-  "contextMenuDuringRun": true,
-  "contextMenuOnlyDuringRun": true,
+  "contextMenuDuringRun": false,
+  "contextMenuOnlyDuringRun": false,
   "pins": [
     {
       "id": "VCC",
-      "x": 187.5,
+      "x": 180,
       "y": 15,
       "type": "power",
       "description": "Positive power supply"
     },
     {
       "id": "GND",
-      "x": 187.5,
+      "x": 180,
       "y": 30,
       "type": "power",
       "description": "Ground"
     },
     {
       "id": "DO",
-      "x": 187.5,
+      "x": 180,
       "y": 45,
       "type": "output",
       "description": "Digital output"
     },
     {
       "id": "AO",
-      "x": 187.5,
+      "x": 180,
       "y": 60,
       "type": "analog",
       "description": "Analog output"
@@ -47,8 +47,8 @@
   },
   "autocoding": {
     "arduino": {
-      "setup": "Serial.begin(9600);\npinMode(${DO}, INPUT);\nSerial.println(\"LDR Sensor Ready\");",
-      "loop": "int analog_${COMP_SUFFIX} = analogRead(${AO});\nint digital_${COMP_SUFFIX} = digitalRead(${DO});\nfloat lux_${COMP_SUFFIX} = (1023.0 - analog_${COMP_SUFFIX}) / 1023.0 * 1000.0;\nSerial.print(\"LDR Analog: \");\nSerial.print(analog_${COMP_SUFFIX});\nSerial.print(\" | Lux~\");\nSerial.print(lux_${COMP_SUFFIX}, 0);\nSerial.print(\" | Dark: \");\nSerial.println(digital_${COMP_SUFFIX} == HIGH ? \"YES\" : \"no\");\ndelay(300);"
+      "setup": "Serial.begin(9600);\npinMode(${DO}, INPUT);\nSerial.println(F(\"LDR Sensor Ready - type /guide for help\"));",
+      "loop": "while (Serial.available()) {\n  char c = Serial.read();\n  static String _cmd${COMP_SUFFIX} = \"\";\n  if (c == '\\n') {\n    _cmd${COMP_SUFFIX}.trim();\n    if (_cmd${COMP_SUFFIX} == \"/guide\") {\n      Serial.println(F(\"=== LDR Guide ===\"));\n      Serial.println(F(\"AO->A0, DO->D3\"));\n      Serial.println(F(\"Potentiometer sets DO threshold only\"));\n      Serial.println(F(\"AO reads 0-1023 always\"));\n      Serial.println(F(\"================\"));\n    }\n    _cmd${COMP_SUFFIX} = \"\";\n  } else {\n    _cmd${COMP_SUFFIX} += c;\n  }\n}\nint analog_${COMP_SUFFIX} = analogRead(${AO});\nint digital_${COMP_SUFFIX} = digitalRead(${DO});\nint lux_${COMP_SUFFIX} = map(analog_${COMP_SUFFIX}, 0, 1023, 0, 1000);\nSerial.print(\"LDR Value: \");\nSerial.print(analog_${COMP_SUFFIX});\nSerial.print(\" | Lux: \");\nSerial.print(lux_${COMP_SUFFIX});\nSerial.print(\" | Dark: \");\nSerial.println(digital_${COMP_SUFFIX} == HIGH ? F(\"YES\") : F(\"NO\"));\ndelay(300);"
     }
   }
 }

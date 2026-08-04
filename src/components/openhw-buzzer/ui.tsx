@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
 // Bounding box for the blue selection ring.
-export const BOUNDS = { x: 0, y: 0, w: 36, h: 47.6 };
+export const BOUNDS = { x: 0, y: 0, w: 105, h: 135 };
 
 // Global audio context shared across buzzer instances
 let audioCtx: AudioContext | null = null;
@@ -9,8 +9,9 @@ let audioCtx: AudioContext | null = null;
 export const BuzzerUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const nativeW = 64;
     const nativeH = 90;
-    const scaleX = BOUNDS.w / nativeW;
-    const scaleY = BOUNDS.h / nativeH;
+    // Physically scale up the component so its native 0.1" (2.54mm) pin gap becomes exactly 15px
+    const scaleX = 1.5625;
+    const scaleY = 1.5625;
 
     const oscRef = useRef<OscillatorNode | null>(null);
     const gainRef = useRef<GainNode | null>(null);
@@ -116,9 +117,12 @@ export const BuzzerUI = ({ state, attrs }: { state: any, attrs: any }) => {
                 hasSignal: state?.isBuzzing ? true : undefined,
                 ...attrs,
                 style: {
+                    position: 'absolute',
                     display: 'block',
                     width: nativeW,
                     height: nativeH,
+                    left: 2.30,
+                    top: 4.40,
                     transform: `scale(${scaleX}, ${scaleY})`,
                     transformOrigin: '0 0'
                 }

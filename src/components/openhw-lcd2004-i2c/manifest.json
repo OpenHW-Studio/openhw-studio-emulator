@@ -1,65 +1,59 @@
 {
-  "type": "openhw-lcd2004-i2c",
-  "label": "LCD 2004 (I2C)",
-  "group": "Displays",
-  "w": 375,
-  "h": 225,
-  "attrs": {
-    "i2cAddress": "0x27",
-    "color": "blue",
-    "pins": "i2c"
-  },
-  "telemetry": {
-    "template": "line0=${state.lines.0}, illuminated=${state.illuminated}",
-    "criticalKeys": [
-      "state.lines",
-      "state.illuminated"
-    ]
-  },
+    "type": "openhw-lcd2004-i2c",
+    "name": "LCD 2004 (I2C)",
+    "description": "20x4 Character LCD Display with I2C Backpack",
+    "category": "Displays",
+    "group": "Displays",
+    "dimensions": {
+        "width": 375,
+        "height": 195
+    },
     "pins": [
+        { "id": "GND", "x": 0, "y": 75, "description": "Ground" },
+        { "id": "VCC", "x": 0, "y": 90, "description": "Power Supply (5V)" },
+        { "id": "SDA", "x": 0, "y": 105, "description": "I2C Data" },
+        { "id": "SCL", "x": 0, "y": 120, "description": "I2C Clock" }
+    ],
+    "properties": [
         {
-            "id": "GND",
-            "x": 7.5,
-            "y": 75,
-            "type": "power",
-            "description": "Ground"
+            "name": "i2cAddress",
+            "type": "number",
+            "default": 39,
+            "description": "I2C Address (default: 0x27)"
         },
         {
-            "id": "VCC",
-            "x": 7.5,
-            "y": 90,
-            "type": "power",
-            "description": "5V Power"
-        },
-        {
-            "id": "SDA",
-            "x": 7.5,
-            "y": 105,
-            "type": "input",
-            "description": "I2C Data"
-        },
-        {
-            "id": "SCL",
-            "x": 7.5,
-            "y": 120,
-            "type": "input",
-            "description": "I2C Clock"
+            "name": "color",
+            "type": "select",
+            "options": ["green", "blue", "yellow", "white"],
+            "default": "blue",
+            "description": "Background color"
         }
     ],
-    "autocoding": {
-        "libraries": ["LiquidCrystal I2C"],
-        "arduino": {
-            "globals": "#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\nLiquidCrystal_I2C lcd_${COMP_SUFFIX}(0x27, 20, 4);",
-            "setup": "lcd_${COMP_SUFFIX}.init();\nlcd_${COMP_SUFFIX}.backlight();\nlcd_${COMP_SUFFIX}.setCursor(0, 0);\nlcd_${COMP_SUFFIX}.print(\"OpenHW Studio!\");",
-            "loop": "unsigned long t_${COMP_SUFFIX} = millis() / 1000;\nlcd_${COMP_SUFFIX}.setCursor(0, 1);\nlcd_${COMP_SUFFIX}.print(\"Timer: \");\nlcd_${COMP_SUFFIX}.print(t_${COMP_SUFFIX});\nlcd_${COMP_SUFFIX}.print(\" s   \");\ndelay(500);"
+    "state": {
+        "lines": ["", "", "", ""],
+        "illuminated": true
+    },
+    "telemetry": {
+        "display": {
+            "type": "string",
+            "format": "text",
+            "source": "lines",
+            "multiple": true
         }
     },
-    "autowiring": {
-      "connections": [
-        { "from": "GND", "to": "arduino:GND" },
-        { "from": "VCC", "to": "arduino:5V" },
-        { "from": "SDA", "to": "arduino:A4", "i2c": true },
-        { "from": "SCL", "to": "arduino:A5", "i2c": true }
-      ]
+    "autocoding": {
+        "arduino": {
+            "includes": ["<Wire.h>", "<LiquidCrystal_I2C.h>"],
+            "globals": "LiquidCrystal_I2C lcd({{i2cAddress}}, 20, 4);",
+            "setup": "lcd.init();\nlcd.backlight();\nlcd.setCursor(0, 0);\nlcd.print(\"Hello, OpenHW!\");",
+            "loop": "",
+            "dependencies": ["LiquidCrystal I2C"]
+        },
+        "micropython": {
+            "includes": ["from machine import I2C, Pin", "from pico_i2c_lcd import I2cLcd"],
+            "globals": "i2c = I2C(0, sda=Pin({{SDA}}), scl=Pin({{SCL}}), freq=400000)\nlcd = I2cLcd(i2c, {{i2cAddress}}, 4, 20)",
+            "setup": "lcd.putstr('Hello, OpenHW!')",
+            "loop": ""
+        }
     }
 }

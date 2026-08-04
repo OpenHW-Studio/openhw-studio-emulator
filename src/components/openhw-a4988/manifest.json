@@ -28,20 +28,20 @@
             { "from": "STEP",      "to": "arduino:8" },
             { "from": "DIR",       "to": "arduino:9" },
             { "from": "ENABLE",    "to": "arduino:10" },
-            { "from": "VDD",       "to": "arduino:5V" },
+            { "from": "VDD",       "to": "arduino:3V3" },
             { "from": "GND_LOGIC", "to": "arduino:GND" },
             { "from": "VMOT",      "to": "powersupply:5V" },
             { "from": "GND_MOT",   "to": "powersupply:GND" },
-            { "from": "RESET",     "to": "arduino:5V" },
-            { "from": "SLEEP",     "to": "arduino:5V" }
+            { "from": "RESET",     "to": "arduino:3V3" },
+            { "from": "SLEEP",     "to": "arduino:3V3" }
         ],
         "externalPower": true,
         "externalVoltage": "12.0"
     },
     "autocoding": {
         "arduino": {
-            "setup": "pinMode(${STEP}, OUTPUT);\npinMode(${DIR}, OUTPUT);\npinMode(${ENABLE}, OUTPUT);\ndigitalWrite(${ENABLE}, LOW);",
-            "loop": "digitalWrite(${DIR}, HIGH);\nfor(int i_${COMP_SUFFIX}=0;i_${COMP_SUFFIX}<200;i_${COMP_SUFFIX}++){digitalWrite(${STEP},HIGH);delayMicroseconds(1000);digitalWrite(${STEP},LOW);delayMicroseconds(1000);}\ndelay(500);\ndigitalWrite(${DIR}, LOW);\nfor(int i_${COMP_SUFFIX}=0;i_${COMP_SUFFIX}<200;i_${COMP_SUFFIX}++){digitalWrite(${STEP},HIGH);delayMicroseconds(1000);digitalWrite(${STEP},LOW);delayMicroseconds(1000);}\ndelay(500);"
+            "setup": "pinMode(${STEP}, OUTPUT);\npinMode(${DIR}, OUTPUT);\npinMode(${ENABLE}, OUTPUT);\ndigitalWrite(${ENABLE}, LOW);\nSerial.begin(9600);\nSerial.println(\"A4988 Stepper Driver Ready\");",
+            "loop": "digitalWrite(${DIR}, HIGH);\nSerial.println(\"Moving CW\");\nfor (int i_${COMP_SUFFIX} = 0; i_${COMP_SUFFIX} < 200; i_${COMP_SUFFIX}++) {\n  digitalWrite(${STEP}, HIGH);\n  delayMicroseconds(1000);\n  digitalWrite(${STEP}, LOW);\n  delayMicroseconds(1000);\n}\ndelay(500);\ndigitalWrite(${DIR}, LOW);\nSerial.println(\"Moving CCW\");\nfor (int i_${COMP_SUFFIX} = 0; i_${COMP_SUFFIX} < 200; i_${COMP_SUFFIX}++) {\n  digitalWrite(${STEP}, HIGH);\n  delayMicroseconds(1000);\n  digitalWrite(${STEP}, LOW);\n  delayMicroseconds(1000);\n}\ndelay(500);"
         }
     }
 }
