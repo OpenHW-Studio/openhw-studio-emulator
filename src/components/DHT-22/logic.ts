@@ -2,8 +2,11 @@ import { BaseComponent } from '../BaseComponent';
 
 type ProtocolState = 'IDLE' | 'WAKE_WAIT' | 'ACKING' | 'SENDING';
 
-// At 16 MHz: 1 µs = 16 cycles
-const US = 16;
+const DHT_LOG = false; // set to false to silence all DHT logs
+
+function dhtLog(...args: any[]) {
+    if (DHT_LOG) console.log('[DHT22]', ...args);
+}
 
 export class DHT22Logic extends BaseComponent {
     private protocolState: ProtocolState = 'IDLE';
@@ -15,225 +18,217 @@ export class DHT22Logic extends BaseComponent {
     private dataBits: boolean[] = [];
     private bitIndex: number = 0;
 
-    // Guard: true while DHT actively drives DATA — prevents re-entrant onPinStateChange.
-    private _drivingBus: boolean = false;
-    private _lastDrivenVoltage: number = 5.0;
-
-    // Injected by avr-runner / execute.ts
+    // Injected by avr-runner.ts
     private _simCpu?: any;
-    private _simUpdatePhysics?: () => void;
-    // Direct AVR port register writer — bypasses full repropagateAllVoltages cascade.
-    // Signature: (boardPin: string, isHigh: boolean) => void
-    private _setAvrPinDirect?: (boardPin: string, isHigh: boolean) => void;
-    // Which board pin the DATA line is wired to (cached on first use)
-    private _boardPin?: string | null;
-    // Watchdog: CPU cycle when we entered ACKING/SENDING; if stuck, auto-reset.
-    private _txStartCycle: number = 0;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
 
-        const attrs = manifest?.attrs || {};
-        this.temperature = Number(attrs.temperature ?? this.state?.temperature ?? 24.0);
-        this.humidity    = Number(attrs.humidity    ?? this.state?.humidity    ?? 50.0);
+        this.temperature = this.state?.temperature ?? 24.0;
+        this.humidity = this.state?.humidity ?? 50.0;
 
-        this.setState({ temperature: this.temperature, humidity: this.humidity });
-
-        // Idle: hold DATA HIGH (open-drain with external pull-up)
-        this.setPinVoltage('DATA', 5.0);
+        this._setVoltageInternal(5.0);
+        dhtLog(`[${id}] Constructed. T=${this.temperature} H=${this.humidity}`);
     }
 
-    onEvent(event: any) {
-        if (event.type === 'SET_ATTR') {
-            if (event.key === 'temperature') {
-                const val = Number(event.value);
-                if (!isNaN(val)) { this.temperature = val; this.setState({ temperature: val }); this._boardPin = undefined; }
-            } else if (event.key === 'humidity') {
-                const val = Number(event.value);
-                if (!isNaN(val)) { this.humidity = val; this.setState({ humidity: val }); this._boardPin = undefined; }
-            }
-        } else if (event.type === 'temperature') {
-            const val = Number(event.value);
-            if (!isNaN(val)) { this.temperature = val; this.setState({ temperature: val }); }
-        } else if (event.type === 'humidity') {
-            const val = Number(event.value);
-            if (!isNaN(val)) { this.humidity = val; this.setState({ humidity: val }); }
-        }
-    }
-
-    onPinStateChange(pin: string, isHigh: boolean, cycles: number) {
-        if ((pin === 'DATA' || pin === 'SDA') && this._drivingBus) return;
-
-        if (pin === 'DATA' || pin === 'SDA') {
-            if (!isHigh && this.protocolState === 'IDLE') {
-                console.log(`[DHT22] WAKE_WAIT start (LOW) at ${cycles}`);
-                this.protocolState = 'WAKE_WAIT';
-                this.wakeStartCycles = cycles;
-            } else if (isHigh && this.protocolState === 'WAKE_WAIT') {
-                const wakeUs = (cycles - this.wakeStartCycles) / US;
-                console.log(`[DHT22] WAKE_WAIT end (HIGH) at ${cycles}, wakeUs=${wakeUs}`);
-                if (wakeUs >= 100) {
-                    this.startAckSequence();
-                } else {
-                    this.protocolState = 'IDLE';
-                }
-            }
-        }
-    }
-
-    private schedule(cb: () => void, delayCycles: number) {
-        if (this._simCpu && typeof this._simCpu.addClockEvent === 'function') {
-            this._simCpu.addClockEvent(cb, delayCycles);
-        }
-    }
-
-    private getBoardPin(): string | null {
-        if (this._boardPin !== undefined && this._boardPin !== null) return this._boardPin;
-        
-        const cpu = this._simCpu as any;
-        if (cpu?._avrRunner) {
-            const runner = cpu._avrRunner;
-            const myNodeData = `${this.id}:DATA`;
-            const myNodeSda = `${this.id}:SDA`;
-            const myNet = runner.pinToNet?.get(myNodeData) ?? runner.pinToNet?.get(myNodeSda);
-            
-            if (myNet !== undefined) {
-                for (const [node, netId] of runner.pinToNet.entries()) {
-                    if (netId === myNet && node.startsWith(runner.boardId + ':')) {
-                        let pinStr = node.split(':')[1];
-                        if (/^D\d+$/i.test(pinStr)) pinStr = pinStr.substring(1);
-                        this._boardPin = pinStr;
-                        console.log(`[DHT22] getBoardPin: Found board pin! node=${node} pin=${this._boardPin}`);
-                        break;
+    /**
+     * Resolve the Arduino board pin (e.g. "5") connected to our DATA/SDA pin.
+     * Cached after first successful lookup. Does NOT cache null (retries each call if not found).
+     */
+    private getConnectedBoardPin(): string | null {
+        if ((this as any)._connectedPin != null) return (this as any)._connectedPin;
+        const runner = this._simCpu?._avrRunner;
+        if (runner?.currentWires) {
+            for (const wire of runner.currentWires) {
+                const from: string = wire.from || '';
+                const to: string = wire.to || '';
+                if (from.startsWith(this.id + ':')) {
+                    const parts = to.split(':');
+                    const pin = parts[1] ?? null;
+                    if (pin) {
+                        (this as any)._connectedPin = pin;
+                        dhtLog(`[${this.id}] Resolved board pin = "${pin}" (from wire from="${from}" to="${to}")`);
+                        return pin;
+                    }
+                } else if (to.startsWith(this.id + ':')) {
+                    const parts = from.split(':');
+                    const pin = parts[1] ?? null;
+                    if (pin) {
+                        (this as any)._connectedPin = pin;
+                        dhtLog(`[${this.id}] Resolved board pin = "${pin}" (from wire from="${from}" to="${to}")`);
+                        return pin;
                     }
                 }
             }
         }
-        return this._boardPin ?? null;
+        // Do not cache null — retry next time so we find it once _simCpu is ready
+        return null;
     }
 
-    private driveData(voltage: number) {
-        this._drivingBus = true;
-        this._lastDrivenVoltage = voltage;
-        this.setPinVoltage('DATA', voltage);
+    private _setVoltageInternal(voltage: number) {
+        (this as any)._lastDrivenVoltage = voltage;
+        if (this.pins['SDA']) this.pins['SDA'].voltage = voltage;
+        if (this.pins['DATA']) this.pins['DATA'].voltage = voltage;
+        try { this.setPinVoltage('SDA', voltage); } catch (_) {}
+        try { this.setPinVoltage('DATA', voltage); } catch (_) {}
+    }
+
+    /**
+     * Drive the data bus to a voltage level.
+     * Fast path: _setAvrPinDirect writes directly to PIND (no netlist traversal).
+     * Fallback: _simUpdatePhysics propagates through breadboard multi-hop paths.
+     * Re-entrancy safe: repropagateAllVoltages uses customCompId guard so it never
+     * calls onPinStateChange back on this component, and the ACKING/SENDING guard
+     * in onPinStateChange provides a second layer of protection.
+     */
+    private drivePin(voltage: number) {
+        this._setVoltageInternal(voltage);
         const isHigh = voltage > 1.8;
-        // Write directly to AVR pin register to avoid the full repropagateAllVoltages
-        // cascade which would cause the InputPullUp handler to fight us.
-        if (this._setAvrPinDirect) {
-            const boardPin = this.getBoardPin();
-            if (boardPin) {
-                console.log(`[DHT22] driveData: boardPin=${boardPin} isHigh=${isHigh} cycles=${this._simCpu?.cycles}`);
-                this._setAvrPinDirect(boardPin, isHigh);
-            } else {
-                console.warn('[DHT22] driveData: boardPin NOT FOUND - falling back to simUpdatePhysics');
-                if (this._simUpdatePhysics) this._simUpdatePhysics();
-            }
-        } else {
-            console.warn('[DHT22] driveData: _setAvrPinDirect NOT injected - falling back to simUpdatePhysics');
-            if (this._simUpdatePhysics) this._simUpdatePhysics();
+
+        // Fast path: directly write to AVR PIND register
+        const boardPin = this.getConnectedBoardPin();
+        if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
+            (this as any)._setAvrPinDirect(boardPin, isHigh);
+        } else if (!boardPin) {
+            dhtLog(`[${this.id}] WARN drivePin(${voltage.toFixed(1)}V): boardPin not resolved yet, relying on _simUpdatePhysics only`);
+        }
+
+        // Fallback: propagate through full netlist (handles breadboard multi-hop paths)
+        this._simUpdatePhysics?.();
+    }
+
+    onEvent(event: any) {
+        if (event.type === 'temperature') {
+            this.temperature = event.value;
+            this.setState({ temperature: this.temperature });
+            dhtLog(`[${this.id}] onEvent → temperature=${this.temperature}`);
+        } else if (event.type === 'humidity') {
+            this.humidity = event.value;
+            this.setState({ humidity: this.humidity });
+            dhtLog(`[${this.id}] onEvent → humidity=${this.humidity}`);
         }
     }
 
-    private releaseData() {
-        this._lastDrivenVoltage = 5.0;
-        this._drivingBus = false;
-        this.protocolState = 'IDLE';
-        this._txStartCycle = 0;
-        this.setPinVoltage('DATA', 5.0);
-        // Restore bus to HIGH and notify runner
-        if (this._setAvrPinDirect) {
-            const boardPin = this.getBoardPin();
-            if (boardPin) this._setAvrPinDirect(boardPin, true);
+    onPinStateChange(pin: string, isHigh: boolean, cycles: number) {
+        // Log EVERY call so we can see unexpected re-entries
+        dhtLog(`[${this.id}] onPinStateChange pin="${pin}" isHigh=${isHigh} state=${this.protocolState} cycles=${cycles}`);
+
+        // Guard: ignore self-induced callbacks while driving the bus
+        if (this.protocolState === 'ACKING' || this.protocolState === 'SENDING') {
+            dhtLog(`[${this.id}]   → IGNORED (state=${this.protocolState})`);
+            return;
         }
-        if (this._simUpdatePhysics) this._simUpdatePhysics();
-        console.log(`[DHT22] Release DATA at ${this._simCpu?.cycles}`);
+        if (pin !== 'SDA' && pin !== 'DATA') {
+            dhtLog(`[${this.id}]   → IGNORED (wrong pin "${pin}")`);
+            return;
+        }
+
+        if (!isHigh && this.protocolState === 'IDLE') {
+            // Arduino pulled LOW — start signal begins
+            this.protocolState = 'WAKE_WAIT';
+            this.wakeStartCycles = cycles;
+            dhtLog(`[${this.id}]   → IDLE→WAKE_WAIT (LOW detected at cycles=${cycles})`);
+
+        } else if (isHigh && this.protocolState === 'WAKE_WAIT') {
+            // Arduino released the bus — measure LOW duration
+            const wakeUs = (cycles - this.wakeStartCycles) / 16;
+            dhtLog(`[${this.id}]   → WAKE_WAIT got HIGH. wakeUs=${wakeUs.toFixed(1)}us (need ≥500us)`);
+
+            if (wakeUs >= 500) {
+                dhtLog(`[${this.id}]   → Starting ACK sequence`);
+                this.startAckSequence();
+            } else {
+                dhtLog(`[${this.id}]   → Wake too short (${wakeUs.toFixed(1)}us < 500us) — ignored`);
+                this.protocolState = 'IDLE';
+            }
+
+        } else {
+            // Unexpected combination — log it so we can see what's happening
+            dhtLog(`[${this.id}]   → UNEXPECTED: pin=${pin} isHigh=${isHigh} in state=${this.protocolState}`);
+        }
     }
 
     private startAckSequence() {
-        console.log(`[DHT22] ACKING sequence scheduled at ${this._simCpu?.cycles}`);
+        if (!this._simCpu) {
+            dhtLog(`[${this.id}] startAckSequence: ABORT — _simCpu is null`);
+            this.protocolState = 'IDLE';
+            return;
+        }
         this.protocolState = 'ACKING';
-        this._txStartCycle = this._simCpu?.cycles ?? 0;
-        this.schedule(() => this.sendAckLow(), 30 * US);
+        dhtLog(`[${this.id}] startAckSequence: waiting 30us before ACK LOW`);
+        this._simCpu.addClockEvent(() => this.sendAckLow(), 30 * 16);
     }
 
     private sendAckLow() {
-        console.log(`[DHT22] ACK LOW sent at ${this._simCpu?.cycles}`);
-        this.driveData(0); 
-        this.schedule(() => this.sendAckHigh(), 80 * US);
+        dhtLog(`[${this.id}] sendAckLow: driving LOW 80us`);
+        this.drivePin(0);
+        this._simCpu.addClockEvent(() => this.sendAckHigh(), 80 * 16);
     }
 
     private sendAckHigh() {
-        console.log(`[DHT22] ACK HIGH sent at ${this._simCpu?.cycles}`);
-        this.driveData(5.0);
-        this.schedule(() => {
-            console.log(`[DHT22] SENDING bits at ${this._simCpu?.cycles}`);
+        dhtLog(`[${this.id}] sendAckHigh: driving HIGH 80us`);
+        this.drivePin(5.0);
+        this._simCpu.addClockEvent(() => {
             this.prepareDataBits();
             this.protocolState = 'SENDING';
+            dhtLog(`[${this.id}] Starting data transmission (T=${this.temperature} H=${this.humidity})`);
             this.sendNextBit();
-        }, 80 * US);
+        }, 80 * 16);
     }
 
-    // ── Data payload ─────────────────────────────────────────────────────────
-
     private prepareDataBits() {
-        // DHT22 40-bit frame (MSB first):
-        //   Byte 0–1: Humidity × 10
-        //   Byte 2–3: Temperature × 10  (bit15 = sign)
-        //   Byte 4:   Checksum = (b0+b1+b2+b3) & 0xFF
-        const h    = Math.round(this.humidity * 10);
-        const tAbs = Math.round(Math.abs(this.temperature) * 10);
-        const sign = this.temperature < 0 ? 0x80 : 0x00;
+        // Re-read from component state in case sliders were changed
+        if (this.state?.temperature !== undefined) this.temperature = Number(this.state.temperature);
+        if (this.state?.humidity !== undefined) this.humidity = Number(this.state.humidity);
 
-        const b0 = (h    >> 8) & 0xFF;
-        const b1 =  h         & 0xFF;
-        const b2 = ((tAbs >> 8) & 0x7F) | sign;
-        const b3 =  tAbs       & 0xFF;
+        const h = Math.min(1000, Math.max(0, Math.round(this.humidity * 10)));
+        const rawT = Math.round(Math.abs(this.temperature) * 10);
+        const tSign = this.temperature < 0 ? 0x8000 : 0x0000;
+        const tEncoded = (rawT & 0x7FFF) | tSign;
+
+        const b0 = (h >> 8) & 0xFF;
+        const b1 = h & 0xFF;
+        const b2 = (tEncoded >> 8) & 0xFF;
+        const b3 = tEncoded & 0xFF;
         const b4 = (b0 + b1 + b2 + b3) & 0xFF;
 
+        dhtLog(`[${this.id}] prepareDataBits: T=${this.temperature} H=${this.humidity} → bytes=[0x${b0.toString(16)},0x${b1.toString(16)},0x${b2.toString(16)},0x${b3.toString(16)}] cksum=0x${b4.toString(16)}`);
+
         this.dataBits = [];
-        for (const byte of [b0, b1, b2, b3, b4]) {
+        for (const b of [b0, b1, b2, b3, b4]) {
             for (let i = 7; i >= 0; i--) {
-                this.dataBits.push(!!((byte >> i) & 1));
+                this.dataBits.push(!!((b >> i) & 1));
             }
         }
         this.bitIndex = 0;
     }
 
     private sendNextBit() {
+        if (!this._simCpu) return;
+
         if (this.bitIndex >= 40) {
-            // End-of-frame: 50 µs LOW, then release.
-            this.driveData(0);
-            this.schedule(() => this.releaseData(), 50 * US);
+            dhtLog(`[${this.id}] All 40 bits sent — ending with 50us LOW then idle HIGH`);
+            this.drivePin(0);
+            this._simCpu.addClockEvent(() => {
+                this.drivePin(5.0);
+                this.protocolState = 'IDLE';
+                dhtLog(`[${this.id}] Transmission complete → IDLE`);
+            }, 50 * 16);
             return;
         }
 
         const bit = this.dataBits[this.bitIndex++];
 
-        // Each bit: 50 µs LOW preamble, then HIGH 26 µs ('0') or 70 µs ('1').
-        this.driveData(0);
-        this.schedule(() => {
-            const highUs = bit ? 70 : 26;
-            this.driveData(5.0);
-            this.schedule(() => this.sendNextBit(), highUs * US);
-        }, 50 * US);
+        // Each bit: 50us LOW preamble, then 28us HIGH = '0' or 70us HIGH = '1'
+        this.drivePin(0);
+        this._simCpu.addClockEvent(() => {
+            this.drivePin(5.0);
+            const highUs = bit ? 70 : 28;
+            this._simCpu.addClockEvent(() => {
+                this.sendNextBit();
+            }, highUs * 16);
+        }, 50 * 16);
     }
 
-    update(cpuCycles: number, wires: any[], instances: BaseComponent[]) {
-        super.update(cpuCycles, wires, instances);
-        
-        // Watchdog: if stuck in ACKING/SENDING for >200ms (3.2M cycles), auto-reset.
-        if ((this.protocolState === 'ACKING' || this.protocolState === 'SENDING') &&
-            this._txStartCycle > 0 &&
-            (cpuCycles - this._txStartCycle) > 3_200_000) {
-            console.warn(`[DHT22] Watchdog: stuck in ${this.protocolState} for too long, resetting.`);
-            this._drivingBus = false;
-            this.protocolState = 'IDLE';
-            this._txStartCycle = 0;
-            this.setPinVoltage('DATA', 5.0);
-            if (this._setAvrPinDirect) {
-                const boardPin = this.getBoardPin();
-                if (boardPin) this._setAvrPinDirect(boardPin, true);
-            }
-        }
-    }
+    update() {}
 }
