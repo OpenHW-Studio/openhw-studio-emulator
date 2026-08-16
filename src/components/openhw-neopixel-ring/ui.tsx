@@ -1,31 +1,35 @@
 import React from 'react';
 
 // Bounding box for the blue selection ring.
+const SCALE = 5;
+
 export const BOUNDS = (attrs: any) => {
     const pixels = parseInt(attrs?.pixels || '16', 10);
     const radius = Math.max(10, (pixels * 9) / (2 * Math.PI));
     const size = radius * 2 + 15;
+    const scaledSize = size * SCALE;
     // Offset so the bottom of the bounds sits exactly at y=60 (where pins are fixed)
     // and horizontally centered around x=30.
-    return { x: 30 - size / 2, y: 60 - size, w: size, h: size };
+    return { x: 30 - scaledSize / 2, y: 60 - scaledSize, w: scaledSize, h: scaledSize };
 };
 
 export const NeopixelRingUI = ({ state, attrs }: { state: any, attrs: any }) => {
     const pixels = parseInt(attrs?.pixels || '16', 10);
     const radius = Math.max(10, (pixels * 9) / (2 * Math.PI));
     const size = radius * 2 + 15;
+    const scaledSize = size * SCALE;
     const center = size / 2;
     
-    const leftOffset = 30 - size / 2;
-    const topOffset = 60 - size;
+    const leftOffset = 30 - scaledSize / 2;
+    const topOffset = 60 - scaledSize;
 
     return (
         <div style={{
             position: 'absolute',
             left: leftOffset,
             top: topOffset,
-            width: size,
-            height: size,
+            width: scaledSize,
+            height: scaledSize,
             pointerEvents: 'none'
         }}>
             <svg 
@@ -36,7 +40,7 @@ export const NeopixelRingUI = ({ state, attrs }: { state: any, attrs: any }) => 
                 style={{ display: 'block', overflow: 'visible' }}
             >
                 {/* Connection Tab bridging the ring to the fixed pins at the bottom */}
-                <path d={`M ${center - 25} ${size} L ${center + 25} ${size} L ${center + 15} ${center + radius} L ${center - 15} ${center + radius} Z`} fill="#111827" stroke="#1f2937" strokeWidth="1" />
+                <path d={`M ${(0 - leftOffset) / SCALE} ${size} L ${(60 - leftOffset) / SCALE} ${size} L ${center + 15} ${center + radius} L ${center - 15} ${center + radius} Z`} fill="#111827" stroke="#1f2937" strokeWidth="1" />
 
                 {/* Thick PCB Ring */}
                 <circle cx={center} cy={center} r={radius} fill="none" stroke="#111827" strokeWidth="12" />
@@ -86,7 +90,7 @@ export const NeopixelRingUI = ({ state, attrs }: { state: any, attrs: any }) => 
                 {/* Fixed Header Pins (VCC, GND, DIN, DOUT) */}
                 {/* These are drawn relative to the bounding box of the SVG.
                     We know the absolute component coords of the pins are y=60, x=[7.5, 22.5, 37.5, 52.5].
-                    To map these into the SVG viewBox, SVG X = Component X - leftOffset. SVG Y = Component Y - topOffset.
+                    To map these into the SVG viewBox, SVG X = (Component X - leftOffset) / SCALE. SVG Y = (Component Y - topOffset) / SCALE.
                 */}
                 {[
                     { label: 'VCC', x: 7.5 },
@@ -94,16 +98,16 @@ export const NeopixelRingUI = ({ state, attrs }: { state: any, attrs: any }) => 
                     { label: 'DIN', x: 37.5 },
                     { label: 'DOUT', x: 52.5 }
                 ].map(pin => {
-                    const svgX = pin.x - leftOffset;
-                    const svgY = 60 - topOffset; // Note: Component y=60
+                    const svgX = (pin.x - leftOffset) / SCALE;
+                    const svgY = (60 - topOffset) / SCALE; // Note: Component y=60
                     return (
                         <g key={pin.label}>
                             {/* Gold Pad */}
-                            <circle cx={svgX} cy={svgY} r="3" fill="#ca8a04" />
-                            <circle cx={svgX} cy={svgY} r="2" fill="#fef08a" />
-                            <circle cx={svgX} cy={svgY} r="1" fill="#111" />
+                            <circle cx={svgX} cy={svgY} r={3 / SCALE} fill="#ca8a04" />
+                            <circle cx={svgX} cy={svgY} r={2 / SCALE} fill="#fef08a" />
+                            <circle cx={svgX} cy={svgY} r={1 / SCALE} fill="#111" />
                             {/* Silkscreen Label */}
-                            <text x={svgX} y={svgY - 5} fontSize="3.5" fontFamily="monospace" fill="#fff" fontWeight="bold" textAnchor="middle">
+                            <text x={svgX} y={svgY - 5 / SCALE} fontSize={3.5 / SCALE} fontFamily="monospace" fill="#fff" fontWeight="bold" textAnchor="middle">
                                 {pin.label}
                             </text>
                         </g>
