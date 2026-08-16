@@ -393,5 +393,25 @@ export const validationCases = [
                 { from: 'uno1.A5', to: 'lcd1602_i2c_1.SCL' }
             ]
         }
+    },
+    {
+        name: 'valid_potentiometer_wiring',
+        expectPass: true,
+        project: {
+            components: [
+                makeUno('uno1'),
+                {
+                    id: 'pot1',
+                    type: 'openhw-potentiometer',
+                    attrs: { value: '10000' },
+                    pins: [{ id: '1' }, { id: 'SIG' }, { id: '2' }]
+                }
+            ],
+            connections: [
+                { from: 'uno1.gnd', to: 'pot1.1' },
+                { from: 'uno1.A0', to: 'pot1.SIG' },
+                { from: 'uno1.5V', to: 'pot1.2' }
+            ]
+        }
     }
 ];
