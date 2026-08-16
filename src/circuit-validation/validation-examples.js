@@ -373,5 +373,25 @@ export const validationCases = [
                 { from: 'uno1.5V', to: 'oled.VCC' }
             ]
         }
+    },
+    {
+        name: 'valid_lcd1602_i2c_wiring',
+        expectPass: true,
+        project: {
+            components: [
+                makeUno('uno1'),
+                {
+                    id: 'lcd1602_i2c_1',
+                    type: 'openhw-lcd1602-i2c',
+                    pins: [{ id: 'GND' }, { id: 'VCC' }, { id: 'SDA' }, { id: 'SCL' }]
+                }
+            ],
+            connections: [
+                { from: 'uno1.5V', to: 'lcd1602_i2c_1.VCC' },
+                { from: 'uno1.gnd', to: 'lcd1602_i2c_1.GND' },
+                { from: 'uno1.A4', to: 'lcd1602_i2c_1.SDA' },
+                { from: 'uno1.A5', to: 'lcd1602_i2c_1.SCL' }
+            ]
+        }
     }
 ];
