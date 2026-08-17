@@ -3,10 +3,10 @@
     "label": "PIR Motion Sensor",
     "description": "Passive Infrared (PIR) motion detection sensor. Outputs HIGH on the OUT pin when motion is detected.",
     "group": "Sensors",
-    "width": 100,
-    "height": 102,
-    "w": 100,
-    "h": 102,
+    "width": 170.7,
+    "height": 170.7,
+    "w": 170.7,
+    "h": 170.7,
     "attrs": {
         "delay": 500
     },
@@ -15,22 +15,22 @@
             "id": "VCC",
             "type": "power",
             "description": "Power (5V)",
-            "x": 40.1,
-            "y": 102.0
+            "x": 67.5,
+            "y": 170.0
         },
         {
             "id": "OUT",
             "type": "digital",
             "description": "Digital Output",
-            "x": 50.0,
-            "y": 102.0
+            "x": 86.5,
+            "y": 170.0
         },
         {
             "id": "GND",
             "type": "power",
             "description": "Ground",
-            "x": 59.9,
-            "y": 102.0
+            "x": 105,
+            "y": 170.0
         }
     ],
     "autocoding": {

@@ -31,8 +31,8 @@ const polarToCartesian = (cx: number, cy: number, r: number, angleDeg: number) =
     };
 };
 
-const SENSOR_CX = 50;
-const SENSOR_CY = 39;
+const SENSOR_CX = 85.3;
+const SENSOR_CY = 65.2;
 const SVG_OFFSET_X = 150;
 const SVG_OFFSET_Y = 250;
 
