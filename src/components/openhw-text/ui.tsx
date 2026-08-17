@@ -4,9 +4,11 @@ import React from 'react';
 export const BOUNDS = (attrs: any) => {
     const textContent = attrs?.text || '1';
     const fontSize = attrs?.fontSize || 24;
-    // Monospace chars are roughly 0.6x font size in width
-    const w = Math.max(15, textContent.length * (fontSize * 0.6));
-    const h = fontSize + 4; // slight padding
+    // Provide a slightly more generous width estimation and minimum size
+    // so it's always easy to grab and move, even if text is 1 char or size is tiny.
+    const charWidth = fontSize * 0.65; 
+    const w = Math.max(30, textContent.length * charWidth);
+    const h = Math.max(30, fontSize + 4);
     return { x: 0, y: 0, w, h };
 };
 
@@ -45,6 +47,7 @@ export const OpenHWTextUI = ({ state, attrs, isPalette }: { state: any; attrs: a
             fontFamily: 'monospace',
             color: color,
             fontSize: `${fontSize}px`,
+            lineHeight: 1,
             whiteSpace: 'nowrap',
             textShadow: '1px 1px 2px rgba(0,0,0,0.8)'
         }}>
@@ -93,6 +96,29 @@ export const OpenHWTextContextMenu = ({
                         width: '24px',
                         height: '24px',
                         cursor: 'pointer'
+                    }}
+                />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text2)' }}>Size:</span>
+                <input 
+                    type="number" 
+                    min="8"
+                    max="128"
+                    value={attrs?.fontSize !== undefined ? attrs.fontSize : 24} 
+                    onChange={(e) => {
+                        const val = e.target.value;
+                        onUpdate('fontSize', val === '' ? '' : parseInt(val, 10));
+                    }}
+                    style={{
+                        background: 'var(--bg1)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--text)',
+                        borderRadius: '4px',
+                        padding: '2px 6px',
+                        fontSize: '12px',
+                        width: '50px',
+                        outline: 'none'
                     }}
                 />
             </div>
