@@ -4,6 +4,7 @@ import { PulseProtocol } from '../../protocol-handlers/index';
 export class HCSR04Logic extends PulseProtocol {
     private isEchoing = false;
     private _simCpu?: any;
+    private isUpdating: boolean = false;
     public echoOutputVoltage: number = 0.0;
 
     constructor(id: string, manifest: any) {
@@ -55,18 +56,24 @@ export class HCSR04Logic extends PulseProtocol {
     }
 
     private driveEcho(voltage: number) {
-        this._setVoltageInternal(voltage);
-        const isHigh = voltage > 1.8;
+        if (this.isUpdating) return;
+        this.isUpdating = true;
+        try {
+            this._setVoltageInternal(voltage);
+            const isHigh = voltage > 1.8;
 
-        // Fast path: directly write to AVR PIN register so pulseIn() reads the pulse instantly
-        const boardPin = this.getConnectedBoardPin();
-        if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
-            (this as any)._setAvrPinDirect(boardPin, isHigh);
-        }
+            // Fast path: directly write to AVR PIN register so pulseIn() reads the pulse instantly
+            const boardPin = this.getConnectedBoardPin();
+            if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
+                (this as any)._setAvrPinDirect(boardPin, isHigh);
+            }
 
-        // Fallback: propagate through full netlist
-        if ((this as any)._simUpdatePhysics) {
-            (this as any)._simUpdatePhysics();
+            // Fallback: propagate through full netlist
+            if ((this as any)._simUpdatePhysics) {
+                (this as any)._simUpdatePhysics();
+            }
+        } finally {
+            this.isUpdating = false;
         }
     }
 

@@ -3,6 +3,7 @@ import { BaseComponent } from '../BaseComponent';
 export class PIRLogic extends BaseComponent {
     private motionTimeout: any = null;
     private _simCpu?: any;
+    private isUpdating: boolean = false;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
@@ -51,16 +52,22 @@ export class PIRLogic extends BaseComponent {
     }
 
     private driveOut(voltage: number) {
-        this._setVoltageInternal(voltage);
-        const isHigh = voltage > 1.8;
+        if (this.isUpdating) return;
+        this.isUpdating = true;
+        try {
+            this._setVoltageInternal(voltage);
+            const isHigh = voltage > 1.8;
 
-        const boardPin = this.getConnectedBoardPin();
-        if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
-            (this as any)._setAvrPinDirect(boardPin, isHigh);
-        }
+            const boardPin = this.getConnectedBoardPin();
+            if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
+                (this as any)._setAvrPinDirect(boardPin, isHigh);
+            }
 
-        if ((this as any)._simUpdatePhysics) {
-            (this as any)._simUpdatePhysics();
+            if ((this as any)._simUpdatePhysics) {
+                (this as any)._simUpdatePhysics();
+            }
+        } finally {
+            this.isUpdating = false;
         }
     }
 

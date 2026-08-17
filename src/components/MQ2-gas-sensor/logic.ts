@@ -3,6 +3,7 @@ import { BaseComponent } from '../BaseComponent';
 export class GasSensorLogic extends BaseComponent {
     private lastOutputTime: number = 0;
     private _simCpu?: any;
+    private isUpdating: boolean = false;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
@@ -70,35 +71,41 @@ export class GasSensorLogic extends BaseComponent {
     }
 
     private updateVoltages() {
-        const vcc = this.getPinVoltage('VCC') || this.getPinVoltage('5V') || 5.0;
-        const gnd = this.getPinVoltage('GND');
+        if (this.isUpdating) return;
+        this.isUpdating = true;
+        try {
+            const vcc = this.getPinVoltage('VCC') || this.getPinVoltage('5V') || 5.0;
+            const gnd = this.getPinVoltage('GND');
 
-        const hasPower = (vcc - gnd) >= 3.0;
+            const hasPower = (vcc - gnd) >= 3.0;
 
-        const gasLevel = Number(this.state?.gasLevel ?? 0);
-        const threshold = Number(this.attrs?.threshold ?? this.state?.threshold ?? 300);
-        const limitExceeded = gasLevel > threshold;
+            const gasLevel = Number(this.state?.gasLevel ?? 0);
+            const threshold = Number(this.attrs?.threshold ?? this.state?.threshold ?? 300);
+            const limitExceeded = gasLevel > threshold;
 
-        const analogVoltage = hasPower ? (gasLevel / 1023) * vcc : 0.0;
+            const analogVoltage = hasPower ? (gasLevel / 1023) * vcc : 0.0;
 
-        // DO outputs LOW (0V) when limit exceeded (Active Low like LM393 comparator on MQ-2 modules)
-        // If not powered or gas below threshold, DO is HIGH (5V)
-        const digitalVoltage = hasPower ? (limitExceeded ? 0.0 : vcc) : 0.0;
+            // DO outputs LOW (0V) when limit exceeded (Active Low like LM393 comparator on MQ-2 modules)
+            // If not powered or gas below threshold, DO is HIGH (5V)
+            const digitalVoltage = hasPower ? (limitExceeded ? 0.0 : vcc) : 0.0;
 
-        (this as any)._drivingBus = true;
-        (this as any)._lastDrivenVoltage = digitalVoltage;
+            (this as any)._drivingBus = true;
+            (this as any)._lastDrivenVoltage = digitalVoltage;
 
-        this.setPinVoltage('AO', analogVoltage);
-        this.setPinVoltage('DO', digitalVoltage);
+            this.setPinVoltage('AO', analogVoltage);
+            this.setPinVoltage('DO', digitalVoltage);
 
-        const isHigh = digitalVoltage > 1.8;
-        const boardPin = this.getConnectedBoardPin();
-        if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
-            (this as any)._setAvrPinDirect(boardPin, isHigh);
-        }
+            const isHigh = digitalVoltage > 1.8;
+            const boardPin = this.getConnectedBoardPin();
+            if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
+                (this as any)._setAvrPinDirect(boardPin, isHigh);
+            }
 
-        if ((this as any)._simUpdatePhysics) {
-            (this as any)._simUpdatePhysics();
+            if ((this as any)._simUpdatePhysics) {
+                (this as any)._simUpdatePhysics();
+            }
+        } finally {
+            this.isUpdating = false;
         }
     }
 
