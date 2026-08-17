@@ -11,7 +11,7 @@ export class PIRLogic extends BaseComponent {
         this._setVoltageInternal(0.0);
     }
 
-    private getConnectedBoardPin(): string | null {
+    public getConnectedBoardPin(): string | null {
         if ((this as any)._connectedPin != null) return (this as any)._connectedPin;
         const runner = this._simCpu?._avrRunner;
         if (runner?.currentWires) {
@@ -38,7 +38,12 @@ export class PIRLogic extends BaseComponent {
         return null;
     }
 
+    public getBoardPin(): string | null {
+        return this.getConnectedBoardPin();
+    }
+
     private _setVoltageInternal(voltage: number) {
+        (this as any)._drivingBus = true;
         (this as any)._lastDrivenVoltage = voltage;
         if (!this.pins['OUT']) this.pins['OUT'] = { voltage: 0, mode: 'OUTPUT' };
         this.pins['OUT'].voltage = voltage;
