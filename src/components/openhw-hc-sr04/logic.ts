@@ -4,6 +4,7 @@ import { PulseProtocol } from '../../protocol-handlers/index';
 export class HCSR04Logic extends PulseProtocol {
     private isEchoing = false;
     private _simCpu?: any;
+    public echoOutputVoltage: number = 0.0;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
@@ -13,6 +14,8 @@ export class HCSR04Logic extends PulseProtocol {
             distance: parseFloat(this.attrs.distance || '100')
         };
         // Ensure ECHO defaults to 0.0V (LOW) at startup so pulseIn() won't time out
+        this.echoOutputVoltage = 0.0;
+        (this as any)._lastDrivenVoltage = 0.0;
         this._setVoltageInternal(0.0);
     }
 
@@ -44,6 +47,8 @@ export class HCSR04Logic extends PulseProtocol {
     }
 
     private _setVoltageInternal(voltage: number) {
+        this.echoOutputVoltage = voltage;
+        (this as any)._lastDrivenVoltage = voltage;
         if (!this.pins['ECHO']) this.pins['ECHO'] = { voltage: 0, mode: 'OUTPUT' };
         this.pins['ECHO'].voltage = voltage;
         try { this.setPinVoltage('ECHO', voltage); } catch (_) {}
@@ -112,10 +117,6 @@ export class HCSR04Logic extends PulseProtocol {
 
     update(cpuCycles: number, wires: any[], instances: BaseComponent[]) {
         super.update(cpuCycles, wires, instances);
-        // If ECHO pin went low, echoing is done
-        if (this.isEchoing && this.getPinVoltage('ECHO') < 2.5) {
-            this.isEchoing = false;
-        }
     }
 
     onCustomTelemetry() {
