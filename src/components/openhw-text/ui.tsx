@@ -2,7 +2,7 @@ import React from 'react';
 
 // Bounding box dynamically adjusts to text length
 export const BOUNDS = (attrs: any) => {
-    const textContent = attrs?.text || '1';
+    const textContent = attrs?.text || 'Text';
     const fontSize = attrs?.fontSize || 24;
     // Provide a slightly more generous width estimation and minimum size
     // so it's always easy to grab and move, even if text is 1 char or size is tiny.
@@ -31,9 +31,9 @@ export const OpenHWTextUI = ({ state, attrs, isPalette }: { state: any; attrs: a
         );
     }
 
-    const textContent = attrs?.text || '1';
+    const fontSize = attrs?.fontSize !== undefined ? attrs.fontSize : 24;
     const color = attrs?.color || '#ffffff';
-    const fontSize = attrs?.fontSize || 24;
+    const textContent = attrs?.text || 'Text';
     const b = BOUNDS(attrs);
 
     return (
@@ -69,7 +69,7 @@ export const OpenHWTextContextMenu = ({
                 <span style={{ fontSize: '11px', color: 'var(--text2)' }}>Text:</span>
                 <input 
                     type="text" 
-                    value={attrs?.text || '1'} 
+                    value={attrs?.text !== undefined ? attrs.text : 'Text'} 
                     onChange={(e) => onUpdate('text', e.target.value)}
                     style={{
                         background: 'var(--bg1)',
