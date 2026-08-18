@@ -1,0 +1,13 @@
+{
+  "type": "openhw-text",
+  "group": "Misc",
+  "author": "OpenHW Studio",
+  "version": "1.0.0",
+  "description": "Customizable Text Label",
+  "attrs": {
+    "text": "1",
+    "color": "#ffffff",
+    "fontSize": 24
+  },
+  "pins": []
+}
