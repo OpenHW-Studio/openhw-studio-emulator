@@ -37,7 +37,10 @@ export const IRReceiverUI = ({ state, attrs, onEvent }: { state: any; attrs: any
     const [showRemote, setShowRemote] = useState(false);
 
     const sendButton = (btn: string) => {
-        onEvent?.({ type: 'ir-send', button: btn });
+        const evt = { type: 'ir-send', button: btn };
+        if (typeof onEvent === 'function') onEvent(evt);
+        if (attrs && typeof attrs.onInteract === 'function') attrs.onInteract(evt);
+        if (attrs && typeof attrs.onEvent === 'function') attrs.onEvent(evt);
     };
 
     return (
