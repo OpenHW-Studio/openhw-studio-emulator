@@ -12,6 +12,19 @@ export class PIRLogic extends BaseComponent {
         this._setVoltageInternal(0.0);
     }
 
+    update(cpuCycles: number, currentWires: any[], allComponentsInstances: BaseComponent[]) {
+        const isMotion = !!this.state?.motion;
+        const currentV = isMotion ? 3.3 : 0.0;
+        this._setVoltageInternal(currentV);
+        if (currentWires && allComponentsInstances) {
+            this.propagatePin('OUT', currentV, currentWires, allComponentsInstances);
+        }
+        const boardPin = this.getConnectedBoardPin();
+        if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
+            (this as any)._setAvrPinDirect(boardPin, isMotion);
+        }
+    }
+
     public getConnectedBoardPin(): string | null {
         if ((this as any)._connectedPin != null) return (this as any)._connectedPin;
         const runner = this._simCpu?._avrRunner;
@@ -23,15 +36,17 @@ export class PIRLogic extends BaseComponent {
                     const parts = to.split(/[:\.]/);
                     const pin = parts[1] ?? null;
                     if (pin) {
-                        (this as any)._connectedPin = pin;
-                        return pin;
+                        const clean = pin.replace(/^D/i, '');
+                        (this as any)._connectedPin = clean;
+                        return clean;
                     }
                 } else if (to === `${this.id}:OUT` || to === `${this.id}.OUT`) {
                     const parts = from.split(/[:\.]/);
                     const pin = parts[1] ?? null;
                     if (pin) {
-                        (this as any)._connectedPin = pin;
-                        return pin;
+                        const clean = pin.replace(/^D/i, '');
+                        (this as any)._connectedPin = clean;
+                        return clean;
                     }
                 }
             }
@@ -47,7 +62,6 @@ export class PIRLogic extends BaseComponent {
         (this as any)._drivingBus = true;
         (this as any)._lastDrivenVoltage = voltage;
         if (!this.pins['OUT']) this.pins['OUT'] = { voltage: 0, mode: 'OUTPUT' };
-        this.pins['OUT'].voltage = voltage;
         try { this.setPinVoltage('OUT', voltage); } catch (_) {}
     }
 
@@ -71,23 +85,24 @@ export class PIRLogic extends BaseComponent {
         }
     }
 
-    onEvent(event: string) {
-        if (event === 'motion_start') {
+    onEvent(event: any) {
+        const type = typeof event === 'string' ? event : event?.type;
+        if (type === 'motion_start') {
             this.setState({ motion: true });
             this.driveOut(3.3);
             if (this.motionTimeout) {
                 clearTimeout(this.motionTimeout);
                 this.motionTimeout = null;
             }
-        } else if (event === 'motion_stop') {
+        } else if (type === 'motion_stop') {
             this.setState({ motion: false });
             this.driveOut(0.0);
             if (this.motionTimeout) {
                 clearTimeout(this.motionTimeout);
                 this.motionTimeout = null;
             }
-        } else if (event === 'motion') {
-            const delay = this.attrs.delay ? parseInt(this.attrs.delay) : 500;
+        } else if (type === 'motion') {
+            const delay = this.attrs.delay ? parseInt(this.attrs.delay, 10) : 500;
             this.setState({ motion: true });
             this.driveOut(3.3);
             if (this.motionTimeout) clearTimeout(this.motionTimeout);
@@ -96,6 +111,20 @@ export class PIRLogic extends BaseComponent {
                 this.driveOut(0.0);
                 this.motionTimeout = null;
             }, delay);
+        } else if (type === 'SET_ATTR') {
+            if (event.key === 'delay') {
+                this.attrs.delay = event.value;
+                this.setState({ delay: Number(event.value) });
+            }
         }
     }
+
+    onCustomTelemetry() {
+        this.setCustomTelemetry({
+            motion: !!this.state?.motion,
+            delay: this.attrs?.delay ? parseInt(this.attrs.delay, 10) : 500,
+            targetBoard: (this as any)._simCpu?._avrRunner?.boardId || undefined
+        });
+    }
 }
+
