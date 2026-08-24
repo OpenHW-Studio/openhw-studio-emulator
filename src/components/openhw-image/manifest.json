@@ -1,0 +1,13 @@
+{
+  "type": "openhw-image",
+  "group": "Misc",
+  "author": "OpenHW Studio",
+  "version": "1.0.0",
+  "description": "Customizable Image Component",
+  "attrs": {
+    "url": "",
+    "width": 300,
+    "height": 300
+  },
+  "pins": []
+}
