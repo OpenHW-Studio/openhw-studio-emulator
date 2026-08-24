@@ -420,23 +420,68 @@ export class FullCircuitValidator {
     }
 
     getPinNumericVoltageLabel(pinId) {
-        const normalized = String(pinId || '').toLowerCase();
-        if (normalized === '5v' || normalized === 'vbus' || normalized === 'vsys') return 5.0;
-        if (normalized === '3v3' || normalized === '3.3v') return 3.3;
-        if (normalized === '12v') return 12.0;
+        if (!pinId) return null;
+        const normalized = String(pinId || '').toLowerCase().trim();
+        const clean = normalized.replace(/[\.\_\-\:]\d+$/g, '').trim();
+
+        if (['5v', '5.0v', '5v0', 'vbus', 'vsys'].includes(clean) || clean.startsWith('5v') || clean.startsWith('5.0v')) return 5.0;
+        if (['3v3', '3.3v', '3v3_out', '3.3v_out', 'vdd'].includes(clean) || clean.startsWith('3v3') || clean.startsWith('3.3v')) return 3.3;
+        if (clean === '12v' || clean.startsWith('12v')) return 12.0;
+        if (['vcc', 'v+', 'vin', 'vbat', 'raw', '+'].includes(clean) || clean.startsWith('vcc')) return 5.0;
         return null;
     }
 
     isGroundNode(nodeId) {
         const { pinId } = this.getNodeParts(nodeId);
-        const normalized = String(pinId || '').toLowerCase();
-        return normalized === 'gnd' || normalized.startsWith('gnd_');
+        if (!pinId) return false;
+        const normalized = String(pinId || '').toLowerCase().trim();
+        const clean = normalized.replace(/[\.\_\-\:]\d+$/g, '').trim();
+        return clean === 'gnd' || clean.startsWith('gnd') || clean === 'ground' || clean === '-';
+    }
+
+    isMcuComponent(component) {
+        if (!component) return false;
+        const type = this.normalizeType(component.type);
+        return type.includes('arduino') ||
+            type.includes('esp32') ||
+            type.includes('pico') ||
+            type.includes('attiny') ||
+            type.includes('stm32') ||
+            type.includes('mcu');
+    }
+
+    isPowerSupplyComponent(component) {
+        if (!component) return false;
+        const type = this.normalizeType(component.type);
+        return type.includes('power-supply') ||
+            type.includes('battery') ||
+            type.includes('charger');
+    }
+
+    isBreadboardComponent(component) {
+        if (!component) return false;
+        const type = this.normalizeType(component.type);
+        return type.includes('breadboard');
     }
 
     isSupplyNode(nodeId) {
         const { pinId } = this.getNodeParts(nodeId);
-        const normalized = String(pinId || '').toLowerCase();
-        return ['5v', '3v3', '3.3v', 'vcc', 'vin', '12v', 'vbus', 'vsys'].includes(normalized);
+        if (!pinId) return false;
+        const normalized = String(pinId || '').toLowerCase().trim();
+        const clean = normalized.replace(/[\.\_\-\:]\d+$/g, '').trim();
+
+        if (this.getPinNumericVoltageLabel(pinId) !== null) return true;
+        if (['5v', '3v3', '3.3v', 'vcc', 'vin', '12v', 'vbus', 'vsys', 'v+', '+', 'vbat', 'raw', 'vdd'].includes(clean)) return true;
+        if (/^(5v|3v3|3\.3v|vcc|vin|vbus|vsys|12v|v\+|vdd)/i.test(clean)) return true;
+
+        const { componentId } = this.getNodeParts(nodeId);
+        const component = this.getComponentById(componentId);
+        if (component) {
+            if (this.isMcuComponent(component) || this.isPowerSupplyComponent(component) || this.isBreadboardComponent(component)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     hasI2CBreakoutPullup(startNode) {
@@ -569,18 +614,40 @@ export class FullCircuitValidator {
         const pinVoltage = this.getPinNumericVoltageLabel(pinId);
         if (pinVoltage !== null) return pinVoltage;
 
-        if (this.isType(component, 'wokwi-arduino-uno', 'openhw-arduino-uno', 'mcu_uno')) {
-            const pin = String(pinId || '').toUpperCase();
-            if (/^(D?\d+|A\d+)$/.test(pin)) return 5.0; // Assume logic high for safety check
-            if (pin === '5V' || pin === 'VCC') return 5.0;
-            if (pin === '3V3') return 3.3;
+        const cleanPin = String(pinId || '').toUpperCase().trim();
+
+        // 5V MCUs & Shields
+        if (this.isType(component,
+            'wokwi-arduino-uno', 'openhw-arduino-uno', 'mcu_uno',
+            'wokwi-arduino-mega', 'openhw-arduino-mega',
+            'wokwi-arduino-nano', 'openhw-arduino-nano',
+            'wokwi-attiny85', 'openhw-attiny85',
+            'openhw-arduino-sensor-shield'
+        )) {
+            if (/^(D?\d+|A\d+)$/.test(cleanPin)) return 5.0; // Assume logic high for safety check
+            if (cleanPin.includes('5V') || cleanPin.includes('VCC')) return 5.0;
+            if (cleanPin.includes('3V3') || cleanPin.includes('3.3V')) return 3.3;
         }
 
-        if (this.isType(component, 'wokwi-power-supply', 'openhw-power-supply')) {
+        // 3.3V MCUs (ESP32, ESP32-Cam, Raspberry Pi Pico / Pico W, STM32 BluePill)
+        if (this.isType(component,
+            'wokwi-esp32', 'openhw-esp32', 'esp32',
+            'wokwi-esp32-cam', 'openhw-esp32-cam', 'esp32-cam',
+            'wokwi-raspberry-pi-pico', 'openhw-pico', 'openhw-pico-w',
+            'wokwi-stm32-bluepill', 'openhw-stm32-bluepill', 'openhw-stm32-blue-pill (frontend)'
+        )) {
+            if (cleanPin.includes('5V') || cleanPin.includes('VBUS')) return 5.0;
+            if (/^(D?\d+|A\d+|GP\d+|GPIO\d+|P[A-D]\d+)$/.test(cleanPin)) return 3.3;
+            if (cleanPin.includes('3V3') || cleanPin.includes('3.3V') || cleanPin.includes('VCC') || cleanPin.includes('VSYS')) return 3.3;
+        }
+
+        // Power Supply / Battery
+        if (this.isType(component, 'wokwi-power-supply', 'openhw-power-supply', 'wokwi-battery', 'openhw-battery')) {
             const configured = this.getComponentAttrNumber(component, 'voltage', 5.0);
             const normalizedPin = String(pinId || '').toLowerCase();
-            if (normalizedPin === '5v' || normalizedPin === 'vcc') return configured;
-            if (normalizedPin === 'gnd') return 0.0;
+            if (normalizedPin.includes('5v') || normalizedPin.includes('vcc') || normalizedPin.includes('v+') || normalizedPin === '+') return configured;
+            if (normalizedPin.includes('gnd') || normalizedPin === '-') return 0.0;
+            return configured;
         }
 
         return null;

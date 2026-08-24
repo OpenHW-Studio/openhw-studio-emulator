@@ -11,21 +11,23 @@ export const validation: { rules: ComponentValidationRule[] } = {
             description: 'Detect when the potentiometer track would overheat.',
             check: (component: any, graph: Map<string, string[]>, validator: any) => {
                 const maxPower = 0.25;
-                const dangerousLowResistance = 10;
-                const vPin1 = validator?.calculateVoltageAtNode(`${component.id}.GND`);
-                const vPin2 = validator?.calculateVoltageAtNode(`${component.id}.VCC`);
+                const rawVal = Number(component?.attrs?.value);
+                const trackResistance = (Number.isFinite(rawVal) && rawVal > 100) ? rawVal : 10000;
 
-                if (vPin1 !== undefined && vPin2 !== undefined) {
+                const vPin1 = validator?.calculateVoltageAtNode(`${component.id}.1`) ?? validator?.calculateVoltageAtNode(`${component.id}.GND`);
+                const vPin2 = validator?.calculateVoltageAtNode(`${component.id}.2`) ?? validator?.calculateVoltageAtNode(`${component.id}.VCC`);
+
+                if (vPin1 !== undefined && vPin1 !== null && vPin2 !== undefined && vPin2 !== null) {
                     const voltageDrop = Math.abs(vPin1 - vPin2);
-                    const worstCasePower = (voltageDrop ** 2) / dangerousLowResistance;
+                    const steadyStatePower = (voltageDrop ** 2) / trackResistance;
 
-                    if (worstCasePower > maxPower) {
+                    if (steadyStatePower > maxPower) {
                         return createValidationIssue({
                             ruleId: 'potentiometer-power-dissipation',
                             severity: 'error',
-                            message: `🔥 [Potentiometer ${component.id}] DANGER: If you turn knob to 0Ω, it will dissipate ${worstCasePower.toFixed(2)}W and burn track! Add static resistor in series.`,
+                            message: `🔥 [Potentiometer ${component.id}] Track dissipates ${steadyStatePower.toFixed(2)}W. Use a higher resistance potentiometer or lower supply voltage.`,
                             compIds: [component.id],
-                            remediation: 'Add a series resistor to limit worst-case current.',
+                            remediation: 'Use a potentiometer with higher track resistance or reduce supply voltage.',
                             autoFix: false,
                         });
                     }

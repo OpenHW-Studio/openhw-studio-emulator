@@ -10,24 +10,25 @@ export const validation: { rules: ComponentValidationRule[] } = {
             priority: 10,
             description: 'Warn when the common pin or segment resistors are missing.',
             check: (component: any, graph: Map<string, string[]>, validator: any) => {
-                const numDigits = parseInt(component.attrs?.digits || '4', 10);
+                const numDigits = parseInt(component.attrs?.digits || '1', 10);
                 const issues = [];
                 
-                let anyDigConnected = false;
+                // The manifest defines common pins as COM.1, COM.2, ... (not DIG1, DIG2)
+                let anyComConnected = false;
                 for (let i = 1; i <= numDigits; i++) {
-                    if (validator.getNeighbors(`${component.id}.DIG${i}`).length > 0) {
-                        anyDigConnected = true;
+                    if (validator.getNeighbors(`${component.id}.COM.${i}`).length > 0) {
+                        anyComConnected = true;
                         break;
                     }
                 }
 
-                if (!anyDigConnected) {
+                if (!anyComConnected) {
                     issues.push(createValidationIssue({
                         ruleId: '7segment-common-and-segment-check',
                         severity: 'warn',
-                        message: `⚠️ [7-Segment ${component.id}] Digit common pins (DIG1${numDigits > 1 ? '-DIG' + numDigits : ''}) are not connected. The display will not light up.`,
+                        message: `⚠️ [7-Segment ${component.id}] Common pin(s) (COM.1${numDigits > 1 ? '-COM.' + numDigits : ''}) are not connected. The display will not light up.\nConnect COM.1 (and COM.2) to Arduino GND for common-cathode mode.`,
                         compIds: [component.id],
-                        remediation: 'Connect the digit common pins to control them.',
+                        remediation: 'Connect COM.1 and COM.2 to Arduino GND (common cathode) or 5V (common anode).',
                         autoFix: true,
                     }));
                 }

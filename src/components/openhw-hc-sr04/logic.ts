@@ -3,6 +3,9 @@ import { PulseProtocol } from '../../protocol-handlers/index';
 
 export class HCSR04Logic extends PulseProtocol {
     private isEchoing = false;
+    private _simCpu?: any;
+    private isUpdating: boolean = false;
+    public echoOutputVoltage: number = 0.0;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
@@ -11,6 +14,67 @@ export class HCSR04Logic extends PulseProtocol {
             ...this.state,
             distance: parseFloat(this.attrs.distance || '100')
         };
+        // Ensure ECHO defaults to 0.0V (LOW) at startup so pulseIn() won't time out
+        this.echoOutputVoltage = 0.0;
+        (this as any)._lastDrivenVoltage = 0.0;
+        this._setVoltageInternal(0.0);
+    }
+
+    private getConnectedBoardPin(): string | null {
+        if ((this as any)._connectedPin != null) return (this as any)._connectedPin;
+        const runner = this._simCpu?._avrRunner;
+        if (runner?.currentWires) {
+            for (const wire of runner.currentWires) {
+                const from: string = wire.from || '';
+                const to: string = wire.to || '';
+                if (from === `${this.id}:ECHO` || from === `${this.id}.ECHO`) {
+                    const parts = to.split(/[:\.]/);
+                    const pin = parts[1] ?? null;
+                    if (pin) {
+                        (this as any)._connectedPin = pin;
+                        return pin;
+                    }
+                } else if (to === `${this.id}:ECHO` || to === `${this.id}.ECHO`) {
+                    const parts = from.split(/[:\.]/);
+                    const pin = parts[1] ?? null;
+                    if (pin) {
+                        (this as any)._connectedPin = pin;
+                        return pin;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private _setVoltageInternal(voltage: number) {
+        this.echoOutputVoltage = voltage;
+        (this as any)._lastDrivenVoltage = voltage;
+        if (!this.pins['ECHO']) this.pins['ECHO'] = { voltage: 0, mode: 'OUTPUT' };
+        this.pins['ECHO'].voltage = voltage;
+        try { this.setPinVoltage('ECHO', voltage); } catch (_) {}
+    }
+
+    private driveEcho(voltage: number) {
+        if (this.isUpdating) return;
+        this.isUpdating = true;
+        try {
+            this._setVoltageInternal(voltage);
+            const isHigh = voltage > 1.8;
+
+            // Fast path: directly write to AVR PIN register so pulseIn() reads the pulse instantly
+            const boardPin = this.getConnectedBoardPin();
+            if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
+                (this as any)._setAvrPinDirect(boardPin, isHigh);
+            }
+
+            // Fallback: propagate through full netlist
+            if ((this as any)._simUpdatePhysics) {
+                (this as any)._simUpdatePhysics();
+            }
+        } finally {
+            this.isUpdating = false;
+        }
     }
 
     onPulseReceived(pinId: string, isHighPulse: boolean, durationUs: number): void {
@@ -32,18 +96,11 @@ export class HCSR04Logic extends PulseProtocol {
         }
     }
 
-    private driveEcho(voltage: number) {
-        this.setPinVoltage('ECHO', voltage);
-        if ((this as any)._simUpdatePhysics) {
-            (this as any)._simUpdatePhysics();
-        }
-    }
-
     private startEcho() {
         if (this.isEchoing) return;
 
-        const distance = parseFloat(this.attrs?.distance || '100');
-        const echoDurationUs = distance * 58;
+        const distance = parseFloat(String(this.attrs?.distance ?? this.state?.distance ?? '100'));
+        const echoDurationUs = Math.max(116, Math.round(distance * 58));
 
         this.isEchoing = true;
         
@@ -61,19 +118,16 @@ export class HCSR04Logic extends PulseProtocol {
         } else {
             // Fallback for non-AVR runners
             this.sendPulse('ECHO', true, echoDurationUs, 0.0);
+            this.isEchoing = false;
         }
     }
 
     update(cpuCycles: number, wires: any[], instances: BaseComponent[]) {
         super.update(cpuCycles, wires, instances);
-        // If ECHO pin went low, echoing is done
-        if (this.isEchoing && this.getPinVoltage('ECHO') < 2.5) {
-            this.isEchoing = false;
-        }
     }
 
     onCustomTelemetry() {
-        const distance = parseFloat(this.attrs?.distance || '100');
+        const distance = parseFloat(String(this.attrs?.distance ?? this.state?.distance ?? '100'));
         const echoDurationUs = distance * 58; // Speed of sound: 340 m/s
 
         this.setCustomTelemetry({

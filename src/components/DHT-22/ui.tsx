@@ -1,6 +1,6 @@
-export const BOUNDS = { x: 0, y: 0, w: 57, h: 120 };
-
 import React, { useState } from 'react';
+import { BOUNDS } from './constants';
+export { BOUNDS };
 
 export const DHT22UI = ({ state, attrs, isRunning }: { state: any, attrs: any, isRunning: boolean }) => {
     // Default 24C, 50% Humidity

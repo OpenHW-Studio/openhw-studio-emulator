@@ -1,5 +1,5 @@
-export const BOUNDS = { x: 0, y: 0, w: 140, h: 142 };
-
+import { BOUNDS } from './constants';
+export { BOUNDS };
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 
 
@@ -31,8 +31,8 @@ const polarToCartesian = (cx: number, cy: number, r: number, angleDeg: number) =
     };
 };
 
-const SENSOR_CX = 72;
-const SENSOR_CY = 52;
+const SENSOR_CX = 85.3;
+const SENSOR_CY = 65.2;
 const SVG_OFFSET_X = 150;
 const SVG_OFFSET_Y = 250;
 
