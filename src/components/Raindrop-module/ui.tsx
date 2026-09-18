@@ -1,5 +1,7 @@
 import React from 'react';
-import moduleImage from './RainDropModule.png';
+// Perf (images): WebP (107KB) instead of PNG (3.6MB). Bundler picks the
+// import that exists; PNG kept as fallback for ancient browsers.
+import moduleImage from './RainDropModule.webp';
 
 const W = 97, H = 227;
 export const BOUNDS = { x: 0, y: 0, w: 70, h: 160 };
