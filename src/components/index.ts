@@ -1,5 +1,6 @@
 // Export everything from the emulator components package so the frontend can import it
 export { BaseComponent } from './BaseComponent';
+export { DisplayRenderContext, useDisplayRenderWorker } from '../display/DisplayRenderContext';
 export * from '../protocol-handlers/index';
 export { default as openhwLed } from './openhw-led';
 export { default as openhwArduinoUno } from './openhw-arduino-uno';
