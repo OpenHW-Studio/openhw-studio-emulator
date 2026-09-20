@@ -76,5 +76,8 @@
             }
         ]
     },
-    "bounds": {"x": 0, "y": 0, "w": 65.3, "h": 65.3}
+    "bounds": {"x": 0, "y": 0, "w": 65.3, "h": 65.3},
+    "wasm": {"abi": 1, "file": "./core/led_core_bg.wasm",
+        "exports": ["create", "destroy", "update", "get_state_ptr"],
+        "fallback": "js", "note": "smoke core is pure-JS (no .wasm ships); heavy ports use real .wasm"}
 }
