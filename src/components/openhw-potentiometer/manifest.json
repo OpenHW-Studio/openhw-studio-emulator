@@ -3,8 +3,8 @@
     "label": "Rotary Potentiometer",
     "description": "Rotary potentiometer (variable resistor). Outputs an analog voltage proportional to the knob's rotation angle. Use with analogRead() on an Arduino analog pin.",
     "group": "Sensors",
-    "width":120,
-    "height":120,
+    "width": 120,
+    "height": 120,
     "w": 120,
     "h": 120,
     "attrs": {
@@ -44,9 +44,18 @@
     ],
     "autowiring": {
         "connections": [
-            { "from": "1",   "to": "arduino:GND" },
-            { "from": "SIG", "to": "arduino:A0" },
-            { "from": "2",   "to": "arduino:3V3" }
+            {
+                "from": "1",
+                "to": "arduino:GND"
+            },
+            {
+                "from": "SIG",
+                "to": "arduino:A0"
+            },
+            {
+                "from": "2",
+                "to": "arduino:3V3"
+            }
         ]
     },
     "autocoding": {
@@ -54,5 +63,21 @@
             "setup": "// Potentiometer connected to ${SIG}",
             "loop": "int potVal_${COMP_SUFFIX} = analogRead(${SIG});\nfloat voltage_${COMP_SUFFIX} = potVal_${COMP_SUFFIX} * (3.3 / 1023.0);\nSerial.print(\"Pot: \");\nSerial.print(potVal_${COMP_SUFFIX});\nSerial.print(\" | \");\nSerial.print(voltage_${COMP_SUFFIX}, 2);\nSerial.println(\" V\");\ndelay(200);"
         }
+    },
+    "sab": {
+        "slotKind": 5,
+        "fields": {
+            "f0": "value"
+        }
+    },
+    "ui": {
+        "svg": "./potentiometer.svg",
+        "interactive": [
+            "rotate"
+        ]
+    },
+    "sim": {
+        "runtime": "js",
+        "validation": "inline"
     }
 }

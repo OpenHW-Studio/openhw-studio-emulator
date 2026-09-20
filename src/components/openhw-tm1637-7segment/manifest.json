@@ -37,5 +37,19 @@
             "type": "power",
             "description": "Ground"
         }
-    ]
+    ],
+    "sab": {
+        "slotKind": 3,
+        "fields": {
+            "i0": "colon"
+        }
+    },
+    "ui": {
+        "svg": "./tm1637-7segment.svg",
+        "interactive": []
+    },
+    "sim": {
+        "runtime": "js",
+        "validation": "inline"
+    }
 }

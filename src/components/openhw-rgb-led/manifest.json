@@ -38,10 +38,34 @@
     ],
     "autowiring": {
         "connections": [
-            { "from": "R",   "to": "arduino:9|6|3",   "via": "openhw-resistor", "attrs": { "value": "220" } },
-            { "from": "G",   "to": "arduino:10|5|11", "via": "openhw-resistor", "attrs": { "value": "220" } },
-            { "from": "B",   "to": "arduino:11|3|6",  "via": "openhw-resistor", "attrs": { "value": "220" } },
-            { "from": "COM", "to": "arduino:GND" }
+            {
+                "from": "R",
+                "to": "arduino:9|6|3",
+                "via": "openhw-resistor",
+                "attrs": {
+                    "value": "220"
+                }
+            },
+            {
+                "from": "G",
+                "to": "arduino:10|5|11",
+                "via": "openhw-resistor",
+                "attrs": {
+                    "value": "220"
+                }
+            },
+            {
+                "from": "B",
+                "to": "arduino:11|3|6",
+                "via": "openhw-resistor",
+                "attrs": {
+                    "value": "220"
+                }
+            },
+            {
+                "from": "COM",
+                "to": "arduino:GND"
+            }
         ]
     },
     "autocoding": {
@@ -65,5 +89,21 @@
             "setup": "pinMode(PIN_R_${COMP_SUFFIX}, OUTPUT);\n  pinMode(PIN_G_${COMP_SUFFIX}, OUTPUT);\n  pinMode(PIN_B_${COMP_SUFFIX}, OUTPUT);",
             "loop": "// Red\n  analogWrite(PIN_R_${COMP_SUFFIX}, 255);\n  analogWrite(PIN_G_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_B_${COMP_SUFFIX}, 0);\n  delay(500);\n\n  // Green\n  analogWrite(PIN_R_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_G_${COMP_SUFFIX}, 255);\n  analogWrite(PIN_B_${COMP_SUFFIX}, 0);\n  delay(500);\n\n  // Blue\n  analogWrite(PIN_R_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_G_${COMP_SUFFIX}, 0);\n  analogWrite(PIN_B_${COMP_SUFFIX}, 255);\n  delay(500);"
         }
+    },
+    "sab": {
+        "slotKind": 1,
+        "fields": {
+            "f0": "r",
+            "f1": "g",
+            "f2": "b"
+        }
+    },
+    "ui": {
+        "svg": "./rgb-led.svg",
+        "interactive": []
+    },
+    "sim": {
+        "runtime": "js",
+        "validation": "inline"
     }
 }

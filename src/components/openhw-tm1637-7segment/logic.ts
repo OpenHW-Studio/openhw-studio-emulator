@@ -76,4 +76,16 @@ export class WokwiTM1637Logic extends TwoWireProtocol {
             brightness: this.brightness
         };
     }
+
+    // 12.4 v2: numeric UI state for SAB slot { i0: colon }.
+    uiState() {
+        return {
+            f: {},
+            i: { colon: this.state?.colon ? 1 : 0 },
+        };
+    }
+
+    validate(_component: any, _graph: Map<string, string[]>) {
+        return null;
+    }
 }

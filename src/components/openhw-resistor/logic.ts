@@ -44,4 +44,19 @@ export class ResistorLogic extends BaseComponent {
             power: (this.state.power * 1000).toFixed(2) + ' mW'
         });
     }
+
+    // 12.4 v2: numeric UI state for SAB slot { f0: voltageDrop, f1: current, i0: glow }.
+    uiState() {
+        return {
+            f: {
+                voltageDrop: Number(this.state?.voltageDrop || 0),
+                current: Number(this.state?.current || 0),
+            },
+            i: { glow: this.state?.glow ? 1 : 0 },
+        };
+    }
+
+    validate(_component: any, _graph: Map<string, string[]>) {
+        return null;
+    }
 }

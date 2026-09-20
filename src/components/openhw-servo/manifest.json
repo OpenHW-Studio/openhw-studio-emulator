@@ -1,7 +1,7 @@
 {
     "type": "openhw-servo",
     "label": "Servo Motor",
-    "description": "Hobby servo motor with precise angular position control (0–180°) via PWM signal. Operates at 5 V; signal pulse width of 1–2 ms controls the shaft angle.",
+    "description": "Hobby servo motor with precise angular position control (0\u2013180\u00b0) via PWM signal. Operates at 5 V; signal pulse width of 1\u20132 ms controls the shaft angle.",
     "group": "Actuators",
     "w": 248.3,
     "h": 180.6,
@@ -36,15 +36,27 @@
     ],
     "autowiring": {
         "connections": [
-            { "from": "GND", "to": "arduino:GND" },
-            { "from": "V+",  "to": "powersupply:5V" },
-            { "from": "PWM", "to": "arduino:6" }
+            {
+                "from": "GND",
+                "to": "arduino:GND"
+            },
+            {
+                "from": "V+",
+                "to": "powersupply:5V"
+            },
+            {
+                "from": "PWM",
+                "to": "arduino:6"
+            }
         ],
         "externalPower": true,
         "externalVoltage": "5.0"
     },
     "autocoding": {
-        "libraries": ["Servo", "ESP32Servo"],
+        "libraries": [
+            "Servo",
+            "ESP32Servo"
+        ],
         "arduino": {
             "globals": "#include <Servo.h>\nServo myServo_${COMP_SUFFIX};",
             "setup": "myServo_${COMP_SUFFIX}.attach(${PWM});\nmyServo_${COMP_SUFFIX}.write(0);\ndelay(500);\nSerial.begin(9600);\nSerial.println(\"Servo Motor Ready\");",
@@ -57,7 +69,23 @@
         }
     },
     "telemetry": {
-      "template": "Angle=${state.angle}°, Moving=${state.moving}",
-      "criticalKeys": ["state.angle"]
+        "template": "Angle=${state.angle}\u00b0, Moving=${state.moving}",
+        "criticalKeys": [
+            "state.angle"
+        ]
+    },
+    "sab": {
+        "slotKind": 6,
+        "fields": {
+            "f0": "angle"
+        }
+    },
+    "ui": {
+        "svg": "./servo.svg",
+        "interactive": []
+    },
+    "sim": {
+        "runtime": "js",
+        "validation": "inline"
     }
 }

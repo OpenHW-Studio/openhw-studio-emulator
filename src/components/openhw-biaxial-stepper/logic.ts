@@ -115,4 +115,36 @@ export class BiaxialStepperLogic extends BaseComponent {
             stepsPerRevolution: Number((360 / this.stepAngle).toFixed(0)),
         });
     }
+
+    // 12.4 v2: numeric UI state for SAB slot { f0: outerAngle, f1: innerAngle }.
+    uiState() {
+        return {
+            f: {
+                outerAngle: Number(this.state?.outerAngle || 0),
+                innerAngle: Number(this.state?.innerAngle || 0),
+            },
+            i: {},
+        };
+    }
+
+    validate(component: any, graph: Map<string, string[]>) {
+        const requiredPins = ['A1+', 'A1-', 'B1+', 'B1-', 'A2+', 'A2-', 'B2+', 'B2-'];
+        const issues = [];
+
+        for (const pin of requiredPins) {
+            const edges = graph.get(`${component.id}.${pin}`);
+            if (!edges || edges.length === 0) {
+                issues.push({
+                    ruleId: 'biaxial-stepper-check',
+                    severity: 'warn',
+                    message: `[${component.type} ${component.id}] Coil pin ${pin} is floating.`,
+                    compIds: [component.id],
+                    remediation: `Connect ${pin} to a stepper driver output.`,
+                    autoFix: true,
+                });
+            }
+        }
+
+        return issues.length > 0 ? issues : null;
+    }
 }

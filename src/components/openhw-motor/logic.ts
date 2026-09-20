@@ -104,4 +104,30 @@ export class MotorLogic extends BaseComponent {
             stateChange: this.stateChanged,
         });
     }
+
+    // 12.4 v2: numeric UI state for SAB slot { f0: speed }.
+    uiState() {
+        return {
+            f: { speed: Number(this.state?.speed || 0) },
+            i: {},
+        };
+    }
+
+    validate(component: any, graph: Map<string, string[]>) {
+        const pin1Neighbors = graph.get(`${component.id}.1`) || [];
+        const pin2Neighbors = graph.get(`${component.id}.2`) || [];
+
+        if (pin1Neighbors.length === 0 && pin2Neighbors.length === 0) {
+            return {
+                ruleId: 'motor-flyback-diode-check',
+                severity: 'warn',
+                message: `[Motor ${component.id}] Motor is completely disconnected.`,
+                compIds: [component.id],
+                remediation: 'Wire the motor terminals into the circuit (ideally via a motor driver).',
+                autoFix: true,
+            };
+        }
+
+        return null;
+    }
 }

@@ -67,4 +67,43 @@ export class RotaryEncoderLogic extends BaseComponent {
             quadratureStep: this.quadratureStep,
         });
     }
+
+    // 12.4 v2: numeric UI state for SAB slot { f0: rot, i0: sw }.
+    uiState() {
+        return {
+            f: { rot: Number(this.state?.rot || 0) },
+            i: { sw: this.state?.sw ? 1 : 0 },
+        };
+    }
+
+    validate(component: any, graph: Map<string, string[]>) {
+        const clk = graph.get(`${component.id}.CLK`) || [];
+        const dt = graph.get(`${component.id}.DT`) || [];
+        const gnd = graph.get(`${component.id}.GND`) || [];
+        const issues = [];
+
+        if (gnd.length === 0) {
+            issues.push({
+                ruleId: 'rotary-encoder-connection-check',
+                severity: 'warn',
+                message: `[Encoder ${component.id}] Ground (GND) is not connected.`,
+                compIds: [component.id],
+                remediation: 'Connect the encoder ground pin.',
+                autoFix: true,
+            });
+        }
+
+        if (clk.length === 0 || dt.length === 0) {
+            issues.push({
+                ruleId: 'rotary-encoder-connection-check',
+                severity: 'warn',
+                message: `[Encoder ${component.id}] Warning: Quadrature outputs (CLK/DT) must both be connected to track rotation.`,
+                compIds: [component.id],
+                remediation: 'Wire both CLK and DT to MCU inputs.',
+                autoFix: true,
+            });
+        }
+
+        return issues.length > 0 ? issues : null;
+    }
 }

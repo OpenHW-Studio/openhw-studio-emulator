@@ -45,6 +45,54 @@ export class ServoLogic extends PWMProtocol {
         });
     }
 
+    // 12.4 v2: numeric UI state for SAB slot { f0: angle }.
+    uiState() {
+        return {
+            f: { angle: Number(this.state?.angle || 0) },
+            i: {},
+        };
+    }
+
+    validate(component: any, graph: Map<string, string[]>) {
+        const pwmPin = graph.get(`${component.id}.PWM`);
+        const vccPin = graph.get(`${component.id}.V+`);
+        const gndPin = graph.get(`${component.id}.GND`);
+        const issues = [];
+
+        if (!pwmPin || pwmPin.length === 0) {
+            issues.push({
+                ruleId: 'servo-power-and-signal-check',
+                severity: 'warn',
+                message: `[Servo ${component.id}] Warning: PWM Signal pin is floating.`,
+                compIds: [component.id],
+                remediation: 'Connect the PWM control pin.',
+                autoFix: true,
+            });
+        }
+        if (!vccPin || vccPin.length === 0) {
+            issues.push({
+                ruleId: 'servo-power-and-signal-check',
+                severity: 'warn',
+                message: `[Servo ${component.id}] Warning: V+ Power is not connected.`,
+                compIds: [component.id],
+                remediation: 'Connect the servo power pin.',
+                autoFix: true,
+            });
+        }
+        if (!gndPin || gndPin.length === 0) {
+            issues.push({
+                ruleId: 'servo-power-and-signal-check',
+                severity: 'warn',
+                message: `[Servo ${component.id}] Warning: Ground is not connected.`,
+                compIds: [component.id],
+                remediation: 'Connect the servo ground pin.',
+                autoFix: true,
+            });
+        }
+
+        return issues.length > 0 ? issues : null;
+    }
+
     update(cpuCycles: number, wires: any[], instances: BaseComponent[]) {
         super.update(cpuCycles, wires, instances);
 
