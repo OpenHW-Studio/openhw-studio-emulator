@@ -19,6 +19,9 @@
 
 import { BaseComponent } from './BaseComponent';
 
+/** WASM ABI version both sides must agree on (manifest.wasm.abi vs worker). */
+export const WASM_ABI_VERSION = 1;
+
 export interface WasmCore {
     readonly memory: ArrayBuffer | SharedArrayBuffer;
     update(cycles: number): void;
@@ -111,6 +114,13 @@ export class WasmComponent extends BaseComponent {
         }
         super.onPinStateChange(pinId, isHigh, cpuCycles);
     }
+
+    // NOTE: no onI2C*/onSPIByte overrides here — BaseComponent declares them
+    // as optional interface methods with NO implementation, so super calls
+    // would not compile. Subclasses (e.g. MAX30102Logic) keep their own JS
+    // bus state machines; the WASM core handles DSP (update) only. A future
+    // core with bus support can call this.core.onI2CByte directly from the
+    // subclass override.
 
     /** Copy WASM state views into the cached JS mirror; set dirty on diff. */
     protected pullWasmState(): void {

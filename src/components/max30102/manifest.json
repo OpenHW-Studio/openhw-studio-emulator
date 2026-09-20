@@ -89,5 +89,8 @@
         "fields": {"f0": "spo2", "f1": "heartRate", "i0": "redLedOn"}
     },
     "ui": {"svg": "./max30102.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "wasm", "validation": "inline"},
+    "wasm": {"abi": 1, "file": "./core/max30102_core_bg.wasm",
+        "exports": ["create", "destroy", "update", "on_pin", "on_i2c", "on_spi", "get_state_ptr"],
+        "fallback": "js"}
 }

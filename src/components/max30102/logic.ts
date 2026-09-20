@@ -1,4 +1,5 @@
-import { BaseComponent } from '../BaseComponent';
+import { WasmComponent } from '../WasmComponent';
+import { max30102GlueLoader } from './glue';
 
 // ─── MAX30102 Register Map ───────────────────────────────────────────
 const REG_INT_STATUS1   = 0x00;
@@ -53,7 +54,7 @@ function ppgPulseShape(t: number): number {
 
 interface FifoEntry { red: number; ir: number; }
 
-export class MAX30102Logic extends BaseComponent {
+export class MAX30102Logic extends WasmComponent {
     // ── I2C state machine ──────────────────
     private i2cAddr        = 0;
     private i2cReadMode    = false;
@@ -88,6 +89,9 @@ export class MAX30102Logic extends BaseComponent {
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
+        // WASM pilot: PPG/DSP core loads lazily via glue.ts; JS below stays
+        // the slow-but-correct reference (REQUIRED fallback contract).
+        this.setGlueLoader(max30102GlueLoader as any);
         this.regs[REG_PART_ID]    = PART_ID;
         this.regs[REG_REV_ID]     = REV_ID;
         this.regs[REG_MODE_CONFIG] = 0x00;
@@ -316,7 +320,7 @@ export class MAX30102Logic extends BaseComponent {
     //  SIMULATION TICK
     // ─────────────────────────────────────────────────────────────────
 
-    update(cpuCycles: number): void {
+    protected fallbackUpdate(cpuCycles: number, _wires?: any[], _instances?: any[]): void {
         const mode = this.regs[REG_MODE_CONFIG] & 0x07;
         const shutdown = this.regs[REG_MODE_CONFIG] & 0x80;
 
