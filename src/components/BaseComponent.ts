@@ -456,7 +456,7 @@ export class BaseComponent {
                 if (visited.has(otherKey)) continue;
                 visited.add(otherKey);
                 const [compId, compPin] = otherKey.split(':');
-                const inst = instances.find((i: BaseComponent) => i.id === compId);
+                const inst = this.findInstance(instances as BaseComponent[] | Map<string, BaseComponent>, compId);
                 if (!inst) continue;
                 if (!inst.pins[compPin]) inst.pins[compPin] = { voltage: 0, mode: 'INPUT' };
                 inst.setPinVoltage(compPin, v);
@@ -492,8 +492,35 @@ export class BaseComponent {
         return undefined;
     }
 
-    protected isLogicAnalyzerAttached(allInstances: BaseComponent[]): boolean {
-        return allInstances.some(inst => inst.manifest?.type === 'openhw-logic-analyzer' || inst.type === 'openhw-logic-analyzer');
+    /**
+     * Iterate all instances regardless of container shape (Array or Map).
+     * Runners pass a Map on the fast path; legacy callers pass Arrays.
+     */
+    protected forEachInstance(
+        instances: BaseComponent[] | Map<string, BaseComponent> | Iterable<BaseComponent>,
+        fn: (inst: BaseComponent) => void,
+    ): void {
+        if (!instances) return;
+        if (instances instanceof Map) {
+            instances.forEach(fn);
+            return;
+        }
+        if (typeof (instances as Iterable<BaseComponent>)[Symbol.iterator] === 'function'
+            && !Array.isArray(instances)) {
+            for (const inst of (instances as Iterable<BaseComponent>)) fn(inst);
+            return;
+        }
+        (instances as BaseComponent[]).forEach(fn);
+    }
+
+    protected isLogicAnalyzerAttached(allInstances: BaseComponent[] | Map<string, BaseComponent>): boolean {
+        let found = false;
+        this.forEachInstance(allInstances, (inst) => {
+            if (inst.manifest?.type === 'openhw-logic-analyzer' || inst.type === 'openhw-logic-analyzer') {
+                found = true;
+            }
+        });
+        return found;
     }
 
     onEvent(event: any) {

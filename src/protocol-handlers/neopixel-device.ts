@@ -29,8 +29,10 @@ export class NeoPixelProtocol extends BaseComponent {
         super.update(cpuCycles, currentWires, instances);
         
         if (!this.freqDetected && instances) {
-            const hasPico = instances.some(i => i.manifest?.type?.includes('pico'));
-            const hasEsp32 = instances.some(i => i.manifest?.type?.includes('esp32'));
+            // instances may be a Map on the runner fast path — iterate both.
+            const list: any[] = instances instanceof Map ? [...instances.values()] : (instances as any[]);
+            const hasPico = list.some(i => i.manifest?.type?.includes('pico'));
+            const hasEsp32 = list.some(i => i.manifest?.type?.includes('esp32'));
             if (hasPico) {
                 this.cpuFreqMHz = 125;
             } else if (hasEsp32) {

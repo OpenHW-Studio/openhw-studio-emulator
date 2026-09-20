@@ -47,7 +47,15 @@ export class BuzzerLogic extends PWMProtocol {
         super.update(cpuCycles, wires, instances);
 
         // Detect clock speed from board type present in the simulation
-        const hasPico = instances.some(c => c.type.includes('pico') || c.type.includes('rp2040'));
+        // (instances may be a Map on the runner fast path — iterate both).
+        let hasPico = false;
+        const each = (fn: (c: any) => void) => {
+            if (instances instanceof Map) { instances.forEach(fn); return; }
+            (instances as BaseComponent[]).forEach(fn);
+        };
+        each((c) => {
+            if (String(c?.type || '').includes('pico') || String(c?.type || '').includes('rp2040')) hasPico = true;
+        });
         const cpuHz = hasPico ? 125_000_000 : 16_000_000;
 
         // Silence timeout: 100ms of no edges
