@@ -21,6 +21,12 @@ export const ili9341GlueLoader: WasmGlueLoader = {
             const core: WasmCore = {
                 memory: (wasm.memory?.buffer ?? new ArrayBuffer(0)) as ArrayBuffer,
                 update(cycles: number) { wasm.ili9341_update(handle, cycles >>> 0); },
+                markDirty(powerOn: number) {
+                    try { wasm.ili9341_mark_dirty(handle, powerOn ? 1 : 0); } catch { /* ignore */ }
+                },
+                onSPIByte(data: number) {
+                    return Number(wasm.ili9341_on_spi?.(handle, data & 0xff) ?? 0xff);
+                },
                 readStateViews() {
                     try {
                         const live = (wasm.memory as WebAssembly.Memory | undefined)?.buffer;

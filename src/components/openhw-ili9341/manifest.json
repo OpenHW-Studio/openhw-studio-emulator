@@ -88,7 +88,7 @@
     "ui": {"svg": "./ili9341.svg", "interactive": []},
     "sim": {"runtime": "wasm", "validation": "inline"},
     "wasm": {"abi": 1, "file": "./core/ili9341_core_bg.wasm",
-        "exports": ["create", "destroy", "update", "on_spi", "get_state_ptr"],
+        "exports": ["create", "destroy", "update", "mark_dirty", "on_spi", "get_state_ptr"],
         "fallback": "js"},
     "bounds": {"x": 0, "y": 0, "w": 240, "h": 360}
 }

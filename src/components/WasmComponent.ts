@@ -28,6 +28,8 @@ export interface WasmCore {
     onPin?(pinIdx: number, high: number, cycles: number): void;
     onI2CByte?(addr: number, data: number): number;
     onSPIByte?(data: number): number;
+    /** Event-path dirty notify (display descriptor cores: mark_dirty). */
+    markDirty?(flag: number): void;
     readStateViews(): { f: Float32Array; i: Int32Array } | null;
     destroy?(): void;
 }

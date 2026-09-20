@@ -1301,19 +1301,26 @@ Migration (no big-bang; both generations coexist in one registry):
 
 ### 12.5 Build order (SAB-max first, no half-migrated states)
 
-STATUS 2026-09-20 (all-gaps sweep): §1–§12 fully implemented.
-Frontend: SAB specs 14/14 green (P1–P11 + reader + agent-relay round-trip);
-emulator tsc 29 = clean-tree parity; circuit-validation 23 pass / 2 CLI fail
-(pre-existing, reproduce on clean stash); vite build green (both repos).
-Commits (no push): frontend `cb52693` (all-gaps) on top of `b26518a` (WASM
-autoload) + `5fba703` (DebugPanel) + `3ff82fb` (SAB transport); emulator
-`46e8a83` (all-gaps) on top of `2c39e0b` (MAX30102) + `7d09e3f`/`e0866b0`
-(codemod) + `c13db71` (golden-ref); docs `b5f6a43` (protocol-api +
-wasm-components); relay `860c570` (R1, new repo `openhw-studio-agent-relay`
-on branch md — run `npm i && npm run build && npm run start` there).
-sab-all-phases.spec.js covers P1–P11 (P10 debug panel, P11 WASM pilot);
+STATUS 2026-09-20 (dispatch + full-map readers sweep):
+Frontend: SAB 15/15 green (P1–P12 + 2 reader specs) + display-verify 2/2
+(TFT SPI + OLED I2C live runs); vite build green. Emulator: tsc 32 = clean-
+tree parity (29 pre-existing + 3 VBUS/SharedArrayBuffer overloads, all pre-
+existing files incl. ili9341-touch); circuit-validation 23 pass / 2 CLI fail
+(pre-existing, reproduce on clean stash).
+Commits (no push): frontend `b64dc02` (COMPONENT_PINS generated from
+manifests, §6) on top of `bac4e24` (display-verify green + telemetry hydrate
+fix) + `0957396`/`e6b79da` (agent-loop) + `0cef81a` (sab-fullmap) + `cb52693`
+(all-gaps); emulator WASM-dispatch (this commit) on top of `7cdab74` (Map-
+compatible instance iteration — TFT runs crashed) + `11e31da` (v2-complete)
++ `46e8a83` (all-gaps); docs `b5f6a43` (protocol-api + wasm-components);
+relay `860c570` (R1, new repo `openhw-studio-agent-relay` on branch md —
+run `npm i && npm run build && npm run start` there).
+sab-all-phases.spec.js covers P1–P12 (P10 debug panel, P11 WASM pilot, P12
+full-map readers: pins + debug + display descriptors via real writer paths);
 sab-reader.spec.js kept as the focused reader contract; agent-relay.spec.js
-covers the WS hello/ack round-trip (skips cleanly when relay is down).
+covers the WS hello/ack round-trip (skips cleanly when relay is down);
+display-verify.spec.js covers TFT + OLED live runs (serial + telemetry +
+pins evidence).
 - [x] T1: per-instance wrappers deleted (`wrapTelemetryMethod`/`installTelemetryHooks`
   gone; gated `trackUpdateStart/End, trackPinEdge, trackIo`); runner-injected fields
   (`sabSlot/stateVersion/_simCpu/_simUpdatePhysics/_setAvrPinDirect/

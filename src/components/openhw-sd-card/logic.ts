@@ -560,6 +560,11 @@ export class SDCardLogic extends SPIProtocol {
         this.lastActivityCycles = (this as any).simCycles || 0;
         this.bytesIn += 1;
         this.state.bytesIn = this.bytesIn;
+        // Mirror into the WASM activity core: the glue's onSPIByte(cycles)
+        // stamps sdcard_on_spi(handle, cycles); core.update() on tick then
+        // decays activity after 120 ms of SPI silence. JS bytesIn stays the
+        // reference for uiState via pullWasmActivityState (monotonic adopt).
+        try { this.wasmCore?.onSPIByte?.(Number((this as any).simCycles) || 0); } catch { /* ignore */ }
 
         if (this.responseQueue.length > 0) {
             return this.emitResponseByte();
@@ -634,6 +639,17 @@ export class SDCardLogic extends SPIProtocol {
     update(cpuCycles?: number) {
         this.refreshPowerState();
         if (Number.isFinite(Number(cpuCycles))) (this as any).simCycles = Number(cpuCycles);
+        // WASM activity core (§12.4): when loaded, it owns the per-byte
+        // counters + 120 ms activity decay. FAT/block device stays JS.
+        if (this.wasmReady && this.wasmCore) {
+            try {
+                this.wasmCore.update(Number(cpuCycles) || 0);
+                this.pullWasmActivityState();
+            } catch {
+                this.wasmReady = false;
+                this.wasmCore = null;
+            }
+        }
         // 120ms @16MHz ~= 1.92M cycles; wall fallback only before first tick.
         const ref = Number.isFinite(Number(cpuCycles)) ? Number(cpuCycles) : -1;
         const active = ref >= 0
@@ -653,6 +669,37 @@ export class SDCardLogic extends SPIProtocol {
         const usedBytes = this.computeUsedBytes();
         if (this.state.usedBytes !== usedBytes) {
             this.state.usedBytes = usedBytes;
+            this.stateChanged = true;
+        }
+    }
+
+    /**
+     * Mirror WASM activity views into JS counters (monotonic guard:
+     * the core only counts up, so never adopt a LOWER value — the JS
+     * reference stays authoritative on reset/regress).
+     * View layout (see glue.ts readStateViews): f[0]=bytesIn,
+     * f[1]=bytesOut, i[0]=active.
+     */
+    protected pullWasmActivityState(): void {
+        const core = this.wasmCore;
+        if (!core) return;
+        let views: { f: Float32Array; i: Int32Array } | null = null;
+        try {
+            views = core.readStateViews();
+        } catch {
+            return;
+        }
+        if (!views) return;
+        const coreIn = views.f.length > 0 ? Math.round(views.f[0]) : this.bytesIn;
+        const coreOut = views.f.length > 1 ? Math.round(views.f[1]) : this.bytesOut;
+        if (coreIn > this.bytesIn) {
+            this.bytesIn = coreIn;
+            this.state.bytesIn = this.bytesIn;
+            this.stateChanged = true;
+        }
+        if (coreOut > this.bytesOut) {
+            this.bytesOut = coreOut;
+            this.state.bytesOut = this.bytesOut;
             this.stateChanged = true;
         }
     }

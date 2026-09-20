@@ -21,6 +21,13 @@ export const sdCardGlueLoader: WasmGlueLoader = {
             const core: WasmCore = {
                 memory: (wasm.memory?.buffer ?? new ArrayBuffer(0)) as ArrayBuffer,
                 update(cycles: number) { wasm.sdcard_update(handle, cycles >>> 0); },
+                onSPIByte(cycles: number) {
+                    // Core signature is sdcard_on_spi(handle, cycles) — it
+                    // stamps activity from the tick clock; the byte VALUE is
+                    // irrelevant, so the caller passes sim cycles here.
+                    try { wasm.sdcard_on_spi(handle, Number(cycles) >>> 0); } catch { /* ignore */ }
+                    return 0;
+                },
                 readStateViews() {
                     try {
                         const live = (wasm.memory as WebAssembly.Memory | undefined)?.buffer;

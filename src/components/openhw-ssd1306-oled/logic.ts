@@ -80,6 +80,28 @@ export class SSD1306Logic extends I2CProtocol {
   }
 
   update(cpuCycles: number) {
+    // WASM descriptor core (§12.4): when loaded, it owns frame pacing +
+    // descriptor numerics (updateCount/displayOn/dirty). Bus + VRAM stay JS.
+    // I2C ingestion marks the core dirty (one u32 write per VRAM /
+    // displayOn/Off event); update() gates frames at 60 FPS and the JS gate
+    // below is the reference fallback when the core is absent.
+    // pullWasmDescriptorState() mirrors core views into state (dirty-gated).
+    if (this.wasmReady && this.wasmCore) {
+      try {
+        this.wasmCore.update(cpuCycles);
+        this.pullWasmDescriptorState();
+      } catch {
+        this.wasmReady = false;
+        this.wasmCore = null;
+      }
+    }
+    if (!this.wasmReady) {
+      this.jsFrameGate(cpuCycles);
+    }
+  }
+
+  /** JS reference frame gate (60 FPS): emits state when VRAM changed. */
+  private jsFrameGate(cpuCycles: number): void {
     if (this.lastUpdateCycle === 0) {
       this.lastUpdateCycle = cpuCycles;
       return;
@@ -100,13 +122,56 @@ export class SSD1306Logic extends I2CProtocol {
           allOn: this.allOn,
           displayOn: this.displayOn,
           displayStartLine: this.displayStartLine,
+          displayOffset: this.displayOffset,
           segmentRemap: this.segmentRemap,
           comScanDir: this.comScanDir,
-          displayOffset: this.displayOffset,
           vramDirty: false,
           updateCount: this.stateUpdateCount,
         });
       }
+    }
+  }
+
+  /** Notify the WASM descriptor core of a VRAM/displayOn change (event path). */
+  private markCoreDirty(): void {
+    if (!this.wasmReady || !this.wasmCore) return;
+    try {
+      this.wasmCore.markDirty?.(this.displayOn ? 1 : 0);
+    } catch { /* core stays stale; JS reference wins */ }
+  }
+
+  /**
+   * Mirror WASM descriptor views into JS state (dirty-gated).
+   * View layout (see glue.ts readStateViews): f[0]=updateCount,
+   * i[0]=displayOn, i[1]=dirty.
+   */
+  protected pullWasmDescriptorState(): void {
+    const core = this.wasmCore;
+    if (!core) return;
+    let views: { f: Float32Array; i: Int32Array } | null = null;
+    try {
+      views = core.readStateViews();
+    } catch {
+      return;
+    }
+    if (!views) return;
+    const updateCount = views.f.length > 0 ? Math.round(views.f[0]) : this.stateUpdateCount;
+    const displayOn = views.i.length > 0 ? views.i[0] !== 0 : this.displayOn;
+    if (updateCount !== this.stateUpdateCount || displayOn !== this.displayOn) {
+      this.stateUpdateCount = updateCount;
+      this.displayOn = displayOn;
+      this.setState({
+        vram: this.vram,
+        invert: this.invert,
+        allOn: this.allOn,
+        displayOn: this.displayOn,
+        displayStartLine: this.displayStartLine,
+        segmentRemap: this.segmentRemap,
+        comScanDir: this.comScanDir,
+        displayOffset: this.displayOffset,
+        vramDirty: false,
+        updateCount: this.stateUpdateCount,
+      });
     }
   }
 
@@ -144,6 +209,7 @@ export class SSD1306Logic extends I2CProtocol {
     if (index >= 0 && index < 1024) {
       this.vram[index] = data;
       this.vramDirty = true;
+      this.markCoreDirty();
     }
 
     if (this.addressingMode === 0) { // Horizontal
@@ -211,22 +277,25 @@ export class SSD1306Logic extends I2CProtocol {
     } else if (cmd >= 0x40 && cmd <= 0x7F) { // Set Display Start Line
       this.displayStartLine = cmd & 0x3F;
       this.vramDirty = true;
+      this.markCoreDirty();
     } else {
       switch (cmd) {
         case 0xA0: case 0xA1: // Segment Remap
           this.segmentRemap = (cmd === 0xA1);
           this.vramDirty = true;
+          this.markCoreDirty();
           break;
         case 0xC0: case 0xC8: // COM Output Scan Direction
           this.comScanDir = (cmd === 0xC8);
           this.vramDirty = true;
+          this.markCoreDirty();
           break;
-        case 0xA4: this.allOn = false; this.vramDirty = true; break;
-        case 0xA5: this.allOn = true; this.vramDirty = true; break;
-        case 0xA6: this.invert = false; this.vramDirty = true; break;
-        case 0xA7: this.invert = true; this.vramDirty = true; break;
-        case 0xAE: this.displayOn = false; this.vramDirty = true; break;
-        case 0xAF: this.displayOn = true; this.vramDirty = true; break;
+        case 0xA4: this.allOn = false; this.vramDirty = true; this.markCoreDirty(); break;
+        case 0xA5: this.allOn = true; this.vramDirty = true; this.markCoreDirty(); break;
+        case 0xA6: this.invert = false; this.vramDirty = true; this.markCoreDirty(); break;
+        case 0xA7: this.invert = true; this.vramDirty = true; this.markCoreDirty(); break;
+        case 0xAE: this.displayOn = false; this.vramDirty = true; this.markCoreDirty(); break;
+        case 0xAF: this.displayOn = true; this.vramDirty = true; this.markCoreDirty(); break;
       }
     }
   }
@@ -246,8 +315,8 @@ export class SSD1306Logic extends I2CProtocol {
         break;
       case 0x81: this.contrast = this.args[0]; break;
       case 0xA8: this.multiplexRatio = this.args[0] & 0x3F; break;
-      case 0xD3: this.displayOffset = this.args[0] & 0x3F; this.vramDirty = true; break;
-      case 0xDA: this.comConfig = this.args[0]; this.vramDirty = true; break;
+      case 0xD3: this.displayOffset = this.args[0] & 0x3F; this.vramDirty = true; this.markCoreDirty(); break;
+      case 0xDA: this.comConfig = this.args[0]; this.vramDirty = true; this.markCoreDirty(); break;
     }
     this.pendingCommand = 0;
   }

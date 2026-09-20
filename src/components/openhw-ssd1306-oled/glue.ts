@@ -21,6 +21,12 @@ export const ssd1306GlueLoader: WasmGlueLoader = {
             const core: WasmCore = {
                 memory: (wasm.memory?.buffer ?? new ArrayBuffer(0)) as ArrayBuffer,
                 update(cycles: number) { wasm.ssd1306_update(handle, cycles >>> 0); },
+                markDirty(displayOn: number) {
+                    try { wasm.ssd1306_mark_dirty(handle, displayOn ? 1 : 0); } catch { /* ignore */ }
+                },
+                onI2CByte(addr: number, data: number) {
+                    return Number(wasm.ssd1306_on_i2c?.(handle, addr & 0x7f, data & 0xff) ?? 1);
+                },
                 readStateViews() {
                     try {
                         const live = (wasm.memory as WebAssembly.Memory | undefined)?.buffer;

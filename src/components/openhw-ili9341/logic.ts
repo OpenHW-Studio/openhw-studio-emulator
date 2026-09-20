@@ -89,6 +89,18 @@ export class ILI9341Logic extends SPIProtocol {
 
     update(cpuCycles: number, currentWires: any[], instances: BaseComponent[]) {
         super.update(cpuCycles, currentWires, instances);
+        // WASM descriptor core (§12.4): when loaded, it paces dirty + sync
+        // counters (30 FPS cap + 100 ms heartbeat). Power sensing + VRAM stay
+        // JS. pullWasmDescriptorState() mirrors core views dirty-gated.
+        if (this.wasmReady && this.wasmCore) {
+            try {
+                this.wasmCore.update(cpuCycles);
+                this.pullWasmDescriptorState();
+            } catch {
+                this.wasmReady = false;
+                this.wasmCore = null;
+            }
+        }
         const nowMs = Math.floor(cpuCycles / 16000); // 16MHz: cycles->ms, no wall clock
 
         // Power Sensing: Check if VCC pin is wired to a power source or explicitly powered
@@ -185,6 +197,42 @@ export class ILI9341Logic extends SPIProtocol {
         if (pinId === 'RESET' && !isHigh) {
             this.vram.fill(0);
             this.vramDirty = true;
+            this.markCoreDirty(true);
+        }
+    }
+
+    /** Notify the WASM pacing core of a VRAM/power event (event path only). */
+    private markCoreDirty(powerOn: boolean): void {
+        if (!this.wasmReady || !this.wasmCore) return;
+        try {
+            this.wasmCore.markDirty?.(powerOn ? 1 : 0);
+        } catch { /* core stays stale; JS reference wins */ }
+    }
+
+    /**
+     * Mirror WASM descriptor views into JS state (dirty-gated).
+     * View layout (see glue.ts readStateViews): f[0]=syncCount,
+     * i[0]=powerOn, i[1]=dirty.
+     */
+    protected pullWasmDescriptorState(): void {
+        const core = this.wasmCore;
+        if (!core) return;
+        let views: { f: Float32Array; i: Int32Array } | null = null;
+        try {
+            views = core.readStateViews();
+        } catch {
+            return;
+        }
+        if (!views) return;
+        const powerOn = views.i.length > 0 ? views.i[0] !== 0 : this.powerOn;
+        if (powerOn !== this.powerOn) {
+            this.powerOn = powerOn;
+            this.state.powerOn = powerOn;
+            this.stateChanged = true;
+            if (!this.powerOn) {
+                this.vram.fill(0);
+                this.vramDirty = true;
+            }
         }
     }
     
@@ -299,6 +347,7 @@ export class ILI9341Logic extends SPIProtocol {
                         this.vram[idx + 2] = b;
                         this.vramDirty = true;
                         this.writeCount += 1;
+                        this.markCoreDirty(this.powerOn);
                     }
 
                     this.currentX++;
