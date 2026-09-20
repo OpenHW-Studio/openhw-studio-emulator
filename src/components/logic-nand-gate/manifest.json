@@ -47,5 +47,6 @@
         "fields": {"i0": "outputHigh"}
     },
     "ui": {"svg": "./logic-nand-gate.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 75, "h": 60}
 }

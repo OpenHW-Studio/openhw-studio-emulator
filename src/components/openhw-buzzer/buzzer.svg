@@ -1,0 +1,7 @@
+<svg width="100%" height="100%" viewBox="0 0 105.0 135.0" xmlns="http://www.w3.org/2000/svg" data-component="openhw-buzzer" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="103.0" height="133.0" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="52.5" y="67.5" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">Buzzer</text>
+  <circle cx="45" cy="135" r="2.5" fill="#888" data-pin="GND" />
+  <circle cx="60" cy="135" r="2.5" fill="#888" data-pin="SIG" />
+</svg>

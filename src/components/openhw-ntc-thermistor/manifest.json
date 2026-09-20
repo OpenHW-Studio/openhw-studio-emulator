@@ -44,5 +44,6 @@
         "fields": {"f0": "temperature"}
     },
     "ui": {"svg": "./ntc-thermistor.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 92.3, "h": 184.6}
 }

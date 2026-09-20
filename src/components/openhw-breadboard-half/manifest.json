@@ -2414,5 +2414,6 @@
         "fields": {}
     },
     "ui": {"svg": "./breadboard-half.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 495, "h": 295}
 }

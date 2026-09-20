@@ -1,6 +1,8 @@
 import { BaseComponent } from '../BaseComponent';
 import { createValidationIssue } from '../component-schema.js';
 import { I2CProtocol } from '../../protocol-handlers/index';
+import type { WasmCore } from '../WasmComponent';
+import { ssd1306GlueLoader } from './glue';
 export class SSD1306Logic extends I2CProtocol {
   private vram: Uint8Array;
 
@@ -37,6 +39,24 @@ export class SSD1306Logic extends I2CProtocol {
   private stateUpdateCount = 0;
   private lastUpdateCycle = 0;
   private cycleCount = 0;
+
+  // WASM Phase 2 (ssd1306 descriptor core): lazy async, never in tick.
+  // Bus/VRAM stay JS; the core paces descriptor numerics only.
+  private wasmCore: WasmCore | null = null;
+  private wasmReady = false;
+  private wasmLoadAttempted = false;
+
+  /** Lazy async core load — called once by runners, never in tick. */
+  async ensureWasmLoaded(): Promise<boolean> {
+      if (this.wasmReady) return true;
+      if (this.wasmLoadAttempted) return false;
+      this.wasmLoadAttempted = true;
+      try {
+          const core = await ssd1306GlueLoader.load(this.manifest);
+          if (core) { this.wasmCore = core; this.wasmReady = true; return true; }
+      } catch { /* JS fallback */ }
+      return false;
+  }
 
   constructor(id: string, manifest: any) {
     super(id, manifest);

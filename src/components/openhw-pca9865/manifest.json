@@ -407,5 +407,6 @@
         "fields": {"i0": "enabled"}
     },
     "ui": {"svg": "./pca9865.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 342.8, "h": 171.4}
 }

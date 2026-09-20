@@ -34,6 +34,29 @@ export interface ComponentManifestPin {
     exit?: 'left' | 'right' | 'top' | 'bottom';
 }
 
+/** SAB slot layout map (Phase 1 — additive, old frontends ignore). */
+export interface ComponentManifestSab {
+    slotKind: number;
+    fields: Record<string, string>;
+}
+
+export interface ComponentManifestUi {
+    svg: string;
+    interactive?: string[];
+}
+
+export interface ComponentManifestSim {
+    runtime: 'js' | 'wasm';
+    validation: 'inline' | 'file';
+}
+
+export interface ComponentManifestWasm {
+    abi: number;
+    file: string;
+    exports?: string[];
+    fallback?: 'js';
+}
+
 export interface ComponentManifest {
     type: string;
     label: string;
@@ -52,6 +75,10 @@ export interface ComponentManifest {
     validation?: {
         rules: ComponentValidationRule[];
     };
+    sab?: ComponentManifestSab;
+    ui?: ComponentManifestUi;
+    sim?: ComponentManifestSim;
+    wasm?: ComponentManifestWasm;
 }
 
 export interface ComponentModuleDefinition {

@@ -1,5 +1,7 @@
 import { BaseComponent } from '../BaseComponent';
 import { SPIProtocol } from '../../protocol-handlers/index';
+import type { WasmCore } from '../WasmComponent';
+import { ili9341GlueLoader } from './glue';
 
 export class ILI9341Logic extends SPIProtocol {
     private currentCommand = 0;
@@ -23,6 +25,7 @@ export class ILI9341Logic extends SPIProtocol {
     private vram = new Uint8Array(typeof SharedArrayBuffer !== 'undefined' ? new SharedArrayBuffer(240 * 320 * 3) : 240 * 320 * 3);
     private vramDirty = false;
     private lastSync = 0;
+    private lastSyncCycles = 0; // cycle-based throttle (no Date.now in tick)
     private powerOn = true;
     private writeCount = 0;
     private madctl = 0x48;
@@ -32,11 +35,29 @@ export class ILI9341Logic extends SPIProtocol {
     // Compact snapshot settings
     private compactPrefixBytes = 64;
 
+    // WASM Phase 2 (ili9341 descriptor core): lazy async, never in tick.
+    // Bus/VRAM stay JS; the core paces descriptor numerics only.
+    private wasmCore: WasmCore | null = null;
+    private wasmReady = false;
+    private wasmLoadAttempted = false;
+
+    /** Lazy async core load — called once by runners, never in tick. */
+    async ensureWasmLoaded(): Promise<boolean> {
+        if (this.wasmReady) return true;
+        if (this.wasmLoadAttempted) return false;
+        this.wasmLoadAttempted = true;
+        try {
+            const core = await ili9341GlueLoader.load(this.manifest);
+            if (core) { this.wasmCore = core; this.wasmReady = true; return true; }
+        } catch { /* JS fallback */ }
+        return false;
+    }
+
     constructor(id: string, manifest: any) {
         super(id, manifest);
         this.powerOn = true;
         this.vccDetected = true;
-        this.state = { buffer: this.vram, powerOn: true, t: Date.now(), spiFrames: [], compactSnapshot: null };
+        this.state = { buffer: this.vram, powerOn: true, t: 0, spiFrames: [], compactSnapshot: null };
     }
 
     // CRC32 helper for compact snapshot
@@ -68,7 +89,7 @@ export class ILI9341Logic extends SPIProtocol {
 
     update(cpuCycles: number, currentWires: any[], instances: BaseComponent[]) {
         super.update(cpuCycles, currentWires, instances);
-        const now = Date.now();
+        const nowMs = Math.floor(cpuCycles / 16000); // 16MHz: cycles->ms, no wall clock
 
         // Power Sensing: Check if VCC pin is wired to a power source or explicitly powered
         const vcc = this.getPinVoltage('VCC');
@@ -107,8 +128,9 @@ export class ILI9341Logic extends SPIProtocol {
 
         // Periodic Sync (10Hz heartbeat + dirty flag for immediate response)
         // We sync if dirty (capped at ~30 FPS / 33ms to prevent telemetry flood) OR at least every 100ms
-        if ((this.vramDirty && (now - this.lastSync > 33)) || (now - this.lastSync > 100)) {
-            this.lastSync = now;
+        if ((this.vramDirty && (nowMs - this.lastSync > 33)) || (nowMs - this.lastSync > 100)) {
+            this.lastSync = nowMs;
+            this.lastSyncCycles = cpuCycles;
             this.vramDirty = false;
             this.stateChanged = true;
         }
@@ -178,7 +200,7 @@ export class ILI9341Logic extends SPIProtocol {
             if (frame && frame.length > 0) {
                 const max = 8;
                 const buf = (this.state.spiFrames as any[]) || [];
-                buf.push({ t: Date.now(), frame });
+                buf.push({ t: 0, frame });
                 while (buf.length > max) buf.shift();
                 this.state.spiFrames = buf;
                 this.state.spiTrafficCount = (this.state.spiTrafficCount || 0) + 1;
@@ -296,7 +318,7 @@ export class ILI9341Logic extends SPIProtocol {
         return {
             buffer: this.vram,
             powerOn: this.powerOn,
-            t: Date.now()
+            t: 0
         };
     }
 

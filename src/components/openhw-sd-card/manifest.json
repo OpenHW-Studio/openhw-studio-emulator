@@ -93,5 +93,9 @@
         "fields": {"i0": "fsReady", "f0": "bytesIn"}
     },
     "ui": {"svg": "./sd-card.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "wasm", "validation": "inline"},
+    "wasm": {"abi": 1, "file": "./core/sd_card_core_bg.wasm",
+        "exports": ["create", "destroy", "update", "on_spi", "get_state_ptr"],
+        "fallback": "js"},
+    "bounds": {"x": 0, "y": 0, "w": 135, "h": 120}
 }

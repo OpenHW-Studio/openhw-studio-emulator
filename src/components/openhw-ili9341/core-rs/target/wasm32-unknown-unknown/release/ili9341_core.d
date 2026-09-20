@@ -1,0 +1,1 @@
+/home/danish1075/Documents/simulator/openhw-studio-emulator/src/components/openhw-ili9341/core-rs/target/wasm32-unknown-unknown/release/ili9341_core.wasm: /home/danish1075/Documents/simulator/openhw-studio-emulator/src/components/openhw-ili9341/core-rs/src/lib.rs

@@ -69,5 +69,6 @@
         "fields": {"f0": "x", "f1": "y", "i0": "pressed"}
     },
     "ui": {"svg": "./analog-joystick.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 237.4, "h": 277.5}
 }

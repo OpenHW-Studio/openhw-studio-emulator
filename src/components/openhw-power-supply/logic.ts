@@ -63,7 +63,7 @@ export class PowerSupplyLogic extends BaseComponent {
 
             if (compId === this.id || visitedComps.has(compId)) continue;
 
-            const inst = instances.find(i => i.id === compId);
+            const inst = this.findInstance(instances, compId);
             if (!inst) continue;
 
             visitedComps.add(compId);

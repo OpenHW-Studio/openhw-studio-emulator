@@ -33,5 +33,6 @@
         "fields": {"f0": "volume", "i0": "playing"}
     },
     "ui": {"svg": "./5w-speaker.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 75, "h": 90}
 }

@@ -298,5 +298,6 @@
         "fields": {}
     },
     "ui": {"svg": "./stm32-blue-pill (frontend).svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 170, "h": 440}
 }

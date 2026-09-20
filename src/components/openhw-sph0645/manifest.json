@@ -48,5 +48,6 @@
         "fields": {"f0": "peakAmplitude"}
     },
     "ui": {"svg": "./sph0645.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 90, "h": 60}
 }

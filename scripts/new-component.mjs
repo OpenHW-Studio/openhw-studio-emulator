@@ -240,8 +240,9 @@ export const glueLoader: WasmGlueLoader = {
     fs.writeFileSync(path.join(dir, 'glue.ts'), glueTs);
     const crateDir = path.join(dir, 'core');
     fs.mkdirSync(path.join(crateDir, 'src'), { recursive: true });
-    fs.writeFileSync(path.join(crateDir, 'Cargo.toml'), `[package]\nname = "${type.replace(/-/g, '_')}_core"\nversion = "0.1.0"\nedition = "2021"\n\n[lib]\ncrate-type = ["cdylib"]\n\n[dependencies]\n`);
-    fs.writeFileSync(path.join(crateDir, 'src', 'lib.rs'), `// ${type} WASM core stub — C ABI, cycles only (never Date/clock).\n#[no_mangle] pub extern "C" fn create() -> u32 { 0 }\n#[no_mangle] pub extern "C" fn destroy(_h: u32) {}\n#[no_mangle] pub extern "C" fn update(_h: u32, _cycles: u64) {}\n#[no_mangle] pub extern "C" fn on_pin(_h: u32, _pin: u32, _high: u32, _cycles: u64) {}\n`);
+    fs.writeFileSync(path.join(crateDir, 'Cargo.toml'), `[package]\nname = "${type.replace(/-/g, '_')}_core"\nversion = "0.1.0"\nedition = "2021"\n\n[lib]\ncrate-type = ["cdylib"]\n\n[dependencies]\nwasm-bindgen = "0.2"\n`);
+    // wasm-bindgen dep is REQUIRED for wasm-pack --target web (glue ?url pattern).
+    fs.writeFileSync(path.join(crateDir, 'src', 'lib.rs'), `// ${type} WASM core stub — C ABI, cycles only (never Date/clock).\nuse wasm_bindgen::prelude::*;\n#[wasm_bindgen(start)] pub fn _wasm_init_hook() {}\n#[no_mangle] pub extern "C" fn create() -> u32 { 0 }\n#[no_mangle] pub extern "C" fn destroy(_h: u32) {}\n#[no_mangle] pub extern "C" fn update(_h: u32, _cycles: u64) {}\n#[no_mangle] pub extern "C" fn on_pin(_h: u32, _pin: u32, _high: u32, _cycles: u64) {}\n`);
     console.log('  + glue.ts + core/ Rust stub');
 }
 

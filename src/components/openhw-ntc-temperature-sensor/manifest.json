@@ -36,5 +36,6 @@
         "fields": {"f0": "temperature", "f1": "resistance"}
     },
     "ui": {"svg": "./ntc-temperature-sensor.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 135.4, "h": 71.8}
 }

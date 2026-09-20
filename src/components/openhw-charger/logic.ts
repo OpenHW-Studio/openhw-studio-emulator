@@ -15,10 +15,12 @@ export class ChargerLogic extends BaseComponent {
         const hasPower = this.getPinVoltage('IN+') > 4.5;
         
         if (hasPower) {
-            // Look for a battery connected to BAT+
-            const battery = allComponents.find(c => 
-                c instanceof BatteryLogic && 
-                currentWires.some(w => 
+            // Look for a battery connected to BAT+ (iterable-agnostic: Array or Map).
+            const allList: BaseComponent[] = allComponents instanceof Map
+                ? [...allComponents.values()] : allComponents;
+            const battery = allList.find(c =>
+                c instanceof BatteryLogic &&
+                currentWires.some(w =>
                     (w.from === `${this.id}:BAT+` && w.to === `${c.id}:VCC`) ||
                     (w.to === `${this.id}:BAT+` && w.from === `${c.id}:VCC`)
                 )

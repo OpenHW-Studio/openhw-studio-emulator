@@ -59,5 +59,6 @@
         "fields": {"i0": "powered"}
     },
     "ui": {"svg": "./ir-receiver.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 100, "h": 150}
 }

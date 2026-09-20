@@ -37,5 +37,9 @@
         "fields": {"i0": "displayOn"}
     },
     "ui": {"svg": "./ssd1306-oled.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "wasm", "validation": "inline"},
+    "wasm": {"abi": 1, "file": "./core/ssd1306_oled_core_bg.wasm",
+        "exports": ["create", "destroy", "update", "get_state_ptr"],
+        "fallback": "js"},
+    "bounds": {"x": 0, "y": 0, "w": 135, "h": 120}
 }

@@ -31,7 +31,7 @@ export class LEDLogic extends BaseComponent {
             }
 
             const [compId] = node.split(':');
-            const comp = allComponentsInstances.find((c) => c.id === compId);
+            const comp = this.findInstance(allComponentsInstances, compId);
             if (comp?.type === 'openhw-resistor' || comp?.type === 'wokwi-resistor') {
                 return true;
             }
@@ -129,8 +129,7 @@ export class LEDLogic extends BaseComponent {
 
         // Cycle-based PWM window (16 MHz: 500 ms ≈ 8M cycles). No Date.now in tick.
         const pwmActive = this._pwmTimestampCycles >= 0
-            ? (this._pwmDutyCycle >= 0 && (cpuCycles - this._pwmTimestampCycles) < 8_000_000)
-            : (this._pwmDutyCycle >= 0 && (Date.now() - this._pwmWallMs) < 500);
+            && (this._pwmDutyCycle >= 0 && (cpuCycles - this._pwmTimestampCycles) < 8_000_000);
 
         if (pwmActive) {
             const brightness = Math.min(255, Math.max(0, Math.round(this._pwmDutyCycle * 255)));
@@ -194,8 +193,7 @@ export class LEDLogic extends BaseComponent {
 
         const cycles = (this._simCpu as any)?.cycles;
         const pwmActive = this._pwmTimestampCycles >= 0 && Number.isFinite(Number(cycles))
-            ? (this._pwmDutyCycle >= 0 && (Number(cycles) - this._pwmTimestampCycles) < 8_000_000)
-            : (this._pwmDutyCycle >= 0 && (Date.now() - this._pwmWallMs) < 500);
+            && (this._pwmDutyCycle >= 0 && (Number(cycles) - this._pwmTimestampCycles) < 8_000_000);
 
         if (pwmActive) {
             state.illuminated = this._pwmDutyCycle >= 0.01;

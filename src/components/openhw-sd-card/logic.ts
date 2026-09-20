@@ -1,6 +1,8 @@
 import { BaseComponent } from '../BaseComponent';
 import { createValidationIssue } from '../component-schema.js';
 import { SPIProtocol } from '../../protocol-handlers/index';
+import type { WasmCore } from '../WasmComponent';
+import { sdCardGlueLoader } from './glue';
 
 const LITTLEFS_MODULE_NAME = 'littlefs';
 const SD_BLOCK_SIZE = 512;
@@ -170,6 +172,7 @@ export class SDCardLogic extends SPIProtocol {
     private bytesIn = 0;
     private bytesOut = 0;
     private lastActivityAt = 0;
+    private lastActivityCycles = 0; // cycle-based (no Date.now in tick)
 
     private readonly textEncoder = new TextEncoder();
     private readonly textDecoder = new TextDecoder();
@@ -181,6 +184,24 @@ export class SDCardLogic extends SPIProtocol {
     private littleFsReady = false;
     private littleFsVolume: LittleFsVolume | null = null;
     private files = new Map<string, Uint8Array>();
+
+    // WASM Phase 2 (sdcard descriptor core): lazy async, never in tick.
+    // Bus/VRAM stay JS; the core paces descriptor numerics only.
+    private wasmCore: WasmCore | null = null;
+    private wasmReady = false;
+    private wasmLoadAttempted = false;
+
+    /** Lazy async core load — called once by runners, never in tick. */
+    async ensureWasmLoaded(): Promise<boolean> {
+        if (this.wasmReady) return true;
+        if (this.wasmLoadAttempted) return false;
+        this.wasmLoadAttempted = true;
+        try {
+            const core = await sdCardGlueLoader.load(this.manifest);
+            if (core) { this.wasmCore = core; this.wasmReady = true; return true; }
+        } catch { /* JS fallback */ }
+        return false;
+    }
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
@@ -535,7 +556,8 @@ export class SDCardLogic extends SPIProtocol {
         }
 
         const byte = value & 0xff;
-        this.lastActivityAt = Date.now();
+        this.lastActivityAt = Date.now(); // event path (SPI byte, not tick)
+        this.lastActivityCycles = (this as any).simCycles || 0;
         this.bytesIn += 1;
         this.state.bytesIn = this.bytesIn;
 
@@ -609,10 +631,14 @@ export class SDCardLogic extends SPIProtocol {
         }
     }
 
-    update() {
+    update(cpuCycles?: number) {
         this.refreshPowerState();
-
-        const active = (Date.now() - this.lastActivityAt) < 120;
+        if (Number.isFinite(Number(cpuCycles))) (this as any).simCycles = Number(cpuCycles);
+        // 120ms @16MHz ~= 1.92M cycles; wall fallback only before first tick.
+        const ref = Number.isFinite(Number(cpuCycles)) ? Number(cpuCycles) : -1;
+        const active = ref >= 0
+            ? (ref - ((this as any).lastActivityCycles || 0)) < 1920000
+            : (Date.now() - this.lastActivityAt) < 120;
         if (this.state.activity !== active) {
             this.state.activity = active;
             this.stateChanged = true;

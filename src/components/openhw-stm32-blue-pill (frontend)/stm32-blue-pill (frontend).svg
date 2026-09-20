@@ -1,0 +1,45 @@
+<svg width="100%" height="100%" viewBox="0 0 170.0 440.0" xmlns="http://www.w3.org/2000/svg" data-component="openhw-stm32-blue-pill (frontend)" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="168.0" height="438.0" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="85.0" y="220.0" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">STM32 Blue Pill (fronten</text>
+  <circle cx="22" cy="56" r="2.5" fill="#888" data-pin="PB12" />
+  <circle cx="22" cy="75" r="2.5" fill="#888" data-pin="PB13" />
+  <circle cx="22" cy="94" r="2.5" fill="#888" data-pin="PB14" />
+  <circle cx="22" cy="113" r="2.5" fill="#888" data-pin="PB15" />
+  <circle cx="22" cy="132" r="2.5" fill="#888" data-pin="PA8" />
+  <circle cx="22" cy="151" r="2.5" fill="#888" data-pin="PA9" />
+  <circle cx="22" cy="170" r="2.5" fill="#888" data-pin="PA10" />
+  <circle cx="22" cy="189" r="2.5" fill="#888" data-pin="PA11" />
+  <circle cx="22" cy="208" r="2.5" fill="#888" data-pin="PA12" />
+  <circle cx="22" cy="227" r="2.5" fill="#888" data-pin="PA15" />
+  <circle cx="22" cy="246" r="2.5" fill="#888" data-pin="PB3" />
+  <circle cx="22" cy="265" r="2.5" fill="#888" data-pin="PB4" />
+  <circle cx="22" cy="284" r="2.5" fill="#888" data-pin="PB5" />
+  <circle cx="22" cy="303" r="2.5" fill="#888" data-pin="PB6" />
+  <circle cx="22" cy="322" r="2.5" fill="#888" data-pin="PB7" />
+  <circle cx="22" cy="341" r="2.5" fill="#888" data-pin="PB8" />
+  <circle cx="22" cy="360" r="2.5" fill="#888" data-pin="PB9" />
+  <circle cx="22" cy="379" r="2.5" fill="#888" data-pin="5V" />
+  <circle cx="22" cy="398" r="2.5" fill="#888" data-pin="GND" />
+  <circle cx="22" cy="417" r="2.5" fill="#888" data-pin="3V3" />
+  <circle cx="148" cy="56" r="2.5" fill="#888" data-pin="GND.2" />
+  <circle cx="148" cy="75" r="2.5" fill="#888" data-pin="GND.3" />
+  <circle cx="148" cy="94" r="2.5" fill="#888" data-pin="3V3.2" />
+  <circle cx="148" cy="113" r="2.5" fill="#888" data-pin="RST" />
+  <circle cx="148" cy="132" r="2.5" fill="#888" data-pin="PB11" />
+  <circle cx="148" cy="151" r="2.5" fill="#888" data-pin="PB10" />
+  <circle cx="148" cy="170" r="2.5" fill="#888" data-pin="PB1" />
+  <circle cx="148" cy="189" r="2.5" fill="#888" data-pin="PB0" />
+  <circle cx="148" cy="208" r="2.5" fill="#888" data-pin="PA7" />
+  <circle cx="148" cy="227" r="2.5" fill="#888" data-pin="PA6" />
+  <circle cx="148" cy="246" r="2.5" fill="#888" data-pin="PA5" />
+  <circle cx="148" cy="265" r="2.5" fill="#888" data-pin="PA4" />
+  <circle cx="148" cy="284" r="2.5" fill="#888" data-pin="PA3" />
+  <circle cx="148" cy="303" r="2.5" fill="#888" data-pin="PA2" />
+  <circle cx="148" cy="322" r="2.5" fill="#888" data-pin="PA1" />
+  <circle cx="148" cy="341" r="2.5" fill="#888" data-pin="PA0" />
+  <circle cx="148" cy="360" r="2.5" fill="#888" data-pin="PC15" />
+  <circle cx="148" cy="379" r="2.5" fill="#888" data-pin="PC14" />
+  <circle cx="148" cy="398" r="2.5" fill="#888" data-pin="PC13" />
+  <circle cx="148" cy="417" r="2.5" fill="#888" data-pin="VBAT" />
+</svg>

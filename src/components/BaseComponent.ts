@@ -475,7 +475,21 @@ export class BaseComponent {
     }
 
     update(cpuCycles: number, currentWires: any[], allComponentsInstances: BaseComponent[]) {
-        // Override in subclasses
+        // Override in subclasses.
+        // NOTE: `allComponentsInstances` may be an Array OR a Map<id, inst>
+        // (runners pass a Map when available — O(1) lookup, no per-tick find).
+        // Use `this.findInstance(allComponentsInstances, id)` instead of
+        // `.find()` to stay compatible with both shapes.
+    }
+
+    /** O(1) instance lookup that accepts Array (legacy) or Map (runner fast path). */
+    protected findInstance(
+        instances: BaseComponent[] | Map<string, BaseComponent>,
+        id: string,
+    ): BaseComponent | undefined {
+        if (instances instanceof Map) return instances.get(id);
+        if (Array.isArray(instances)) return instances.find((i) => i.id === id);
+        return undefined;
     }
 
     protected isLogicAnalyzerAttached(allInstances: BaseComponent[]): boolean {

@@ -8,6 +8,9 @@ export class Lcd2004I2CLogic extends I2CProtocol {
     private pendingSync = false;
     private lastFlushMs = 0;
     private lastI2CActivityMs = 0;
+    private lastI2CActivityCycles = 0; // cycle-based debounce (no Date.now in tick)
+    private simCycles = 0;
+    private lastFlushCycles = 0;
 
     private static readonly FLUSH_INTERVAL_MS = 40;
 
@@ -20,7 +23,8 @@ export class Lcd2004I2CLogic extends I2CProtocol {
         this.lastByte = this.hd44780.feedI2CByte(value, this.lastByte);
         if (this.hd44780.stateChanged) {
             this.pendingSync = true;
-            this.lastI2CActivityMs = Date.now();
+            this.lastI2CActivityMs = Date.now(); // legacy wall stamp (non-tick)
+            this.lastI2CActivityCycles = this.simCycles;
             this.hd44780.clearChanged();
         }
         return true;
@@ -28,18 +32,19 @@ export class Lcd2004I2CLogic extends I2CProtocol {
 
     update(cpuCycles: number, wires: any, allComponents: any) {
         if (!this.pendingSync) return;
+        this.simCycles = cpuCycles;
 
-        const now = Date.now();
-        // Debounce: Wait until 40ms of silence since the last I2C byte
-        const isIdle = (now - this.lastI2CActivityMs) >= Lcd2004I2CLogic.FLUSH_INTERVAL_MS;
-        // Max Wait: Force flush every 200ms to prevent starvation if firmware spams
-        const isStarved = this.lastFlushMs && (now - this.lastFlushMs) >= 200;
+        // Debounce in cycles (16MHz): 40ms silence = 640k cycles, 200ms starve = 3.2M.
+        const idleCycles = cpuCycles - this.lastI2CActivityCycles;
+        const isIdle = idleCycles >= 640000;
+        const isStarved = this.lastFlushCycles > 0 && (cpuCycles - this.lastFlushCycles) >= 3200000;
 
         if (!isIdle && !isStarved) {
             return;
         }
 
-        this.lastFlushMs = now;
+        this.lastFlushCycles = cpuCycles;
+        this.lastFlushMs = Math.floor(cpuCycles / 16000);
         this.pendingSync = false;
         this.setState({ ...this.state, ...this.hd44780.getState() });
     }

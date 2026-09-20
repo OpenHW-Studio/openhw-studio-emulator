@@ -35,5 +35,6 @@
         "fields": {"f0": "gasLevel", "i0": "limitExceeded"}
     },
     "ui": {"svg": "./MQ2-gas-sensor.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 138, "h": 63}
 }

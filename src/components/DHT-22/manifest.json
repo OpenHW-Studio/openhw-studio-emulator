@@ -34,5 +34,6 @@
         "fields": {"f0": "temperature", "f1": "humidity"}
     },
     "ui": {"svg": "./DHT-22.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 57, "h": 120}
 }

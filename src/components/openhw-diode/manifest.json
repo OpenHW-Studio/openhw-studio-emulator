@@ -24,5 +24,6 @@
         "fields": {"f0": "voltageDrop"}
     },
     "ui": {"svg": "./diode.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 60, "h": 20}
 }

@@ -1,0 +1,1 @@
+/home/danish1075/Documents/simulator/openhw-studio-emulator/src/components/openhw-sd-card/core-rs/target/wasm32-unknown-unknown/release/sdcard_core.wasm: /home/danish1075/Documents/simulator/openhw-studio-emulator/src/components/openhw-sd-card/core-rs/src/lib.rs

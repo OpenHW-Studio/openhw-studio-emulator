@@ -40,5 +40,6 @@
         "fields": {"i0": "keyAvailable"}
     },
     "ui": {"svg": "./membrane-keypad.svg", "interactive": ["press"]},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 415.37, "h": 537.4}
 }

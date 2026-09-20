@@ -28,7 +28,7 @@ export class Logic extends BaseComponent {
 
         for (const node of connectedNodes) {
             const [compId] = node.split(':');
-            const comp = components.find(c => c.id === compId);
+            const comp = this.findInstance(components, compId);
             if (comp && comp.state.i2sAudioChunk) {
                 // Transfer the audio chunk from the source (e.g. max98357)
                 audioChunkToPlay = comp.state.i2sAudioChunk;

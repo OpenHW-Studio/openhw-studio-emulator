@@ -10,6 +10,7 @@ export class EPaperLogic extends BaseComponent {
     private vram = new Uint8Array(4736);
     private vramDirty = false;
     private lastSync = 0;
+    private lastSyncCycles = 0; // cycle-based throttle (no Date.now in tick)
     private powerOn = true;
     
     // Command parsing state
@@ -19,11 +20,11 @@ export class EPaperLogic extends BaseComponent {
     constructor(id: string, manifest: any) {
         super(id, manifest);
         this.vram.fill(255); // initialize to white (all 1s)
-        this.state = { vram: this.vram, powerOn: true, t: Date.now() };
+        this.state = { vram: this.vram, powerOn: true, t: 0 };
     }
 
     update(cpuCycles: number) {
-        const now = Date.now();
+        const nowMs = Math.floor(cpuCycles / 16000); // 16MHz: cycles->ms, no wall clock
         const vcc = this.getPinVoltage('VCC');
         const newPower = vcc > 2.0;
 
@@ -32,14 +33,15 @@ export class EPaperLogic extends BaseComponent {
             this.stateChanged = true;
         }
 
-        if (this.vramDirty || (now - this.lastSync > 100)) {
-            this.lastSync = now;
+        if (this.vramDirty || (nowMs - this.lastSync > 100)) {
+            this.lastSync = nowMs;
+            this.lastSyncCycles = cpuCycles;
             this.vramDirty = false;
             this.stateChanged = true;
             this.setState({
                 vram: new Uint8Array(this.vram),
                 powerOn: this.powerOn,
-                t: now
+                t: nowMs
             });
         }
         
@@ -80,7 +82,7 @@ export class EPaperLogic extends BaseComponent {
         return {
             vram: this.vram,
             powerOn: this.powerOn,
-            t: Date.now()
+            t: 0
         };
     }
 

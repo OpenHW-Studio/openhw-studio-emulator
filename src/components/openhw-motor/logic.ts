@@ -49,11 +49,11 @@ export class MotorLogic extends BaseComponent {
         for (const w of currentWires) {
             if (w.from === myPinStr) {
                 const [targetComp, targetPin] = w.to.split(':');
-                const inst = instances.find(i => i.id === targetComp);
+                const inst = this.findInstance(instances, targetComp);
                 if (inst && inst.pins[targetPin]) maxV = Math.max(maxV, inst.pins[targetPin].voltage || 0);
             } else if (w.to === myPinStr) {
                 const [targetComp, targetPin] = w.from.split(':');
-                const inst = instances.find(i => i.id === targetComp);
+                const inst = this.findInstance(instances, targetComp);
                 if (inst && inst.pins[targetPin]) maxV = Math.max(maxV, inst.pins[targetPin].voltage || 0);
             }
         }

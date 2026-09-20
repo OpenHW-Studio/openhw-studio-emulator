@@ -48,5 +48,6 @@
         "fields": {"f0": "ax", "f1": "ay", "f2": "az"}
     },
     "ui": {"svg": "./mpu6050.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 135, "h": 105}
 }

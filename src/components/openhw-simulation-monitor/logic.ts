@@ -23,12 +23,17 @@ export class SimulationMonitorLogic extends BaseComponent {
             telemetryPayloadBytes: 0,
             canvasFps: 60,
             uiMainThreadBlockedTimeMs: 0,
-            workerMessageQueueLagMs: 0
+            workerMessageQueueLagMs: 0,
+            // Phase0 bench counters (§6): runLoop timing mirrors, fed by the
+            // runner via updateMetrics extras. Zero = runner predates counters.
+            lastRunLoopMs: 0,
+            lastPhysicsMs: 0,
+            lastComponentUpdateMs: 0
         };
         this.stateChanged = true;
     }
 
-    updateMetrics(cpuCycles: number, targetFreq: number, isTelemetryEnabled: boolean, watchedParams: string[], realCanvasFps: number = 60, realUiBlockedMs: number = 0) {
+    updateMetrics(cpuCycles: number, targetFreq: number, isTelemetryEnabled: boolean, watchedParams: string[], realCanvasFps: number = 60, realUiBlockedMs: number = 0, runLoopMs: number = 0, physicsMs: number = 0, componentMs: number = 0) {
         const now = performance.now();
         if (this.simStartTime === 0) {
             this.simStartTime = now;
@@ -91,7 +96,10 @@ export class SimulationMonitorLogic extends BaseComponent {
             telemetryPayloadBytes: this.lastPayloadBytes,
             canvasFps: Number(realCanvasFps.toFixed(2)),
             uiMainThreadBlockedTimeMs: realUiBlockedMs,
-            workerMessageQueueLagMs: isTelemetryEnabled ? (load > 50 ? 12.4 : 1.5) : 0.2
+            workerMessageQueueLagMs: isTelemetryEnabled ? (load > 50 ? 12.4 : 1.5) : 0.2,
+            lastRunLoopMs: Number(runLoopMs.toFixed(3)),
+            lastPhysicsMs: Number(physicsMs.toFixed(3)),
+            lastComponentUpdateMs: Number(componentMs.toFixed(3))
         };
 
         this.state = nextState;

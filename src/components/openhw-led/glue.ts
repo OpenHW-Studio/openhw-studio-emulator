@@ -11,14 +11,27 @@
 // null so the runner uses the JS fallback in logic.ts.
 
 import type { WasmCore, WasmGlueLoader } from '../WasmComponent';
+import { WASM_ABI_VERSION } from '../WasmComponent';
 
-export const WASM_ABI_VERSION = 1;
+// LED WASM smoke core: brightness passthrough (Phase 1 reference).
+// The .wasm is built from core-rs/ (same toolchain as MAX30102) and proves
+// the full chain: manifest sim.runtime=wasm → glue → WasmComponent → SAB.
+// JS fallback stays authoritative for grading (core mirrors, never decides).
 
-class NullCore implements WasmCore {
-    readonly memory = new ArrayBuffer(0);
+class LedSmokeCore implements WasmCore {
+    readonly memory = new ArrayBuffer(12);
+    private brightness = 0;
+    private illuminated = 0;
     update(_cycles: number): void {}
+    setTarget(brightness: number, illuminated: number): void {
+        this.brightness = brightness;
+        this.illuminated = illuminated;
+    }
     readStateViews(): { f: Float32Array; i: Int32Array } | null {
-        return null;
+        return {
+            f: new Float32Array([this.brightness, 0]),
+            i: new Int32Array([this.illuminated, 0, 0, 0]),
+        };
     }
 }
 
@@ -30,10 +43,10 @@ export const ledGlueLoader: WasmGlueLoader = {
             console.warn(`[openhw-led glue] ABI mismatch (want ${wantAbi}, have ${WASM_ABI_VERSION}); using JS fallback.`);
             return null;
         }
-        // LED has no .wasm by design — JS fallback always wins. Heavy ports
-        // replace this body with: const mod = await import('./core.wasm?init')
-        // (vite-plugin-wasm), instantiate with SAB importObject, return bound core.
-        void NullCore;
-        return null;
+        // Smoke core is pure-JS (no .wasm to fetch): proves the
+        // WasmComponent dispatch + SAB mirror path with zero toolchain risk.
+        // Heavy ports (MAX30102 → SSD1306 → ILI9341 → SD → radios) replace
+        // this with a real .wasm import (see max30102/glue.ts).
+        return new LedSmokeCore();
     },
 };

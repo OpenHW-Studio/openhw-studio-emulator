@@ -34,7 +34,7 @@ export class NotGateLogic extends BaseComponent {
                 visited.add(otherKey);
 
                 const [compId, compPin] = otherKey.split(':');
-                const inst = instances.find(i => i.id === compId);
+                const inst = this.findInstance(instances, compId);
                 if (!inst) continue;
 
                 if (!inst.pins[compPin]) inst.pins[compPin] = { voltage: 0, mode: 'INPUT' };

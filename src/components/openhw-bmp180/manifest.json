@@ -65,5 +65,6 @@
         "fields": {"f0": "temperature", "f1": "pressure"}
     },
     "ui": {"svg": "./bmp180.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 72, "h": 50}
 }

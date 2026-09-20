@@ -66,5 +66,6 @@
         "fields": {"i0": "wifiConnected"}
     },
     "ui": {"svg": "./pico-w.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 124, "h": 314}
 }

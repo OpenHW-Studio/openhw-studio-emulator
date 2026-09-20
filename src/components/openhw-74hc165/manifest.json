@@ -125,5 +125,6 @@
         "fields": {"i0": "loaded"}
     },
     "ui": {"svg": "./74hc165.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 135, "h": 45}
 }

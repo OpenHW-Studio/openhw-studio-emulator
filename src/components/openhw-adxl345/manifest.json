@@ -46,5 +46,6 @@
         "fields": {"f0": "accelX", "f1": "accelY", "f2": "accelZ"}
     },
     "ui": {"svg": "./adxl345.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 94.5, "h": 135}
 }

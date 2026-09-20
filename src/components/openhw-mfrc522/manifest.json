@@ -51,5 +51,6 @@
         "fields": {"i0": "cardPresent"}
     },
     "ui": {"svg": "./mfrc522.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 165, "h": 135}
 }

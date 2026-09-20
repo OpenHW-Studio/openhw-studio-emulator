@@ -19,7 +19,10 @@ function toBCD(val: number): number {
 }
 
 export class DS1307RTCLogic extends I2CProtocol {
-    private startTime: number = Date.now();
+    // Sim-time clock: elapsed derives from cpuCycles (16M cycles = 1 sim-s),
+    // so replay/pause/determinism hold. Wall clock only seeds construction.
+    private startCycles: number = 0;
+    private startCyclesSet: boolean = false;
     private baseDate: Date;
     private powered: boolean = false;
 
@@ -27,7 +30,6 @@ export class DS1307RTCLogic extends I2CProtocol {
         super(id, manifest);
         const dt = manifest.attrs?.datetime ?? '2024-01-01T00:00:00';
         this.baseDate = new Date(dt);
-        this.startTime = Date.now();
 
         this.state = {
             ...this.state,
@@ -38,8 +40,9 @@ export class DS1307RTCLogic extends I2CProtocol {
     }
 
     private currentDate(): Date {
-        const elapsed = Date.now() - this.startTime;
-        return new Date(this.baseDate.getTime() + elapsed);
+        const cycles = (this as any).simCycles || 0;
+        const elapsed = Math.floor((cycles - this.startCycles) / 16000000) * 1000;
+        return new Date(this.baseDate.getTime() + Math.max(0, elapsed));
     }
 
     private formatDisplay(d: Date): string {
@@ -48,6 +51,8 @@ export class DS1307RTCLogic extends I2CProtocol {
     }
 
     update(cpuCycles: number, currentWires: any[], allComponentsInstances: BaseComponent[]) {
+        (this as any).simCycles = cpuCycles;
+        if (!this.startCyclesSet) { this.startCycles = cpuCycles; this.startCyclesSet = true; }
         // Accept power from either VCC pin name or the '5V' alias that some wiring uses
         const vcc = Math.max(
             this.getPinVoltage('VCC'),

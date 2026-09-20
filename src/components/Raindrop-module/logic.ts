@@ -3,6 +3,7 @@ import { raindropSharedState } from '../raindrop-shared-state';
 
 export class RaindropModuleLogic extends BaseComponent {
     private lastUpdate = 0;
+    private lastUpdateCycles = 0; // cycle-based (no Date.now in tick)
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
@@ -17,7 +18,7 @@ export class RaindropModuleLogic extends BaseComponent {
         }
     }
 
-    update() {
+    update(cpuCycles?: number) {
         // Read from shared state (computed by Pad)
         const { padVoltage, rainLevel, rainDetected } = raindropSharedState;
 
@@ -27,10 +28,17 @@ export class RaindropModuleLogic extends BaseComponent {
         this.setPinVoltage('VCC', 5.0);
         this.setPinVoltage('GND', 0.0);
 
-        const now = Date.now();
-        if (now - this.lastUpdate > 100) {
+        // 100ms @16MHz ~= 1.6M cycles; wall fallback only before first tick.
+        if (Number.isFinite(Number(cpuCycles))) {
+            if (Number(cpuCycles) - this.lastUpdateCycles < 1600000) return;
+            this.lastUpdateCycles = Number(cpuCycles);
             this.setState({ rainLevel, rainDetected, padVoltage });
-            this.lastUpdate = now;
+        } else {
+            const now = Date.now();
+            if (now - this.lastUpdate > 100) {
+                this.setState({ rainLevel, rainDetected, padVoltage });
+                this.lastUpdate = now;
+            }
         }
     }
 

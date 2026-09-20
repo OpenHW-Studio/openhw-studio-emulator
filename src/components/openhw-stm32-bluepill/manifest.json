@@ -56,5 +56,6 @@
         "fields": {"i0": "builtInLed"}
     },
     "ui": {"svg": "./stm32-bluepill.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 92, "h": 320}
 }

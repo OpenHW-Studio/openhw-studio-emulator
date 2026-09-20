@@ -5,5 +5,6 @@
     "group": "Inputs",
     "w": 130, "h": 310,
     "attrs": {},
-    "telemetry": { "template": "command=${state.lastCommand}", "criticalKeys": ["state.lastCommand"] }
+    "telemetry": { "template": "command=${state.lastCommand}", "criticalKeys": ["state.lastCommand"] },
+    "bounds": {"x": 0, "y": 0, "w": 130, "h": 310}
 }

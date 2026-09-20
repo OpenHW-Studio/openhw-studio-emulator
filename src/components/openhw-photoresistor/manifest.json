@@ -50,5 +50,6 @@
         "fields": {"f0": "lux", "f1": "resistance"}
     },
     "ui": {"svg": "./photoresistor.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 22.5, "h": 22.5}
 }

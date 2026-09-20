@@ -43,5 +43,6 @@
         "fields": {"f0": "rainLevel", "i0": "rainDetected"}
     },
     "ui": {"svg": "./Raindrop-module.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 70, "h": 160}
 }

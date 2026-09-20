@@ -160,5 +160,6 @@
         "fields": {"i0": "enabled"}
     },
     "ui": {"svg": "./motor-driver.svg", "interactive": []},
-    "sim": {"runtime": "js", "validation": "inline"}
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 80, "h": 80}
 }

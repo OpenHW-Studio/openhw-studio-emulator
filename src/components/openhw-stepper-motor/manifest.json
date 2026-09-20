@@ -131,5 +131,6 @@
     "sim": {
         "runtime": "js",
         "validation": "inline"
-    }
+    },
+    "bounds": {"x": 0, "y": 0, "w": 135, "h": 165}
 }
