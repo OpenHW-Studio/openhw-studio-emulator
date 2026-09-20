@@ -88,7 +88,10 @@
     "ui": {"svg": "./ili9341.svg", "interactive": []},
     "sim": {"runtime": "wasm", "validation": "inline"},
     "wasm": {"abi": 1, "file": "./core/ili9341_core_bg.wasm",
-        "exports": ["create", "destroy", "update", "mark_dirty", "on_spi", "get_state_ptr"],
+        "exports": ["create", "destroy", "update", "mark_dirty", "on_spi",
+            "set_window", "ramwr_begin", "ramwr_blit", "dma_blit_rgb565",
+            "fill_percent_x10", "crc32", "ramwr_cursor", "write_count",
+            "fb_ptr", "fb_len", "get_state_ptr"],
         "fallback": "js"},
     "bounds": {"x": 0, "y": 0, "w": 240, "h": 360}
 }

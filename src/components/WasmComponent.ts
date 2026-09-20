@@ -30,6 +30,22 @@ export interface WasmCore {
     onSPIByte?(data: number): number;
     /** Event-path dirty notify (display descriptor cores: mark_dirty). */
     markDirty?(flag: number): void;
+    /**
+     * Batched pixel/window fast paths (ILI9341 TFT). All optional; the JS
+     * reference in logic.ts stays authoritative and runs when any of these
+     * is absent or returns 0/falsy.
+     * - setWindow/ramwrBegin mirror CASET/PASET/MADCTL/RAMWR framing.
+     * - ramwrBlit/dmaBlit ingest whole byte streams in ONE crossing and
+     *   bulk-copy the result into the SAB VRAM; return pixels written.
+     * - fillPercentX10/crc32Of replace the full-VRAM telemetry scan.
+     */
+    setWindow?(cs: number, ce: number, rs: number, re: number, madctl: number): void;
+    ramwrBegin?(): void;
+    ramwrBlit?(bytes: Uint8Array, vram: Uint8Array): number;
+    dmaBlit?(dma: Uint8Array, vram: Uint8Array): number;
+    ramwrCursor?(): { x: number; y: number } | null;
+    fillPercentX10?(): number;
+    crc32Of?(prefix: Uint8Array): number;
     readStateViews(): { f: Float32Array; i: Int32Array } | null;
     destroy?(): void;
 }
