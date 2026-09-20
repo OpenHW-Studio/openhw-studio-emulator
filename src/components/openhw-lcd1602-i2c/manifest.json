@@ -61,5 +61,11 @@
     "telemetry": {
       "template": "Lines=${state.lines.length}, Illuminated=${state.illuminated}, Backlight=${state.backlight}",
       "criticalKeys": ["state.lines", "state.illuminated"]
-    }
+    },
+    "sab": {
+        "slotKind": 3,
+        "fields": {"i0": "backlight"}
+    },
+    "ui": {"svg": "./lcd1602-i2c.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

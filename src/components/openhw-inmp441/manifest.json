@@ -42,5 +42,11 @@
       "setup": "Serial.begin(9600);\\nI2S.setBCLK(${SCK});\\nI2S.setDATA(${SD});\\nI2S.begin(I2S_PHILIPS_MODE, 44100, 32);\\nSD.begin(5);\\naudioFile = SD.open(\\\"/rec.wav\\\", FILE_WRITE);",
       "loop": "int32_t sample = 0;\\nI2S.read();\\nsample = I2S.read();\\nif(audioFile) audioFile.write((uint8_t*)&sample, 4);"
     }
-  }
+  },
+    "sab": {
+        "slotKind": 4,
+        "fields": {"f0": "peakAmplitude"}
+    },
+    "ui": {"svg": "./inmp441.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

@@ -53,5 +53,11 @@
       "setup": "irrecv_${COMP_SUFFIX}.enableIRIn();\nSerial.println(\"IR Receiver Ready\");",
       "loop": "if (irrecv_${COMP_SUFFIX}.decode(&results_${COMP_SUFFIX})) {\n  Serial.print(\"IR Code: 0x\");\n  Serial.println(results_${COMP_SUFFIX}.value, HEX);\n  irrecv_${COMP_SUFFIX}.resume();\n}\ndelay(100);"
     }
-  }
+  },
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "powered"}
+    },
+    "ui": {"svg": "./ir-receiver.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

@@ -28,6 +28,11 @@
             "setup": "Serial.begin(9600);\npinMode(${OUT}, INPUT);",
             "loop": "Serial.print(\"CLK=\");\nSerial.println(digitalRead(${OUT}));\ndelay(100);"
         }
-    }
+    },
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "out"}
+    },
+    "ui": {"svg": "./logic-clock-generator.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }
-

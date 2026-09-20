@@ -28,5 +28,11 @@
             { "from": "GND", "to": "arduino:GND" },
             { "from": "DATA", "to": "arduino:4|5|6|7|8|9|10|11|12" }
         ]
-    }
+    },
+    "sab": {
+        "slotKind": 4,
+        "fields": {"f0": "temperature", "f1": "humidity"}
+    },
+    "ui": {"svg": "./DHT-22.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

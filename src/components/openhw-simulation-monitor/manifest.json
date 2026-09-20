@@ -23,5 +23,11 @@
             "setup": "// Simulation Monitor active: real-time telemetry streaming enabled via Deep Silicon bus.",
             "loop": ""
         }
-    }
+    },
+    "sab": {
+        "slotKind": 0,
+        "fields": {"f0": "workerCpuLoadPercentage"}
+    },
+    "ui": {"svg": "./simulation-monitor.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

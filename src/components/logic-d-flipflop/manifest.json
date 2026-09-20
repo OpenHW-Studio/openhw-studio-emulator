@@ -49,5 +49,11 @@
             "setup": "Serial.begin(9600);\npinMode(${D}, OUTPUT);\npinMode(${CLK}, OUTPUT);\npinMode(${Q}, INPUT);\npinMode(${Qbar}, INPUT);\nSerial.println(\"D Flip-Flop ready\");",
             "loop": "for (int i=0; i<2; i++) {\n  digitalWrite(${D}, i?HIGH:LOW);\n  digitalWrite(${CLK}, LOW);\n  delay(5);\n  digitalWrite(${CLK}, HIGH);\n  delay(5);\n  Serial.print(\"DFF | D=\");\n  Serial.print(i);\n  Serial.print(\" -> Q=\");\n  Serial.print(digitalRead(${Q}));\n  Serial.print(\" Qbar=\");\n  Serial.println(digitalRead(${Qbar}));\n  delay(1000);\n}"
         }
-    }
+    },
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "q", "i1": "qbar"}
+    },
+    "ui": {"svg": "./logic-d-flipflop.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

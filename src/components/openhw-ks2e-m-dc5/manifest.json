@@ -71,5 +71,11 @@
             "type": "passive",
             "description": "Normally Open 2"
         }
-    ]
+    ],
+    "sab": {
+        "slotKind": 6,
+        "fields": {"i0": "energised"}
+    },
+    "ui": {"svg": "./ks2e-m-dc5.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

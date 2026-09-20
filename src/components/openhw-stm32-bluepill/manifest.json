@@ -50,5 +50,11 @@
     { "id": "SWDIO", "x": 38.5, "y": 315, "type": "digital_inout", "description": "SWD Data" },
     { "id": "SWCLK", "x": 53.5, "y": 315, "type": "digital_inout", "description": "SWD Clock" },
     { "id": "SWD_GND", "x": 68.5, "y": 315, "type": "power", "description": "SWD Ground" }
-  ]
+  ],
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "builtInLed"}
+    },
+    "ui": {"svg": "./stm32-bluepill.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

@@ -15,5 +15,11 @@
         { "id": "D5",  "x": 105, "y": 90, "type": "digital" },
         { "id": "D6",  "x": 120, "y": 90, "type": "digital" },
         { "id": "D7",  "x": 135, "y": 90, "type": "digital" }
-    ]
+    ],
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "active"}
+    },
+    "ui": {"svg": "./logic-analyzer.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

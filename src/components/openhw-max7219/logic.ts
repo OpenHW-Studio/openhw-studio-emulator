@@ -111,4 +111,22 @@ export class MAX7219Logic extends SPIProtocol {
     }
 
     getSyncState() { return { ...this.state }; }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: shutdown} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {},
+            i: {shutdown: (s.shutdown ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const vccVolts = validator?.calculateVoltageAtNode(`${component.id}.VCC`);
+
+        if (vccVolts !== undefined && vccVolts < 4.5) {
+            return { severity: 'warn', message: 'MAX7219 requires 5V on VCC' };
+        }
+        return null;
+    }
 }

@@ -43,4 +43,17 @@ export class Logic extends BaseComponent {
             this.stateChanged = true;
         }
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: volume, i0: playing} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {volume: Number(s.volume ?? 0)},
+            i: {playing: (s.playing ? 1 : 0)},
+        };
+    }
+    validate(_component: any, _graph: Map<string, string[]>) {
+        return null;
+    }
 }

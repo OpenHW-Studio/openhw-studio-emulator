@@ -47,5 +47,11 @@
       "setup": "lc_${COMP_SUFFIX}.shutdown(0, false);\nlc_${COMP_SUFFIX}.setIntensity(0, 8);\nlc_${COMP_SUFFIX}.clearDisplay(0);\n// Welcome Message (H)\nlc_${COMP_SUFFIX}.setRow(0,0,B01100110);\nlc_${COMP_SUFFIX}.setRow(0,1,B01100110);\nlc_${COMP_SUFFIX}.setRow(0,2,B01100110);\nlc_${COMP_SUFFIX}.setRow(0,3,B01111110);\nlc_${COMP_SUFFIX}.setRow(0,4,B01111110);\nlc_${COMP_SUFFIX}.setRow(0,5,B01100110);\nlc_${COMP_SUFFIX}.setRow(0,6,B01100110);\nlc_${COMP_SUFFIX}.setRow(0,7,B01100110);\ndelay(2000);",
       "loop": "// Dot Matrix ready for animation."
     }
-  }
+  },
+    "sab": {
+        "slotKind": 3,
+        "fields": {"i0": "shutdown"}
+    },
+    "ui": {"svg": "./max7219.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

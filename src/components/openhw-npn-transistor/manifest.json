@@ -34,5 +34,11 @@
             "setup": "from machine import Pin\nimport time\ntransistor = Pin(${B}, Pin.OUT)",
             "loop": "transistor.value(1)\ntime.sleep(1)\ntransistor.value(0)\ntime.sleep(1)"
         }
-    }
+    },
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "conducting"}
+    },
+    "ui": {"svg": "./npn-transistor.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

@@ -107,4 +107,25 @@ export class SimulationMonitorLogic extends BaseComponent {
     getTelemetryData() {
         return this.state;
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: workerCpuLoadPercentage} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {workerCpuLoadPercentage: Number(s.workerCpuLoadPercentage ?? 0)},
+            i: {},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const hasVcc = component.pins?.VCC?.connected;
+        const hasGnd = component.pins?.GND?.connected;
+        if (!hasVcc || !hasGnd) {
+            return {
+                pass: false,
+                reasons: [`Simulation Monitor '${component.id}' requires both VCC and GND connections.`]
+            };
+        }
+        return { pass: true };
+    }
 }

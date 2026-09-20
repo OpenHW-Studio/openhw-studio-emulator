@@ -23,5 +23,11 @@
             "type": "power",
             "description": "Ground"
         }
-    ]
+    ],
+    "sab": {
+        "slotKind": 0,
+        "fields": {"f0": "voltage", "f1": "current"}
+    },
+    "ui": {"svg": "./power-supply.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

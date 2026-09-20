@@ -209,4 +209,17 @@ export class CC1101Logic extends SPIProtocol implements RadioNode {
             interruptPin: this.getPinVoltage('GDO0') > 2.5 ? 'HIGH' : 'LOW'
         });
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: powered} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {},
+            i: {powered: (s.powered ? 1 : 0)},
+        };
+    }
+    validate(_component: any, _graph: Map<string, string[]>) {
+        return null;
+    }
 }

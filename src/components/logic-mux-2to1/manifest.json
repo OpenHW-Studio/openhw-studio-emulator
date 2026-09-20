@@ -49,6 +49,11 @@
             "setup": "Serial.begin(9600);\npinMode(${D0}, OUTPUT);\npinMode(${D1}, OUTPUT);\npinMode(${SEL}, OUTPUT);\npinMode(${OUT}, INPUT);\nSerial.println(\"MUX 2:1 ready\");",
             "loop": "for (int i=0; i<8; i++) {\n  digitalWrite(${SEL}, (i&4)?HIGH:LOW);\n  digitalWrite(${D0}, (i&1)?HIGH:LOW);\n  digitalWrite(${D1}, (i&2)?HIGH:LOW);\n  delay(5);\n  Serial.print(\"MUX | SEL=\");\n  Serial.print((i&4)?1:0);\n  Serial.print(\" D0=\");\n  Serial.print((i&1)?1:0);\n  Serial.print(\" D1=\");\n  Serial.print((i&2)?1:0);\n  Serial.print(\" -> \");\n  Serial.println(digitalRead(${OUT}));\n  delay(300);\n}"
         }
-    }
+    },
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "outputHigh"}
+    },
+    "ui": {"svg": "./logic-mux-2to1.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }
-

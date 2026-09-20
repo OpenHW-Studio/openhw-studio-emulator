@@ -34,5 +34,11 @@
         "setup": "FastLED.addLeds<NEOPIXEL, ${DIN}>(leds_${COMP_SUFFIX}, NUM_LEDS_${COMP_SUFFIX});",
         "loop": "fill_solid(leds_${COMP_SUFFIX}, NUM_LEDS_${COMP_SUFFIX}, CRGB::Red);\nFastLED.show();\ndelay(500);\nfill_solid(leds_${COMP_SUFFIX}, NUM_LEDS_${COMP_SUFFIX}, CRGB::Black);\nFastLED.show();\ndelay(500);"
       }
-    }
+    },
+    "sab": {
+        "slotKind": 1,
+        "fields": {"i0": "enabled"}
+    },
+    "ui": {"svg": "./neopixel-ring.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

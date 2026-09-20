@@ -1,42 +1,38 @@
-export const validation = {
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
+import { createValidationIssue } from '../component-schema.js';
+import type { ComponentValidationRule } from '../component-schema.js';
+import { BMP180Logic } from './logic';
+
+const delegate = BMP180Logic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>, validator?: any) =>
+        BMP180Logic.prototype.validate!.call(undefined, component, graph, validator)
+    : (_component: any, _graph: Map<string, string[]>) => null;
+
+export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
         {
+            id: 'openhw-bmp180-check',
             name: 'BMP180 Power Check',
-            check: (component: any, graph: Map<string, string[]>) => {
-                const vcc = graph.get(`${component.id}.VIN`);
-                const gnd = graph.get(`${component.id}.GND`);
-                if (!vcc || vcc.length === 0)
-                    return `⚠️ [BMP180 ${component.id}] VIN not connected. Use 3.3V (preferred) or 5V.`;
-                if (!gnd || gnd.length === 0)
-                    return `⚠️ [BMP180 ${component.id}] GND not connected.`;
-                return null;
-            },
-        },
-        {
-            name: 'BMP180 I2C Bus Check',
-            check: (component: any, graph: Map<string, string[]>) => {
-                const scl = graph.get(`${component.id}.SCL`);
-                const sda = graph.get(`${component.id}.SDA`);
-                if (!scl || scl.length === 0)
-                    return `⚠️ [BMP180 ${component.id}] SCL not connected. Connect to Arduino A5 (SCL).`;
-                if (!sda || sda.length === 0)
-                    return `⚠️ [BMP180 ${component.id}] SDA not connected. Connect to Arduino A4 (SDA).`;
-                return null;
-            },
-        },
-        {
-            name: 'BMP180 I2C Pin Mapping Check',
-            check: (component: any, graph: Map<string, string[]>) => {
-                const scl = graph.get(`${component.id}.SCL`) || [];
-                const sda = graph.get(`${component.id}.SDA`) || [];
-                const sclOk = scl.some((c: string) => c.includes(':A5') || c.includes(':SCL'));
-                const sdaOk = sda.some((c: string) => c.includes(':A4') || c.includes(':SDA'));
-                if (!sclOk)
-                    return `⚠️ [BMP180 ${component.id}] SCL should connect to Arduino A5. Use Wire.begin() and the Adafruit_BMP085 library.`;
-                if (!sdaOk)
-                    return `⚠️ [BMP180 ${component.id}] SDA should connect to Arduino A4.`;
-                return null;
-            },
-        },
-    ],
+            severity: 'warn' as const,
+            priority: 10,
+            description: 'BMP180 Power Check',
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'openhw-bmp180-check');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'openhw-bmp180-check'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
+            }
+        }
+    ]
 };

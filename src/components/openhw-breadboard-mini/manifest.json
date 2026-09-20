@@ -1028,5 +1028,11 @@
       "y": 180,
       "type": "digital"
     }
-  ]
+  ],
+    "sab": {
+        "slotKind": 0,
+        "fields": {}
+    },
+    "ui": {"svg": "./breadboard-mini.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

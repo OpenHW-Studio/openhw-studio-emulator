@@ -91,5 +91,11 @@
         { "id": "A13", "description": "A13", "x": 526.2, "y": 286.8, "type": "analog" },
         { "id": "A14", "description": "A14", "x": 540.9, "y": 286.8, "type": "analog" },
         { "id": "A15", "description": "A15", "x": 556.1, "y": 286.8, "type": "analog" }
-    ]
+    ],
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "rxActive"}
+    },
+    "ui": {"svg": "./arduino-mega.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

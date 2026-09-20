@@ -1,80 +1,104 @@
-export const validation = {
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
+import { createValidationIssue } from '../component-schema.js';
+import type { ComponentValidationRule } from '../component-schema.js';
+import { MAX30102Logic } from './logic';
+
+const delegate = MAX30102Logic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>, validator?: any) =>
+        MAX30102Logic.prototype.validate!.call(undefined, component, graph, validator)
+    : (_component: any, _graph: Map<string, string[]>) => null;
+
+export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
         {
             id: 'max30102-vin-voltage',
+            name: 'max30102-vin-voltage',
+            severity: 'error' as const,
+            priority: 10,
             description: 'VIN must be connected to a 1.8 V – 3.3 V supply',
-            check(comp: any, _graph: any, validator: any) {
-                const v = validator.calculateVoltageAtNode(`${comp.id}.VIN`);
-                if (v === undefined || v === null) {
-                    return {
-                        severity: 'error',
-                        message:  'MAX30102 VIN is not connected to a power source.',
-                    };
-                }
-                if (v > 3.6) {
-                    return {
-                        severity: 'error',
-                        message: `MAX30102 VIN is ${v.toFixed(2)} V. Maximum rated voltage is 3.6 V — the IC may be damaged.`,
-                    };
-                }
-                if (v < 1.7) {
-                    return {
-                        severity: 'warning',
-                        message: `MAX30102 VIN is ${v.toFixed(2)} V. The chip requires at least 1.8 V to operate.`,
-                    };
-                }
-                return null;
-            },
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'max30102-vin-voltage');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'max30102-vin-voltage'),
+                    severity: r.severity || 'error',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
+            }
         },
         {
             id: 'max30102-gnd-connected',
+            name: 'max30102-gnd-connected',
+            severity: 'error' as const,
+            priority: 10,
             description: 'GND must be connected to ground (0 V)',
-            check(comp: any, _graph: any, validator: any) {
-                const v = validator.calculateVoltageAtNode(`${comp.id}.GND`);
-                if (v === undefined || v === null) {
-                    return {
-                        severity: 'error',
-                        message:  'MAX30102 GND pin is not connected.',
-                    };
-                }
-                if (v > 0.1) {
-                    return {
-                        severity: 'error',
-                        message:  `MAX30102 GND pin is at ${v.toFixed(2)} V instead of 0 V — check your ground connection.`,
-                    };
-                }
-                return null;
-            },
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'max30102-gnd-connected');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'max30102-gnd-connected'),
+                    severity: r.severity || 'error',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
+            }
         },
         {
             id: 'max30102-i2c-pullups',
+            name: 'max30102-i2c-pullups',
+            severity: 'warn' as const,
+            priority: 10,
             description: 'SDA and SCL require pull-up resistors for reliable I2C communication',
-            check(comp: any, _graph: any, validator: any) {
-                const sclR = validator.findSeriesResistance(`${comp.id}.SCL`);
-                const sdaR = validator.findSeriesResistance(`${comp.id}.SDA`);
-
-                if (sclR === 0 && sdaR === 0) {
-                    // Both are directly driven – no pull-up visible; only warn if unconnected
-                    return null;
-                }
-                if (sclR > 10_000 || sdaR > 10_000) {
-                    return {
-                        severity: 'warning',
-                        message:  `MAX30102 I2C pull-up resistance is high (SCL: ${sclR} Ω, SDA: ${sdaR} Ω). Recommended range is 1 kΩ – 10 kΩ.`,
-                    };
-                }
-                return null;
-            },
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'max30102-i2c-pullups');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'max30102-i2c-pullups'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
+            }
         },
         {
             id: 'max30102-5v-i2c',
+            name: 'max30102-5v-i2c',
+            severity: 'error' as const,
+            priority: 10,
             description: 'SDA / SCL lines must not exceed VIO (3.3 V default)',
-            check(comp: any, _graph: any, validator: any) {
-                // Since there is no logic level shifter component in the simulator, 
-                // we bypass this 5V check so users don't get stuck with a warning 
-                // when using an Arduino Uno.
-                return null;
-            },
-        },
-    ],
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'max30102-5v-i2c');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'max30102-5v-i2c'),
+                    severity: r.severity || 'error',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
+            }
+        }
+    ]
 };

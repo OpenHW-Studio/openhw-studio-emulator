@@ -14,5 +14,11 @@
     ],
     "attrs": {
         "chargeCurrentMa": "1000"
-    }
+    },
+    "sab": {
+        "slotKind": 0,
+        "fields": {"f0": "currentMa", "i0": "isCharging"}
+    },
+    "ui": {"svg": "./charger.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

@@ -34,5 +34,11 @@
         { "id": "A3", "description": "A3", "x": 366.8, "y": 297.0, "type": "analog" },
         { "id": "A4", "description": "A4", "x": 381.5, "y": 297.0, "type": "analog" },
         { "id": "A5", "description": "A5", "x": 396.1, "y": 297.0, "type": "analog" }
-    ]
+    ],
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "rxActive"}
+    },
+    "ui": {"svg": "./arduino-uno.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

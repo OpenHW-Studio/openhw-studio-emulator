@@ -21,5 +21,11 @@
             "type": "digital",
             "description": "Output"
         }
-    ]
+    ],
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "outputHigh"}
+    },
+    "ui": {"svg": "./logic-buffer-gate.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

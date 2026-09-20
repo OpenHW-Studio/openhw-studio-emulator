@@ -29,5 +29,11 @@
             { "from": "DO",  "to": "arduino:2|3|4|5|6|7" },
             { "from": "AO",  "to": "arduino:A0|A1|A2|A3|A4|A5" }
         ]
-    }
+    },
+    "sab": {
+        "slotKind": 4,
+        "fields": {"f0": "gasLevel", "i0": "limitExceeded"}
+    },
+    "ui": {"svg": "./MQ2-gas-sensor.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

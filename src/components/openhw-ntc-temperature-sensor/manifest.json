@@ -30,5 +30,11 @@
             "setup": "Serial.begin(9600);",
             "loop": "const float BETA_${COMP_SUFFIX} = 3950;\nint analogValue_${COMP_SUFFIX} = analogRead(${OUT});\nfloat celsius_${COMP_SUFFIX} = 1 / (log(1 / (1023. / analogValue_${COMP_SUFFIX} - 1)) / BETA_${COMP_SUFFIX} + 1.0 / 298.15) - 273.15;\nSerial.print(\"Temperature: \");\nSerial.print(celsius_${COMP_SUFFIX}, 0);\nSerial.println(\" C\");\ndelay(500);"
         }
-    }
+    },
+    "sab": {
+        "slotKind": 4,
+        "fields": {"f0": "temperature", "f1": "resistance"}
+    },
+    "ui": {"svg": "./ntc-temperature-sensor.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

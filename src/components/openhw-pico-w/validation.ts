@@ -1,42 +1,38 @@
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
 import { createValidationIssue } from '../component-schema.js';
 import type { ComponentValidationRule } from '../component-schema.js';
+import { PicoWLogic } from './logic';
+
+const delegate = PicoWLogic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>, validator?: any) =>
+        PicoWLogic.prototype.validate!.call(undefined, component, graph, validator)
+    : (_component: any, _graph: Map<string, string[]>) => null;
 
 export const validation: { rules: ComponentValidationRule[] } = {
-  rules: [
-    {
-      id: 'rp2040-pico-w-power-input-check',
-      name: 'RP2040 Power Input Check',
-      severity: 'error',
-      priority: 10,
-      description: 'Detect over-voltage on the Pico W VBUS and 3V3 rails.',
-      check: (component: any, graph: Map<string, string[]>, validator: any) => {
-        const vbusVolts = validator?.calculateVoltageAtNode(`${component.id}.VBUS`) || 0;
-        const v3Volts = validator?.calculateVoltageAtNode(`${component.id}.3V3`) || 0;
-
-        if (vbusVolts > 5.5) {
-          return createValidationIssue({
-            ruleId: 'rp2040-pico-w-power-input-check',
-            severity: 'error',
-            message: `🔥 [Pico W ${component.id}] ${vbusVolts}V applied to VBUS. Max expected is 5V USB input.`,
-            compIds: [component.id],
-            remediation: 'Keep VBUS at USB-level voltages.',
-            autoFix: false,
-          });
+    rules: [
+        {
+            id: 'rp2040-pico-w-power-input-check',
+            name: 'RP2040 Power Input Check',
+            severity: 'error' as const,
+            priority: 10,
+            description: 'Detect over-voltage on the Pico W VBUS and 3V3 rails.',
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'rp2040-pico-w-power-input-check');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'rp2040-pico-w-power-input-check'),
+                    severity: r.severity || 'error',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
+            }
         }
-
-        if (v3Volts > 3.6) {
-          return createValidationIssue({
-            ruleId: 'rp2040-pico-w-power-input-check',
-            severity: 'error',
-            message: `🔥 [Pico W ${component.id}] ${v3Volts}V applied to 3V3 rail.`,
-            compIds: [component.id],
-            remediation: 'Keep the 3V3 rail within the RP2040 logic range.',
-            autoFix: false,
-          });
-        }
-
-        return null;
-      },
-    },
-  ],
+    ]
 };

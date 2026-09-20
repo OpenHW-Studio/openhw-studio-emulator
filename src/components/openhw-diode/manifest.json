@@ -18,5 +18,11 @@
             "y": 10,
             "type": "digital"
         }
-    ]
+    ],
+    "sab": {
+        "slotKind": 0,
+        "fields": {"f0": "voltageDrop"}
+    },
+    "ui": {"svg": "./diode.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

@@ -54,5 +54,11 @@
                 "to": "arduino:13"
             }
         ]
-    } 
+    },
+    "sab": {
+        "slotKind": 4,
+        "fields": {"i0": "motion"}
+    },
+    "ui": {"svg": "./PIR-Motion-Sensor.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

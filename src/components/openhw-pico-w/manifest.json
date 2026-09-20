@@ -60,5 +60,11 @@
     { "id": "5V", "description": "Alias for VBUS", "x": 114.5, "y": 20.4, "type": "power" },
     { "id": "A4", "description": "Alias for GP20", "x": 114.5, "y": 230.4, "type": "analog" },
     { "id": "A5", "description": "Alias for GP21", "x": 114.5, "y": 215.4, "type": "analog" }
-  ]
+  ],
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "wifiConnected"}
+    },
+    "ui": {"svg": "./pico-w.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

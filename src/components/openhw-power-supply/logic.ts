@@ -113,4 +113,19 @@ export class PowerSupplyLogic extends BaseComponent {
             this.setState({ current: totalCurrentMA });
         }
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: voltage, f1: current} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {voltage: Number(s.voltage ?? 0), current: Number(s.current ?? 0)},
+            i: {},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        // Default generic validation for openhw-power-supply
+        // Implement further physics logic based on specific pins
+        return null;
+    }
 }

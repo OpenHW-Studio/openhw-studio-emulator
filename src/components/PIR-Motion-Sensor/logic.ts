@@ -126,5 +126,32 @@ export class PIRLogic extends BaseComponent {
             targetBoard: (this as any)._simCpu?._avrRunner?.boardId || undefined
         });
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: motion} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {},
+            i: {motion: (s.motion ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const outPin = graph.get(`${component.id}.OUT`);
+        const vccPin = graph.get(`${component.id}.VCC`);
+        const gndPin = graph.get(`${component.id}.GND`);
+
+        if (!outPin || outPin.length === 0) {
+            return `⚠️ [PIR ${component.id}] Warning: OUT pin is disconnected. Motion events will not be captured.`;
+        }
+        if (!vccPin || vccPin.length === 0) {
+            return `⚠️ [PIR ${component.id}] Warning: VCC pin is disconnected.`;
+        }
+        if (!gndPin || gndPin.length === 0) {
+            return `⚠️ [PIR ${component.id}] Warning: GND pin is disconnected.`;
+        }
+
+        return null;
+    }
 }
 

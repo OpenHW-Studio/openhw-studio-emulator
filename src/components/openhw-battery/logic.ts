@@ -1,4 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
+import { createValidationIssue } from '../component-schema.js';
 
 export class BatteryLogic extends BaseComponent {
     lastUpdate = Date.now();
@@ -130,5 +131,30 @@ export class BatteryLogic extends BaseComponent {
             voltage: this.state.voltage.toFixed(2) + 'V',
             status: this.state.isDead ? 'Empty' : 'Discharging'
         });
+    }
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: voltage, f1: charge} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {voltage: Number(s.voltage ?? 0), charge: Number(s.charge ?? 0)},
+            i: {},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const vccNode = `${component.id}.VCC`;
+        const gndNode = `${component.id}.GND`;
+        if (validator.findResistanceBetween(vccNode, gndNode) < 1.0) {
+            return createValidationIssue({
+                ruleId: 'battery-short-circuit-check',
+                severity: 'error',
+                message: `🔥 [Battery ${component.id}] Dead short detected! Battery will overheat and catch fire.`,
+                compIds: [component.id],
+                remediation: 'Remove the short or add a proper load path.',
+                autoFix: false,
+            });
+        }
+        return null;
     }
 }

@@ -292,5 +292,11 @@
       "type": "power",
       "description": "VBAT"
     }
-  ]
+  ],
+    "sab": {
+        "slotKind": 0,
+        "fields": {}
+    },
+    "ui": {"svg": "./stm32-blue-pill (frontend).svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

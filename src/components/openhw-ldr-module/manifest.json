@@ -50,5 +50,11 @@
       "setup": "Serial.begin(9600);\npinMode(${DO}, INPUT);\nSerial.println(F(\"LDR Sensor Ready - type /guide for help\"));",
       "loop": "while (Serial.available()) {\n  char c = Serial.read();\n  static String _cmd${COMP_SUFFIX} = \"\";\n  if (c == '\\n') {\n    _cmd${COMP_SUFFIX}.trim();\n    if (_cmd${COMP_SUFFIX} == \"/guide\") {\n      Serial.println(F(\"=== LDR Guide ===\"));\n      Serial.println(F(\"AO->A0, DO->D3\"));\n      Serial.println(F(\"Potentiometer sets DO threshold only\"));\n      Serial.println(F(\"AO reads 0-1023 always\"));\n      Serial.println(F(\"================\"));\n    }\n    _cmd${COMP_SUFFIX} = \"\";\n  } else {\n    _cmd${COMP_SUFFIX} += c;\n  }\n}\nint analog_${COMP_SUFFIX} = analogRead(${AO});\nint digital_${COMP_SUFFIX} = digitalRead(${DO});\nint lux_${COMP_SUFFIX} = map(analog_${COMP_SUFFIX}, 0, 1023, 0, 1000);\nSerial.print(\"LDR Value: \");\nSerial.print(analog_${COMP_SUFFIX});\nSerial.print(\" | Lux: \");\nSerial.print(lux_${COMP_SUFFIX});\nSerial.print(\" | Dark: \");\nSerial.println(digital_${COMP_SUFFIX} == HIGH ? F(\"YES\") : F(\"NO\"));\ndelay(300);"
     }
-  }
+  },
+    "sab": {
+        "slotKind": 4,
+        "fields": {"f0": "light", "i0": "dOut"}
+    },
+    "ui": {"svg": "./ldr-module.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

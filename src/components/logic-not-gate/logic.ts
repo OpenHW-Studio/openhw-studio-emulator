@@ -61,4 +61,23 @@ export class NotGateLogic extends BaseComponent {
         }
         return super.getPinVoltage(pinId);
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: outputHigh} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {},
+            i: {outputHigh: (s.outputHigh ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const pinIn = graph.get(`${component.id}.IN`);
+        const pinOut = graph.get(`${component.id}.OUT`);
+
+        if ((!pinIn || pinIn.length === 0) && (!pinOut || pinOut.length === 0)) {
+            return `⚠️ [NOT Gate ${component.id}] Warning: No pins are connected.`;
+        }
+        return null;
+    }
 }

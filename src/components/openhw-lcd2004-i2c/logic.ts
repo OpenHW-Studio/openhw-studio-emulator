@@ -58,4 +58,27 @@ export class Lcd2004I2CLogic extends I2CProtocol {
     getSyncState() {
         return { ...this.state };
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: backlight} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {},
+            i: {backlight: (s.backlight ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        void validator;
+        const pin = graph.get(`${component.id}.SDA`);
+        if (!pin || pin.length === 0) {
+            return {
+                ruleId: 'openhw-lcd2004-i2c-check',
+                severity: 'warn',
+                message: `[${component.id}] Warning: SDA is not connected.`,
+                compIds: [component.id],
+            };
+        }
+        return null;
+    }
 }

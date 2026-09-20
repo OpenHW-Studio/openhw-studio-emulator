@@ -119,5 +119,11 @@
             "type": "power",
             "description": "GND (Pin 8)"
         }
-    ]
+    ],
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "loaded"}
+    },
+    "ui": {"svg": "./74hc165.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

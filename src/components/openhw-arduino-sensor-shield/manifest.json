@@ -570,5 +570,11 @@
             "y": 110,
             "type": "power"
         }
-    ]
+    ],
+    "sab": {
+        "slotKind": 0,
+        "fields": {}
+    },
+    "ui": {"svg": "./arduino-sensor-shield.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

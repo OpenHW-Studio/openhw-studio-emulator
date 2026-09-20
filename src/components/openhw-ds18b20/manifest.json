@@ -53,5 +53,11 @@
       "setup": "Serial.begin(9600);\npinMode(ONE_WIRE_BUS_${COMP_SUFFIX}, INPUT_PULLUP);\nsensors_${COMP_SUFFIX}.begin();",
       "loop": "sensors_${COMP_SUFFIX}.requestTemperatures();\nfloat temp_${COMP_SUFFIX} = sensors_${COMP_SUFFIX}.getTempCByIndex(0);\nSerial.print(\"DS18B20 Temp: \");\nSerial.print(temp_${COMP_SUFFIX});\nSerial.println(\" C\");\ndelay(1000);"
     }
-  }
+  },
+    "sab": {
+        "slotKind": 4,
+        "fields": {"f0": "temperature"}
+    },
+    "ui": {"svg": "./ds18b20.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

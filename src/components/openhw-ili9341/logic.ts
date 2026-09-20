@@ -336,4 +336,26 @@ export class ILI9341Logic extends SPIProtocol {
             // ignore telemetry failures
         }
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: powerOn} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {},
+            i: {powerOn: (s.powerOn ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const vccVolt = validator?.calculateVoltageAtNode(`${component.id}.VCC`);
+        const gndVolt = validator?.calculateVoltageAtNode(`${component.id}.GND`);
+
+        if (vccVolt !== undefined && vccVolt < 3.0) {
+            return { severity: 'warn', message: `${component.label || 'ILI9341'} requires at least 3.3V on VCC` };
+        }
+        if (gndVolt !== undefined && gndVolt > 0.5) {
+            return { severity: 'error', message: `${component.label || 'ILI9341'} has missing or poor ground connection` };
+        }
+        return null;
+    }
 }

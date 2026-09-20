@@ -144,4 +144,49 @@ export class BMP180Logic extends I2CProtocol {
             altitude:    `${this._altitude(this.pressure).toFixed(1)} m`,
         });
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: temperature, f1: pressure} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {temperature: Number((this as any).temperature ?? 25), pressure: Number((this as any).pressure ?? 101325)},
+            i: {},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        {
+const vcc = graph.get(`${component.id}.VIN`);
+        const gnd = graph.get(`${component.id}.GND`);
+        if (!vcc || vcc.length === 0)
+            return `⚠️ [BMP180 ${component.id}] VIN not connected. Use 3.3V (preferred) or 5V.`;
+        if (!gnd || gnd.length === 0)
+            return `⚠️ [BMP180 ${component.id}] GND not connected.`;
+        return null;
+        }
+
+        /* --- next rule --- */
+        {
+const scl = graph.get(`${component.id}.SCL`);
+        const sda = graph.get(`${component.id}.SDA`);
+        if (!scl || scl.length === 0)
+            return `⚠️ [BMP180 ${component.id}] SCL not connected. Connect to Arduino A5 (SCL).`;
+        if (!sda || sda.length === 0)
+            return `⚠️ [BMP180 ${component.id}] SDA not connected. Connect to Arduino A4 (SDA).`;
+        return null;
+        }
+
+        /* --- next rule --- */
+        {
+const scl = graph.get(`${component.id}.SCL`) || [];
+        const sda = graph.get(`${component.id}.SDA`) || [];
+        const sclOk = scl.some((c: string) => c.includes(':A5') || c.includes(':SCL'));
+        const sdaOk = sda.some((c: string) => c.includes(':A4') || c.includes(':SDA'));
+        if (!sclOk)
+            return `⚠️ [BMP180 ${component.id}] SCL should connect to Arduino A5. Use Wire.begin() and the Adafruit_BMP085 library.`;
+        if (!sdaOk)
+            return `⚠️ [BMP180 ${component.id}] SDA should connect to Arduino A4.`;
+        return null;
+        }
+}
 }

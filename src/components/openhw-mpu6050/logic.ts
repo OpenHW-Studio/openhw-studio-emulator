@@ -209,4 +209,41 @@ export class MPU6050Logic extends I2CProtocol {
             sleeping: this.sleeping,
         });
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: ax, f1: ay, f2: az} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {ax: Number((this as any).accelX ?? 0), ay: Number((this as any).accelY ?? 0), az: Number((this as any).accelZ ?? 1)},
+            i: {},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        {
+const vcc = graph.get(`${component.id}.VCC`);
+        const gnd = graph.get(`${component.id}.GND`);
+        if (!vcc || vcc.length === 0) return `⚠️ [MPU6050 ${component.id}] VCC not connected. Connect to 3.3V or 5V.`;
+        if (!gnd || gnd.length === 0) return `⚠️ [MPU6050 ${component.id}] GND not connected.`;
+        return null;
+        }
+
+        /* --- next rule --- */
+        {
+const scl = graph.get(`${component.id}.SCL`);
+        const sda = graph.get(`${component.id}.SDA`);
+        if (!scl || scl.length === 0) return `⚠️ [MPU6050 ${component.id}] SCL not connected. Connect to Arduino A5.`;
+        if (!sda || sda.length === 0) return `⚠️ [MPU6050 ${component.id}] SDA not connected. Connect to Arduino A4.`;
+        return null;
+        }
+
+        /* --- next rule --- */
+        {
+const sda = graph.get(`${component.id}.SDA`);
+        if (sda && sda.length > 0) {
+            return `💡 [MPU6050 ${component.id}] Remember to call Wire.beginTransmission(0x68); Wire.write(0x6B); Wire.write(0); Wire.endTransmission(); in setup() to wake the MPU6050 from sleep mode.`;
+        }
+        return null;
+        }
+}
 }

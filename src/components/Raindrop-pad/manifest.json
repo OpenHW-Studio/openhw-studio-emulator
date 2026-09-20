@@ -43,5 +43,11 @@
             "setup": "pinMode(RAIN_DO_PIN_${COMP_SUFFIX}, INPUT);\nSerial.println(\"Raindrop Pad ${COMP_SUFFIX} ready.\");",
             "loop": "int rainLevel_${COMP_SUFFIX} = analogRead(RAIN_AO_PIN_${COMP_SUFFIX});\nint doVal_${COMP_SUFFIX} = digitalRead(RAIN_DO_PIN_${COMP_SUFFIX});\nSerial.print(\"Rain Pad ${COMP_SUFFIX} Level: \");\nSerial.print(rainLevel_${COMP_SUFFIX});\nSerial.print(\"  DO: \");\nSerial.println(doVal_${COMP_SUFFIX} == LOW ? \"RAIN DETECTED\" : \"Dry\");\ndelay(1000);"
         }
-    }
+    },
+    "sab": {
+        "slotKind": 4,
+        "fields": {"f0": "rainLevel", "i0": "limitExceeded"}
+    },
+    "ui": {"svg": "./Raindrop-pad.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

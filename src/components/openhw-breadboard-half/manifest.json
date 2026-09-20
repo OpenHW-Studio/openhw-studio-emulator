@@ -2408,5 +2408,11 @@
       "y": 275,
       "type": "power"
     }
-  ]
+  ],
+    "sab": {
+        "slotKind": 0,
+        "fields": {}
+    },
+    "ui": {"svg": "./breadboard-half.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

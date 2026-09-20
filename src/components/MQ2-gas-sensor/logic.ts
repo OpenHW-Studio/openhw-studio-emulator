@@ -114,4 +114,31 @@ export class GasSensorLogic extends BaseComponent {
             this.updateVoltages();
         }
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: gasLevel, i0: limitExceeded} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {gasLevel: Number(s.gasLevel ?? 0)},
+            i: {limitExceeded: (s.limitExceeded ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        // Original rule used a (comp, wires) signature; wires aren't available
+        // here — derive connectivity from graph keys instead (same semantics).
+        const connectedPins = [...graph.keys()];
+        void validator;
+        const hasVCC = connectedPins.includes(`${component.id}:VCC`);
+        const hasGND = connectedPins.includes(`${component.id}:GND`);
+        const hasOut = connectedPins.includes(`${component.id}:DO`) || connectedPins.includes(`${component.id}:AO`);
+
+        if (!hasVCC || !hasGND) {
+            return `Gas Sensor ${component.id} requires VCC and GND connections to function`;
+        }
+        if (!hasOut) {
+            return `Gas Sensor ${component.id} has no output pins (DO or AO) connected`;
+        }
+        return null;
+    }
 }

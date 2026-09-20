@@ -1,4 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
+import { createValidationIssue } from '../component-schema.js';
 
 type ProtocolState = 'IDLE' | 'WAKE_WAIT' | 'ACKING' | 'SENDING';
 
@@ -231,4 +232,34 @@ export class DHT22Logic extends BaseComponent {
     }
 
     update() {}
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: temperature, f1: humidity} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {temperature: Number((this as any).temperature ?? 0), humidity: Number((this as any).humidity ?? 0)},
+            i: {},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const requiredPins = ['VCC', 'GND', 'DATA'];
+        const missingPins = requiredPins.filter(pin => {
+            const node = `${component.id}.${pin}`;
+            return ((validator ? validator.getNeighbors(node) : (graph.get(node) || []))).length === 0;
+        });
+
+        if (missingPins.length > 0) {
+            return createValidationIssue({
+                ruleId: 'dht22-connection-check',
+                severity: 'warn',
+                message: `⚠️ [DHT22 ${component.id}] Pin Warning: The following pins are not connected: ${missingPins.join(', ')}. DHT22 sensor requires VCC, GND, and DATA pins to be fully wired.`,
+                compIds: [component.id],
+                remediation: 'Connect all DHT22 pins.',
+                autoFix: true,
+            });
+        }
+
+        return null;
+    }
 }

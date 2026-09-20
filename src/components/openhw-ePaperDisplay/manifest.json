@@ -108,5 +108,11 @@
                 "to": "arduino:7"
             }
         ]
-    }
+    },
+    "sab": {
+        "slotKind": 3,
+        "fields": {"i0": "powerOn"}
+    },
+    "ui": {"svg": "./ePaperDisplay.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

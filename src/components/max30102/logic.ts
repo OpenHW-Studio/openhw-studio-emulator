@@ -492,4 +492,82 @@ export class MAX30102Logic extends BaseComponent {
             mode,
         });
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: spo2, f1: heartRate, i0: redLedOn} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {spo2: Number(s.spo2 ?? 0), heartRate: Number(s.heartRate ?? 0)},
+            i: {redLedOn: (s.redLedOn ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        {
+const v = validator.calculateVoltageAtNode(`${component.id}.VIN`);
+        if (v === undefined || v === null) {
+            return {
+                severity: 'error',
+                message:  'MAX30102 VIN is not connected to a power source.',
+            };
+        }
+        if (v > 3.6) {
+            return {
+                severity: 'error',
+                message: `MAX30102 VIN is ${v.toFixed(2)} V. Maximum rated voltage is 3.6 V — the IC may be damaged.`,
+            };
+        }
+        if (v < 1.7) {
+            return {
+                severity: 'warning',
+                message: `MAX30102 VIN is ${v.toFixed(2)} V. The chip requires at least 1.8 V to operate.`,
+            };
+        }
+        return null;
+        }
+
+        /* --- next rule --- */
+        {
+const v = validator.calculateVoltageAtNode(`${component.id}.GND`);
+        if (v === undefined || v === null) {
+            return {
+                severity: 'error',
+                message:  'MAX30102 GND pin is not connected.',
+            };
+        }
+        if (v > 0.1) {
+            return {
+                severity: 'error',
+                message:  `MAX30102 GND pin is at ${v.toFixed(2)} V instead of 0 V — check your ground connection.`,
+            };
+        }
+        return null;
+        }
+
+        /* --- next rule --- */
+        {
+const sclR = validator.findSeriesResistance(`${component.id}.SCL`);
+        const sdaR = validator.findSeriesResistance(`${component.id}.SDA`);
+
+        if (sclR === 0 && sdaR === 0) {
+            // Both are directly driven – no pull-up visible; only warn if unconnected
+            return null;
+        }
+        if (sclR > 10_000 || sdaR > 10_000) {
+            return {
+                severity: 'warning',
+                message:  `MAX30102 I2C pull-up resistance is high (SCL: ${sclR} Ω, SDA: ${sdaR} Ω). Recommended range is 1 kΩ – 10 kΩ.`,
+            };
+        }
+        return null;
+        }
+
+        /* --- next rule --- */
+        {
+// Since there is no logic level shifter component in the simulator, 
+        // we bypass this 5V check so users don't get stuck with a warning 
+        // when using an Arduino Uno.
+        return null;
+        }
+}
 }

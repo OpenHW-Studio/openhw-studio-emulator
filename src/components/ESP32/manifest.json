@@ -37,5 +37,11 @@
     { "id": "15", "description": "15", "x": 157.8, "y": 217.5 },
     { "id": "GND.1", "description": "GND", "x": 157.8, "y": 232.5, "type": "power" },
     { "id": "3V3", "description": "3.3V", "x": 157.8, "y": 247.5, "type": "power" }
-  ]
+  ],
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "rxActive"}
+    },
+    "ui": {"svg": "./ESP32.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

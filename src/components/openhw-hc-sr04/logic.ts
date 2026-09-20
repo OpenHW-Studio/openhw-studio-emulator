@@ -1,4 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
+import { createValidationIssue } from '../component-schema.js';
 import { PulseProtocol } from '../../protocol-handlers/index';
 
 export class HCSR04Logic extends PulseProtocol {
@@ -136,5 +137,47 @@ export class HCSR04Logic extends PulseProtocol {
             isEchoing: this.isEchoing,
             lastMeasurement: this.state.distance || distance,
         });
+    }
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: distance} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {distance: Number(s.distance ?? 0)},
+            i: {},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const triggerPin = `${component.id}.TRIG`;
+        const echoPin = `${component.id}.ECHO`;
+        const vccPin = `${component.id}.VCC`;
+        const gndPin = `${component.id}.GND`;
+        const issues = [];
+
+        if (((validator ? validator.getNeighbors(vccPin) : (graph.get(vccPin) || []))).length > 0 && ((validator ? validator.getNeighbors(gndPin) : (graph.get(gndPin) || []))).length > 0) {
+            if (((validator ? validator.getNeighbors(triggerPin) : (graph.get(triggerPin) || []))).length === 0) {
+                issues.push(createValidationIssue({
+                    ruleId: 'hc-sr04-connection-check',
+                    severity: 'warn',
+                    message: `⚠️ [Ultrasonic ${component.id}] Warning: TRIG pin is not connected. Sensor cannot be triggered.`,
+                    compIds: [component.id],
+                    remediation: 'Connect TRIG to a digital output pin.',
+                    autoFix: true,
+                }));
+            }
+            if (((validator ? validator.getNeighbors(echoPin) : (graph.get(echoPin) || []))).length === 0) {
+                issues.push(createValidationIssue({
+                    ruleId: 'hc-sr04-connection-check',
+                    severity: 'warn',
+                    message: `⚠️ [Ultrasonic ${component.id}] Warning: ECHO pin is not connected. No distance reading will be received.`,
+                    compIds: [component.id],
+                    remediation: 'Connect ECHO to a digital input pin.',
+                    autoFix: true,
+                }));
+            }
+        }
+
+        return issues.length > 0 ? issues : null;
     }
 }

@@ -87,5 +87,11 @@
             "setup": "Serial.begin(9600);\nwhile (!Serial);\nSerial.print(\"Initializing SD card...\");\nif (!SD.begin(${CS})) {\n  Serial.println(\"initialization failed!\");\n  return;\n}\nSerial.println(\"initialization done.\");",
             "loop": "// SD Card ready for datalogging."
         }
-    }
+    },
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "fsReady", "f0": "bytesIn"}
+    },
+    "ui": {"svg": "./sd-card.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

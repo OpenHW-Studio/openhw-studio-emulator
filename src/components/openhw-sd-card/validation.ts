@@ -1,46 +1,38 @@
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
 import { createValidationIssue } from '../component-schema.js';
 import type { ComponentValidationRule } from '../component-schema.js';
+import { SDCardLogic } from './logic';
+
+const delegate = SDCardLogic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>, validator?: any) =>
+        SDCardLogic.prototype.validate!.call(undefined, component, graph, validator)
+    : (_component: any, _graph: Map<string, string[]>) => null;
 
 export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
         {
             id: 'sd-card-wiring-check',
             name: 'SD Card wiring check',
-            severity: 'warn',
+            severity: 'warn' as const,
             priority: 10,
             description: 'Warn when the SD card power or SPI pins are disconnected.',
-            check: (component: any, graph: Map<string, string[]>) => {
-                const vcc = graph.get(`${component.id}.VCC`) || [];
-                const gnd = graph.get(`${component.id}.GND`) || [];
-                const cs = graph.get(`${component.id}.CS`) || [];
-                const sck = graph.get(`${component.id}.SCK`) || [];
-                const mosi = graph.get(`${component.id}.MOSI`) || [];
-                const issues = [];
-
-                if (vcc.length === 0 || gnd.length === 0) {
-                    issues.push(createValidationIssue({
-                        ruleId: 'sd-card-wiring-check',
-                        severity: 'warn',
-                        message: `⚠️ [SD ${component.id}] Warning: Connect both VCC and GND to power the card.`,
-                        compIds: [component.id],
-                        remediation: 'Connect the SD card power pins.',
-                        autoFix: true,
-                    }));
-                }
-
-                if (cs.length === 0 || sck.length === 0 || mosi.length === 0) {
-                    issues.push(createValidationIssue({
-                        ruleId: 'sd-card-wiring-check',
-                        severity: 'warn',
-                        message: `⚠️ [SD ${component.id}] Warning: CS/SCK/MOSI are required for SPI communication.`,
-                        compIds: [component.id],
-                        remediation: 'Wire the SD card SPI pins to the MCU.',
-                        autoFix: true,
-                    }));
-                }
-
-                return issues.length > 0 ? issues : null;
-            },
-        },
-    ],
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'sd-card-wiring-check');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'sd-card-wiring-check'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
+            }
+        }
+    ]
 };

@@ -1,4 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
+import { createValidationIssue } from '../component-schema.js';
 import { PulseProtocol } from '../../protocol-handlers/index';
 
 // IR Receiver (e.g. VS1838B)
@@ -205,4 +206,79 @@ export class IRReceiverLogic extends PulseProtocol {
             lastValue: String(this.state.lastValue || '0x00000000'),
         });
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: powered} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {},
+            i: {powered: ((this as any).powered ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        {
+const vcc = graph.get(`${component.id}.VCC`) || [];
+        const gnd = graph.get(`${component.id}.GND`) || [];
+        const issues = [];
+
+        if (vcc.length === 0) {
+            issues.push(createValidationIssue({
+                ruleId: 'ir-receiver-power-check',
+                severity: 'warn',
+                message: `⚠️ [IR Receiver ${component.id}] VCC not connected. Connect to 3.3V or 5V.`,
+                compIds: [component.id],
+                remediation: 'Connect VCC to the power rail.',
+                autoFix: true,
+            }));
+        }
+        if (gnd.length === 0) {
+            issues.push(createValidationIssue({
+                ruleId: 'ir-receiver-power-check',
+                severity: 'warn',
+                message: `⚠️ [IR Receiver ${component.id}] GND not connected.`,
+                compIds: [component.id],
+                remediation: 'Connect GND to the common ground rail.',
+                autoFix: true,
+            }));
+        }
+        return issues.length > 0 ? issues : null;
+        }
+
+        /* --- next rule --- */
+        {
+const out = graph.get(`${component.id}.OUT`) || [];
+        if (out.length === 0) {
+            return createValidationIssue({
+                ruleId: 'ir-receiver-out-check',
+                severity: 'warn',
+                message: `⚠️ [IR Receiver ${component.id}] OUT pin not connected. Connect to a digital pin.`,
+                compIds: [component.id],
+                remediation: 'Connect the OUT pin to an MCU digital pin.',
+                autoFix: true,
+            });
+        }
+        return null;
+        }
+
+        /* --- next rule --- */
+        {
+const out = graph.get(`${component.id}.OUT`) || [];
+        const hasDigital = out.some((c: string) =>
+            !c.includes(':A0') && !c.includes(':A1') &&
+            !c.includes(':A2') && !c.includes(':A3')
+        );
+        if (out.length > 0 && !hasDigital) {
+            return createValidationIssue({
+                ruleId: 'ir-receiver-digital-check',
+                severity: 'warn',
+                message: `⚠️ [IR Receiver ${component.id}] OUT should connect to a digital pin (e.g. D2–D13), not an analog-only pin.`,
+                compIds: [component.id],
+                remediation: 'Move OUT connection to a digital pin.',
+                autoFix: false,
+            });
+        }
+        return null;
+        }
+}
 }

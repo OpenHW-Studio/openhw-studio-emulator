@@ -32,5 +32,11 @@
             { "from": "C", "to": "arduino:5V" },
             { "from": "A", "to": "arduino:A0|A1|A2|A3|A4|A5" }
         ]
-    }
+    },
+    "sab": {
+        "slotKind": 4,
+        "fields": {"f0": "light"}
+    },
+    "ui": {"svg": "./photodiode.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

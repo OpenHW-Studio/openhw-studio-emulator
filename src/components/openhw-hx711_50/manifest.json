@@ -43,5 +43,11 @@
             "type": "power",
             "description": "Power (5V)"
         }
-    ]
+    ],
+    "sab": {
+        "slotKind": 4,
+        "fields": {"f0": "weight"}
+    },
+    "ui": {"svg": "./hx711_50.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }
