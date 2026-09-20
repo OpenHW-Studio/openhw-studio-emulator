@@ -19,6 +19,21 @@
             "state.burnedOut"
         ]
     },
+    "sab": {
+        "slotKind": 1,
+        "fields": {
+            "f0": "brightness",
+            "i0": "illuminated"
+        }
+    },
+    "ui": {
+        "svg": "./led.svg",
+        "interactive": []
+    },
+    "sim": {
+        "runtime": "js",
+        "validation": "inline"
+    },
     "pins": [
         {
             "id": "A",

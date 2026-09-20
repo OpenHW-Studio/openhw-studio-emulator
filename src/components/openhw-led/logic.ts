@@ -8,7 +8,8 @@ export class LEDLogic extends BaseComponent {
     hasIlluminatedSinceSync: boolean;
 
     private _pwmDutyCycle: number = -1;
-    private _pwmTimestamp: number = 0;
+    private _pwmTimestampCycles: number = -1;
+    private _pwmWallMs: number = 0;
 
     private hasResistorInConnectedPath(currentWires: any[], allComponentsInstances: BaseComponent[]): boolean {
         const startNodes = new Set([`${this.id}:A`, `${this.id}:K`]);
@@ -68,7 +69,9 @@ export class LEDLogic extends BaseComponent {
     onPWM(pinId: string, payload: any): void {
         const dutyCycle = payload?.dutyCycle ?? 0;
         this._pwmDutyCycle = dutyCycle;
-        this._pwmTimestamp = Date.now();
+        this._pwmWallMs = Date.now(); // event path (not tick) — wall clock OK
+        const cycles = (this._simCpu as any)?.cycles;
+        if (Number.isFinite(Number(cycles))) this._pwmTimestampCycles = Number(cycles);
         const brightness = Math.min(255, Math.max(0, Math.round(dutyCycle * 255)));
         this.setState({
             illuminated: dutyCycle >= 0.01,
@@ -79,7 +82,9 @@ export class LEDLogic extends BaseComponent {
 
     onPWMSignal(pinId: string, frequencyHz: number, dutyCycle: number, pulseUs: number): void {
         this._pwmDutyCycle = dutyCycle;
-        this._pwmTimestamp = Date.now();
+        this._pwmWallMs = Date.now(); // event path (not tick) — wall clock OK
+        const cycles = (this._simCpu as any)?.cycles;
+        if (Number.isFinite(Number(cycles))) this._pwmTimestampCycles = Number(cycles);
         const brightness = Math.min(255, Math.max(0, Math.round(dutyCycle * 255)));
         this.setState({
             illuminated: dutyCycle >= 0.01,
@@ -89,6 +94,8 @@ export class LEDLogic extends BaseComponent {
     }
 
     update(cpuCycles: number, currentWires: any[], allComponentsInstances: BaseComponent[]) {
+        if (this._simCpu == null) this._simCpu = { cycles: cpuCycles } as any;
+        else if (typeof this._simCpu === 'object') (this._simCpu as any).cycles = cpuCycles;
         if (this.lastUpdateCycles === 0) {
             this.lastUpdateCycles = cpuCycles;
         }
@@ -120,8 +127,10 @@ export class LEDLogic extends BaseComponent {
             return;
         }
 
-        const now = Date.now();
-        const pwmActive = this._pwmDutyCycle >= 0 && (now - this._pwmTimestamp) < 500;
+        // Cycle-based PWM window (16 MHz: 500 ms ≈ 8M cycles). No Date.now in tick.
+        const pwmActive = this._pwmTimestampCycles >= 0
+            ? (this._pwmDutyCycle >= 0 && (cpuCycles - this._pwmTimestampCycles) < 8_000_000)
+            : (this._pwmDutyCycle >= 0 && (Date.now() - this._pwmWallMs) < 500);
 
         if (pwmActive) {
             const brightness = Math.min(255, Math.max(0, Math.round(this._pwmDutyCycle * 255)));
@@ -156,11 +165,37 @@ export class LEDLogic extends BaseComponent {
         }
     }
 
+    // 12.4 v2: numeric UI state for SAB slot { f0: brightness, i0: illuminated }.
+    uiState() {
+        return {
+            f: { brightness: Number(this.state?.brightness || 0) },
+            i: { illuminated: this.state?.illuminated ? 1 : 0 },
+        };
+    }
+
+    validate(component: any, graph: Map<string, string[]>) {
+        const anodeConnected = graph.get(`${component.id}.A`);
+        const cathodeConnected = graph.get(`${component.id}.K`);
+        if (!anodeConnected || !cathodeConnected) return null;
+        if (anodeConnected.length === 0 && cathodeConnected.length === 0) {
+            return {
+                ruleId: 'led-series-resistor-check',
+                severity: 'warn',
+                message: `⚠️ [LED ${component.id}] Warning: Neither Anode nor Cathode is connected.`,
+                compIds: [component.id],
+                remediation: 'Wire the LED into a circuit with a series resistor.',
+            };
+        }
+        return null;
+    }
+
     getSyncState() {
         const state = super.getSyncState() || {};
 
-        const now = Date.now();
-        const pwmActive = this._pwmDutyCycle >= 0 && (now - this._pwmTimestamp) < 500;
+        const cycles = (this._simCpu as any)?.cycles;
+        const pwmActive = this._pwmTimestampCycles >= 0 && Number.isFinite(Number(cycles))
+            ? (this._pwmDutyCycle >= 0 && (Number(cycles) - this._pwmTimestampCycles) < 8_000_000)
+            : (this._pwmDutyCycle >= 0 && (Date.now() - this._pwmWallMs) < 500);
 
         if (pwmActive) {
             state.illuminated = this._pwmDutyCycle >= 0.01;

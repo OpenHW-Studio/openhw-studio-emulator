@@ -100,6 +100,18 @@ export class BaseComponent {
     deepSiliconEnabled: boolean = false;
     attrs: any;
     manifest: any;
+    // SAB slot contract (12.4): assigned at START by SabStateWriter.
+    // Declared upfront for V8 shape stability — never add dynamically in runners.
+    sabSlot: number = -1;
+    stateVersion: number = 0;
+    // Runner-injected sim handles (avr-runner/rp2040-runner). Declared here so
+    // JIT hidden classes stay stable; runners assign, never define new keys.
+    _simCpu: any = null;
+    _simUpdatePhysics: (() => void) | null = null;
+    _setAvrPinDirect: ((boardPin: string, isHigh: boolean) => void) | null = null;
+    pendingVisualStateEmit: boolean = false;
+    telemetryMode: string = 'detail';
+    telemetryWatchedParams: string[] = ['all'];
 
     private telemetryManifest: TelemetryManifestConfig | null = null;
     private telemetryRuntime = {
@@ -139,8 +151,6 @@ export class BaseComponent {
         lastEventAtMs: 0,
         lastIoAtMs: 0,
         stateFingerprint: '',
-        lastStateFingerprintAtMs: 0,
-        updateStartAtMs: 0,
         updateStartPerfMs: 0,
         lastUpdateAtMs: 0,
         totalUpdateTimeMs: 0,
@@ -182,168 +192,56 @@ export class BaseComponent {
             };
         }
 
-        this.installTelemetryHooks();
-        this.observeStateMutation('constructor', undefined, true);
+        // T1 (§12.3): no per-instance method wrapping. Hot methods stay on the
+        // prototype (monomorphic call sites, inlinable). Telemetry is recorded
+        // via explicit gated hooks (trackUpdate/trackPinEdge/trackIo) called
+        // from the base-class wrappers below — zero closure alloc per tick.
+        this.markStateMutated(undefined, true);
     }
 
-    private wrapTelemetryMethod(
-        methodName: string,
-        before?: (...args: any[]) => void,
-        after?: (result: any, ...args: any[]) => void
-    ): void {
-        const host = this as any;
-        const current = host[methodName];
-        if (typeof current !== 'function') return;
-        if (current.__telemetryWrapped) return;
-
-        const wrapped = (...args: any[]) => {
-            if (this.telemetryEnabled && before) {
-                try {
-                    before(...args);
-                } catch {
-                    // Non-fatal telemetry hook.
-                }
-            }
-
-            const result = current.apply(this, args);
-
-            if (this.telemetryEnabled && after) {
-                try {
-                    after(result, ...args);
-                } catch {
-                    // Non-fatal telemetry hook.
-                }
-            }
-            return result;
-        };
-
-        wrapped.__telemetryWrapped = true;
-        wrapped.__telemetryOriginal = current;
-        host[methodName] = wrapped;
+    // --- T1 gated telemetry hooks (called ONLY when telemetryEnabled) ---
+    // Base-class protocol entry points route through these so subclass
+    // overrides (onI2CByte/onSPIByte/...) never pay telemetry cost when off.
+    protected trackUpdateStart(cpuCycles: number): void {
+        if (!this.telemetryEnabled) return;
+        this.telemetryRuntime.updateCount += 1;
+        this.telemetryRuntime.updateStartPerfMs = this.getPerfNowMs();
+        this.captureCpuCycles(cpuCycles);
     }
 
-    private installTelemetryHooks(): void {
-        this.wrapTelemetryMethod(
-            'update',
-            (cpuCycles: number) => {
-                const startMs = Date.now();
-                const startPerfMs = this.getPerfNowMs();
-                this.telemetryRuntime.updateCount += 1;
-                this.telemetryRuntime.updateStartAtMs = startMs;
-                this.telemetryRuntime.updateStartPerfMs = startPerfMs;
-                this.captureCpuCycles(cpuCycles);
-            },
-            (_result, cpuCycles: number) => {
-                const endMs = Date.now();
-                const startMs = Number(this.telemetryRuntime.updateStartAtMs || 0);
-                const endPerfMs = this.getPerfNowMs();
-                const startPerfMs = Number(this.telemetryRuntime.updateStartPerfMs || 0);
-                if (startMs > 0 || startPerfMs > 0) {
-                    const duration = Math.max(
-                        0,
-                        startPerfMs > 0 ? (endPerfMs - startPerfMs) : (endMs - startMs)
-                    );
-                    this.telemetryRuntime.totalUpdateTimeMs += duration;
-                    if (duration > this.telemetryRuntime.maxUpdateTimeMs) {
-                        this.telemetryRuntime.maxUpdateTimeMs = duration;
-                    }
-                }
-                this.telemetryRuntime.lastUpdateAtMs = endMs;
-                this.observeStateMutation('update', cpuCycles, false);
+    protected trackUpdateEnd(cpuCycles: number): void {
+        if (!this.telemetryEnabled) return;
+        const endPerfMs = this.getPerfNowMs();
+        const startPerfMs = Number(this.telemetryRuntime.updateStartPerfMs || 0);
+        if (startPerfMs > 0) {
+            const duration = Math.max(0, endPerfMs - startPerfMs);
+            this.telemetryRuntime.totalUpdateTimeMs += duration;
+            if (duration > this.telemetryRuntime.maxUpdateTimeMs) {
+                this.telemetryRuntime.maxUpdateTimeMs = duration;
             }
-        );
-
-        this.wrapTelemetryMethod(
-            'onEvent',
-            (event: any) => {
-                this.telemetryRuntime.onEventCount += 1;
-                this.telemetryRuntime.lastEventAtMs = Date.now();
-                const key = this.getInteractionKey(event);
-                this.telemetryRuntime.interactionsByType[key] =
-                    Number(this.telemetryRuntime.interactionsByType[key] || 0) + 1;
-            },
-            () => {
-                this.observeStateMutation('onEvent', undefined, true);
-            }
-        );
-
-        this.wrapTelemetryMethod(
-            'onPinStateChange',
-            (pinId: string, isHigh: boolean, cpuCycles: number) => {
-                this.telemetryRuntime.onPinStateChangeCount += 1;
-                this.captureCpuCycles(cpuCycles);
-                this.capturePinLogicLevel(pinId, !!isHigh);
-            },
-            (_result, _pinId: string, _isHigh: boolean, cpuCycles: number) => {
-                this.observeStateMutation('onPinStateChange', cpuCycles, false);
-            }
-        );
-
-        this.wrapTelemetryMethod('onI2CStart', () => {
-            this.telemetryRuntime.io.i2cTransactions += 1;
-            this.telemetryRuntime.lastIoAtMs = Date.now();
-        });
-
-        this.wrapTelemetryMethod(
-            'onI2CByte',
-            () => {
-                this.telemetryRuntime.io.i2cBytes += 1;
-                this.telemetryRuntime.lastIoAtMs = Date.now();
-            },
-            () => {
-                this.observeStateMutation('onI2CByte', undefined, false);
-            }
-        );
-
-        this.wrapTelemetryMethod('onI2CStop', () => {
-            this.telemetryRuntime.lastIoAtMs = Date.now();
-        });
-
-        this.wrapTelemetryMethod(
-            'onSPIByte',
-            () => {
-                this.telemetryRuntime.io.spiBytes += 1;
-                this.telemetryRuntime.io.spiTransactions += 1;
-                this.telemetryRuntime.lastIoAtMs = Date.now();
-            },
-            () => {
-                this.observeStateMutation('onSPIByte', undefined, false);
-            }
-        );
-
-        const protocolHooks = [
-            'onPWM',
-            'onPwm',
-            'onPWMSignal',
-            'onPIOPinChange',
-            'onPioPinChange',
-            'onPIO',
-            'onPio',
-            'onOneWireReset',
-            'onOnewireReset',
-            'onOneWireWriteBit',
-            'onOnewireWriteBit',
-            'onOneWireSlot',
-            'onOnewireSlot',
-            'onI2SFrame',
-        ];
-
-        for (const hook of protocolHooks) {
-            this.wrapTelemetryMethod(
-                hook,
-                () => {
-                    this.telemetryRuntime.lastIoAtMs = Date.now();
-                    const h = hook.toLowerCase();
-                    if (h.includes('pwm')) this.telemetryRuntime.io.pwmCount++;
-                    else if (h.includes('onewire')) this.telemetryRuntime.io.oneWireCount++;
-                    else if (h.includes('pio')) this.telemetryRuntime.io.pioCount++;
-                    else if (h.includes('i2s')) this.telemetryRuntime.io.i2sCount++;
-                },
-                () => {
-                    this.observeStateMutation(hook, undefined, false);
-                }
-            );
         }
+        this.telemetryRuntime.lastUpdateAtMs = Date.now();
+        this.markStateMutated(cpuCycles, false);
+    }
+
+    protected trackPinEdge(pinId: string, isHigh: boolean, cpuCycles: number): void {
+        if (!this.telemetryEnabled) return;
+        this.telemetryRuntime.onPinStateChangeCount += 1;
+        this.captureCpuCycles(cpuCycles);
+        this.capturePinLogicLevel(pinId, !!isHigh);
+        this.markStateMutated(cpuCycles, false);
+    }
+
+    protected trackIo(kind: 'i2c' | 'spi' | 'pwm' | 'onewire' | 'pio' | 'i2s', bytes = 0): void {
+        if (!this.telemetryEnabled) return;
+        const io = this.telemetryRuntime.io;
+        this.telemetryRuntime.lastIoAtMs = Date.now();
+        if (kind === 'i2c') { io.i2cTransactions += 1; io.i2cBytes += bytes; }
+        else if (kind === 'spi') { io.spiTransactions += 1; io.spiBytes += bytes; }
+        else if (kind === 'pwm') io.pwmCount++;
+        else if (kind === 'onewire') io.oneWireCount++;
+        else if (kind === 'pio') io.pioCount++;
+        else if (kind === 'i2s') io.i2sCount++;
     }
 
     recordI2cTransaction(data: number[]) {
@@ -456,17 +354,16 @@ export class BaseComponent {
         }
     }
 
-    private normalizeStateForTelemetry(value: any, depth = 0): any {
+    // T2 (§12.3): version-counter mutation tracking. JSON fingerprinting
+    // (normalizeStateForTelemetry + safeSerializeState + key sorting) is OFF
+    // the tick path — stringify survives only in grading snapshots (rare).
+    // Kept as thin static helpers for that path; never called from update().
+    static previewForSnapshot(value: any): any {
         if (value === null || value === undefined) return value;
-
         if (typeof value === 'string') {
             return value.length > 4096 ? `${value.slice(0, 4096)}...` : value;
         }
-
-        if (typeof value === 'number' || typeof value === 'boolean') {
-            return value;
-        }
-
+        if (typeof value === 'number' || typeof value === 'boolean') return value;
         if (ArrayBuffer.isView(value)) {
             const view = (value as any) as ArrayLike<number> & { length?: number };
             const len = Number(view?.length || 0);
@@ -474,92 +371,70 @@ export class BaseComponent {
             for (let i = 0; i < Math.min(len, 24); i += 1) {
                 preview.push(Number(view[i] || 0));
             }
-            return {
-                kind: 'typed-array',
-                length: len,
-                preview,
-            };
+            return { kind: 'typed-array', length: len, preview };
         }
-
         if (Array.isArray(value)) {
-            if (value.length <= 24 && depth <= 1) {
-                return value.map((entry) => this.normalizeStateForTelemetry(entry, depth + 1));
-            }
-            return {
-                kind: 'array',
-                length: value.length,
-                preview: value.slice(0, 24).map((entry) => this.normalizeStateForTelemetry(entry, depth + 1)),
-            };
+            if (value.length <= 24) return value.map((entry) => BaseComponent.previewForSnapshot(entry));
+            return { kind: 'array', length: value.length, preview: value.slice(0, 24).map((entry) => BaseComponent.previewForSnapshot(entry)) };
         }
-
         if (typeof value === 'object') {
             const keys = Object.keys(value);
-            if (depth >= 3 && keys.length > 16) {
-                return {
-                    kind: 'object',
-                    keys: keys.slice(0, 16),
-                    size: keys.length,
-                };
-            }
-
+            if (keys.length > 16) return { kind: 'object', keys: keys.slice(0, 16), size: keys.length };
             const out: Record<string, any> = {};
-            for (const key of keys.sort((a, b) => a.localeCompare(b))) {
-                out[key] = this.normalizeStateForTelemetry(value[key], depth + 1);
-            }
+            for (const key of keys) out[key] = (value as any)[key];
             return out;
         }
-
         return String(value);
+    }
+
+    // Compat shims: grading/snapshot path only. NOT used in tick.
+    private normalizeStateForTelemetry(value: any): any {
+        return BaseComponent.previewForSnapshot(value);
     }
 
     private safeSerializeState(): string {
         try {
             const cleanState = { ...this.state };
             delete (cleanState as any).vHistory;
-            return JSON.stringify(this.normalizeStateForTelemetry(cleanState));
+            return JSON.stringify(BaseComponent.previewForSnapshot(cleanState));
         } catch {
             return '{}';
         }
     }
 
-    private observeStateMutation(source: string, cpuCycles?: number, force = false): void {
-        const now = Date.now();
-        const minIntervalMs = source === 'update' ? 45 : 0;
-        if (!force && minIntervalMs > 0 && (now - this.telemetryRuntime.lastStateFingerprintAtMs) < minIntervalMs) {
-            return;
-        }
+    private observeStateMutation(_source: string, cpuCycles?: number, force = false): void {
+        this.markStateMutated(cpuCycles, force);
+    }
 
-        this.telemetryRuntime.lastStateFingerprintAtMs = now;
-        const fingerprint = this.safeSerializeState();
-
-        if (!this.telemetryRuntime.stateFingerprint) {
-            this.telemetryRuntime.stateFingerprint = fingerprint;
-            this.telemetryRuntime.lastStateChangeAtMs = now;
+    // Single mutation entry: bump u32 version + flags. Cheap, no alloc.
+    // force=true also refreshes wall-clock stamps (rare paths only).
+    protected markStateMutated(cpuCycles?: number, force = false): void {
+        this.stateVersion = (this.stateVersion + 1) >>> 0;
+        this.stateChanged = true;
+        if (!this.telemetryEnabled && !force) return;
+        this.telemetryRuntime.stateMutationCount += 1;
+        if (force || this.telemetryEnabled) {
+            this.telemetryRuntime.lastStateChangeAtMs = Date.now();
             if (Number.isFinite(Number(cpuCycles))) {
                 this.telemetryRuntime.lastStateChangeCycles = Number(cpuCycles);
             }
-            return;
+            if (!this.telemetryRuntime.stateFingerprint) {
+                this.telemetryRuntime.stateFingerprint = String(this.stateVersion);
+            } else {
+                this.telemetryRuntime.stateFingerprint = String(this.stateVersion);
+            }
         }
-
-        if (fingerprint === this.telemetryRuntime.stateFingerprint) {
-            return;
-        }
-
-        this.telemetryRuntime.stateFingerprint = fingerprint;
-        this.telemetryRuntime.stateMutationCount += 1;
-        this.telemetryRuntime.lastStateChangeAtMs = now;
-        if (Number.isFinite(Number(cpuCycles))) {
-            this.telemetryRuntime.lastStateChangeCycles = Number(cpuCycles);
-        }
-        this.stateChanged = true;
     }
 
     setPinVoltage(pinId: string, voltage: number) {
         if (this.pins[pinId] && this.pins[pinId].voltage !== voltage) {
             this.pins[pinId].voltage = voltage;
-            this.capturePinLogicLevel(pinId, Number(voltage) > 0.5);
-            this.capturePowerSample(pinId, Number(voltage));
-            this.stateChanged = true;
+            // T1: telemetry capture gated — zero cost when disabled.
+            if (this.telemetryEnabled) {
+                this.capturePinLogicLevel(pinId, Number(voltage) > 0.5);
+                this.capturePowerSample(pinId, Number(voltage));
+            }
+            this.markStateMutated(undefined, false);
         }
     }
 
@@ -661,10 +536,16 @@ export class BaseComponent {
             }
         }
         if (changed) {
-            this.stateChanged = true;
-            this.observeStateMutation('setState', undefined, true);
+            this.markStateMutated(undefined, false);
         }
     }
+
+    // --- 12.4 component v2 contract (optional; old components unaffected) ---
+    // validate(): replaces standalone validation.ts (keep a shim re-export).
+    // uiState(): returns SAB slot fields { f:{}, i:{} } — replaces per-frame
+    // getSyncState spreads for SAB-native components.
+    validate?(_component: any, _graph: Map<string, string[]>): any;
+    uiState?(): { f?: Record<string, number>; i?: Record<string, number> };
 
     private estimateCpuHz(): number {
         const key = String(this.type || '').toLowerCase();
@@ -950,13 +831,13 @@ export class BaseComponent {
 
     // Method 1: Human-readable summary
     getTelemetrySummary(): string {
-        this.observeStateMutation('summary', undefined, true);
+        this.markStateMutated(undefined, true);
         return this.applyHeuristics().summary;
     }
 
     // Method 2: Deep-state payload
     getTelemetryData(): Record<string, any> {
-        this.observeStateMutation('telemetry', undefined, true);
+        this.markStateMutated(undefined, true);
         const heuristics = this.applyHeuristics();
         const source = this.state && typeof this.state === 'object' && !Array.isArray(this.state)
             ? this.state
@@ -1011,8 +892,50 @@ export class BaseComponent {
     }
 
     getDeltaMetrics(watchedParams?: string[]) {
+        // T2 fast path: version-counter compare first — no JSON when clean.
+        // lastReportedVersion tracks the last EMITTED version; stateVersion
+        // bumps on every mutation via markStateMutated().
+        const activeParams = Array.isArray(watchedParams) && watchedParams.length > 0 ? watchedParams : ['all'];
+        const lastEmitted = (this as any)._lastDeltaEmittedVersion as number | undefined;
+        if (!activeParams.includes('all') && lastEmitted === this.stateVersion && this.lastReportedJson) {
+            // Watched-subset path still needs value compare (cheap: few keys).
+            const fullSyncState = this.getSyncState();
+            try {
+                const oldObj = JSON.parse(this.lastReportedJson);
+                const oldState = oldObj?.state || {};
+                let same = true;
+                for (const param of activeParams) {
+                    if (fullSyncState[param] !== oldState[param]) { same = false; break; }
+                }
+                if (same) {
+                    return {
+                        id: this.id,
+                        type: this.type,
+                        state: fullSyncState,
+                        delta: false,
+                        metrics: oldObj?.metrics,
+                        heuristics: oldObj?.heuristics,
+                        capturedAt: oldObj?.capturedAt
+                    };
+                }
+            } catch { /* fall through to full path */ }
+        } else if (activeParams.includes('all') && lastEmitted === this.stateVersion && this.lastReportedJson) {
+            try {
+                const oldObj = JSON.parse(this.lastReportedJson);
+                return {
+                    id: this.id,
+                    type: this.type,
+                    state: this.getSyncState(),
+                    delta: false,
+                    metrics: oldObj?.metrics,
+                    heuristics: oldObj?.heuristics,
+                    capturedAt: oldObj?.capturedAt
+                };
+            } catch { /* fall through to full path */ }
+        }
+
         const full = this.getRawMetrics();
-        
+
         // Stabilize metrics for comparison (remove volatile timing fields)
         const stableMetrics = { ...full.metrics };
         delete (stableMetrics as any).updateFreq;
@@ -1033,7 +956,6 @@ export class BaseComponent {
 
         const fullSyncState = this.getSyncState();
         let stableState: any = {};
-        const activeParams = Array.isArray(watchedParams) && watchedParams.length > 0 ? watchedParams : ['all'];
 
         if (activeParams.includes('all')) {
             stableState = { ...fullSyncState };
@@ -1048,6 +970,7 @@ export class BaseComponent {
 
         const currentJson = JSON.stringify({ state: stableState, metrics: stableMetrics });
         if (currentJson === this.lastReportedJson) {
+            (this as any)._lastDeltaEmittedVersion = this.stateVersion;
             return {
                 id: this.id,
                 type: this.type,
@@ -1085,11 +1008,38 @@ export class BaseComponent {
         }
 
         this.lastReportedJson = currentJson;
+        (this as any)._lastDeltaEmittedVersion = this.stateVersion;
         return {
             ...full,
             state: this.getSyncState(),
             delta: true,
             deltaSummary: mutationSummary
         };
+    }
+
+    // SAB slot write (§12.3 T3/T5): pack uiState()/key state fields into the
+    // shared 64 B slot views. Called from SabStateWriter in forceEmitState —
+    // never from update(). No-op when slot unassigned (sabSlot < 0).
+    writeSabSlot(f32: Float32Array, i32: Int32Array): void {
+        if (this.sabSlot < 0) return;
+        try {
+            const ui = typeof this.uiState === 'function' ? this.uiState() : null;
+            const f = ui?.f || {};
+            const i = ui?.i || {};
+            const fKeys = Object.keys(f).slice(0, 8);
+            const iKeys = Object.keys(i).slice(0, 4);
+            for (let k = 0; k < 8; k++) {
+                const key = fKeys[k];
+                f32[this.sabSlot * 8 + k] = key !== undefined ? Number((f as any)[key] || 0) : 0;
+            }
+            for (let k = 0; k < 4; k++) {
+                const key = iKeys[k];
+                i32[this.sabSlot * 4 + k] = key !== undefined ? Number((i as any)[key] || 0) : 0;
+            }
+            // version word lives in the header-adjacent u32 view (written by caller).
+            this.pendingVisualStateEmit = false;
+        } catch {
+            // SAB write must never break simulation.
+        }
     }
 }
