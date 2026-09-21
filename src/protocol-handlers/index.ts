@@ -1,15 +1,15 @@
 export { I2CProtocol, I2cBusFramer, type I2cFrameEvents } from './i2c-device';
 export { SPIProtocol, SpiBusFramer, type SpiFrameEvents, type SPITransactionMeta } from './spi-device';
-export { PWMProtocol } from './pwm-device';
-export { DigitalProtocol } from './digital-device';
-export { AnalogProtocol } from './analog-device';
-export { UARTProtocol } from './uart-device';
-export { OneWireProtocol } from './onewire-device';
-export { I2SProtocol } from './i2s-device';
+export { PWMProtocol, PwmBusFramer, type PwmFrameEvents, type PwmSignal } from './pwm-device';
+export { DigitalProtocol, DigitalBusFramer, type DigitalFrameEvents } from './digital-device';
+export { AnalogProtocol, AnalogBusFramer, type AnalogFrameEvents } from './analog-device';
+export { UARTProtocol, UartBusFramer, type UartFrameEvents } from './uart-device';
+export { OneWireProtocol, OneWireBusFramer, type OneWireFrameEvents } from './onewire-device';
+export { I2SProtocol, I2sBusFramer, type I2sFrameEvents } from './i2s-device';
 export { HD44780Controller } from './hd44780-controller';
-export { PulseProtocol } from './pulse-device';
-export { NeoPixelProtocol } from './neopixel-device';
-export { TwoWireProtocol } from './twowire-device';
+export { PulseProtocol, PulseBusFramer, type PulseFrameEvents } from './pulse-device';
+export { NeoPixelProtocol, NeoPixelBusFramer, type NeoPixelFrameEvents } from './neopixel-device';
+export { TwoWireProtocol, TwoWireBusFramer, type TwoWireFrameEvents } from './twowire-device';
 export { RadioEnvironment, type RadioNode, type RadioPacket } from './radio-environment';
 
 // Re-export old logic components for backward compatibility

@@ -294,10 +294,142 @@ export class OneWireProtocol extends BaseComponent {
     private triggerLowPulse(pinId: string): void {
         this.sendingBit = true;
         this.driveDQ(pinId, 0.0);
-        
+
         // Hold LOW for ~30 µs (480 AVR cycles @ 16 MHz), then release
         this.schedule(() => {
             this.releaseDQ(pinId);
         }, 480);
     }
+}
+
+/**
+ * OneWireBusFramer — composition helper for WASM-heavy components (§12.4).
+ * Pure ROM/state machine for the DS18B20-style flow (no _simCpu/_runner
+ * knowledge — bus driving stays in the component). Feed reset/writeBit/
+ * slot events; the framer returns response bits for DATA/SEARCH_ROM reads
+ * via onReadBit. A WASM-heavy 1-Wire component extends WasmComponent
+ * DIRECTLY, owns a OneWireBusFramer, and routes via
+ * routeOneWire(0|1|2, pinId, arg) — kind 2 returns the response bit.
+ */
+export interface OneWireFrameEvents {
+    onConvertTemperature?(): void;
+    onReadScratchpad?(): number[];
+    getROMAddress?(): number[];
+}
+
+export class OneWireBusFramer {
+    private owState: 'IDLE' | 'RESET' | 'ROM_MATCH' | 'SEARCH_ROM' | 'FUNCTION_CMD' | 'DATA' | 'ROM_CMD' = 'IDLE';
+    private byteBuffer: number[] = [];
+    private readBuffer: number[] = [];
+    private readBitIndex = 0;
+    private romMatchCount = 0;
+    private romMatchValid = true;
+    private searchBitIndex = 0;
+    private searchSlotStep = 0;
+    private ignoreNextSlot = false;
+    private scratchpad: number[] = [];
+    constructor(private readonly events: OneWireFrameEvents) {}
+
+    private rom(): number[] {
+        return this.events.getROMAddress?.() ?? [0x28, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0xFF];
+    }
+
+    /** Master reset pulse: returns to RESET, clears buffers. */
+    reset(): void {
+        this.owState = 'RESET';
+        this.byteBuffer = [];
+        this.readBuffer = [];
+        this.readBitIndex = 0;
+        this.romMatchCount = 0;
+        this.romMatchValid = true;
+        this.searchBitIndex = 0;
+        this.searchSlotStep = 0;
+        this.ignoreNextSlot = false;
+    }
+
+    /** Master write bit (ignored while self-driving — caller guards). */
+    writeBit(bit: number): void {
+        if (this.owState === 'IDLE') return;
+        if (this.owState === 'SEARCH_ROM') {
+            if (this.searchSlotStep !== 2) return;
+            const romAddr = this.rom();
+            const romBit = (romAddr[Math.floor(this.searchBitIndex / 8)] >> (this.searchBitIndex % 8)) & 1;
+            if (bit === romBit) {
+                this.searchBitIndex++;
+                this.searchSlotStep = 3;
+                if (this.searchBitIndex >= 64) this.owState = 'IDLE';
+            } else {
+                this.owState = 'IDLE';
+            }
+            return;
+        }
+        if (this.owState === 'DATA') return; // master is reading
+        this.byteBuffer.push(bit & 1);
+        if (this.byteBuffer.length < 8) return;
+        const byte = this.byteBuffer.reduce((acc, b, i) => acc | (b << i), 0);
+        this.byteBuffer = [];
+        this.ignoreNextSlot = true;
+        this.decodeCommand(byte);
+    }
+
+    private decodeCommand(byte: number): void {
+        if (this.owState === 'RESET') {
+            if (byte === 0xCC) this.owState = 'FUNCTION_CMD';
+            else if (byte === 0x33) { this.owState = 'DATA'; this.readBuffer = [...this.rom()]; this.readBitIndex = 0; }
+            else if (byte === 0x55) { this.owState = 'ROM_MATCH'; this.romMatchCount = 0; this.romMatchValid = true; }
+            else if (byte === 0xF0) { this.owState = 'SEARCH_ROM'; this.searchBitIndex = 0; this.searchSlotStep = 0; }
+            else this.owState = 'ROM_CMD';
+        } else if (this.owState === 'ROM_MATCH') {
+            if (byte !== (this.rom()[this.romMatchCount] ?? 0)) this.romMatchValid = false;
+            this.romMatchCount++;
+            if (this.romMatchCount >= 8) this.owState = this.romMatchValid ? 'FUNCTION_CMD' : 'IDLE';
+        } else if (this.owState === 'FUNCTION_CMD') {
+            if (byte === 0x44) {
+                this.events.onConvertTemperature?.();
+                this.owState = 'DATA';
+                this.readBuffer = [0xFF];
+                this.readBitIndex = 0;
+            } else if (byte === 0xBE) {
+                this.scratchpad = [...(this.events.onReadScratchpad?.() ?? [])];
+                this.owState = 'DATA';
+                this.readBuffer = [...this.scratchpad];
+                this.readBitIndex = 0;
+            } else {
+                this.owState = 'DATA';
+                this.readBuffer = [...this.scratchpad];
+                this.readBitIndex = 0;
+            }
+        }
+    }
+
+    /**
+     * Timeslot poll: returns the response bit the device should drive
+     * (0 = pull LOW, 1 = release). Mirrors OneWireProtocol.onOneWireSlot.
+     */
+    pollSlot(): 0 | 1 {
+        if (this.ignoreNextSlot) { this.ignoreNextSlot = false; return 1; }
+        if (this.owState === 'SEARCH_ROM') {
+            if (this.searchSlotStep === 3) { this.searchSlotStep = 0; return 1; }
+            const romAddr = this.rom();
+            const romBit = (romAddr[Math.floor(this.searchBitIndex / 8)] >> (this.searchBitIndex % 8)) & 1;
+            let outBit = 1;
+            if (this.searchSlotStep === 0) { outBit = romBit; this.searchSlotStep = 1; }
+            else if (this.searchSlotStep === 1) { outBit = romBit ? 0 : 1; this.searchSlotStep = 2; }
+            else return 1;
+            return (outBit === 0 ? 0 : 1) as 0 | 1;
+        }
+        if (this.owState === 'DATA') {
+            const buffer = this.readBuffer.length > 0 ? this.readBuffer : this.scratchpad;
+            const byteIndex = Math.floor(this.readBitIndex / 8);
+            const bitOffset = this.readBitIndex % 8;
+            let outBit = 1;
+            if (byteIndex < buffer.length) outBit = (buffer[byteIndex] >> bitOffset) & 1;
+            this.readBitIndex++;
+            return (outBit === 0 ? 0 : 1) as 0 | 1;
+        }
+        return 1;
+    }
+
+    setScratchpad(data: number[]): void { this.scratchpad = [...data]; }
+    get state(): string { return this.owState; }
 }

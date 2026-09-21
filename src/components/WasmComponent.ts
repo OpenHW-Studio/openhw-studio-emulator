@@ -12,10 +12,23 @@
 //     onPin?(pinIdx: number, high: number, cycles: number): void;
 //     onI2CByte?(addr: number, data: number): number;
 //     onSPIByte?(data: number): number;
+//     // ... one optional hook per protocol family (all default-absent;
+//     // subclass opts in via useWasmBusHooks() + route*() helpers below).
+//     onUARTByte?(data: number): void;
+//     onPWM?(pinIdx: number, duty01: number, freqHz: number): void;
+//     onOneWire?(kind: number, pinIdx: number, arg: number): number;
+//     onI2SFrame?(channel: number, sample: number): void;
+//     onPulse?(pinIdx: number, high: number, durationUs: number): void;
+//     onTwoWire?(byte: number): void;
+//     onDigitalEdge?(pinIdx: number, high: number, cycles: number): void;
+//     onAnalog?(pinIdx: number, volts: number): void;
+//     onNeoPixel?(count: number): void;
 //     readStateViews(): { f: Float32Array; i: Int32Array } | null;
 //     destroy?(): void;
 //   }
 // Strings NEVER cross the boundary in the hot path (see §5).
+// Numeric enum encodings keep every crossing to plain numbers:
+// onOneWire kind: 0=reset 1=writeBit 2=slot; onDigitalEdge high: 0/1.
 
 import { BaseComponent } from './BaseComponent';
 
@@ -28,6 +41,28 @@ export interface WasmCore {
     onPin?(pinIdx: number, high: number, cycles: number): void;
     onI2CByte?(addr: number, data: number): number;
     onSPIByte?(data: number): number;
+    /** UART RX byte (framed by UartBusFramer; TX queue stays JS). */
+    onUARTByte?(data: number): void;
+    /** PWM signal (duty 0..1, freq Hz; pinIdx from buildPinIndex). */
+    onPWM?(pinIdx: number, duty01: number, freqHz: number): void;
+    /**
+     * 1-Wire slot event. kind: 0=reset 1=writeBit(arg=bit) 2=slot.
+     * Returns the response bit for kind 2 (DATA/SEARCH_ROM reads),
+     * 0 otherwise ( reset/writeBit are fire-and-forget).
+     */
+    onOneWire?(kind: number, pinIdx: number, arg: number): number;
+    /** I2S audio frame (channel 0=L/1=R, signed sample). */
+    onI2SFrame?(channel: number, sample: number): void;
+    /** Pulse-device completed pulse (duration in microseconds). */
+    onPulse?(pinIdx: number, high: number, durationUs: number): void;
+    /** TwoWire (TM1637-style) decoded byte, LSB-first already assembled. */
+    onTwoWire?(byte: number): void;
+    /** Debounced digital edge (DigitalProtocol.onPinEdge equivalent). */
+    onDigitalEdge?(pinIdx: number, high: number, cycles: number): void;
+    /** Analog threshold crossing (averaged volts). */
+    onAnalog?(pinIdx: number, volts: number): void;
+    /** NeoPixel frame ready (pixel buffer already in shared memory). */
+    onNeoPixel?(count: number): void;
     /** Event-path dirty notify (display descriptor cores: mark_dirty). */
     markDirty?(flag: number): void;
     /**
@@ -179,48 +214,114 @@ export class WasmComponent extends BaseComponent {
     protected useWasmBusHooks(): boolean { return false; }
 
     onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number): void {
-        if (this.core && this.wasmReady && this.useWasmBusHooks()
-            && typeof this.core.onPin === 'function') {
-            const idx = this.pinIndex.get(String(pinId));
-            if (idx !== undefined) {
-                try {
-                    this.core.onPin(idx, isHigh ? 1 : 0, cpuCycles);
-                    return;
-                } catch {
-                    this.wasmReady = false;
-                    this.core = null;
-                }
-            }
+        const idx = this.pinIndex.get(String(pinId));
+        if (idx !== undefined) {
+            const routed = this.callCore((c) =>
+                typeof c.onPin === 'function' ? c.onPin(idx, isHigh ? 1 : 0, cpuCycles) : undefined);
+            // A core that handles the pin owns the edge: skip the JS hook
+            // (prevents double-driving). A core without on_pin (undefined)
+            // falls through to JS — the common display/SD case.
+            if (routed !== undefined) return;
         }
         super.onPinStateChange(pinId, isHigh, cpuCycles);
     }
 
+    /** Resolve a pin id to its u32 index (built once at load). -1 = unknown. */
+    protected pinToIndex(pinId: string): number {
+        const idx = this.pinIndex.get(String(pinId));
+        return idx === undefined ? -1 : idx;
+    }
+
+    /**
+     * Guarded core call: runs fn only when a core is loaded AND the
+     * subclass opted into WASM bus hooks. WASM-throw self-heals to JS
+     * (wasmReady=false) and yields undefined — the caller then runs the
+     * JS reference. Every route*() helper below funnels through this so
+     * there is exactly ONE place where the boundary can fail.
+     */
+    protected callCore<T>(fn: (core: WasmCore) => T): T | undefined {
+        if (!this.core || !this.wasmReady || !this.useWasmBusHooks()) return undefined;
+        try {
+            return fn(this.core);
+        } catch {
+            this.wasmReady = false;
+            this.core = null;
+            return undefined;
+        }
+    }
+
     /** I2C byte → core when the subclass opts into WASM bus hooks. */
     protected routeI2CByte(addr: number, data: number): number | null {
-        if (this.core && this.wasmReady && this.useWasmBusHooks()
-            && typeof this.core.onI2CByte === 'function') {
-            try {
-                return Number(this.core.onI2CByte(addr & 0x7f, data & 0xff));
-            } catch {
-                this.wasmReady = false;
-                this.core = null;
-            }
-        }
-        return null;
+        const r = this.callCore((c) =>
+            typeof c.onI2CByte === 'function' ? c.onI2CByte(addr & 0x7f, data & 0xff) : undefined);
+        return typeof r === 'number' ? Number(r) : null;
     }
 
     /** SPI byte → core when the subclass opts into WASM bus hooks. */
     protected routeSPIByte(data: number): number | null {
-        if (this.core && this.wasmReady && this.useWasmBusHooks()
-            && typeof this.core.onSPIByte === 'function') {
-            try {
-                return Number(this.core.onSPIByte(data & 0xff));
-            } catch {
-                this.wasmReady = false;
-                this.core = null;
-            }
-        }
-        return null;
+        const r = this.callCore((c) =>
+            typeof c.onSPIByte === 'function' ? c.onSPIByte(data & 0xff) : undefined);
+        return typeof r === 'number' ? Number(r) : null;
+    }
+
+    /** UART RX byte → core (framed; TX queue stays JS). */
+    protected routeUARTByte(data: number): void {
+        this.callCore((c) => { c.onUARTByte?.(data & 0xff); });
+    }
+
+    /** PWM signal → core (pin id resolved once via pinIndex). */
+    protected routePWM(pinId: string, duty01: number, freqHz: number): void {
+        const idx = this.pinToIndex(pinId);
+        if (idx < 0) return;
+        this.callCore((c) => { c.onPWM?.(idx, duty01, freqHz); });
+    }
+
+    /**
+     * 1-Wire slot event → core. kind: 0=reset 1=writeBit 2=slot.
+     * Returns the response bit for kind 2, null otherwise.
+     */
+    protected routeOneWire(kind: 0 | 1 | 2, pinId: string, arg: number): number | null {
+        const idx = this.pinToIndex(pinId);
+        if (idx < 0) return null;
+        const r = this.callCore((c) =>
+            typeof c.onOneWire === 'function' ? c.onOneWire(kind, idx, arg) : undefined);
+        return typeof r === 'number' ? Number(r) : null;
+    }
+
+    /** I2S audio frame → core (normalized sample already computed). */
+    protected routeI2SFrame(channel: 0 | 1, sample: number): void {
+        this.callCore((c) => { c.onI2SFrame?.(channel, sample); });
+    }
+
+    /** Completed pulse → core (duration already measured in µs). */
+    protected routePulse(pinId: string, high: boolean, durationUs: number): void {
+        const idx = this.pinToIndex(pinId);
+        if (idx < 0) return;
+        this.callCore((c) => { c.onPulse?.(idx, high ? 1 : 0, durationUs); });
+    }
+
+    /** TwoWire decoded byte → core. */
+    protected routeTwoWire(byte: number): void {
+        this.callCore((c) => { c.onTwoWire?.(byte & 0xff); });
+    }
+
+    /** Debounced digital edge → core. */
+    protected routeDigitalEdge(pinId: string, high: boolean, cycles: number): void {
+        const idx = this.pinToIndex(pinId);
+        if (idx < 0) return;
+        this.callCore((c) => { c.onDigitalEdge?.(idx, high ? 1 : 0, cycles >>> 0); });
+    }
+
+    /** Analog threshold crossing → core (averaged volts). */
+    protected routeAnalog(pinId: string, volts: number): void {
+        const idx = this.pinToIndex(pinId);
+        if (idx < 0) return;
+        this.callCore((c) => { c.onAnalog?.(idx, volts); });
+    }
+
+    /** NeoPixel frame ready → core (pixels already in shared memory). */
+    protected routeNeoPixel(count: number): void {
+        this.callCore((c) => { c.onNeoPixel?.(count >>> 0); });
     }
 
     /** Copy WASM state views into the cached JS mirror; set dirty on diff. */

@@ -48,6 +48,17 @@ export class PWMProtocol extends BaseComponent {
         // To be overridden by subclass
     }
 
+    /**
+     * Single fan-out for a settled PWM signal. Subclasses override
+     * onPWMSignal(); WASM-heavy subclasses ALSO route via routePWM()
+     * inside their override (see PwmBusFramer docs below). Keeping the
+     * emit in one method guarantees the JS reference and the core see
+     * the same settled values exactly once.
+     */
+    protected emitPwmSignal(pinId: string, frequencyHz: number, dutyCycle: number, pulseUs: number): void {
+        this.onPWMSignal(pinId, frequencyHz, dutyCycle, pulseUs);
+    }
+
     onPWM(pinId: string, meta: PWMMeta): void {
         if (!this.isMonitoredPin(pinId)) return;
 
@@ -113,9 +124,72 @@ export class PWMProtocol extends BaseComponent {
                     this.stateChanged = true;
                     (this as any)._lastPwmUpdateMs = nowMs;
 
-                    this.onPWMSignal(pinId, avgFreq, dutyCycle, avgPulse);
+                    this.emitPwmSignal(pinId, avgFreq, dutyCycle, avgPulse);
                 }
             }
         }
+    }
+}
+
+/**
+ * PwmBusFramer — composition helper for WASM-heavy components (§12.4).
+ * Pure rolling-window stability detector (no update/WASM knowledge):
+ * feed raw edge samples via pushSample(); when freq/duty settle, the
+ * onSignal event fires EXACTLY like PWMProtocol.emitPwmSignal. A
+ * WASM-heavy PWM component extends WasmComponent DIRECTLY, owns a
+ * PwmBusFramer, and routes via routePWM() inside its onSignal handler.
+ */
+export interface PwmSignal {
+    frequencyHz: number;
+    dutyCycle: number;
+    pulseUs: number;
+    periodUs: number;
+}
+
+export interface PwmFrameEvents {
+    onSignal?(pinId: string, signal: PwmSignal): void;
+}
+
+export class PwmBusFramer {
+    private readonly windowSize = 4;
+    private recent: { freqHz: number; pulseUs: number; dutyCycle: number; periodUs: number }[] = [];
+    private last: { freqHz: number; dutyCycle: number } | null = null;
+    private lastEmitMs = 0;
+    constructor(private readonly events: PwmFrameEvents) {}
+
+    /**
+     * Feed one raw sample. Returns the settled signal when it fires,
+     * null otherwise. Mirrors PWMProtocol thresholds (5% freq / 2% duty
+     * change, 16ms throttle) so JS and WASM paths agree bit-for-bit.
+     */
+    pushSample(
+        pinId: string, frequencyHz: number, dutyCycle: number,
+        pulseUs: number, periodUs: number, nowMs: number,
+    ): PwmSignal | null {
+        if (pulseUs < 1 || frequencyHz > 1000000) return null;
+        this.recent.push({ freqHz: frequencyHz, pulseUs, dutyCycle, periodUs });
+        if (this.recent.length > this.windowSize) this.recent.shift();
+        if (this.recent.length < this.windowSize) return null;
+        const freqs = this.recent.map((m) => m.freqHz);
+        const pulses = this.recent.map((m) => m.pulseUs);
+        const avgFreq = freqs.reduce((a, b) => a + b, 0) / this.windowSize;
+        const avgPulse = pulses.reduce((a, b) => a + b, 0) / this.windowSize;
+        const freqJitter = Math.max(...freqs) - Math.min(...freqs);
+        const pulseJitter = Math.max(...pulses) - Math.min(...pulses);
+        if (!((freqJitter / avgFreq < 0.05 || freqJitter < 5)
+            && (pulseJitter / avgPulse < 0.05 || pulseJitter < 10))) return null;
+        const duty = this.recent.reduce((a, b) => a + b.dutyCycle, 0) / this.windowSize;
+        const period = this.recent.reduce((a, b) => a + b.periodUs, 0) / this.windowSize;
+        const lastFreq = this.last?.freqHz ?? 0;
+        const lastDuty = this.last?.dutyCycle ?? 0;
+        const freqChanged = Math.abs(avgFreq - lastFreq) / (lastFreq || 1) > 0.05;
+        const dutyChanged = Math.abs(duty - lastDuty) > 0.02;
+        const timePassed = (nowMs - this.lastEmitMs) > 16;
+        if (!(freqChanged || dutyChanged || timePassed)) return null;
+        this.last = { freqHz: avgFreq, dutyCycle: duty };
+        this.lastEmitMs = nowMs;
+        const signal: PwmSignal = { frequencyHz: avgFreq, dutyCycle: duty, pulseUs: avgPulse, periodUs: period };
+        this.events.onSignal?.(pinId, signal);
+        return signal;
     }
 }
