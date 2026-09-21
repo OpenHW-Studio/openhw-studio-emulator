@@ -62,6 +62,17 @@ export class WasmComponent extends BaseComponent {
     private loadAttempted = false;
     private cachedMirror: Record<string, any> = {};
 
+    /**
+     * Legacy accessors (§12.4 migration): subclasses written before the
+     * WasmComponent-subclass refactor use this.wasmCore/this.wasmReady.
+     * Backed by the base fields — one source of truth, no duplication.
+     */
+    protected get wasmCore(): WasmCore | null { return this.core; }
+    protected set wasmCore(c: WasmCore | null) {
+        this.core = c;
+        if (c) this.wasmReady = true;
+    }
+
     /** Attach the component-specific glue loader (imported from ./glue). */
     protected setGlueLoader(loader: WasmGlueLoader | null): void {
         this.loader = loader;
@@ -103,22 +114,73 @@ export class WasmComponent extends BaseComponent {
         // Default: hold state. Real components implement the reference model.
     }
 
+    /**
+     * WASM-first dispatch: when a core is loaded, the CORE owns update()
+     * (subclass may still run cheap JS housekeeping via afterWasmUpdate()
+     * — e.g. descriptor pulls — but the per-tick model lives in WASM).
+     * shouldRunWasmUpdate() lets idle components skip the boundary entirely
+     * (zero overhead when idle — e.g. ILI9341 gates on dirty/heartbeat).
+     * WASM-throw → self-heal to JS fallback, never break simulation.
+     */
     update(cpuCycles: number, wires: any[], instances: BaseComponent[]): void {
         if (this.core && this.wasmReady) {
+            let runWasm = true;
             try {
-                this.core.update(cpuCycles);
-                this.pullWasmState();
-                return;
+                runWasm = this.shouldRunWasmUpdate(cpuCycles, wires, instances);
             } catch {
-                this.wasmReady = false;
-                this.core = null;
+                runWasm = true;
+            }
+            if (runWasm) {
+                try {
+                    this.core.update(cpuCycles);
+                    this.pullWasmState();
+                    this.afterWasmUpdate(cpuCycles, wires, instances);
+                    return;
+                } catch {
+                    this.wasmReady = false;
+                    this.core = null;
+                }
+            } else {
+                // Idle-gated: core has no work — still run JS housekeeping
+                // so power/sync/DMA mirrors stay live with zero crossings.
+                try {
+                    this.afterWasmUpdate(cpuCycles, wires, instances);
+                } catch {
+                    // housekeeping must never break the tick
+                }
+                return;
             }
         }
         this.fallbackUpdate(cpuCycles, wires, instances);
     }
 
+    /**
+     * Idle gate: return false to skip the WASM boundary on this tick.
+     * Default true (core runs every tick; cheap cores gate internally).
+     */
+    protected shouldRunWasmUpdate(
+        _cpuCycles: number, _wires: any[], _instances: BaseComponent[],
+    ): boolean {
+        return true;
+    }
+
+    /**
+     * Post-core JS housekeeping (optional): cheap mirror/sync work that must
+     * run even on the WASM path (e.g. ILI9341 DMA poll, SSD1306 frame emit).
+     * Default: no-op. Must NEVER duplicate compute the core already did.
+     */
+    protected afterWasmUpdate(_cpuCycles: number, _wires: any[], _instances: BaseComponent[]): void {}
+
+    /**
+     * Guard: route to the core only when it implements the hook AND the
+     * subclass opts in via useWasmBusHooks() (bus-heavy cores). Default
+     * false → JS bus state machines stay authoritative (displays, SD).
+     */
+    protected useWasmBusHooks(): boolean { return false; }
+
     onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number): void {
-        if (this.core && this.wasmReady && typeof this.core.onPin === 'function') {
+        if (this.core && this.wasmReady && this.useWasmBusHooks()
+            && typeof this.core.onPin === 'function') {
             const idx = this.pinIndex.get(String(pinId));
             if (idx !== undefined) {
                 try {
@@ -133,12 +195,33 @@ export class WasmComponent extends BaseComponent {
         super.onPinStateChange(pinId, isHigh, cpuCycles);
     }
 
-    // NOTE: no onI2C*/onSPIByte overrides here — BaseComponent declares them
-    // as optional interface methods with NO implementation, so super calls
-    // would not compile. Subclasses (e.g. MAX30102Logic) keep their own JS
-    // bus state machines; the WASM core handles DSP (update) only. A future
-    // core with bus support can call this.core.onI2CByte directly from the
-    // subclass override.
+    /** I2C byte → core when the subclass opts into WASM bus hooks. */
+    protected routeI2CByte(addr: number, data: number): number | null {
+        if (this.core && this.wasmReady && this.useWasmBusHooks()
+            && typeof this.core.onI2CByte === 'function') {
+            try {
+                return Number(this.core.onI2CByte(addr & 0x7f, data & 0xff));
+            } catch {
+                this.wasmReady = false;
+                this.core = null;
+            }
+        }
+        return null;
+    }
+
+    /** SPI byte → core when the subclass opts into WASM bus hooks. */
+    protected routeSPIByte(data: number): number | null {
+        if (this.core && this.wasmReady && this.useWasmBusHooks()
+            && typeof this.core.onSPIByte === 'function') {
+            try {
+                return Number(this.core.onSPIByte(data & 0xff));
+            } catch {
+                this.wasmReady = false;
+                this.core = null;
+            }
+        }
+        return null;
+    }
 
     /** Copy WASM state views into the cached JS mirror; set dirty on diff. */
     protected pullWasmState(): void {

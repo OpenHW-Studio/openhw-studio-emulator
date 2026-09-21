@@ -1,9 +1,18 @@
-import { BaseComponent } from '../BaseComponent';
 import { createValidationIssue } from '../component-schema.js';
-import { I2CProtocol } from '../../protocol-handlers/index';
-import type { WasmCore } from '../WasmComponent';
+import { WasmComponent } from '../WasmComponent';
+import { I2cBusFramer } from '../../protocol-handlers/index';
 import { ssd1306GlueLoader } from './glue';
-export class SSD1306Logic extends I2CProtocol {
+
+// §12.4 WASM-heavy layout (same as ILI9341): `extends WasmComponent`
+// DIRECTLY + an owned I2cBusFramer for pure address/buffer bookkeeping.
+// WASM owns COMPUTE (frame pacing + descriptor numerics); TS owns bus
+// event decode (register shadow + 1K VRAM), state, validate, uiState.
+// fallbackUpdate() = REQUIRED JS reference.
+//
+// Why not `extends I2CProtocol`: same double-dispatch problem as the TFT
+// (protocol base + WASM adapter owning the same onI2CByte). Composition
+// gives exactly ONE owner per bus event. See I2cBusFramer docs.
+export class SSD1306Logic extends WasmComponent {
   private vram: Uint8Array;
 
   private awaitingControlByte = true;
@@ -40,32 +49,41 @@ export class SSD1306Logic extends I2CProtocol {
   private lastUpdateCycle = 0;
   private cycleCount = 0;
 
-  // WASM Phase 2 (ssd1306 descriptor core): lazy async, never in tick.
-  // Bus/VRAM stay JS; the core paces descriptor numerics only.
-  private wasmCore: WasmCore | null = null;
-  private wasmReady = false;
-  private wasmLoadAttempted = false;
-
-  /** Lazy async core load — called once by runners, never in tick. */
-  async ensureWasmLoaded(): Promise<boolean> {
-      if (this.wasmReady) return true;
-      if (this.wasmLoadAttempted) return false;
-      this.wasmLoadAttempted = true;
-      try {
-          const core = await ssd1306GlueLoader.load(this.manifest);
-          if (core) { this.wasmCore = core; this.wasmReady = true; return true; }
-      } catch { /* JS fallback */ }
-      return false;
-  }
+  // Owned I2C framer (composition, NOT inheritance): pure address match
+  // + write-buffer assembly. Runner bytes enter via onI2CStart/onI2CByte/
+  // onI2CStop/onI2CReadByte below — exactly once.
+  private i2cAddr = 0x3c;
+  private i2c = new I2cBusFramer(0x3c, {
+    onWriteRegister: (reg, data) => this.i2cWriteRegister(reg, data),
+    onReadRequest: (reg, count) => this.i2cReadRequest(reg, count),
+    onStop: () => { this.awaitingControlByte = true; },
+  });
 
   constructor(id: string, manifest: any) {
     super(id, manifest);
+    // §12.4: attach the WASM loader; WasmComponent owns core/ready/load.
+    this.setGlueLoader(ssd1306GlueLoader as any);
+    const rawAddr = Number(manifest?.attrs?.address ?? manifest?.attrs?.i2cAddress ?? manifest?.attrs?.addr ?? 0x3c);
+    this.i2cAddr = Number.isFinite(rawAddr) ? (rawAddr & 0x7f) : 0x3c;
+    // Rebuild the framer with the resolved address (field initializers run
+    // before the constructor body, so the default 0x3c above is replaced).
+    this.i2c = new I2cBusFramer(this.i2cAddr, {
+      onWriteRegister: (reg, data) => this.i2cWriteRegister(reg, data),
+      onReadRequest: (reg, count) => this.i2cReadRequest(reg, count),
+      onStop: () => { this.awaitingControlByte = true; },
+    });
     this.vram = new Uint8Array(typeof SharedArrayBuffer !== 'undefined' ? new SharedArrayBuffer(1024) : 1024);
 
 
 
     this.state = {
       ...this.state,
+      i2cAddress: this.i2cAddr,
+      i2cRxBytes: 0,
+      i2cTxBytes: 0,
+      lastRegister: null,
+      lastWriteData: [],
+      lastReadData: [],
       vram: this.vram,
       invert: false,
       allOn: false,
@@ -79,25 +97,70 @@ export class SSD1306Logic extends I2CProtocol {
     };
   }
 
-  update(cpuCycles: number) {
-    // WASM descriptor core (§12.4): when loaded, it owns frame pacing +
-    // descriptor numerics (updateCount/displayOn/dirty). Bus + VRAM stay JS.
-    // I2C ingestion marks the core dirty (one u32 write per VRAM /
-    // displayOn/Off event); update() gates frames at 60 FPS and the JS gate
-    // below is the reference fallback when the core is absent.
-    // pullWasmDescriptorState() mirrors core views into state (dirty-gated).
-    if (this.wasmReady && this.wasmCore) {
-      try {
-        this.wasmCore.update(cpuCycles);
-        this.pullWasmDescriptorState();
-      } catch {
-        this.wasmReady = false;
-        this.wasmCore = null;
-      }
+  // ── Runner entry points (SINGLE dispatch owner) ────────────────
+
+  getI2CAddress(): number { return this.i2cAddr; }
+
+  onI2CStart(address: number, read: boolean): boolean {
+    const ack = this.i2c.start(address, read);
+    if (ack && read) {
+      // Mirror the protocol-base read-queue snapshot into state.
+      this.state.lastReadMode = true;
+      this.stateChanged = true;
+    } else if (ack) {
+      this.state.lastReadMode = false;
+      this.stateChanged = true;
     }
-    if (!this.wasmReady) {
-      this.jsFrameGate(cpuCycles);
-    }
+    return ack;
+  }
+
+  onI2CByte(addr: number, data: number) {
+    const byte = data & 0xff;
+    this.state.i2cRxBytes = Number(this.state.i2cRxBytes || 0) + 1;
+    this.stateChanged = true;
+    // Framer assembles the write buffer; control/data decode below.
+    this.i2c.pushByte(byte);
+    this.ssdByteIn(byte);
+    return true;
+  }
+
+  onI2CReadByte(): number {
+    const b = this.i2c.readByte(0xff);
+    this.state.i2cTxBytes = Number(this.state.i2cTxBytes || 0) + 1;
+    this.stateChanged = true;
+    return b;
+  }
+
+  onI2CStop(): void {
+    this.i2c.stop();
+  }
+
+  // ── Framer event handlers (private decode; the ONLY I2C consumers) ──
+
+  /** Register-write decode: SSD1306 has no register map — every payload
+   * byte is a control/data stream byte. */
+  private i2cWriteRegister(_reg: number, _data: number[]): void {}
+
+  private i2cReadRequest(_reg: number, _count: number): number[] {
+    return [];
+  }
+
+  /**
+   * REQUIRED JS reference (§12.4): 60 FPS frame gate emitting state when
+   * VRAM changed. Runs when no WASM core is loaded (WasmComponent
+   * fallbackUpdate dispatch).
+   */
+  protected fallbackUpdate(cpuCycles: number): void {
+    this.jsFrameGate(cpuCycles);
+  }
+
+  /**
+   * Post-core housekeeping on the WASM path: pull descriptor views, then
+   * run the SAME frame gate as the JS reference (shared helper — no drift).
+   */
+  protected afterWasmUpdate(cpuCycles: number): void {
+    this.pullWasmDescriptorState();
+    this.jsFrameGate(cpuCycles);
   }
 
   /** JS reference frame gate (60 FPS): emits state when VRAM changed. */
@@ -134,9 +197,9 @@ export class SSD1306Logic extends I2CProtocol {
 
   /** Notify the WASM descriptor core of a VRAM/displayOn change (event path). */
   private markCoreDirty(): void {
-    if (!this.wasmReady || !this.wasmCore) return;
+    if (!this.core) return;
     try {
-      this.wasmCore.markDirty?.(this.displayOn ? 1 : 0);
+      this.core.markDirty?.(this.displayOn ? 1 : 0);
     } catch { /* core stays stale; JS reference wins */ }
   }
 
@@ -146,7 +209,7 @@ export class SSD1306Logic extends I2CProtocol {
    * i[0]=displayOn, i[1]=dirty.
    */
   protected pullWasmDescriptorState(): void {
-    const core = this.wasmCore;
+    const core = this.core;
     if (!core) return;
     let views: { f: Float32Array; i: Int32Array } | null = null;
     try {
@@ -175,9 +238,12 @@ export class SSD1306Logic extends I2CProtocol {
     }
   }
 
-  onI2CByte(addr: number, data: number) {
-    super.onI2CByte(addr, data);
-    // console.log(`[SSD1306 OLED] Received I2C byte: 0x${data.toString(16)} at address 0x${addr.toString(16)}`);
+  /**
+   * Control/data stream decode (was onI2CByte body under I2CProtocol).
+   * Called exactly once per byte from the onI2CByte() entry above.
+   */
+  private ssdByteIn(data: number) {
+    // console.log(`[SSD1306 OLED] Received I2C byte: 0x${data.toString(16)}`);
 
 
     if (this.awaitingControlByte) {
@@ -197,11 +263,6 @@ export class SSD1306Logic extends I2CProtocol {
       this.awaitingControlByte = true;
     }
     return true;
-  }
-
-  onI2CStop() {
-    super.onI2CStop();
-    this.awaitingControlByte = true;
   }
 
   private writeVram(data: number) {

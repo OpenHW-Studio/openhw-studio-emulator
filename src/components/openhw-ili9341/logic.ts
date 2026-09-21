@@ -1,9 +1,22 @@
-import { BaseComponent } from '../BaseComponent';
-import { SPIProtocol } from '../../protocol-handlers/index';
-import type { WasmCore } from '../WasmComponent';
+import type { BaseComponent } from '../BaseComponent';
+import { WasmComponent } from '../WasmComponent';
+import { SpiBusFramer } from '../../protocol-handlers/index';
 import { ili9341GlueLoader } from './glue';
 
-export class ILI9341Logic extends SPIProtocol {
+// §12.4 WASM-heavy layout: `extends WasmComponent` DIRECTLY + an owned
+// SpiBusFramer for pure CS/frame bookkeeping. WASM owns COMPUTE
+// (descriptor pacing + pixel kernels); TS owns bus event decode
+// (CASET/PASET/RAMWR framing), state, validate, uiState.
+// update() = WasmComponent WASM-first dispatch; fallbackUpdate() = the
+// REQUIRED slow-but-correct JS reference (runs when no core loaded).
+//
+// Why not `extends SPIProtocol`: that would stack TWO dispatch owners —
+// the protocol base (CS/frame engine, its own _frame/_csActive) AND the
+// WASM adapter (guarded onPin/onSPI routing) — over the same runner
+// events. Bytes/state get double-counted and CS edges can run the core
+// and the JS reference on the same tick. Composition (framer as a field)
+// gives exactly ONE owner per event. See SpiBusFramer docs.
+export class ILI9341Logic extends WasmComponent {
     private currentCommand = 0;
 
     // Windowing 
@@ -39,29 +52,88 @@ export class ILI9341Logic extends SPIProtocol {
     // Compact snapshot settings
     private compactPrefixBytes = 64;
 
-    // WASM Phase 2 (ili9341 descriptor core): lazy async, never in tick.
-    // Bus/VRAM stay JS; the core paces descriptor numerics only.
-    private wasmCore: WasmCore | null = null;
-    private wasmReady = false;
-    private wasmLoadAttempted = false;
-
-    /** Lazy async core load — called once by runners, never in tick. */
-    async ensureWasmLoaded(): Promise<boolean> {
-        if (this.wasmReady) return true;
-        if (this.wasmLoadAttempted) return false;
-        this.wasmLoadAttempted = true;
-        try {
-            const core = await ili9341GlueLoader.load(this.manifest);
-            if (core) { this.wasmCore = core; this.wasmReady = true; return true; }
-        } catch { /* JS fallback */ }
-        return false;
-    }
+    // Owned SPI framer (composition, NOT inheritance): pure CS/frame
+    // bookkeeping. Runner bytes enter via onSPIByte() below — exactly once.
+    private spi = new SpiBusFramer('CS', true, {
+        onByte: (byte, index) => this.spiByteIn(byte, index),
+        onAssert: () => this.spiAssert(),
+        onDeassert: (meta) => this.spiDeassert(meta),
+    });
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
+        // §12.4: attach the WASM loader; WasmComponent owns core/ready/load.
+        this.setGlueLoader(ili9341GlueLoader as any);
         this.powerOn = true;
         this.vccDetected = true;
-        this.state = { buffer: this.vram, powerOn: true, t: 0, spiFrames: [], compactSnapshot: null };
+        this.state = {
+            ...this.state,
+            buffer: this.vram, powerOn: true, t: 0,
+            spiFrames: [], compactSnapshot: null,
+            spiRxBytes: 0, spiTxBytes: 0, csActive: false,
+            lastCommand: null, lastFrame: [], lastResponse: [],
+        };
+    }
+
+    // ── Runner entry points (SINGLE dispatch owner) ────────────────
+    // The runner calls these; the framer only tracks CS/frame edges.
+
+    /** Every SPI clock byte exchange. Returns the MISO byte (TFT: 0xFF). */
+    onSPIByte(data: number): number {
+        const byte = data & 0xFF;
+        this.state.spiRxBytes = (this.state.spiRxBytes || 0) + 1;
+        this.stateChanged = true;
+        const miso = this.spi.pushByte(byte);
+        this.state.spiTxBytes = (this.state.spiTxBytes || 0) + 1;
+        return miso & 0xFF;
+    }
+
+    /** CS + RESET pin edges. CS routes to the framer; RESET stays local. */
+    onPinStateChange(pinId: string, isHigh: boolean, cycles: number) {
+        // WASM bus hooks stay OFF for the TFT (JS framing authoritative).
+        super.onPinStateChange(pinId, isHigh, cycles);
+        if (pinId === 'CS') {
+            const wasActive = this.spi.csActive;
+            this.spi.pushPin(pinId, isHigh);
+            this.state.csActive = this.spi.csActive;
+            this.stateChanged = true;
+            void wasActive;
+            return;
+        }
+        if (pinId === 'RESET' && !isHigh) {
+            this.vram.fill(0);
+            this.vramDirty = true;
+            this.markCoreDirty(true);
+        }
+    }
+
+    // ── Framer event handlers (private; the ONLY consumers of SPI bytes) ──
+
+    private spiByteIn(byte: number, byteIndex: number): number | void {
+        this.onSPIByteReceived(byte, byteIndex);
+    }
+
+    private spiAssert(): void {
+        this.onCSAssert();
+    }
+
+    private spiDeassert(meta: { command: number; payload: number[]; frame: number[]; csPin: string }): void {
+        if (meta.frame.length > 0) {
+            this.state.lastCommand = meta.command;
+            this.state.lastFrame = meta.frame;
+        }
+        this.onCSDeassert(meta);
+    }
+
+    /**
+     * Idle gate (§12.4): skip the WASM boundary when the core has no work
+     * (no dirty VRAM, heartbeat not due) — zero overhead when idle.
+     */
+    protected shouldRunWasmUpdate(cpuCycles: number): boolean {
+        const nowMs = Math.floor(cpuCycles / 16000);
+        return (this.vramDirty && (nowMs - this.lastSync > 33))
+            || (nowMs - this.lastSync > 100)
+            || this.vramDirty;
     }
 
     // CRC32 helper for compact snapshot
@@ -91,26 +163,26 @@ export class ILI9341Logic extends SPIProtocol {
         return this.getPinVoltage('DC') > 2.5;
     }
 
-    update(cpuCycles: number, currentWires: any[], instances: BaseComponent[]) {
-        super.update(cpuCycles, currentWires, instances);
-        // WASM descriptor core (§12.4): IDLE-GATED dispatch — when nothing
-        // changed (no VRAM writes, no power edge, outside the sync windows)
-        // we skip the boundary entirely: zero overhead when idle. The core
-        // only runs when it has work to do (dirty frame or due heartbeat).
-        if (this.wasmReady && this.wasmCore) {
-            const nowMs = Math.floor(cpuCycles / 16000);
-            const syncDue = (this.vramDirty && (nowMs - this.lastSync > 33))
-                || (nowMs - this.lastSync > 100);
-            if (syncDue || this.vramDirty) {
-                try {
-                    this.wasmCore.update(cpuCycles);
-                    this.pullWasmDescriptorState();
-                } catch {
-                    this.wasmReady = false;
-                    this.wasmCore = null;
-                }
-            }
-        }
+    /**
+     * REQUIRED JS reference (§12.4): full model — power sensing, 30 FPS /
+     * 100 ms sync gate, DMA blit. Runs when no WASM core is loaded AND as
+     * afterWasmUpdate() housekeeping on the WASM path (via shared helper
+     * below so both paths execute IDENTICAL logic — no drift).
+     */
+    protected fallbackUpdate(cpuCycles: number, currentWires: any[], instances: BaseComponent[]): void {
+        this.jsSyncAndPower(cpuCycles, currentWires, instances);
+    }
+
+    /**
+     * Post-core housekeeping on the WASM path: pull descriptor views, then
+     * run the SAME sync/power/DMA helper as the JS reference.
+     */
+    protected afterWasmUpdate(cpuCycles: number, currentWires: any[], instances: BaseComponent[]): void {
+        this.pullWasmDescriptorState();
+        this.jsSyncAndPower(cpuCycles, currentWires, instances);
+    }
+
+    private jsSyncAndPower(cpuCycles: number, currentWires: any[], instances: BaseComponent[]): void {
         const nowMs = Math.floor(cpuCycles / 16000); // 16MHz: cycles->ms, no wall clock
 
         // Power Sensing: Check if VCC pin is wired to a power source or explicitly powered
@@ -183,12 +255,12 @@ export class ILI9341Logic extends SPIProtocol {
                         // Falls back to the JS loop below when the core is
                         // absent or rejects the frame (returns 0).
                         let converted = 0;
-                        if (this.wasmReady && this.wasmCore?.dmaBlit) {
+                        if (this.core?.dmaBlit) {
                             try {
                                 const bytes = dmaData instanceof Uint8Array
                                     ? dmaData
                                     : new Uint8Array(dmaData.buffer ?? dmaData);
-                                converted = this.wasmCore.dmaBlit(bytes, this.vram) || 0;
+                                converted = this.core.dmaBlit(bytes, this.vram) || 0;
                             } catch { converted = 0; }
                         }
                         if (converted > 0) {
@@ -221,20 +293,11 @@ export class ILI9341Logic extends SPIProtocol {
         }
     }
 
-    onPinStateChange(pinId: string, isHigh: boolean, cycles: number) {
-        super.onPinStateChange(pinId, isHigh, cycles);
-        if (pinId === 'RESET' && !isHigh) {
-            this.vram.fill(0);
-            this.vramDirty = true;
-            this.markCoreDirty(true);
-        }
-    }
-
     /** Notify the WASM pacing core of a VRAM/power event (event path only). */
     private markCoreDirty(powerOn: boolean): void {
-        if (!this.wasmReady || !this.wasmCore) return;
+        if (!this.core) return;
         try {
-            this.wasmCore.markDirty?.(powerOn ? 1 : 0);
+            this.core.markDirty?.(powerOn ? 1 : 0);
         } catch { /* core stays stale; JS reference wins */ }
     }
 
@@ -244,7 +307,7 @@ export class ILI9341Logic extends SPIProtocol {
      * i[0]=powerOn, i[1]=dirty.
      */
     protected pullWasmDescriptorState(): void {
-        const core = this.wasmCore;
+        const core = this.core;
         if (!core) return;
         let views: { f: Float32Array; i: Int32Array } | null = null;
         try {
@@ -265,6 +328,10 @@ export class ILI9341Logic extends SPIProtocol {
         }
     }
     
+    /**
+     * @deprecated Kept public for backward-compat. Runner path is
+     * onPinStateChange(CS) → framer → here. New code must NOT call this.
+     */
     onCSAssert(): void {
         this.params = [];
         this.secondByte = false;
@@ -272,6 +339,7 @@ export class ILI9341Logic extends SPIProtocol {
         this.ramwrPending = null;
     }
 
+    /** @deprecated Same as onCSAssert — use the framer path. */
     onCSDeassert(meta: any): void {
         // Flush the batched RAMWR stream: ONE crossing for the whole frame.
         this.flushRamwrBatch();
@@ -323,9 +391,9 @@ export class ILI9341Logic extends SPIProtocol {
         }
         const tail = bytes.length - evenLen;
         let written = 0;
-        if (this.wasmReady && this.wasmCore?.ramwrBlit) {
+        if (this.core?.ramwrBlit) {
             try {
-                written = this.wasmCore.ramwrBlit(bytes.subarray(0, evenLen), this.vram) || 0;
+                written = this.core.ramwrBlit(bytes.subarray(0, evenLen), this.vram) || 0;
             } catch { written = 0; }
         }
         if (written > 0) {
@@ -350,7 +418,7 @@ export class ILI9341Logic extends SPIProtocol {
     /** Best-effort cursor mirror (core → JS) after a kernel blit. */
     private syncCursorFromCore(): void {
         try {
-            const q = (this.wasmCore as any)?.ramwrCursor?.();
+            const q = this.core?.ramwrCursor?.();
             if (q && Number.isFinite(Number(q.x)) && Number.isFinite(Number(q.y))) {
                 this.currentX = Number(q.x);
                 this.currentY = Number(q.y);
@@ -358,6 +426,11 @@ export class ILI9341Logic extends SPIProtocol {
         } catch { /* JS cursor stays authoritative */ }
     }
 
+    /**
+     * @deprecated Kept public for backward-compat (tests/tools call it
+     * directly). The runner path is onSPIByte() → framer → here. New code
+     * must NOT call this; use onSPIByte().
+     */
     onSPIByteReceived(byte: number, byteIndex: number): void {
         const dmaAddress = parseInt((this as any).attrs?.dmaAddress || this.state?.dmaAddress || '0', 16);
         if (dmaAddress > 0 && !this.state.dmaBypassDisabled) return; // Bypass normal SPI processing if DMA active
@@ -379,7 +452,7 @@ export class ILI9341Logic extends SPIProtocol {
             if (byte === 0x2C) { // RAMWR
                 this.currentX = this.colStart;
                 this.currentY = this.rowStart;
-                try { this.wasmCore?.ramwrBegin?.(); } catch { /* ignore */ }
+                try { this.core?.ramwrBegin?.(); } catch { /* ignore */ }
             }
         } else {
             this.handleDataByte(byte);
@@ -461,7 +534,7 @@ export class ILI9341Logic extends SPIProtocol {
                 break;
 
             case 0x2C: // RAMWR - RGB565 (batched; flushed on CS deassert)
-                if (this.wasmReady && this.wasmCore?.ramwrBlit) {
+                if (this.core?.ramwrBlit) {
                     if (!this.ramwrPending) this.ramwrPending = [];
                     this.ramwrPending.push(data & 0xff);
                     // Bound the batch (8 KB ≈ 4k pixels); flush early on
@@ -480,9 +553,9 @@ export class ILI9341Logic extends SPIProtocol {
 
     /** Mirror CASET/PASET/MADCTL window into the core (command path only). */
     private pushWindowToCore(): void {
-        if (!this.wasmReady || !this.wasmCore?.setWindow) return;
+        if (!this.core?.setWindow) return;
         try {
-            this.wasmCore.setWindow(
+            this.core.setWindow(
                 this.colStart, this.colEnd, this.rowStart, this.rowEnd, this.madctl);
         } catch { /* core window stays stale; JS wins */ }
     }
@@ -500,8 +573,8 @@ export class ILI9341Logic extends SPIProtocol {
         // WASM helpers below are a latency win, not a boundary cost: they
         // replace a 76.8k-iteration JS scan with one kernel call each.
         let fillPercent: number;
-        const wasmFill = (this.wasmReady && this.wasmCore?.fillPercentX10)
-            ? (() => { try { return this.wasmCore!.fillPercentX10!(); } catch { return 0; } })()
+        const wasmFill = (this.core?.fillPercentX10)
+            ? (() => { try { return this.core!.fillPercentX10!(); } catch { return 0; } })()
             : 0;
         if (wasmFill > 0) {
             fillPercent = Number((wasmFill / 10).toFixed(1));
@@ -529,8 +602,8 @@ export class ILI9341Logic extends SPIProtocol {
             const firstBytes = new Uint8Array(prefix);
             for (let i = 0; i < prefix; i++) firstBytes[i] = this.vram[i];
             let checksum: number;
-            if (this.wasmReady && this.wasmCore?.crc32Of) {
-                try { checksum = this.wasmCore.crc32Of(firstBytes) >>> 0; }
+            if (this.core?.crc32Of) {
+                try { checksum = this.core.crc32Of(firstBytes) >>> 0; }
                 catch { checksum = ILI9341Logic.crc32(firstBytes); }
             } else {
                 checksum = ILI9341Logic.crc32(firstBytes);

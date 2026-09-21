@@ -34,6 +34,13 @@ export interface SPITransactionMeta {
 }
 
 export class SPIProtocol extends BaseComponent {
+    // NOTE (§12.4): this class is the PURE-TS bus layer (frame/MISO/CS
+    // engine). It deliberately does NOT extend WasmComponent: every one of
+    // the ~16 SPI components must keep working with zero WASM involvement.
+    // WASM-heavy components compose instead — `class XLogic extends
+    // WasmComponent` + `private spi = new SpiBusFramer(...)` (see below) —
+    // so the bus is a helper, never a base class, and onPin/onSPI routing
+    // can never double-fire through a protocol inheritance chain.
     // ── Configuration overrides ───────────────────────────────────────────────
 
     /** Return false to use Active-HIGH CS (default: Active-LOW). */
@@ -249,4 +256,65 @@ export class SPIProtocol extends BaseComponent {
     protected clearMISOQueue(): void {
         this._misoQueue = [];
     }
+}
+
+/**
+ * SpiBusFramer — composition helper for WASM-heavy components (§12.4).
+ *
+ * The problem with `class XLogic extends SPIProtocol extends WasmComponent`
+ * is that two dispatch layers then own the same events (onPin/onSPIByte):
+ * the runner calls the WASM-first override while the protocol engine also
+ * drives CS/frame state, so bytes get counted twice and CS edges can run
+ * the core AND the JS reference on the same tick.
+ *
+ * The fix: WASM-heavy components extend WasmComponent DIRECTLY and own a
+ * SpiBusFramer for pure framing (CS detect, byte counting, frame buffer).
+ * The framer has NO update()/WASM knowledge — it just reports events the
+ * component routes explicitly (JS reference and/or core batch calls).
+ */
+export interface SpiFrameEvents {
+    onByte?(byte: number, byteIndex: number): number | void;
+    onAssert?(): void;
+    onDeassert?(meta: SPITransactionMeta): void;
+}
+
+export class SpiBusFramer {
+    private frame: number[] = [];
+    private active = false;
+    constructor(
+        private readonly csPinName: string,
+        private readonly activeLow: boolean,
+        private readonly events: SpiFrameEvents,
+    ) {}
+
+    /** Feed one exchanged byte; returns the MISO byte (default 0xFF). */
+    pushByte(data: number): number {
+        const byte = data & 0xFF;
+        this.frame.push(byte);
+        const r = this.events.onByte?.(byte, this.frame.length - 1);
+        return typeof r === 'number' ? (r & 0xFF) : 0xFF;
+    }
+
+    /** Feed a CS pin edge; default CS pin name + active-low polarity. */
+    pushPin(pinId: string, isHigh: boolean): void {
+        if (pinId !== this.csPinName) return;
+        const nowActive = this.activeLow ? !isHigh : isHigh;
+        if (nowActive && !this.active) {
+            this.active = true;
+            this.frame = [];
+            this.events.onAssert?.();
+        } else if (!nowActive && this.active) {
+            this.active = false;
+            const frame = [...this.frame];
+            this.events.onDeassert?.({
+                command: frame[0] ?? 0,
+                payload: frame.slice(1),
+                frame,
+                csPin: pinId,
+            });
+        }
+    }
+
+    get csActive(): boolean { return this.active; }
+    get currentFrame(): number[] { return [...this.frame]; }
 }
