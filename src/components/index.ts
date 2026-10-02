@@ -8,6 +8,7 @@ export { default as openhwArduinoUno } from './openhw-arduino-uno';
 // Board shells (UI-only while execution is AVR-only): the svg/manifest/ui
 // artwork stays on canvas; CPU/runner logic returns from scratch later.
 export { default as openhwPico } from './openhw-pico/index';
+export { default as openhwPico2 } from './openhw-pico-2/index';
 export { default as openhwPicoW } from './openhw-pico-w/index';
 export { default as openhwEsp32 } from './ESP32/index';
 export { default as openhwEsp32Cam } from './openhw-esp32-cam/index';
