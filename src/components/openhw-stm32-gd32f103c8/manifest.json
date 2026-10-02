@@ -1,7 +1,7 @@
 {
   "type": "openhw-stm32-gd32f103c8",
   "label": "GD32F103C8 Blue Pill",
-  "group": "Boards",
+  "group": "Board Variants",
   "description": "GigaDevice GD32F103C8 \u2014 register-identical to STM32F103C8 (64KB flash / 20KB RAM). USART1 PA9/PA10, LED PC13.",
   "w": 92,
   "h": 320,

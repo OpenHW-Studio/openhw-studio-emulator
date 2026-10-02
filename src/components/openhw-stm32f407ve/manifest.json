@@ -1,7 +1,7 @@
 {
   "type": "openhw-stm32f407ve",
   "label": "STM32F407VE Black Board",
-  "group": "Boards",
+  "group": "Board Variants",
   "description": "STM32F407VE black board \u2014 512KB flash / 192KB RAM, 168MHz. LED PA6. USART1 PA9/PA10.",
   "w": 140,
   "h": 320,

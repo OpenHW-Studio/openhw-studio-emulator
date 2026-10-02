@@ -1,7 +1,7 @@
 {
   "type": "openhw-stm32-gd32f103rb",
   "label": "GD32F103RB (128K)",
-  "group": "Boards",
+  "group": "Board Variants",
   "description": "GigaDevice GD32F103RB \u2014 128KB flash / 20KB RAM. USART1 PA9/PA10, LED PC13.",
   "w": 92,
   "h": 320,

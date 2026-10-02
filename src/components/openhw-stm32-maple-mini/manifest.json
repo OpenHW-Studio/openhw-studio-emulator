@@ -1,7 +1,7 @@
 {
   "type": "openhw-stm32-maple-mini",
   "label": "Maple Mini (F103CB)",
-  "group": "Boards",
+  "group": "Board Variants",
   "description": "LeafLabs Maple Mini \u2014 STM32F103CB (128KB flash / 20KB RAM). USART1 PA9/PA10, LED PB1.",
   "w": 92,
   "h": 320,

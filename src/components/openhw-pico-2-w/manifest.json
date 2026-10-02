@@ -2,7 +2,7 @@
   "type": "openhw-pico-2-w",
   "label": "Raspberry Pi Pico 2 W",
   "description": "RP2350 Pico 2 W board with CYW43 wireless. GPIO/UART/I2C/SPI/PWM/ADC in simulation; WiFi/BLE via _wifi_enable (deferred live net).",
-  "group": "Boards",
+  "group": "Board Variants",
   "w": 124,
   "h": 314,
   "attrs": {

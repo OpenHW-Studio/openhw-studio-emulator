@@ -1,7 +1,7 @@
 {
   "type": "openhw-stm32f411",
   "label": "STM32F411 BlackPill",
-  "group": "Boards",
+  "group": "Board Variants",
   "description": "STM32F411CE BlackPill \u2014 512KB flash / 128KB RAM, 100MHz. LED PC13 (Nucleo PA5 alias). USART1 PA9/PA10.",
   "w": 140,
   "h": 320,

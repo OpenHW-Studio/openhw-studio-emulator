@@ -2,7 +2,7 @@
   "type": "openhw-pico-eth",
   "label": "WIZnet W5500-EVB-Pico",
   "description": "RP2040 W5500-EVB-Pico carrier (W5500 on SPI0, CSn=GPIO17/RSTn=GPIO20/INTn=GPIO21). Ethernet via _picoemu_board_eth (deferred live net).",
-  "group": "Boards",
+  "group": "Board Variants",
   "w": 124,
   "h": 314,
   "attrs": {

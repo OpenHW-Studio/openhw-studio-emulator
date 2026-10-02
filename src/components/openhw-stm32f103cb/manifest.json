@@ -1,7 +1,7 @@
 {
   "type": "openhw-stm32f103cb",
   "label": "STM32F103CB Blue Pill (128K)",
-  "group": "Boards",
+  "group": "Board Variants",
   "description": "STM32F103CB Blue Pill \u2014 128KB flash / 20KB RAM. Same Blue Pill footprint; USART1 PA9/PA10, LED PC13.",
   "w": 92,
   "h": 320,

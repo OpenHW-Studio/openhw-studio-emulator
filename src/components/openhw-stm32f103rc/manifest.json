@@ -1,7 +1,7 @@
 {
   "type": "openhw-stm32f103rc",
   "label": "STM32F103RC (256K)",
-  "group": "Boards",
+  "group": "Board Variants",
   "description": "STM32F103RC \u2014 256KB flash / 48KB RAM. USART1 PA9/PA10, LED PC13.",
   "w": 92,
   "h": 320,
