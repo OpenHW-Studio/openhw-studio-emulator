@@ -1,0 +1,49 @@
+<svg width="100%" height="100%" viewBox="0 0 92 320" xmlns="http://www.w3.org/2000/svg">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="90" height="318" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="46.0" y="160.0" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">GD32F103C8 Blue Pill</text>
+  <circle cx="15" cy="15" r="2.5" fill="#888" data-pin="VBAT" />
+  <circle cx="15" cy="30" r="2.5" fill="#888" data-pin="PC13" />
+  <circle cx="15" cy="45" r="2.5" fill="#888" data-pin="PC14" />
+  <circle cx="15" cy="60" r="2.5" fill="#888" data-pin="PC15" />
+  <circle cx="15" cy="75" r="2.5" fill="#888" data-pin="PA0" />
+  <circle cx="15" cy="90" r="2.5" fill="#888" data-pin="PA1" />
+  <circle cx="15" cy="105" r="2.5" fill="#888" data-pin="PA2" />
+  <circle cx="15" cy="120" r="2.5" fill="#888" data-pin="PA3" />
+  <circle cx="15" cy="135" r="2.5" fill="#888" data-pin="PA4" />
+  <circle cx="15" cy="150" r="2.5" fill="#888" data-pin="PA5" />
+  <circle cx="15" cy="165" r="2.5" fill="#888" data-pin="PA6" />
+  <circle cx="15" cy="180" r="2.5" fill="#888" data-pin="PA7" />
+  <circle cx="15" cy="195" r="2.5" fill="#888" data-pin="PB0" />
+  <circle cx="15" cy="210" r="2.5" fill="#888" data-pin="PB1" />
+  <circle cx="15" cy="225" r="2.5" fill="#888" data-pin="PB10" />
+  <circle cx="15" cy="240" r="2.5" fill="#888" data-pin="PB11" />
+  <circle cx="15" cy="255" r="2.5" fill="#888" data-pin="RESET" />
+  <circle cx="15" cy="270" r="2.5" fill="#888" data-pin="3V3.1" />
+  <circle cx="15" cy="285" r="2.5" fill="#888" data-pin="GND.1" />
+  <circle cx="15" cy="300" r="2.5" fill="#888" data-pin="GND.2" />
+  <circle cx="75" cy="15" r="2.5" fill="#888" data-pin="3V3.2" />
+  <circle cx="75" cy="30" r="2.5" fill="#888" data-pin="GND.3" />
+  <circle cx="75" cy="45" r="2.5" fill="#888" data-pin="5V" />
+  <circle cx="75" cy="60" r="2.5" fill="#888" data-pin="PB9" />
+  <circle cx="75" cy="75" r="2.5" fill="#888" data-pin="PB8" />
+  <circle cx="75" cy="90" r="2.5" fill="#888" data-pin="PB7" />
+  <circle cx="75" cy="105" r="2.5" fill="#888" data-pin="PB6" />
+  <circle cx="75" cy="120" r="2.5" fill="#888" data-pin="PB5" />
+  <circle cx="75" cy="135" r="2.5" fill="#888" data-pin="PB4" />
+  <circle cx="75" cy="150" r="2.5" fill="#888" data-pin="PB3" />
+  <circle cx="75" cy="165" r="2.5" fill="#888" data-pin="PA15" />
+  <circle cx="75" cy="180" r="2.5" fill="#888" data-pin="PA12" />
+  <circle cx="75" cy="195" r="2.5" fill="#888" data-pin="PA11" />
+  <circle cx="75" cy="210" r="2.5" fill="#888" data-pin="PA10" />
+  <circle cx="75" cy="225" r="2.5" fill="#888" data-pin="PA9" />
+  <circle cx="75" cy="240" r="2.5" fill="#888" data-pin="PA8" />
+  <circle cx="75" cy="255" r="2.5" fill="#888" data-pin="PB15" />
+  <circle cx="75" cy="270" r="2.5" fill="#888" data-pin="PB14" />
+  <circle cx="75" cy="285" r="2.5" fill="#888" data-pin="PB13" />
+  <circle cx="75" cy="300" r="2.5" fill="#888" data-pin="PB12" />
+  <circle cx="23.5" cy="315" r="2.5" fill="#888" data-pin="SWD_3V3" />
+  <circle cx="38.5" cy="315" r="2.5" fill="#888" data-pin="SWDIO" />
+  <circle cx="53.5" cy="315" r="2.5" fill="#888" data-pin="SWCLK" />
+  <circle cx="68.5" cy="315" r="2.5" fill="#888" data-pin="SWD_GND" />
+</svg>

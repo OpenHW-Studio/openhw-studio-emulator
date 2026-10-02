@@ -1,0 +1,10 @@
+<svg width="100%" height="100%" viewBox="0 0 140 320" xmlns="http://www.w3.org/2000/svg">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="138" height="318" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="70.0" y="160.0" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">STM32F411 BlackPill</text>
+  <circle cx="15" cy="15" r="2.5" fill="#888" data-pin="5V" />
+  <circle cx="15" cy="60" r="2.5" fill="#888" data-pin="PA0" />
+  <circle cx="125" cy="60" r="2.5" fill="#888" data-pin="PD12" />
+  <circle cx="125" cy="150" r="2.5" fill="#888" data-pin="PA9" />
+  <circle cx="125" cy="165" r="2.5" fill="#888" data-pin="PA10" />
+</svg>
