@@ -1,0 +1,9 @@
+<svg width="100%" height="100%" viewBox="0 0 140.0 320.0" xmlns="http://www.w3.org/2000/svg" data-component="openhw-stm32f4" data-bind-root="true">
+  <rect x="1" y="1" width="138.0" height="318.0" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="70.0" y="160.0" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">STM32F4 Discovery</text>
+  <circle cx="15" cy="15" r="2.5" fill="#888" data-pin="5V" />
+  <circle cx="15" cy="60" r="2.5" fill="#888" data-pin="PA0" />
+  <circle cx="125" cy="150" r="2.5" fill="#888" data-pin="PA9" />
+  <circle cx="125" cy="165" r="2.5" fill="#888" data-pin="PA10" />
+  <circle cx="125" cy="60" r="2.5" fill="#888" data-pin="PD12" />
+</svg>
