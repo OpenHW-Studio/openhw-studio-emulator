@@ -428,8 +428,10 @@ export class SDCardLogic extends SPIProtocol {
         }
 
         if (command === 58) {
-            // OCR with CCS bit set (SDHC-compatible addressing for simulator simplicity).
-            this.queueResponse([0x00, 0x40, 0x00, 0x00, 0x00]);
+            // OCR: power-up complete (bit31) + CCS/SDHC (bit30) + 2.7–3.6V
+            // window. A ready card MUST report power-up complete — stacks
+            // reject OCRs with bit31 clear even after ACMD41 went ready.
+            this.queueResponse([0x00, 0xc0, 0xff, 0x80, 0x00]);
             return;
         }
 
