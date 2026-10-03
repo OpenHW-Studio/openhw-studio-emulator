@@ -10,9 +10,15 @@ export const UI = ({ state, attrs }: { state: any, attrs: any }) => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const workletNodeRef = useRef<AudioWorkletNode | null>(null);
+  // Mount-once media pipeline: attrs object identity changes every render,
+  // so depending on it churns getUserMedia/contexts forever and audio never
+  // sustains. Mode is captured at mount (circuit edits remount anyway).
+  const liveMicAtMount = useRef(liveMicEnabled);
+  const interactRef = useRef(attrs?.onInteract);
+  interactRef.current = attrs?.onInteract;
 
   useEffect(() => {
-    if (!liveMicEnabled) {
+    if (!liveMicAtMount.current) {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(t => t.stop());
         streamRef.current = null;
@@ -53,8 +59,9 @@ export const UI = ({ state, attrs }: { state: any, attrs: any }) => {
 
         const workletNode = new AudioWorkletNode(audioCtx, 'mic-processor');
         workletNode.port.onmessage = (e) => {
-          if (attrs.onInteract) {
-              attrs.onInteract({ type: 'mic_data', data: e.data });
+          const cb = interactRef.current;
+          if (cb) {
+              cb({ type: 'mic_data', data: e.data });
           }
         };
         
@@ -64,8 +71,9 @@ export const UI = ({ state, attrs }: { state: any, attrs: any }) => {
       })
       .catch(err => {
         console.warn('Microphone access denied or error:', err);
-        if (attrs.onInteract) {
-            attrs.onInteract({ type: 'mic_error' });
+        const cb = interactRef.current;
+        if (cb) {
+            cb({ type: 'mic_error' });
         }
       });
 
@@ -77,7 +85,8 @@ export const UI = ({ state, attrs }: { state: any, attrs: any }) => {
         audioContextRef.current.close().catch(e => console.warn('AudioContext close error:', e));
       }
     };
-  }, [liveMicEnabled, attrs]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div style={{ position: 'relative', width: BOUNDS.w, height: BOUNDS.h, pointerEvents: 'none' }}>
