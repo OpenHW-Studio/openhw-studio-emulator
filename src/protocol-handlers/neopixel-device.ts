@@ -86,6 +86,26 @@ export class NeoPixelProtocol extends BaseComponent implements NeoPixelEdgeState
                 }
             }
         }
+
+        // WS2812 latch on idle timeout: real strips latch the frame ~50us
+        // after the last edge with NO further traffic. The edge framer can
+        // only emit on the next rising edge, so a firmware that calls
+        // show() once and never touches DIN again (the normal Arduino
+        // pattern) would leave a fully-decoded buffer unlatched forever —
+        // exactly the live activePixels:0 seen with perfect edge timing.
+        // Flush here when the line has idled past the reset window.
+        if (this.buffer.length > 0) {
+            const idleThreshold = this.cpuFreqMHz * 50;
+            if (cpuCycles - this.lastCycle > idleThreshold) {
+                const pixels = NeoPixelBusFramer.packPixels(this.buffer);
+                this.buffer = [];
+                this.currentBit = 0;
+                this.currentByte = 0;
+                this.state.pixels = pixels;
+                this.stateChanged = true;
+                this.onNeoPixelFrame(pixels);
+            }
+        }
     }
 
     onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number): void {
