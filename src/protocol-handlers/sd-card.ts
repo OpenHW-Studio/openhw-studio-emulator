@@ -705,10 +705,19 @@ export class SDCardLogic extends SPIProtocol {
 
         if (this.commandFrame.length === 0) {
             if ((byte & 0xc0) === 0x40) {
+                // New command frame: the card drives MISO HIGH while
+                // receiving command bytes (real cards never spend queued
+                // responses on clocks the master ignores). Returning the
+                // queue here would eat the previous response early and
+                // shift every subsequent read by one. Stale tail bytes are
+                // dropped: a new command supersedes them in hardware too.
+                this.responseQueue.length = 0;
                 this.commandFrame.push(byte);
+                return 0xff;
             } else if (byte === 0x9f) {
                 // Legacy SPI probe compatibility.
                 this.queueResponse([0x53, 0x44, 0x30]);
+                return 0xff;
             }
             return this.emitResponseByte();
         }
@@ -718,6 +727,9 @@ export class SDCardLogic extends SPIProtocol {
             const frame = this.commandFrame.slice(0, 6);
             this.commandFrame = [];
             this.handleCommandFrame(frame);
+            // Command bytes read back as idle-high; the queued R1/R3/R7
+            // surfaces on the master's following read clocks.
+            return 0xff;
         }
 
         return this.emitResponseByte();
