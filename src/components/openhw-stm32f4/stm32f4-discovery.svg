@@ -1,9 +1,162 @@
-<svg width="100%" height="100%" viewBox="0 0 140.0 320.0" xmlns="http://www.w3.org/2000/svg" data-component="openhw-stm32f4" data-bind-root="true">
-  <rect x="1" y="1" width="138.0" height="318.0" rx="6" fill="#1e293b" stroke="#475569" />
-  <text x="70.0" y="160.0" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">STM32F4 Discovery</text>
-  <circle cx="15" cy="15" r="2.5" fill="#888" data-pin="5V" />
-  <circle cx="15" cy="60" r="2.5" fill="#888" data-pin="PA0" />
-  <circle cx="125" cy="150" r="2.5" fill="#888" data-pin="PA9" />
-  <circle cx="125" cy="165" r="2.5" fill="#888" data-pin="PA10" />
-  <circle cx="125" cy="60" r="2.5" fill="#888" data-pin="PD12" />
+<svg width="100%" height="100%" viewBox="0 0 140 320" xmlns="http://www.w3.org/2000/svg" data-component="openhw-stm32f4" data-bind-root="true">
+  <!--
+    STM32F4 Discovery (STM32F407VGT6) — photo-faithful board art.
+    Black Discovery PCB: ST-LINK/V2 top bar, LQFP100 MCU, NO TFT
+    (unlike F429), 4 user LEDs PD12-PD15 (green driven), USER (PA0)
+    + RESET buttons, 8MHz crystal.
+    Dynamics (driven by ui.tsx state.builtInLed, never by this file):
+      - data-bind="builtin-led" ← green PD12 on #2ecc71 / off #145a32
+    Pin geometry matches manifest.json exactly (20L + 17R + 3 SWD).
+  -->
+  <rect x="0" y="5" width="140" height="305" rx="4" fill="#1a1a2e" stroke="#0d0d1a" stroke-width="1" />
+  <!-- ST-LINK/V2 top bar -->
+  <rect x="30" y="0" width="80" height="14" fill="#95a5a6" rx="2" stroke="#7f8c8d" />
+  <text x="70" y="10" fill="#2c3e50" font-size="6" font-family="monospace" text-anchor="middle">ST-LINK/V2</text>
+  <!-- STM32F407VGT6 LQFP100 -->
+  <g transform="translate(70,130)">
+    <rect x="-22" y="-22" width="44" height="44" fill="#2c3e50" rx="2" />
+    <line x1="-23" y1="-19" x2="-26" y2="-19" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="23" y1="-19" x2="26" y2="-19" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="-23" y1="-16.5" x2="-26" y2="-16.5" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="23" y1="-16.5" x2="26" y2="-16.5" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="-23" y1="-14" x2="-26" y2="-14" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="23" y1="-14" x2="26" y2="-14" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="-23" y1="-11.5" x2="-26" y2="-11.5" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="23" y1="-11.5" x2="26" y2="-11.5" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="-23" y1="-9" x2="-26" y2="-9" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="23" y1="-9" x2="26" y2="-9" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="-23" y1="-6.5" x2="-26" y2="-6.5" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="23" y1="-6.5" x2="26" y2="-6.5" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="-23" y1="-4" x2="-26" y2="-4" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="23" y1="-4" x2="26" y2="-4" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="-23" y1="-1.5" x2="-26" y2="-1.5" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="23" y1="-1.5" x2="26" y2="-1.5" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="-23" y1="1" x2="-26" y2="1" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="23" y1="1" x2="26" y2="1" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="-23" y1="3.5" x2="-26" y2="3.5" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="23" y1="3.5" x2="26" y2="3.5" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="-23" y1="6" x2="-26" y2="6" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="23" y1="6" x2="26" y2="6" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="-23" y1="8.5" x2="-26" y2="8.5" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="23" y1="8.5" x2="26" y2="8.5" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="-23" y1="11" x2="-26" y2="11" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="23" y1="11" x2="26" y2="11" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="-23" y1="13.5" x2="-26" y2="13.5" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="23" y1="13.5" x2="26" y2="13.5" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="-23" y1="16" x2="-26" y2="16" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="23" y1="16" x2="26" y2="16" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="-23" y1="18.5" x2="-26" y2="18.5" stroke="#bdc3c7" stroke-width="0.6" />
+    <line x1="23" y1="18.5" x2="26" y2="18.5" stroke="#bdc3c7" stroke-width="0.6" />
+    <text x="0" y="-4" fill="#7f8c8d" font-size="5" font-family="monospace" text-anchor="middle">STM32</text>
+    <text x="0" y="3" fill="#7f8c8d" font-size="4" font-family="monospace" text-anchor="middle">F407VGT6</text>
+    <circle cx="-16" cy="-16" r="2" fill="#1a252f" />
+  </g>
+  <!-- MEMS accelerometer + audio DAC area (silkscreen only) -->
+  <rect x="34" y="160" width="34" height="20" fill="#141c2e" stroke="#3b4a63" stroke-width="0.7" rx="1" />
+  <text x="51" y="168" fill="#7f8c8d" font-size="3.5" font-family="monospace" text-anchor="middle">LIS302DL</text>
+  <text x="51" y="174" fill="#5d6d7e" font-size="3" font-family="monospace" text-anchor="middle">CS43L22 DAC</text>
+  <!-- User LEDs PD12 green (dynamic) + PD13/PD14/PD15 static companions -->
+  <circle cx="100" cy="200" r="3" fill="#145a32" data-bind="builtin-led" />
+  <circle cx="108" cy="200" r="3" fill="#7d4e12" />
+  <circle cx="100" cy="208" r="3" fill="#7b1f1f" />
+  <circle cx="108" cy="208" r="3" fill="#1f3a7b" />
+  <text x="104" y="220" fill="#7f8c8d" font-size="4" font-family="monospace" text-anchor="middle">PD12-15</text>
+  <!-- USER (PA0, blue) + RESET (black) buttons -->
+  <rect x="58" y="230" width="24" height="10" fill="#34495e" rx="2" />
+  <circle cx="70" cy="235" r="3" fill="#2980b9" />
+  <text x="70" y="248" fill="#7f8c8d" font-size="4" font-family="monospace" text-anchor="middle">USER PA0</text>
+  <rect x="90" y="230" width="14" height="10" fill="#2c3e50" rx="2" />
+  <circle cx="97" cy="235" r="2.5" fill="#000" />
+  <!-- 8MHz crystal -->
+  <rect x="58" y="255" width="24" height="8" fill="#bdc3c7" rx="4" />
+  <text x="70" y="261" fill="#2c3e50" font-size="4" font-family="monospace" text-anchor="middle">8.000</text>
+  <!-- Board silkscreen -->
+  <text x="70" y="280" fill="#7f8c8d" font-size="4" font-family="monospace" text-anchor="middle">STM32F4 Discovery</text>
+  <text x="70" y="286" fill="#5d6d7e" font-size="3" font-family="monospace" text-anchor="middle">1MB/192K 168MHz USART1</text>
+  <!-- Headers Left (x=15, y=15+i*15, 20 pins) -->
+  <g><circle cx="15" cy="15" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="5V" /><circle cx="15" cy="15" r="1.2" fill="#000" /></g>
+  <g><circle cx="15" cy="30" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="GND.1" /><circle cx="15" cy="30" r="1.2" fill="#000" /></g>
+  <g><circle cx="15" cy="45" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="3V3" /><circle cx="15" cy="45" r="1.2" fill="#000" /></g>
+  <g><circle cx="15" cy="60" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PA0" /><circle cx="15" cy="60" r="1.2" fill="#000" /></g>
+  <g><circle cx="15" cy="75" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PA1" /><circle cx="15" cy="75" r="1.2" fill="#000" /></g>
+  <g><circle cx="15" cy="90" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PA2" /><circle cx="15" cy="90" r="1.2" fill="#000" /></g>
+  <g><circle cx="15" cy="105" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PA3" /><circle cx="15" cy="105" r="1.2" fill="#000" /></g>
+  <g><circle cx="15" cy="120" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PA4" /><circle cx="15" cy="120" r="1.2" fill="#000" /></g>
+  <g><circle cx="15" cy="135" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PA5" /><circle cx="15" cy="135" r="1.2" fill="#000" /></g>
+  <g><circle cx="15" cy="150" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PA6" /><circle cx="15" cy="150" r="1.2" fill="#000" /></g>
+  <g><circle cx="15" cy="165" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PA7" /><circle cx="15" cy="165" r="1.2" fill="#000" /></g>
+  <g><circle cx="15" cy="180" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PB0" /><circle cx="15" cy="180" r="1.2" fill="#000" /></g>
+  <g><circle cx="15" cy="195" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PB1" /><circle cx="15" cy="195" r="1.2" fill="#000" /></g>
+  <g><circle cx="15" cy="210" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PB6" /><circle cx="15" cy="210" r="1.2" fill="#000" /></g>
+  <g><circle cx="15" cy="225" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PB7" /><circle cx="15" cy="225" r="1.2" fill="#000" /></g>
+  <g><circle cx="15" cy="240" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PB8" /><circle cx="15" cy="240" r="1.2" fill="#000" /></g>
+  <g><circle cx="15" cy="255" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PB9" /><circle cx="15" cy="255" r="1.2" fill="#000" /></g>
+  <g><circle cx="15" cy="270" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="RESET" /><circle cx="15" cy="270" r="1.2" fill="#000" /></g>
+  <g><circle cx="15" cy="285" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="GND.2" /><circle cx="15" cy="285" r="1.2" fill="#000" /></g>
+  <g><circle cx="15" cy="300" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="3V3.2" /><circle cx="15" cy="300" r="1.2" fill="#000" /></g>
+  <!-- Headers Right (x=125, 17 pins) -->
+  <g><circle cx="125" cy="15" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="GND.3" /><circle cx="125" cy="15" r="1.2" fill="#000" /></g>
+  <g><circle cx="125" cy="30" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PC0" /><circle cx="125" cy="30" r="1.2" fill="#000" /></g>
+  <g><circle cx="125" cy="45" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PC1" /><circle cx="125" cy="45" r="1.2" fill="#000" /></g>
+  <g><circle cx="125" cy="60" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PD12" /><circle cx="125" cy="60" r="1.2" fill="#000" /></g>
+  <g><circle cx="125" cy="75" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PD13" /><circle cx="125" cy="75" r="1.2" fill="#000" /></g>
+  <g><circle cx="125" cy="90" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PD14" /><circle cx="125" cy="90" r="1.2" fill="#000" /></g>
+  <g><circle cx="125" cy="105" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PD15" /><circle cx="125" cy="105" r="1.2" fill="#000" /></g>
+  <g><circle cx="125" cy="120" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PC6" /><circle cx="125" cy="120" r="1.2" fill="#000" /></g>
+  <g><circle cx="125" cy="135" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PC7" /><circle cx="125" cy="135" r="1.2" fill="#000" /></g>
+  <g><circle cx="125" cy="150" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PA9" /><circle cx="125" cy="150" r="1.2" fill="#000" /></g>
+  <g><circle cx="125" cy="165" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PA10" /><circle cx="125" cy="165" r="1.2" fill="#000" /></g>
+  <g><circle cx="125" cy="180" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PA11" /><circle cx="125" cy="180" r="1.2" fill="#000" /></g>
+  <g><circle cx="125" cy="195" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PA12" /><circle cx="125" cy="195" r="1.2" fill="#000" /></g>
+  <g><circle cx="125" cy="210" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PB12" /><circle cx="125" cy="210" r="1.2" fill="#000" /></g>
+  <g><circle cx="125" cy="225" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PB13" /><circle cx="125" cy="225" r="1.2" fill="#000" /></g>
+  <g><circle cx="125" cy="240" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PB14" /><circle cx="125" cy="240" r="1.2" fill="#000" /></g>
+  <g><circle cx="125" cy="255" r="2.5" fill="#f1c40f" stroke="#000" stroke-width="0.5" data-pin="PB15" /><circle cx="125" cy="255" r="1.2" fill="#000" /></g>
+  <!-- SWD 3-pin bottom header (y=312) -->
+  <g><circle cx="45" cy="312" r="2.5" fill="#bdc3c7" stroke="#000" stroke-width="0.5" data-pin="SWDIO" /><circle cx="45" cy="312" r="1.2" fill="#000" /></g>
+  <g><circle cx="65" cy="312" r="2.5" fill="#bdc3c7" stroke="#000" stroke-width="0.5" data-pin="SWCLK" /><circle cx="65" cy="312" r="1.2" fill="#000" /></g>
+  <g><circle cx="85" cy="312" r="2.5" fill="#bdc3c7" stroke="#000" stroke-width="0.5" data-pin="SWD_GND" /><circle cx="85" cy="312" r="1.2" fill="#000" /></g>
+  <!-- Pin silkscreen Left -->
+  <g fill="#ecf0f1" font-size="4.5" font-family="monospace" font-weight="bold">
+    <text x="10" y="16">5V</text>
+    <text x="10" y="31">GND</text>
+    <text x="10" y="46">3V3</text>
+    <text x="10" y="61">PA0</text>
+    <text x="10" y="76">PA1</text>
+    <text x="10" y="91">PA2</text>
+    <text x="10" y="106">PA3</text>
+    <text x="10" y="121">PA4</text>
+    <text x="10" y="136">PA5</text>
+    <text x="10" y="151">PA6</text>
+    <text x="10" y="166">PA7</text>
+    <text x="10" y="181">PB0</text>
+    <text x="10" y="196">PB1</text>
+    <text x="10" y="211">PB6</text>
+    <text x="10" y="226">PB7</text>
+    <text x="10" y="241">PB8</text>
+    <text x="10" y="256">PB9</text>
+    <text x="10" y="271">RST</text>
+    <text x="10" y="286">GND</text>
+    <text x="10" y="301">3V3</text>
+  </g>
+  <!-- Pin silkscreen Right -->
+  <g fill="#ecf0f1" font-size="4.5" font-family="monospace" font-weight="bold" text-anchor="end">
+    <text x="130" y="16">GND</text>
+    <text x="130" y="31">PC0</text>
+    <text x="130" y="46">PC1</text>
+    <text x="130" y="61">PD12</text>
+    <text x="130" y="76">PD13</text>
+    <text x="130" y="91">PD14</text>
+    <text x="130" y="106">PD15</text>
+    <text x="130" y="121">PC6</text>
+    <text x="130" y="136">PC7</text>
+    <text x="130" y="151">PA9</text>
+    <text x="130" y="166">PA10</text>
+    <text x="130" y="181">PA11</text>
+    <text x="130" y="196">PA12</text>
+    <text x="130" y="211">PB12</text>
+    <text x="130" y="226">PB13</text>
+    <text x="130" y="241">PB14</text>
+    <text x="130" y="256">PB15</text>
+  </g>
 </svg>

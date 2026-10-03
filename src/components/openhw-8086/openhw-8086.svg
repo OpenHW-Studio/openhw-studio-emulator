@@ -1,0 +1,45 @@
+<svg width="100%" height="100%" viewBox="0 0 92.0 330.0" xmlns="http://www.w3.org/2000/svg" data-component="openhw-8086" data-bind-root="true">
+  <rect x="1" y="1" width="90.0" height="328.0" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="46.0" y="165.0" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">Intel 8086</text>
+  <circle cx="15" cy="15" r="2.5" fill="#888" data-pin="L0" />
+  <circle cx="15" cy="30" r="2.5" fill="#888" data-pin="L1" />
+  <circle cx="15" cy="45" r="2.5" fill="#888" data-pin="L2" />
+  <circle cx="15" cy="60" r="2.5" fill="#888" data-pin="L3" />
+  <circle cx="15" cy="75" r="2.5" fill="#888" data-pin="L4" />
+  <circle cx="15" cy="90" r="2.5" fill="#888" data-pin="L5" />
+  <circle cx="15" cy="105" r="2.5" fill="#888" data-pin="L6" />
+  <circle cx="15" cy="120" r="2.5" fill="#888" data-pin="L7" />
+  <circle cx="15" cy="135" r="2.5" fill="#888" data-pin="L8" />
+  <circle cx="15" cy="150" r="2.5" fill="#888" data-pin="L9" />
+  <circle cx="15" cy="165" r="2.5" fill="#888" data-pin="L10" />
+  <circle cx="15" cy="180" r="2.5" fill="#888" data-pin="L11" />
+  <circle cx="15" cy="195" r="2.5" fill="#888" data-pin="L12" />
+  <circle cx="15" cy="210" r="2.5" fill="#888" data-pin="L13" />
+  <circle cx="15" cy="225" r="2.5" fill="#888" data-pin="L14" />
+  <circle cx="15" cy="240" r="2.5" fill="#888" data-pin="L15" />
+  <circle cx="15" cy="255" r="2.5" fill="#888" data-pin="L16" />
+  <circle cx="15" cy="270" r="2.5" fill="#888" data-pin="L17" />
+  <circle cx="15" cy="285" r="2.5" fill="#888" data-pin="L18" />
+  <circle cx="15" cy="300" r="2.5" fill="#888" data-pin="L19" />
+  <circle cx="75" cy="15" r="2.5" fill="#888" data-pin="R0" />
+  <circle cx="75" cy="30" r="2.5" fill="#888" data-pin="R1" />
+  <circle cx="75" cy="45" r="2.5" fill="#888" data-pin="R2" />
+  <circle cx="75" cy="60" r="2.5" fill="#888" data-pin="R3" />
+  <circle cx="75" cy="75" r="2.5" fill="#888" data-pin="R4" />
+  <circle cx="75" cy="90" r="2.5" fill="#888" data-pin="R5" />
+  <circle cx="75" cy="105" r="2.5" fill="#888" data-pin="R6" />
+  <circle cx="75" cy="120" r="2.5" fill="#888" data-pin="R7" />
+  <circle cx="75" cy="135" r="2.5" fill="#888" data-pin="R8" />
+  <circle cx="75" cy="150" r="2.5" fill="#888" data-pin="R9" />
+  <circle cx="75" cy="165" r="2.5" fill="#888" data-pin="R10" />
+  <circle cx="75" cy="180" r="2.5" fill="#888" data-pin="R11" />
+  <circle cx="75" cy="195" r="2.5" fill="#888" data-pin="R12" />
+  <circle cx="75" cy="210" r="2.5" fill="#888" data-pin="R13" />
+  <circle cx="75" cy="225" r="2.5" fill="#888" data-pin="R14" />
+  <circle cx="75" cy="240" r="2.5" fill="#888" data-pin="R15" />
+  <circle cx="75" cy="255" r="2.5" fill="#888" data-pin="R16" />
+  <circle cx="75" cy="270" r="2.5" fill="#888" data-pin="R17" />
+  <circle cx="75" cy="285" r="2.5" fill="#888" data-pin="R18" />
+  <circle cx="75" cy="300" r="2.5" fill="#888" data-pin="R19" />
+  <circle cx="53.5" cy="315" r="2.5" fill="#888" data-pin="SWCLK" />
+</svg>

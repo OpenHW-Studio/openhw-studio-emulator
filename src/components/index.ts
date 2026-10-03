@@ -28,6 +28,13 @@ export { default as openhwStm32f401 } from './openhw-stm32f401/index';
 export { default as openhwStm32f411 } from './openhw-stm32f411/index';
 export { default as openhwStm32f407ve } from './openhw-stm32f407ve/index';
 export { default as openhwStm32f429 } from './openhw-stm32f429/index';
+export { default as openhw8086 } from './openhw-8086/index';
+export { default as openhw8088 } from './openhw-8088/index';
+export { default as openhw8085 } from './openhw-8085/index';
+export { default as openhw8051 } from './openhw-8051/index';
+export { default as openhw6502 } from './openhw-6502/index';
+export { default as openhwZ80 } from './openhw-z80/index';
+export { default as openhwRv32 } from './openhw-rv32/index';
 // WiFi Access Point — functional AP component (equivalent to wokwi-wifi-ap)
 export { WiFiApLogic as openhwWifiAp, WiFiApLogic as wokwiWifiAp } from './openhw-wifi-ap/index';
 export { default as openhwResistor } from './openhw-resistor';
