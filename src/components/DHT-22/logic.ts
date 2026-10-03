@@ -38,6 +38,16 @@ export class DHT22Logic extends BaseComponent {
      */
     private getConnectedBoardPin(): string | null {
         if ((this as any)._connectedPin != null) return (this as any)._connectedPin;
+        // Runner-agnostic net query first (plan §5.3); legacy wire scan below.
+        try {
+            const netOf = (this as any)._boardNetOf;
+            if (typeof netOf === 'function') {
+                for (const pn of ['DATA', 'SDA']) {
+                    const pin = netOf(pn);
+                    if (pin) { (this as any)._connectedPin = pin; return pin; }
+                }
+            }
+        } catch { /* fall through to legacy scan */ }
         const runner = this._simCpu?._avrRunner;
         if (runner?.currentWires) {
             for (const wire of runner.currentWires) {
@@ -82,6 +92,24 @@ export class DHT22Logic extends BaseComponent {
      * calls onPinStateChange back on this component, and the ACKING/SENDING guard
      * in onPinStateChange provides a second layer of protection.
      */
+    /**
+     * Schedule a callback in engine steps/cycles. Prefers the
+     * runner-agnostic clock service (plan §5.3); falls back to the AVR
+     * CPU clock events. Identical timing either way on AVR.
+     */
+    private schedule(delayCycles: number, cb: () => void): void {
+        try {
+            const sched = (this as any)._scheduleBoardCycles;
+            if (typeof sched === 'function') { sched(cb, delayCycles); return; }
+        } catch { /* fall through */ }
+        try { (this as any)._simCpu?.addClockEvent?.(cb, delayCycles); } catch { /* ignore */ }
+    }
+
+    private hasClock(): boolean {
+        return typeof (this as any)._scheduleBoardCycles === 'function'
+            || typeof (this as any)._simCpu?.addClockEvent === 'function';
+    }
+
     private drivePin(voltage: number) {
         this._setVoltageInternal(voltage);
         const isHigh = voltage > 1.8;
@@ -153,31 +181,31 @@ export class DHT22Logic extends BaseComponent {
     }
 
     private startAckSequence() {
-        if (!this._simCpu) {
-            dhtLog(`[${this.id}] startAckSequence: ABORT — _simCpu is null`);
+        if (!this.hasClock()) {
+            dhtLog(`[${this.id}] startAckSequence: ABORT — no clock service`);
             this.protocolState = 'IDLE';
             return;
         }
         this.protocolState = 'ACKING';
         dhtLog(`[${this.id}] startAckSequence: waiting 30us before ACK LOW`);
-        this._simCpu.addClockEvent(() => this.sendAckLow(), 30 * 16);
+        this.schedule(30 * 16, () => this.sendAckLow());
     }
 
     private sendAckLow() {
         dhtLog(`[${this.id}] sendAckLow: driving LOW 80us`);
         this.drivePin(0);
-        this._simCpu.addClockEvent(() => this.sendAckHigh(), 80 * 16);
+        this.schedule(80 * 16, () => this.sendAckHigh());
     }
 
     private sendAckHigh() {
         dhtLog(`[${this.id}] sendAckHigh: driving HIGH 80us`);
         this.drivePin(5.0);
-        this._simCpu.addClockEvent(() => {
+        this.schedule(80 * 16, () => {
             this.prepareDataBits();
             this.protocolState = 'SENDING';
             dhtLog(`[${this.id}] Starting data transmission (T=${this.temperature} H=${this.humidity})`);
             this.sendNextBit();
-        }, 80 * 16);
+        });
     }
 
     private prepareDataBits() {
@@ -208,16 +236,16 @@ export class DHT22Logic extends BaseComponent {
     }
 
     private sendNextBit() {
-        if (!this._simCpu) return;
+        if (!this.hasClock()) return;
 
         if (this.bitIndex >= 40) {
             dhtLog(`[${this.id}] All 40 bits sent — ending with 50us LOW then idle HIGH`);
             this.drivePin(0);
-            this._simCpu.addClockEvent(() => {
+            this.schedule(50 * 16, () => {
                 this.drivePin(5.0);
                 this.protocolState = 'IDLE';
                 dhtLog(`[${this.id}] Transmission complete → IDLE`);
-            }, 50 * 16);
+            });
             return;
         }
 
@@ -225,13 +253,13 @@ export class DHT22Logic extends BaseComponent {
 
         // Each bit: 50us LOW preamble, then 28us HIGH = '0' or 70us HIGH = '1'
         this.drivePin(0);
-        this._simCpu.addClockEvent(() => {
+        this.schedule(50 * 16, () => {
             this.drivePin(5.0);
             const highUs = bit ? 70 : 28;
-            this._simCpu.addClockEvent(() => {
+            this.schedule(highUs * 16, () => {
                 this.sendNextBit();
-            }, highUs * 16);
-        }, 50 * 16);
+            });
+        });
     }
 
     update() {}

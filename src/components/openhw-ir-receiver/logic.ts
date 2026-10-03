@@ -52,6 +52,15 @@ export class IRReceiverLogic extends PulseProtocol {
 
     public getConnectedBoardPin(): string | null {
         if ((this as any)._connectedPin != null) return (this as any)._connectedPin;
+        try {
+            const netOf = (this as any)._boardNetOf;
+            if (typeof netOf === 'function') {
+                for (const pn of ['OUT', 'R']) {
+                    const pin = netOf(pn);
+                    if (pin) { (this as any)._connectedPin = pin; return pin; }
+                }
+            }
+        } catch { /* fall through to legacy scan */ }
         const runner = (this as any)._simCpu?._avrRunner;
         if (runner?.currentWires) {
             for (const wire of runner.currentWires) {

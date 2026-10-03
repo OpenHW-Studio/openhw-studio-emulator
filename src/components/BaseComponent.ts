@@ -120,6 +120,22 @@ export class BaseComponent {
      * capability checks, and will be retired once consumers migrate.
      */
     _driveBoardPin: ((boardPin: string, isHigh: boolean) => void) | null = null;
+    /**
+     * Runner-agnostic clock service (plan §5.3, Phase 3): schedule a
+     * callback after a delay in engine steps/cycles. Preferred over
+     * `_simCpu.addClockEvent` (AVR-only). ARM runners drain a step-counted
+     * queue in the tick loop, so delivery stays deterministic.
+     */
+    _scheduleBoardCycles: ((cb: () => void, delayCycles: number) => void) | null = null;
+    /** Runner-agnostic engine step/cycle counter (read-only). */
+    _boardCyclesNow: (() => number) | null = null;
+    /**
+     * Runner-agnostic net query (plan §5.3, Phase 3): given one of THIS
+     * component's pin names, return the board-side pin label sharing its
+     * net (`"13"`, not `"uno1:13"`), or null when unresolvable. Preferred
+     * over `_simCpu._avrRunner` netlist scans.
+     */
+    _boardNetOf: ((componentPin: string) => string | null) | null = null;
     pendingVisualStateEmit: boolean = false;
     telemetryMode: string = 'detail';
     telemetryWatchedParams: string[] = ['all'];

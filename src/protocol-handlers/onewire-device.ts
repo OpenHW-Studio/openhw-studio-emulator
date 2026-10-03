@@ -59,7 +59,18 @@ export class OneWireProtocol extends BaseComponent {
     // ── Board pin discovery (same approach as DHT22) ─────────────────────
     private getBoardPin(): string | null {
         if (this._boardPin !== undefined && this._boardPin !== null) return this._boardPin;
-        
+
+        // Runner-agnostic net query first (plan §5.3); legacy scan below.
+        try {
+            const netOf = (this as any)._boardNetOf;
+            if (typeof netOf === 'function') {
+                for (const pn of ['DQ', 'DATA']) {
+                    const pin = netOf(pn);
+                    if (pin) { this._boardPin = pin; return pin; }
+                }
+            }
+        } catch { /* fall through to legacy scan */ }
+
         const cpu = this._simCpu as any;
         if (cpu?._avrRunner) {
             const runner = cpu._avrRunner;

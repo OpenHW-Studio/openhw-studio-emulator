@@ -29,6 +29,13 @@ export class PIRLogic extends BaseComponent {
 
     public getConnectedBoardPin(): string | null {
         if ((this as any)._connectedPin != null) return (this as any)._connectedPin;
+        try {
+            const netOf = (this as any)._boardNetOf;
+            if (typeof netOf === 'function') {
+                const pin = netOf('OUT');
+                if (pin) { (this as any)._connectedPin = pin; return pin; }
+            }
+        } catch { /* fall through to legacy scan */ }
         const runner = this._simCpu?._avrRunner;
         if (runner?.currentWires) {
             for (const wire of runner.currentWires) {
