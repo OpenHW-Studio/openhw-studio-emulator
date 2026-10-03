@@ -5,6 +5,8 @@ export interface NeoPixelEdgeState {
     buffer: number[];
     currentBit: number;
     currentByte: number;
+    /** Last delivered level; same-level repeats are not edges (ignored). */
+    lastLevel?: boolean | null;
 }
 
 export class NeoPixelProtocol extends BaseComponent implements NeoPixelEdgeState {
@@ -13,6 +15,7 @@ export class NeoPixelProtocol extends BaseComponent implements NeoPixelEdgeState
     buffer: number[] = [];
     currentBit = 0;
     currentByte = 0;
+    lastLevel: boolean | null = null;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
@@ -171,6 +174,34 @@ export class NeoPixelBusFramer implements NeoPixelEdgeState {
         state: NeoPixelEdgeState,
         isHigh: boolean, cpuCycles: number, cpuFreqMHz: number,
     ): number[] | null {
+        // Stale-idle resync FIRST: any edge arriving more than a full
+        // reset window (50us) after the previous one cannot belong to the
+        // same frame — emit what came before (a complete frame the tick
+        // latch may not have seen, e.g. back-to-back shows with no update
+        // between), then resync WITHOUT decoding this edge. This also
+        // absorbs driver-takeover edges (pinMode/begin after construction
+        // state) and the tests' time jumps, so they never inject phantom
+        // data bits.
+        const staleThreshold = cpuFreqMHz * 50;
+        if (cpuCycles - state.lastCycle > staleThreshold) {
+            let pixels: number[] | null = null;
+            if (state.buffer.length > 0) {
+                pixels = NeoPixelBusFramer.packPixels(state.buffer);
+                state.buffer = [];
+            }
+            state.currentBit = 0;
+            state.currentByte = 0;
+            state.lastLevel = isHigh;
+            state.lastCycle = cpuCycles;
+            return pixels;
+        }
+        // Transition dedup: runners may re-deliver the settled level
+        // (tick fan-out re-asserts idle LOW every tick). A same-level
+        // repeat is not an edge — without this, each repeat decodes a
+        // phantom 1-bit (huge elapsed) and idle ticks emit 0xFF bytes that
+        // overwrite the real frame.
+        if (state.lastLevel != null && state.lastLevel === isHigh) return null;
+        state.lastLevel = isHigh;
         const elapsed = cpuCycles - state.lastCycle;
         state.lastCycle = cpuCycles;
 
