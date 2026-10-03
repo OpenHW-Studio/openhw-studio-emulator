@@ -448,10 +448,12 @@ export class SDCardLogic extends SPIProtocol {
             stage: 'token',
             data: [],
         };
-        // No response queued yet: the DATA_ACCEPTED token (0x05) is queued
-        // by completeWriteBlock after the payload lands. Queueing now would
-        // let the 512 payload clocks eat it (Arduino checks
-        // (status & 0x1F) === 0x05 on the post-payload read).
+        // R1 for the command itself: 0x00 (accepted). The DATA_ACCEPTED
+        // token (0x05) is queued separately by completeWriteBlock after
+        // the payload lands — queueing it here would let the 512 payload
+        // clocks eat it (Arduino checks (status & 0x1F) === 0x05 on the
+        // post-payload read).
+        this.queueResponse([0x00]);
     }
 
     private completeWriteBlock() {
