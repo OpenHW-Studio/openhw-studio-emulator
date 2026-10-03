@@ -444,7 +444,10 @@ export class SDCardLogic extends SPIProtocol {
             stage: 'token',
             data: [],
         };
-        this.queueResponse([0x00]);
+        // No response queued yet: the DATA_ACCEPTED token (0x05) is queued
+        // by completeWriteBlock after the payload lands. Queueing now would
+        // let the 512 payload clocks eat it (Arduino checks
+        // (status & 0x1F) === 0x05 on the post-payload read).
     }
 
     private completeWriteBlock() {
@@ -715,44 +718,35 @@ export class SDCardLogic extends SPIProtocol {
         this.bytesIn += 1;
         this.state.bytesIn = this.bytesIn;
 
-        if (this.responseQueue.length > 0) {
-            return this.emitResponseByte();
-        }
-
         if (this.writeState) {
             this.handleWriteByte(byte);
+            // If this byte completed the block, its data response belongs
+            // to the FOLLOWING clocks (real cards idle during CRC) — do
+            // not emit the just-queued token on the completing clock.
+            if (!this.writeState) return 0xff;
             return this.emitResponseByte();
         }
 
-        if (this.commandFrame.length === 0) {
-            if ((byte & 0xc0) === 0x40) {
-                // New command frame: the card drives MISO HIGH while
-                // receiving command bytes (real cards never spend queued
-                // responses on clocks the master ignores). Returning the
-                // queue here would eat the previous response early and
-                // shift every subsequent read by one. Stale tail bytes are
-                // dropped: a new command supersedes them in hardware too.
-                this.responseQueue.length = 0;
-                this.commandFrame.push(byte);
-                return 0xff;
-            } else if (byte === 0x9f) {
-                // Legacy SPI probe compatibility.
-                this.queueResponse([0x53, 0x44, 0x30]);
-                return 0xff;
+        // Command-frame assembly consumes clocks silently (MISO idle-high):
+        // a 0x40-masked start byte opens a frame and supersedes any unread
+        // stale tail (hardware drops it too). Reads (0xFF clocks) and the
+        // 0x9F legacy probe fall through to the queue below. Checking the
+        // queue FIRST here would spend stale responses on command clocks
+        // and shift every subsequent read by one.
+        if ((byte & 0xc0) === 0x40 || this.commandFrame.length > 0) {
+            if (this.commandFrame.length === 0) this.responseQueue.length = 0;
+            this.commandFrame.push(byte);
+            if (this.commandFrame.length >= 6) {
+                const frame = this.commandFrame.slice(0, 6);
+                this.commandFrame = [];
+                this.handleCommandFrame(frame);
             }
-            return this.emitResponseByte();
-        }
-
-        this.commandFrame.push(byte);
-        if (this.commandFrame.length >= 6) {
-            const frame = this.commandFrame.slice(0, 6);
-            this.commandFrame = [];
-            this.handleCommandFrame(frame);
-            // Command bytes read back as idle-high; the queued R1/R3/R7
-            // surfaces on the master's following read clocks.
             return 0xff;
         }
-
+        if (byte === 0x9f) {
+            // Legacy SPI probe compatibility.
+            this.queueResponse([0x53, 0x44, 0x30]);
+        }
         return this.emitResponseByte();
     }
 
