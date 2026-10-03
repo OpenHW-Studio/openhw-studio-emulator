@@ -29,7 +29,33 @@ export class WokwiTM1637Logic extends TwoWireProtocol {
 
     onTwoWireByteReceived(data: number): void {
         console.log(`[TM1637] Received Byte: 0x${data.toString(16).toUpperCase()}`);
-        
+
+        // In DATA state every byte on the wire is display data until STOP.
+        // Real TM1637 decodes commands ONLY from the first byte after
+        // START: checking top-bits first misreads segment bytes like 0x5B
+        // ('2') and 0x4F ('3', top bits 01) as data-commands, eating digits
+        // 3-4 (live showed [63,6,0,0] for a 4-digit write).
+        if (this.stateMachine === 'DATA') {
+            // Incoming data for current address
+            if (this.currentAddress < 6) {
+                // Address 0-3 are digits 1-4.
+                if (this.currentAddress < 4) {
+                    this.state.digits[this.currentAddress] = data & 0x7F;
+                    if ((data & 0x80) !== 0) {
+                        this.state.colon = true;
+                    } else if (this.currentAddress === 1) {
+                        // some modules use bit 7 of digit 2 for colon
+                        this.state.colon = false;
+                    }
+                    this.stateChanged = true;
+                }
+            }
+            if (this.writeMode === 'AUTO') {
+                this.currentAddress++;
+            }
+            return;
+        }
+
         // TM1637 Commands are distinguished by the top 2 bits
         const cmdType = data & 0xC0;
 
@@ -48,24 +74,6 @@ export class WokwiTM1637Logic extends TwoWireProtocol {
             // Address command
             this.currentAddress = data & 0x0F;
             this.stateMachine = 'DATA';
-        } else if (this.stateMachine === 'DATA') {
-            // Incoming data for current address
-            if (this.currentAddress < 6) {
-                // Address 0-3 are digits 1-4.
-                if (this.currentAddress < 4) {
-                    this.state.digits[this.currentAddress] = data & 0x7F;
-                    if ((data & 0x80) !== 0) {
-                        this.state.colon = true;
-                    } else if (this.currentAddress === 1) { 
-                        // some modules use bit 7 of digit 2 for colon
-                        this.state.colon = false;
-                    }
-                    this.stateChanged = true;
-                }
-            }
-            if (this.writeMode === 'AUTO') {
-                this.currentAddress++;
-            }
         }
     }
 
