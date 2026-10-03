@@ -541,6 +541,16 @@ export class SDCardLogic extends SPIProtocol {
             return;
         }
 
+        if (command === 13) {
+            // SEND_STATUS (R2 = R1 + status). Arduino's blocking
+            // writeBlock() requires cardCommand(CMD13, 0) === 0 AND the
+            // following status byte === 0; anything else aborts the write
+            // with SD_CARD_ERROR_WRITE_PROGRAMMING, so every cache flush
+            // (dir entries, FAT, file data) silently failed before this.
+            this.queueResponse([0x00, 0x00]);
+            return;
+        }
+
         if (command === 17) {
             const blockIndex = this.parseBlockIndex(arg);
             if (blockIndex === null) {
