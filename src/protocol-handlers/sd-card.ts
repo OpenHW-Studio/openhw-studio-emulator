@@ -351,9 +351,13 @@ export class SDCardLogic extends SPIProtocol {
             this.storage[base + 4] = 0xff;
             this.storage[base + 5] = 0xff;
         }
-        // Root directory: README.TXT, cluster 2.
+        // Root directory: README.TXT, cluster 2. The region MUST be
+        // zero-filled first: free directory entries are 0x00 and deleted
+        // ones 0xE5 — leftover 0xFF bytes look used, so creation scans all
+        // 512 entries, finds no free slot, and fails with "no space".
         const readme = this.textEncoder.encode('OpenHW virtual SD card\n');
         const rootBase = (1 + 1 + 2 * fatSectors) * S;
+        for (let i = 0; i < rootSectors * S; i += 1) this.storage[rootBase + i] = 0x00;
         const name = 'README  TXT';
         for (let i = 0; i < 11; i += 1) this.storage[rootBase + i] = name.charCodeAt(i);
         this.storage[rootBase + 11] = 0x20; // archive
