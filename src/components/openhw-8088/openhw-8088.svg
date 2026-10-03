@@ -41,5 +41,8 @@
   <circle cx="75" cy="270" r="2.5" fill="#888" data-pin="R17" />
   <circle cx="75" cy="285" r="2.5" fill="#888" data-pin="R18" />
   <circle cx="75" cy="300" r="2.5" fill="#888" data-pin="R19" />
+  <circle cx="23.5" cy="315" r="2.5" fill="#888" data-pin="SWD_3V3" />
+  <circle cx="38.5" cy="315" r="2.5" fill="#888" data-pin="SWDIO" />
   <circle cx="53.5" cy="315" r="2.5" fill="#888" data-pin="SWCLK" />
+  <circle cx="68.5" cy="315" r="2.5" fill="#888" data-pin="SWD_GND" />
 </svg>
