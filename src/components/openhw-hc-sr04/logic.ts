@@ -63,9 +63,12 @@ export class HCSR04Logic extends PulseProtocol {
             this._setVoltageInternal(voltage);
             const isHigh = voltage > 1.8;
 
-            // Fast path: directly write to AVR PIN register so pulseIn() reads the pulse instantly
+            // Board drive via the bus service when available (plan §5.3);
+            // legacy AVR-only fast path otherwise.
             const boardPin = this.getConnectedBoardPin();
-            if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
+            if (boardPin && typeof (this as any)._driveBoardPin === 'function') {
+                (this as any)._driveBoardPin(boardPin, isHigh);
+            } else if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
                 (this as any)._setAvrPinDirect(boardPin, isHigh);
             }
 

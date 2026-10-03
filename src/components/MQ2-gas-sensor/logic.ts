@@ -97,7 +97,9 @@ export class GasSensorLogic extends BaseComponent {
 
             const isHigh = digitalVoltage > 1.8;
             const boardPin = this.getConnectedBoardPin();
-            if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
+            if (boardPin && typeof (this as any)._driveBoardPin === 'function') {
+                (this as any)._driveBoardPin(boardPin, isHigh);
+            } else if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
                 (this as any)._setAvrPinDirect(boardPin, isHigh);
             }
 

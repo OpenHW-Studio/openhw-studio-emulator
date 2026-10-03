@@ -86,9 +86,12 @@ export class DHT22Logic extends BaseComponent {
         this._setVoltageInternal(voltage);
         const isHigh = voltage > 1.8;
 
-        // Fast path: directly write to AVR PIND register
+        // Board drive via the runner-agnostic bus service when available
+        // (plan §5.3); legacy AVR-only fast path otherwise.
         const boardPin = this.getConnectedBoardPin();
-        if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
+        if (boardPin && typeof (this as any)._driveBoardPin === 'function') {
+            (this as any)._driveBoardPin(boardPin, isHigh);
+        } else if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
             (this as any)._setAvrPinDirect(boardPin, isHigh);
         } else if (!boardPin) {
             dhtLog(`[${this.id}] WARN drivePin(${voltage.toFixed(1)}V): boardPin not resolved yet, relying on _simUpdatePhysics only`);

@@ -20,7 +20,9 @@ export class PIRLogic extends BaseComponent {
             this.propagatePin('OUT', currentV, currentWires, allComponentsInstances);
         }
         const boardPin = this.getConnectedBoardPin();
-        if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
+        if (boardPin && typeof (this as any)._driveBoardPin === 'function') {
+            (this as any)._driveBoardPin(boardPin, isMotion);
+        } else if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
             (this as any)._setAvrPinDirect(boardPin, isMotion);
         }
     }
@@ -73,7 +75,9 @@ export class PIRLogic extends BaseComponent {
             const isHigh = voltage > 1.8;
 
             const boardPin = this.getConnectedBoardPin();
-            if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
+            if (boardPin && typeof (this as any)._driveBoardPin === 'function') {
+                (this as any)._driveBoardPin(boardPin, isHigh);
+            } else if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
                 (this as any)._setAvrPinDirect(boardPin, isHigh);
             }
 

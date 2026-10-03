@@ -91,8 +91,16 @@ export class OneWireProtocol extends BaseComponent {
         this._lastDrivenVoltage = voltage;
         this.setPinVoltage(pinId, voltage);
         const isHigh = voltage > 1.8;
-        // Write directly to AVR pin register — this is the proven path used by DHT22
-        if (this._setAvrPinDirect) {
+        // Board drive via the bus service when available (plan §5.3);
+        // legacy AVR-only path otherwise.
+        if (this._driveBoardPin) {
+            const boardPin = this.getBoardPin();
+            if (boardPin) {
+                this._driveBoardPin(boardPin, isHigh);
+            } else {
+                if (this._simUpdatePhysics) this._simUpdatePhysics();
+            }
+        } else if (this._setAvrPinDirect) {
             const boardPin = this.getBoardPin();
             if (boardPin) {
                 this._setAvrPinDirect(boardPin, isHigh);
@@ -109,8 +117,11 @@ export class OneWireProtocol extends BaseComponent {
         this._drivingBus = false;
         this.sendingBit = false;
         this.setPinVoltage(pinId, 5.0);
-        // Restore bus to HIGH and notify runner
-        if (this._setAvrPinDirect) {
+        // Restore bus to HIGH and notify runner (bus service first).
+        if (this._driveBoardPin) {
+            const boardPin = this.getBoardPin();
+            if (boardPin) this._driveBoardPin(boardPin, true);
+        } else if (this._setAvrPinDirect) {
             const boardPin = this.getBoardPin();
             if (boardPin) this._setAvrPinDirect(boardPin, true);
         }
