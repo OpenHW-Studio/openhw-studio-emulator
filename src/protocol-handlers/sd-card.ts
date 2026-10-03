@@ -225,7 +225,10 @@ export class SDCardLogic extends SPIProtocol {
     constructor(id: string, manifest: any) {
         super(id, manifest);
 
-        const capacityKbRaw = Number(manifest?.attrs?.capacityKB ?? 2048);
+        // Default 32 MB: FAT16 needs >= 4085 data clusters and Arduino's
+        // bundled SD library mounts FAT16/FAT32 only — smaller images
+        // format best-effort but cannot mount there.
+        const capacityKbRaw = Number(manifest?.attrs?.capacityKB ?? 32768);
         const capacityKB = Number.isFinite(capacityKbRaw) && capacityKbRaw > 64
             ? Math.floor(capacityKbRaw)
             : 2048;
@@ -273,6 +276,10 @@ export class SDCardLogic extends SPIProtocol {
 
     /**
      * Minimal FAT16 formatter (MBR + PBR + 2 FATs + root + README data).
+     * Genuine FAT16 (NOT FAT12): Arduino's bundled SD library mounts
+     * FAT16/FAT32 only, and FAT16 needs >= 4085 data clusters — images too
+     * small for that keep a best-effort layout but won't mount there.
+     * Sectors/cluster adapts (1..64) to land in range.
      * Geometry: reserved 1, 2 FATs, 512 root entries, 8 sectors/cluster.
      * Pure arithmetic over this.storage — no I/O, no dependencies. Lets
      * genuine FAT stacks mount the virtual card and do file I/O through
@@ -305,14 +312,25 @@ export class SDCardLogic extends SPIProtocol {
         const oem = 'MSDOS5.0';
         for (let i = 0; i < 8; i += 1) this.storage[pbr + 3 + i] = oem.charCodeAt(i);
         set16(pbr + 11, S);
-        this.storage[pbr + 13] = 8; // sectors per cluster
+        // Sectors/cluster adapts so data clusters land in FAT16 range.
+        const rootSectors = 32;
+        let spc = 8;
+        let fatSectors = 2;
+        for (const cand of [1, 2, 4, 8, 16, 32, 64]) {
+            const fat = Math.max(1, Math.ceil((((total - 1 - rootSectors) / cand) * 2) / S));
+            const clusters = Math.floor((total - 1 - rootSectors - 2 * fat) / cand);
+            if (clusters >= 4085 && clusters <= 65525) {
+                spc = cand;
+                fatSectors = fat;
+                break;
+            }
+        }
+        this.storage[pbr + 13] = spc; // sectors per cluster
         set16(pbr + 14, 1); // reserved sectors
         this.storage[pbr + 16] = 2; // FAT count
         set16(pbr + 17, 512); // root entries
         set16(pbr + 19, total - 1); // total16
         this.storage[pbr + 21] = 0xf8; // media
-        const rootSectors = 32;
-        const fatSectors = 2;
         set16(pbr + 22, fatSectors);
         set16(pbr + 24, 32); // sectors per track
         set16(pbr + 26, 64); // heads
