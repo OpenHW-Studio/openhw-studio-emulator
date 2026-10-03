@@ -70,7 +70,7 @@ export class LEDLogic extends BaseComponent {
         const dutyCycle = payload?.dutyCycle ?? 0;
         this._pwmDutyCycle = dutyCycle;
         this._pwmWallMs = Date.now(); // event path (not tick) — wall clock OK
-        const cycles = (this._simCpu as any)?.cycles;
+        const cycles = this.cyclesNow();
         if (Number.isFinite(Number(cycles))) this._pwmTimestampCycles = Number(cycles);
         const brightness = Math.min(255, Math.max(0, Math.round(dutyCycle * 255)));
         this.setState({
@@ -83,7 +83,7 @@ export class LEDLogic extends BaseComponent {
     onPWMSignal(pinId: string, frequencyHz: number, dutyCycle: number, pulseUs: number): void {
         this._pwmDutyCycle = dutyCycle;
         this._pwmWallMs = Date.now(); // event path (not tick) — wall clock OK
-        const cycles = (this._simCpu as any)?.cycles;
+        const cycles = this.cyclesNow();
         if (Number.isFinite(Number(cycles))) this._pwmTimestampCycles = Number(cycles);
         const brightness = Math.min(255, Math.max(0, Math.round(dutyCycle * 255)));
         this.setState({
@@ -91,6 +91,23 @@ export class LEDLogic extends BaseComponent {
             brightness,
             glow: brightness > 50,
         });
+    }
+
+    /**
+     * Runner-agnostic cycle counter (plan §5.3). Prefers the board clock
+     * service; falls back to the legacy _simCpu mirror (kept updated in
+     * update() for headless harnesses). New code must call this, never
+     * _simCpu directly.
+     */
+    private cyclesNow(): number | undefined {
+        try {
+            const svc = (this as any)._boardCyclesNow;
+            if (typeof svc === 'function') {
+                const v = Number(svc());
+                if (Number.isFinite(v)) return v;
+            }
+        } catch { /* fall through */ }
+        return (this as any)._simCpu?.cycles;
     }
 
     update(cpuCycles: number, currentWires: any[], allComponentsInstances: BaseComponent[]) {
@@ -191,7 +208,7 @@ export class LEDLogic extends BaseComponent {
     getSyncState() {
         const state = super.getSyncState() || {};
 
-        const cycles = (this._simCpu as any)?.cycles;
+        const cycles = this.cyclesNow();
         const pwmActive = this._pwmTimestampCycles >= 0 && Number.isFinite(Number(cycles))
             && (this._pwmDutyCycle >= 0 && (Number(cycles) - this._pwmTimestampCycles) < 8_000_000);
 

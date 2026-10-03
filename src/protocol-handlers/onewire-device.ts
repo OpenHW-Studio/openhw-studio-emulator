@@ -140,6 +140,12 @@ export class OneWireProtocol extends BaseComponent {
     }
 
     private schedule(cb: () => void, delayCycles: number) {
+        // Runner-agnostic clock service first (plan §5.3); legacy AVR clock
+        // fallback. Identical timing either way on AVR.
+        try {
+            const sched = (this as any)._scheduleBoardCycles;
+            if (typeof sched === 'function') { sched(cb, delayCycles); return; }
+        } catch { /* fall through */ }
         const simCpu = (this as any)._simCpu;
         if (simCpu && typeof simCpu.addClockEvent === 'function') {
             simCpu.addClockEvent(cb, delayCycles);

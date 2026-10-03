@@ -111,6 +111,9 @@ export class IRReceiverLogic extends PulseProtocol {
     }
 
     private transmitNEC(code: number) {
+        // Runner-agnostic clock service first (plan §5.3); legacy AVR clock
+        // fallback; wall-clock timeout last. Identical pulse order either way.
+        const sched = (this as any)._scheduleBoardCycles;
         const cpu = (this as any)._simCpu;
         const pulses: { isHigh: boolean; durationUs: number }[] = [];
 
@@ -131,8 +134,22 @@ export class IRReceiverLogic extends PulseProtocol {
         pulses.push({ isHigh: false, durationUs: 562 });
         pulses.push({ isHigh: true, durationUs: 1000 });
 
-        // Schedule pulse train using CPU clock events or fallback timeout
-        if (cpu && typeof cpu.addClockEvent === 'function') {
+        // Schedule pulse train using board clock service, CPU clock events or fallback timeout
+        if (typeof sched === 'function') {
+            let accumulatedCycles = 0;
+            for (const p of pulses) {
+                const targetCycles = accumulatedCycles;
+                const v = p.isHigh ? 5.0 : 0.0;
+                sched(() => {
+                    this.driveOut(v);
+                }, targetCycles);
+                accumulatedCycles += p.durationUs * 16;
+            }
+            sched(() => {
+                this.transmitting = false;
+                this.setState({ powered: true, transmitting: false });
+            }, accumulatedCycles);
+        } else if (cpu && typeof cpu.addClockEvent === 'function') {
             let accumulatedCycles = 0;
             for (const p of pulses) {
                 const targetCycles = accumulatedCycles;

@@ -114,9 +114,22 @@ export class HCSR04Logic extends PulseProtocol {
         const echoDurationUs = Math.max(116, Math.round(distance * 58));
 
         this.isEchoing = true;
-        
+
         // Wait ~200us before driving ECHO high to simulate 8-cycle 40kHz sonic burst.
         // This gives the Arduino CPU enough time to hit the pulseIn() instruction.
+        // Runner-agnostic clock service first (plan §5.3); legacy AVR clock
+        // fallback; non-AVR pulse fallback last. Identical timing either way.
+        const sched = (this as any)._scheduleBoardCycles;
+        if (typeof sched === 'function') {
+            sched(() => {
+                this.driveEcho(5.0); // Start pulse
+                sched(() => {
+                    this.driveEcho(0.0); // End pulse
+                    this.isEchoing = false;
+                }, echoDurationUs * 16);
+            }, 200 * 16); // 200us at 16MHz
+            return;
+        }
         const cpu = (this as any)._simCpu;
         if (cpu && typeof cpu.addClockEvent === 'function') {
             cpu.addClockEvent(() => {
