@@ -298,7 +298,10 @@ export class SDCardLogic extends SPIProtocol {
             set16(off + 2, Math.floor(v / 65536) & 0xffff);
         };
         // MBR (LBA 0): one FAT16 partition spanning LBA 1..total-1.
+        // Boot indicator MUST be 0x00/0x80: Arduino rejects entries with
+        // any other low 7 bits as "not a valid partition".
         const part = 446;
+        this.storage[part] = 0x00;
         this.storage[part + 4] = 0x06;
         set32(part + 8, 1);
         set32(part + 12, total - 1);
