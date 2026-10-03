@@ -109,6 +109,17 @@ export class BaseComponent {
     _simCpu: any = null;
     _simUpdatePhysics: (() => void) | null = null;
     _setAvrPinDirect: ((boardPin: string, isHigh: boolean) => void) | null = null;
+    /**
+     * Runner-agnostic board-drive service (plan §5.3, Phase 3 seed).
+     * Preferred over the AVR-only `_setAvrPinDirect`: every runner family
+     * provides it (AVR: port set + repropagate; ARM/retro: engine input
+     * injection). Components must not branch on board type; they call this
+     * when they actively drive a board-side line (OneWire presence/data,
+     * DHT responses). The `_simCpu` / `_simUpdatePhysics` / `_setAvrPinDirect`
+     * / `_avrRunner` handles are deprecated in favor of this service plus
+     * capability checks, and will be retired once consumers migrate.
+     */
+    _driveBoardPin: ((boardPin: string, isHigh: boolean) => void) | null = null;
     pendingVisualStateEmit: boolean = false;
     telemetryMode: string = 'detail';
     telemetryWatchedParams: string[] = ['all'];
