@@ -66,6 +66,12 @@ export class HCSR04Logic extends PulseProtocol {
     private driveEcho(voltage: number) {
         if (this.isUpdating) return;
         this.isUpdating = true;
+        // Claim the bus for the whole echo window (same _drivingBus
+        // contract as OneWireProtocol): without it the runner's periodic
+        // repropagate re-asserts pullup HIGH and pulseIn() never sees LOW.
+        // Left claimed afterwards — ECHO idles LOW between measurements and
+        // the stale LOW (_lastDrivenVoltage=0) keeps it correct.
+        (this as any)._drivingBus = true;
         try {
             this._setVoltageInternal(voltage);
             const isHigh = voltage > 1.8;

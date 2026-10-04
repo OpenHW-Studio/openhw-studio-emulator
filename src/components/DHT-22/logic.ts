@@ -113,6 +113,12 @@ export class DHT22Logic extends BaseComponent {
     private drivePin(voltage: number) {
         this._setVoltageInternal(voltage);
         const isHigh = voltage > 1.8;
+        // Claim the bus while driving: the runner's periodic repropagate
+        // would otherwise re-assert INPUT_PULLUP HIGH onto the AVR pin and
+        // clobber our ACK/data LOWs within microseconds (Arduino then reads
+        // HIGH forever → TIMEOUT → NaN). Same _drivingBus contract as
+        // OneWireProtocol. Cleared when the bus returns to IDLE below.
+        (this as any)._drivingBus = true;
 
         // Board drive via the runner-agnostic bus service when available
         // (plan §5.3); legacy AVR-only fast path otherwise.
@@ -244,6 +250,7 @@ export class DHT22Logic extends BaseComponent {
             this.schedule(50 * 16, () => {
                 this.drivePin(5.0);
                 this.protocolState = 'IDLE';
+                (this as any)._drivingBus = false;
                 dhtLog(`[${this.id}] Transmission complete → IDLE`);
             });
             return;
