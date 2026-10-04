@@ -68,5 +68,6 @@
     },
     "ui": {"svg": "./neopixel-matrix.svg", "interactive": []},
     "sim": {"runtime": "js", "validation": "inline"},
+    "wasm": {"abi": 1, "file": "./core/neopixel_core_bg.wasm", "exports": ["create", "destroy", "set_freq", "reset", "edge", "poll", "out_len", "out_ptr"], "fallback": "js"},
     "bounds": {"x": 0, "y": 0, "w": 30, "h": 30}
 }

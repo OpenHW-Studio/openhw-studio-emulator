@@ -1,4 +1,5 @@
 import { BaseComponent } from '../components/BaseComponent';
+import { neoPixelGlueLoader, NeoPixelWasmCore } from '../components/openhw-neopixel-matrix/glue';
 
 export interface NeoPixelEdgeState {
     lastCycle: number;
@@ -23,6 +24,54 @@ export class NeoPixelProtocol extends BaseComponent implements NeoPixelEdgeState
             ...this.state,
             pixels: []
         };
+        this.setState({ core: 'js' });
+    }
+
+    // WASM framer (dual-runtime: when loaded, edges + idle latch run in
+    // the Rust core; the JS clockEdge path below stays the reference
+    // fallback with bit-exact shared semantics).
+    protected neoWasm: NeoPixelWasmCore | null = null;
+    private neoWasmLoadAttempted = false;
+    private neoWasmFreqSent = 0;
+
+    /** Lazy WASM core load — called by the runner once, never in tick. */
+    async ensureWasmLoaded(): Promise<boolean> {
+        if (this.neoWasm) return true;
+        if (this.neoWasmLoadAttempted) return false;
+        this.neoWasmLoadAttempted = true;
+        try {
+            const core = await neoPixelGlueLoader.load(this.manifest);
+            if (core) {
+                this.neoWasm = core as NeoPixelWasmCore;
+                this.neoWasm.setFreq(this.cpuFreqMHz);
+                this.neoWasmFreqSent = this.cpuFreqMHz;
+                this.setState({ core: 'wasm' });
+                this.stateChanged = true;
+                return true;
+            }
+        } catch { /* fall through to JS reference */ }
+        return false;
+    }
+
+    /** Push the detected CPU frequency into the core when it changes. */
+    private syncWasmFreq(): void {
+        try {
+            if (this.neoWasm && this.neoWasmFreqSent !== this.cpuFreqMHz) {
+                this.neoWasm.setFreq(this.cpuFreqMHz);
+                this.neoWasmFreqSent = this.cpuFreqMHz;
+            }
+        } catch { /* ignore */ }
+    }
+
+    /** Adopt core-decoded pixels into state (shared landing helper). */
+    private adoptPixels(pixels: number[] | null): void {
+        if (!pixels) return;
+        this.buffer = [];
+        this.currentBit = 0;
+        this.currentByte = 0;
+        this.state.pixels = pixels;
+        this.stateChanged = true;
+        this.onNeoPixelFrame(pixels);
     }
     
     private cpuFreqMHz = 16;
@@ -97,7 +146,14 @@ export class NeoPixelProtocol extends BaseComponent implements NeoPixelEdgeState
         // pattern) would leave a fully-decoded buffer unlatched forever —
         // exactly the live activePixels:0 seen with perfect edge timing.
         // Flush here when the line has idled past the reset window.
-        if (this.buffer.length > 0) {
+        // WASM path: the core owns the buffer, so poll unconditionally.
+        if (this.neoWasm) {
+            try {
+                this.syncWasmFreq();
+                this.adoptPixels(this.neoWasm.poll(cpuCycles));
+            } catch { /* fall through to JS reference below */ }
+        }
+        if (!this.neoWasm && this.buffer.length > 0) {
             const idleThreshold = this.cpuFreqMHz * 50;
             if (cpuCycles - this.lastCycle > idleThreshold) {
                 const pixels = NeoPixelBusFramer.packPixels(this.buffer);
@@ -119,11 +175,20 @@ export class NeoPixelProtocol extends BaseComponent implements NeoPixelEdgeState
         if (dmaAddress > 0 && !this.state.dmaBypassDisabled) return;
 
         if (pinId === this.getNeoPixelPinName()) {
-            const pixels = NeoPixelBusFramer.clockEdge(this, isHigh, cpuCycles, this.cpuFreqMHz);
-            if (pixels) {
-                this.state.pixels = pixels;
-                this.stateChanged = true;
-                this.onNeoPixelFrame(pixels);
+            // WASM path: edges decode in the core.
+            if (this.neoWasm) {
+                try {
+                    this.syncWasmFreq();
+                    this.adoptPixels(this.neoWasm.edge(isHigh, cpuCycles));
+                } catch { /* fall through to JS reference */ }
+            }
+            if (!this.neoWasm) {
+                const pixels = NeoPixelBusFramer.clockEdge(this, isHigh, cpuCycles, this.cpuFreqMHz);
+                if (pixels) {
+                    this.state.pixels = pixels;
+                    this.stateChanged = true;
+                    this.onNeoPixelFrame(pixels);
+                }
             }
         }
     }
