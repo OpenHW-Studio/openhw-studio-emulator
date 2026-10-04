@@ -49,6 +49,8 @@ export const RotaryEncoderUI = ({ state, attrs, isRunning }: { state: any, attrs
                     const svgDist = dist * ratio;
 
                     if (svgDist < 14) { // Center button click (radius < 14)
+                        // TEMP-DIAG rot-press (revert after isolation).
+                        try { console.warn(`[ROT-PRESS] press dist=${svgDist.toFixed(1)} hasInteract=${typeof attrs.onInteract}`); } catch { /* ignore */ }
                         if (attrs.onInteract) attrs.onInteract('press');
                         (e.currentTarget as any).setPointerCapture(e.pointerId);
                     } else { // Knob rotation start

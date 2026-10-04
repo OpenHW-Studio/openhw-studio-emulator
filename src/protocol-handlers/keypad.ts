@@ -14,6 +14,8 @@ export class KeypadLogic extends BaseComponent {
             const pair = (this as any).state?.connectedPair;
             const netOf = (this as any)._boardNetOf;
             const drive = (this as any)._driveBoardPin;
+            // TEMP-DIAG kp-drive (revert after isolation).
+            try { console.warn(`[KP-DRIVE] pair=${JSON.stringify(pair)} netOf=${typeof netOf} drive=${typeof drive} rV=${pair ? this.getPinVoltage(pair[0]) : 'n/a'}`); } catch { /* ignore */ }
             if (!pair || typeof netOf !== 'function' || typeof drive !== 'function') return;
             const rowBoard = netOf(pair[0]);
             const colBoard = netOf(pair[1]);
