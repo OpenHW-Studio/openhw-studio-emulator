@@ -136,6 +136,12 @@ export class ADXL345Logic extends BaseComponent {
         return val & 0xFF;
     }
 
+    // Runner I2C contract name (readByte path calls onI2CReadByte):
+    // delegate to the register-pointer read above.
+    onI2CReadByte(): number {
+        try { return this.readI2CByte(); } catch { return 0xFF; }
+    }
+
     private getRawRegisters(): Record<number, number> {
         const isMeasuring = (this.registers[0x2D] & 0x08) !== 0;
 
