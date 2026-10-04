@@ -70,7 +70,7 @@ export class MPU6050Logic extends I2CProtocol {
     onI2CStart(address: number, read: boolean): boolean {
         if (!this.powered) return false;
         // AD0 pin high → address 0x69
-        const ad0 = this.getPinVoltage('ADO') > 2.0;
+        const ad0 = this.getPinVoltage('AD0') > 2.0;
         const myAddr = ad0 ? 0x69 : 0x68;
         const addr7 = (address > 0x7F) ? (address >> 1) : address;
         if (addr7 !== myAddr) return false;

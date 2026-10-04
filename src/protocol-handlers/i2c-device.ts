@@ -59,6 +59,20 @@ export class I2CProtocol extends BaseComponent {
             this.stateChanged = true;
 
             if (read) {
+                // Repeated-start support: the register pointer was just
+                // written with endTransmission(false), so no STOP has
+                // committed the write buffer yet. Drain it here (exactly
+                // once — the buffer is cleared, so a later STOP no-ops)
+                // instead of reading from a stale lastRegister.
+                const pending = this.state._currentWriteBuffer || [];
+                if (pending.length > 0) {
+                    const reg = pending[0];
+                    const data = pending.slice(1);
+                    this.state.lastRegister = reg;
+                    this.state.lastWriteData = data;
+                    this.onI2CWriteRegister(reg, data);
+                    this.state._currentWriteBuffer = [];
+                }
                 // Populate read queue
                 const reg = this.state.lastRegister !== null ? this.state.lastRegister : 0;
                 // We don't know the exact count master will read, so we ask for a chunk (e.g. 32 bytes)
