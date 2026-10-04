@@ -121,6 +121,14 @@ export class CC1101Logic extends SPIProtocol implements RadioNode {
         }
 
         if (this.activeCommand !== null) {
+            // FIFO modes FIRST: 0x7F/0x3F have bit7 clear and would
+            // otherwise misclassify as register writes below (observed:
+            // TX FIFO stayed empty, STX transmitted nothing).
+            if (this.activeCommand === BURST_TX_FIFO) {
+                this.txFifo.push(value);
+                return 0x0F;
+            }
+
             // Write Register
             if ((this.activeCommand & 0x80) === 0) {
                 const reg = this.activeCommand & 0x3F;
@@ -128,17 +136,11 @@ export class CC1101Logic extends SPIProtocol implements RadioNode {
                 this.updateRadioParams();
                 return 0x00;
             }
-            
+
             // Read Register
             if ((this.activeCommand & 0x80) !== 0 && this.activeCommand !== BURST_RX_FIFO) {
                 const reg = this.activeCommand & 0x3F;
                 return this.getRegister(reg) || 0;
-            }
-
-            // Write TX FIFO
-            if (this.activeCommand === BURST_TX_FIFO) {
-                this.txFifo.push(value);
-                return 0x0F;
             }
 
             // Read RX FIFO
