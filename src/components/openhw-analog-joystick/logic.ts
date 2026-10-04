@@ -59,6 +59,9 @@ export class JoystickLogic extends BaseComponent {
 
         this.setPinVoltage('VRX', vx);
         this.setPinVoltage('VRY', vy);
+        // Manifest pins are VERT/HORZ — drive those (VRX/VRY are legacy).
+        this.setPinVoltage('VERT', vx);
+        this.setPinVoltage('HORZ', vy);
     }
 
     onCustomTelemetry() {
