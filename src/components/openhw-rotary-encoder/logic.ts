@@ -42,6 +42,35 @@ export class RotaryEncoderLogic extends BaseComponent {
         }
     }
 
+    // Runner repropagate sustain: the periodic input-pin sweep drives the
+    // AVR pin from _lastDrivenVoltage for components exposing this method
+    // (same contract as DHT22).
+    private getConnectedBoardPin(): string | null {
+        try {
+            const netOf = (this as any)._boardNetOf;
+            if (typeof netOf === 'function') {
+                const pin = netOf('SW');
+                if (pin) return pin;
+            }
+        } catch { /* fall through to wire scan */ }
+        try {
+            const runner = (this as any)._simCpu?._avrRunner;
+            const wires = runner?.currentWires;
+            if (Array.isArray(wires)) {
+                for (const w of wires) {
+                    const from: string = w.from || '';
+                    const to: string = w.to || '';
+                    if (from === `${this.id}:SW` && !to.startsWith(this.id + ':')) return to.split(':')[1] ?? null;
+                    if (to === `${this.id}:SW` && !from.startsWith(this.id + ':')) return from.split(':')[1] ?? null;
+                }
+            }
+        } catch { /* ignore */ }
+        return null;
+    }
+    private getBoardPin(): string | null {
+        try { return this.getConnectedBoardPin(); } catch { return null; }
+    }
+
     // Drive the AVR input pin so firmware digitalRead observes the press.
     // setPinVoltage alone only moves the component-side net — the AVR PIN
     // register moves via board-pin drive (same _drivingBus contract as DHT).
@@ -49,24 +78,7 @@ export class RotaryEncoderLogic extends BaseComponent {
         try {
             (this as any)._drivingBus = true;
             (this as any)._lastDrivenVoltage = isHigh ? 5.0 : 0.0;
-            const netOf = (this as any)._boardNetOf;
-            let boardPin: string | null = null;
-            if (typeof netOf === 'function') {
-                try { boardPin = netOf('SW'); } catch { boardPin = null; }
-            }
-            if (!boardPin) {
-                const runner = (this as any)._simCpu?._avrRunner;
-                const wires = runner?.currentWires;
-                if (Array.isArray(wires)) {
-                    for (const w of wires) {
-                        const from: string = w.from || '';
-                        const to: string = w.to || '';
-                        if (from === `${this.id}:SW` && !to.startsWith(this.id + ':')) boardPin = to.split(':')[1] ?? null;
-                        else if (to === `${this.id}:SW` && !from.startsWith(this.id + ':')) boardPin = from.split(':')[1] ?? null;
-                        if (boardPin) break;
-                    }
-                }
-            }
+            const boardPin = this.getConnectedBoardPin();
             if (boardPin && typeof (this as any)._driveBoardPin === 'function') {
                 (this as any)._driveBoardPin(boardPin, isHigh);
             } else if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
