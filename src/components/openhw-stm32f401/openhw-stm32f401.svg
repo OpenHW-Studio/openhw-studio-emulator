@@ -1,10 +1,266 @@
-<svg width="100%" height="100%" viewBox="0 0 140 320" xmlns="http://www.w3.org/2000/svg">
-  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
-  <rect x="1" y="1" width="138" height="318" rx="6" fill="#1e293b" stroke="#475569" />
-  <text x="70.0" y="160.0" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">STM32F401 BlackPill</text>
-  <circle cx="15" cy="15" r="2.5" fill="#888" data-pin="5V" />
-  <circle cx="15" cy="60" r="2.5" fill="#888" data-pin="PA0" />
-  <circle cx="125" cy="60" r="2.5" fill="#888" data-pin="PD12" />
-  <circle cx="125" cy="150" r="2.5" fill="#888" data-pin="PA9" />
-  <circle cx="125" cy="165" r="2.5" fill="#888" data-pin="PA10" />
+<svg width="100%" height="100%" viewBox="0 0 140 320" xmlns="http://www.w3.org/2000/svg" data-component="openhw-stm32f401" data-bind-root="true">
+  <!--
+    STM32F401 BlackPill (STM32F401CCU6) — reference-quality board art.
+    narrow BlackPill: ST-LINK module, QFN48 MCU, USB-C device port, PC13 LED (green driven),
+    Dynamics live in ui.tsx state.builtInLed; static off-state here:
+      - data-bind="builtin-led" off #145a32
+    Pin geometry == manifest.json order (20L + 17R + 3 SWD).
+  -->
+  viewBox="0 0 140 320"
+  width="100%"
+  height="100%"
+  
+  xmlns="http://www.w3.org/2000/svg"
+      >
+  <defs>
+    
+    <pattern id="f4-mask" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="4" fill="#1a1a2e" />
+      <circle cx="1" cy="1" r="0.45" fill="#22223a" />
+      <circle cx="3" cy="3" r="0.3" fill="#16162a" />
+    </pattern>
+    
+    <linearGradient id="f4-tft" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b4f7a" />
+      <stop offset="0.5" stop-color="#12395b" />
+      <stop offset="1" stop-color="#0b2440" />
+    </linearGradient>
+    
+    <linearGradient id="f4-mcu" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b5068" />
+      <stop offset="0.5" stop-color="#2c3e50" />
+      <stop offset="1" stop-color="#1d2a38" />
+    </linearGradient>
+    
+    <radialGradient id="f4-gold" cx="0.35" cy="0.3" r="1">
+      <stop offset="0" stop-color="#ffe9a3" />
+      <stop offset="0.55" stop-color="#f1c40f" />
+      <stop offset="1" stop-color="#9a7603" />
+    </radialGradient>
+  </defs>
+
+  <!-- PCB base: near-black Discovery + texture + edge rail -->
+  <rect x="0" y="5" width="140" height="305" rx="4" fill="#1a1a2e" stroke="#0d0d1a" stroke-width="1" />
+  <rect x="0" y="5" width="140" height="305" rx="4" fill="url(#f4-mask)" opacity="0.6" />
+  <rect x="1.5" y="6.5" width="137" height="302" rx="3" fill="none" stroke="#34345a" stroke-width="0.5" opacity="0.8" />
+
+  <!-- ST-LINK/V2 top module: shell + mini-USB + status LEDs -->
+  <rect x="30" y="0" width="80" height="14" fill="#95a5a6" rx="2" stroke="#5d6d7e" stroke-width="0.7" />
+  <rect x="30" y="0" width="80" height="4" fill="#d5d8dc" rx="2" opacity="0.5" />
+  <rect x="86" y="3" width="16" height="8" fill="#1a252f" rx="1" />
+  <rect x="88" y="5" width="12" height="4" fill="#ecf0f1" rx="0.5" />
+  <circle cx="36" cy="7" r="1.6" fill="#e74c3c" />
+  <circle cx="36" cy="11" r="1.6" fill="#2ecc71" />
+  <text x="52" y="11.5" fill="#2c3e50" font-size="5" font-family="monospace" text-anchor="middle">ST-LINK/V2</text>
+
+  <!-- STM32F401CCU6 LQFP144: body + dense pins + pin-1 dot -->
+  <g transform="translate(70, 108)">
+    <rect x="-24" y="-24" width="48" height="48" fill="#000" opacity="0.35" rx="3" />
+    <rect x="-22" y="-22" width="44" height="44" fill="url(#f4-mcu)" rx="2" stroke="#10161d" stroke-width="0.7" />
+              <line x1="-23" y1="-19" x2="-27" y2="-19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="23" y1="-19" x2="27" y2="-19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-19" y1="-23" x2="-19" y2="-27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-19" y1="23" x2="-19" y2="27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-23" y1="-16.5" x2="-27" y2="-16.5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="23" y1="-16.5" x2="27" y2="-16.5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-16.5" y1="-23" x2="-16.5" y2="-27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-16.5" y1="23" x2="-16.5" y2="27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-23" y1="-14" x2="-27" y2="-14" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="23" y1="-14" x2="27" y2="-14" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-14" y1="-23" x2="-14" y2="-27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-14" y1="23" x2="-14" y2="27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-23" y1="-11.5" x2="-27" y2="-11.5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="23" y1="-11.5" x2="27" y2="-11.5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-11.5" y1="-23" x2="-11.5" y2="-27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-11.5" y1="23" x2="-11.5" y2="27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-23" y1="-9" x2="-27" y2="-9" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="23" y1="-9" x2="27" y2="-9" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-9" y1="-23" x2="-9" y2="-27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-9" y1="23" x2="-9" y2="27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-23" y1="-6.5" x2="-27" y2="-6.5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="23" y1="-6.5" x2="27" y2="-6.5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-6.5" y1="-23" x2="-6.5" y2="-27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-6.5" y1="23" x2="-6.5" y2="27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-23" y1="-4" x2="-27" y2="-4" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="23" y1="-4" x2="27" y2="-4" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-4" y1="-23" x2="-4" y2="-27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-4" y1="23" x2="-4" y2="27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-23" y1="-1.5" x2="-27" y2="-1.5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="23" y1="-1.5" x2="27" y2="-1.5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-1.5" y1="-23" x2="-1.5" y2="-27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-1.5" y1="23" x2="-1.5" y2="27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-23" y1="1" x2="-27" y2="1" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="23" y1="1" x2="27" y2="1" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="1" y1="-23" x2="1" y2="-27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="1" y1="23" x2="1" y2="27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-23" y1="3.5" x2="-27" y2="3.5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="23" y1="3.5" x2="27" y2="3.5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="3.5" y1="-23" x2="3.5" y2="-27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="3.5" y1="23" x2="3.5" y2="27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-23" y1="6" x2="-27" y2="6" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="23" y1="6" x2="27" y2="6" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="6" y1="-23" x2="6" y2="-27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="6" y1="23" x2="6" y2="27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-23" y1="8.5" x2="-27" y2="8.5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="23" y1="8.5" x2="27" y2="8.5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="8.5" y1="-23" x2="8.5" y2="-27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="8.5" y1="23" x2="8.5" y2="27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-23" y1="11" x2="-27" y2="11" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="23" y1="11" x2="27" y2="11" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="11" y1="-23" x2="11" y2="-27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="11" y1="23" x2="11" y2="27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-23" y1="13.5" x2="-27" y2="13.5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="23" y1="13.5" x2="27" y2="13.5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="13.5" y1="-23" x2="13.5" y2="-27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="13.5" y1="23" x2="13.5" y2="27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-23" y1="16" x2="-27" y2="16" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="23" y1="16" x2="27" y2="16" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="16" y1="-23" x2="16" y2="-27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="16" y1="23" x2="16" y2="27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-23" y1="18.5" x2="-27" y2="18.5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="23" y1="18.5" x2="27" y2="18.5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="18.5" y1="-23" x2="18.5" y2="-27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="18.5" y1="23" x2="18.5" y2="27" stroke="#d5d8dc" stroke-width="0.7"/>
+    <text x="0" y="-5" fill="#aeb6bf" font-size="5" font-family="monospace" text-anchor="middle">STM32</text>
+    <text x="0" y="2" fill="#aeb6bf" font-size="4" font-family="monospace" text-anchor="middle">F401CCU6</text>
+    <text x="0" y="8" fill="#7f8c8d" font-size="2.6" font-family="monospace" text-anchor="middle">QFN48 · 84MHz</text>
+    <circle cx="-16" cy="-16" r="2" fill="#10161d" stroke="#5d6d7e" stroke-width="0.4" />
+  </g>
+
+  <!-- USB-C device port + NRST + 25MHz can (BlackPill) -->
+  <rect x="32" y="140" width="38" height="12" fill="#aeb9c2" rx="3" stroke="#5d6d7e" stroke-width="0.7" />
+  <rect x="34" y="142" width="34" height="8" fill="#1a252f" rx="1.5" />
+  <rect x="36" y="144" width="30" height="4" fill="#ecf0f1" rx="1" />
+  <text x="51" y="158" fill="#7f8c8d" font-size="3.2" font-family="monospace" text-anchor="middle">USB-C</text>
+  <text x="51" y="162" fill="#5d6d7e" font-size="2.4" font-family="monospace" text-anchor="middle">DEVICE · FS PHY</text>
+
+  <!-- NRST tactile + 25MHz + 32kHz cans (BlackPill) -->
+  <rect x="74" y="142" width="20" height="10" fill="#8a939c" rx="2" stroke="#5d6d7e" stroke-width="0.6" />
+  <circle cx="84" cy="147" r="3" fill="#0a0a0a" stroke="#2c3e50" stroke-width="0.5" />
+  <text x="84" y="158" fill="#5d6d7e" font-size="2.4" font-family="monospace" text-anchor="middle">NRST</text>
+  <rect x="74" y="160" width="20" height="7" fill="#c7ced5" rx="3.5" stroke="#7f8c8d" stroke-width="0.6" />
+  <text x="84" y="165.5" fill="#2c3e50" font-size="2.8" font-family="monospace" text-anchor="middle">25.0</text>
+
+  <!-- Single status LED + BOOT0 jumper (BlackPill) -->
+  <rect x="96" y="176" width="20" height="10" fill="#14181d" rx="1" stroke="#000" stroke-width="0.5" />
+  <rect x="98" y="178" width="6" height="6" fill="#f1c40f" stroke="#9a7603" stroke-width="0.4" />
+  <rect x="106" y="178" width="6" height="6" fill="#f1c40f" stroke="#9a7603" stroke-width="0.4" />
+  <text x="106" y="192" fill="#5d6d7e" font-size="2.4" font-family="monospace" text-anchor="middle">BOOT0</text>
+
+  <!-- User LEDs: LD3 green PG13 (dynamic) + LD4 red PD14-ish companion -->
+  <rect x="96" y="198" width="7" height="9" fill="#0e3a22" rx="1" />
+  <circle cx="99.5" cy="202.5" r="2.6" fill="#145a32" data-bind="builtin-led" />
+          <rect x="105" y="198" width="7" height="9" fill="#3a0e0e" rx="1" />
+  <circle cx="108.5" cy="202.5" r="2.6" fill="#7b1f1f" />
+  <text x="104" y="220" fill="#9fb3c8" font-size="3" font-family="monospace" text-anchor="middle">PC13 · BUILT-IN LED</text>
+
+  <!-- USER (PA0 blue) + RESET (black) pushbuttons -->
+  <ellipse cx="64" cy="242" rx="13" ry="1.8" fill="#000" opacity="0.35" />
+  <rect x="52" y="230" width="24" height="10" fill="#8a939c" rx="2" stroke="#5d6d7e" stroke-width="0.6" />
+  <rect x="54" y="232" width="20" height="6" fill="#232a33" rx="1.2" />
+  <circle cx="64" cy="235" r="3" fill="#2980b9" stroke="#1a5276" stroke-width="0.6" />
+  <text x="64" y="248" fill="#9fb3c8" font-size="3" font-family="monospace" text-anchor="middle">USER PA0</text>
+  <rect x="80" y="230" width="14" height="10" fill="#8a939c" rx="2" stroke="#5d6d7e" stroke-width="0.6" />
+  <rect x="82" y="232" width="10" height="6" fill="#232a33" rx="1.2" />
+  <circle cx="87" cy="235" r="2.4" fill="#0a0a0a" stroke="#2c3e50" stroke-width="0.5" />
+  <text x="87" y="248" fill="#9fb3c8" font-size="3" font-family="monospace" text-anchor="middle">RESET</text>
+
+  <!-- 8MHz crystal can -->
+  <rect x="52" y="253" width="5" height="3" fill="#c9a227" />
+  <rect x="71" y="253" width="5" height="3" fill="#c9a227" />
+  <rect x="54" y="253" width="24" height="8" fill="#c7ced5" rx="4" stroke="#7f8c8d" stroke-width="0.7" />
+  <rect x="54" y="253" width="24" height="3.5" fill="#eef1f4" rx="1.7" opacity="0.8" />
+  <text x="66" y="259" fill="#2c3e50" font-size="3.6" font-family="monospace" text-anchor="middle">8.000</text>
+
+  <!-- Board silkscreen title -->
+  <text x="70" y="276" fill="#ffffff" font-size="4.5" font-family="monospace" text-anchor="middle" fontWeight="bold">F401 BlackPill</text>
+  <text x="70" y="282" fill="#9fb3c8" font-size="3" font-family="monospace" text-anchor="middle">F401CC · 84MHz · 512K/96K</text>
+  <text x="70" y="287" fill="#9fb3c8" font-size="2.6" font-family="monospace" text-anchor="middle">USART1 PA9/PA10 · USB-C · PC13 LED</text>
+
+  
+  <!-- Headers: gold-ring pads + drilled holes (manifest order) -->
+  <g><circle cx="15" cy="15" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="5V"/><circle cx="15" cy="15" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="30" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="GND.1"/><circle cx="15" cy="30" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="45" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="3V3"/><circle cx="15" cy="45" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="60" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA0"/><circle cx="15" cy="60" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="75" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA1"/><circle cx="15" cy="75" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="90" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA2"/><circle cx="15" cy="90" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="105" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA3"/><circle cx="15" cy="105" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="120" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA4"/><circle cx="15" cy="120" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="135" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA5"/><circle cx="15" cy="135" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="150" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA6"/><circle cx="15" cy="150" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="165" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA7"/><circle cx="15" cy="165" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="180" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB0"/><circle cx="15" cy="180" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="195" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB1"/><circle cx="15" cy="195" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="210" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB6"/><circle cx="15" cy="210" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="225" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB7"/><circle cx="15" cy="225" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="240" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB8"/><circle cx="15" cy="240" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="255" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB9"/><circle cx="15" cy="255" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="270" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="RESET"/><circle cx="15" cy="270" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="285" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="GND.2"/><circle cx="15" cy="285" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="300" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="3V3.2"/><circle cx="15" cy="300" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="125" cy="15" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="GND.3"/><circle cx="125" cy="15" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="125" cy="30" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PC0"/><circle cx="125" cy="30" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="125" cy="45" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PC1"/><circle cx="125" cy="45" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="125" cy="60" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PD12"/><circle cx="125" cy="60" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="125" cy="75" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PD13"/><circle cx="125" cy="75" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="125" cy="90" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PD14"/><circle cx="125" cy="90" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="125" cy="105" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PD15"/><circle cx="125" cy="105" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="125" cy="120" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PC6"/><circle cx="125" cy="120" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="125" cy="135" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PC7"/><circle cx="125" cy="135" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="125" cy="150" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA9"/><circle cx="125" cy="150" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="125" cy="165" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA10"/><circle cx="125" cy="165" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="125" cy="180" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA11"/><circle cx="125" cy="180" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="125" cy="195" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA12"/><circle cx="125" cy="195" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="125" cy="210" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB12"/><circle cx="125" cy="210" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="125" cy="225" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB13"/><circle cx="125" cy="225" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="125" cy="240" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB14"/><circle cx="125" cy="240" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="125" cy="255" r="3.1" fill="url(#f4-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB15"/><circle cx="125" cy="255" r="1.2" fill="#0a0a0a"/></g>
+  <!-- SWD bottom header -->
+  <g><circle cx="45" cy="312" r="3" fill="#d5d8dc" stroke="#5d6d7e" stroke-width="0.4" data-pin="SWDIO"/><circle cx="45" cy="312" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="65" cy="312" r="3" fill="#d5d8dc" stroke="#5d6d7e" stroke-width="0.4" data-pin="SWCLK"/><circle cx="65" cy="312" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="85" cy="312" r="3" fill="#d5d8dc" stroke="#5d6d7e" stroke-width="0.4" data-pin="SWD_GND"/><circle cx="85" cy="312" r="1.2" fill="#0a0a0a"/></g>
+  <text x="65" y="306" fill="#9fb3c8" font-size="2.6" font-family="monospace" text-anchor="middle">SWD DIO · CLK · GND</text>
+  <!-- Silkscreen pin labels -->
+  <g fill="#ecf0f1" font-size="4.5" font-family="monospace" font-weight="bold">
+    <text x="21" y="16">5V</text>
+    <text x="21" y="31">GND</text>
+    <text x="21" y="46">3V3</text>
+    <text x="21" y="61">PA0</text>
+    <text x="21" y="76">PA1</text>
+    <text x="21" y="91">PA2</text>
+    <text x="21" y="106">PA3</text>
+    <text x="21" y="121">PA4</text>
+    <text x="21" y="136">PA5</text>
+    <text x="21" y="151">PA6</text>
+    <text x="21" y="166">PA7</text>
+    <text x="21" y="181">PB0</text>
+    <text x="21" y="196">PB1</text>
+    <text x="21" y="211">PB6</text>
+    <text x="21" y="226">PB7</text>
+    <text x="21" y="241">PB8</text>
+    <text x="21" y="256">PB9</text>
+    <text x="21" y="271">RST</text>
+    <text x="21" y="286">GND</text>
+    <text x="21" y="301">3V3</text>
+  </g>
+  <g fill="#ecf0f1" font-size="4.5" font-family="monospace" font-weight="bold" text-anchor="end">
+    <text x="119" y="16">GND</text>
+    <text x="119" y="31">PC0</text>
+    <text x="119" y="46">PC1</text>
+    <text x="119" y="61">PD12</text>
+    <text x="119" y="76">PD13</text>
+    <text x="119" y="91">PD14</text>
+    <text x="119" y="106">PD15</text>
+    <text x="119" y="121">PC6</text>
+    <text x="119" y="136">PC7</text>
+    <text x="119" y="151">PA9</text>
+    <text x="119" y="166">PA10</text>
+    <text x="119" y="181">PA11</text>
+    <text x="119" y="196">PA12</text>
+    <text x="119" y="211">PB12</text>
+    <text x="119" y="226">PB13</text>
+    <text x="119" y="241">PB14</text>
+    <text x="119" y="256">PB15</text>
+  </g>
 </svg>

@@ -1,49 +1,276 @@
-<svg width="100%" height="100%" viewBox="0 0 92 320" xmlns="http://www.w3.org/2000/svg">
-  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
-  <rect x="1" y="1" width="90" height="318" rx="6" fill="#1e293b" stroke="#475569" />
-  <text x="46.0" y="160.0" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">Nucleo-F103RB</text>
-  <circle cx="15" cy="15" r="2.5" fill="#888" data-pin="VBAT" />
-  <circle cx="15" cy="30" r="2.5" fill="#888" data-pin="PC13" />
-  <circle cx="15" cy="45" r="2.5" fill="#888" data-pin="PC14" />
-  <circle cx="15" cy="60" r="2.5" fill="#888" data-pin="PC15" />
-  <circle cx="15" cy="75" r="2.5" fill="#888" data-pin="PA0" />
-  <circle cx="15" cy="90" r="2.5" fill="#888" data-pin="PA1" />
-  <circle cx="15" cy="105" r="2.5" fill="#888" data-pin="PA2" />
-  <circle cx="15" cy="120" r="2.5" fill="#888" data-pin="PA3" />
-  <circle cx="15" cy="135" r="2.5" fill="#888" data-pin="PA4" />
-  <circle cx="15" cy="150" r="2.5" fill="#888" data-pin="PA5" />
-  <circle cx="15" cy="165" r="2.5" fill="#888" data-pin="PA6" />
-  <circle cx="15" cy="180" r="2.5" fill="#888" data-pin="PA7" />
-  <circle cx="15" cy="195" r="2.5" fill="#888" data-pin="PB0" />
-  <circle cx="15" cy="210" r="2.5" fill="#888" data-pin="PB1" />
-  <circle cx="15" cy="225" r="2.5" fill="#888" data-pin="PB10" />
-  <circle cx="15" cy="240" r="2.5" fill="#888" data-pin="PB11" />
-  <circle cx="15" cy="255" r="2.5" fill="#888" data-pin="RESET" />
-  <circle cx="15" cy="270" r="2.5" fill="#888" data-pin="3V3.1" />
-  <circle cx="15" cy="285" r="2.5" fill="#888" data-pin="GND.1" />
-  <circle cx="15" cy="300" r="2.5" fill="#888" data-pin="GND.2" />
-  <circle cx="75" cy="15" r="2.5" fill="#888" data-pin="3V3.2" />
-  <circle cx="75" cy="30" r="2.5" fill="#888" data-pin="GND.3" />
-  <circle cx="75" cy="45" r="2.5" fill="#888" data-pin="5V" />
-  <circle cx="75" cy="60" r="2.5" fill="#888" data-pin="PB9" />
-  <circle cx="75" cy="75" r="2.5" fill="#888" data-pin="PB8" />
-  <circle cx="75" cy="90" r="2.5" fill="#888" data-pin="PB7" />
-  <circle cx="75" cy="105" r="2.5" fill="#888" data-pin="PB6" />
-  <circle cx="75" cy="120" r="2.5" fill="#888" data-pin="PB5" />
-  <circle cx="75" cy="135" r="2.5" fill="#888" data-pin="PB4" />
-  <circle cx="75" cy="150" r="2.5" fill="#888" data-pin="PB3" />
-  <circle cx="75" cy="165" r="2.5" fill="#888" data-pin="PA15" />
-  <circle cx="75" cy="180" r="2.5" fill="#888" data-pin="PA12" />
-  <circle cx="75" cy="195" r="2.5" fill="#888" data-pin="PA11" />
-  <circle cx="75" cy="210" r="2.5" fill="#888" data-pin="PA10" />
-  <circle cx="75" cy="225" r="2.5" fill="#888" data-pin="PA9" />
-  <circle cx="75" cy="240" r="2.5" fill="#888" data-pin="PA8" />
-  <circle cx="75" cy="255" r="2.5" fill="#888" data-pin="PB15" />
-  <circle cx="75" cy="270" r="2.5" fill="#888" data-pin="PB14" />
-  <circle cx="75" cy="285" r="2.5" fill="#888" data-pin="PB13" />
-  <circle cx="75" cy="300" r="2.5" fill="#888" data-pin="PB12" />
-  <circle cx="23.5" cy="315" r="2.5" fill="#888" data-pin="SWD_3V3" />
-  <circle cx="38.5" cy="315" r="2.5" fill="#888" data-pin="SWDIO" />
-  <circle cx="53.5" cy="315" r="2.5" fill="#888" data-pin="SWCLK" />
-  <circle cx="68.5" cy="315" r="2.5" fill="#888" data-pin="SWD_GND" />
+<svg width="100%" height="100%" viewBox="0 0 92 320" xmlns="http://www.w3.org/2000/svg" data-component="openhw-stm32-nucleo-f103rb" data-bind-root="true">
+  <!--
+    STM32 Blue Pill (STM32F103RBT6) — reference-quality board art (wokwi-detail bar:
+    soldermask texture, copper traces, brushed USB shell, gold-ring pads, beveled QFP,
+    dual crystals, SOT-223 regulator + tantalums, PWR + PC13 LEDs with glow).
+    Dynamics live in ui.tsx state.builtInLed; static off-state here:
+      - data-bind="builtin-led" off #145a32
+    Pin geometry == manifest.json order (20L + 20R + 4 SWD).
+  -->
+  <defs>
+    
+    <pattern id="bp-mask" width="3" height="3" patternUnits="userSpaceOnUse">
+      <rect width="3" height="3" fill="#003a73"/>
+      <circle cx="1" cy="1" r="0.35" fill="#00417f"/>
+    </pattern>
+    
+    <linearGradient id="bp-usb" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dfe6ec"/>
+      <stop offset="0.45" stop-color="#aeb9c2"/>
+      <stop offset="0.55" stop-color="#8e9aa4"/>
+      <stop offset="1" stop-color="#c3ccd3"/>
+    </linearGradient>
+    
+    <radialGradient id="bp-gold" cx="0.35" cy="0.3" r="1">
+      <stop offset="0" stop-color="#ffe9a3"/>
+      <stop offset="0.55" stop-color="#f1c40f"/>
+      <stop offset="1" stop-color="#9a7603"/>
+    </radialGradient>
+    
+    <linearGradient id="bp-mcu" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b5068"/>
+      <stop offset="0.5" stop-color="#2c3e50"/>
+      <stop offset="1" stop-color="#1d2a38"/>
+    </linearGradient>
+  </defs>
+
+  <!-- PCB base: blue soldermask + texture + edge rail -->
+  <rect x="0" y="5" width="92" height="315" rx="4" fill="#003366" stroke="#001a33" stroke-width="1"/>
+  <rect x="0" y="5" width="92" height="315" rx="4" fill="url(#bp-mask)" opacity="0.55"/>
+  <rect x="1.5" y="6.5" width="89" height="312" rx="3" fill="none" stroke="#0a4d99" stroke-width="0.5" opacity="0.7"/>
+  
+  <circle cx="6" cy="312" r="2.6" fill="#001a33" stroke="#c9a227" stroke-width="0.8"/>
+  <circle cx="6" cy="312" r="1" fill="#000"/>
+
+  <!-- Micro USB port (top): shell + tongue + inner contacts -->
+  <rect x="33" y="0" width="26" height="15" fill="url(#bp-usb)" rx="2" stroke="#5d6d7e" stroke-width="0.8"/>
+  <rect x="33" y="0" width="26" height="4" fill="#eef1f4" opacity="0.55"/>
+  <rect x="36" y="5" width="20" height="7" fill="#1a252f" rx="0.8"/>
+  <rect x="36" y="5" width="20" height="7" fill="none" stroke="#ecf0f1" stroke-width="0.5" opacity="0.7"/>
+  <rect x="39" y="9.5" width="1.6" height="1.6" fill="#f1c40f"/>
+  <rect x="42.5" y="9.5" width="1.6" height="1.6" fill="#f1c40f"/>
+  <rect x="46" y="9.5" width="1.6" height="1.6" fill="#f1c40f"/>
+  <rect x="49.5" y="9.5" width="1.6" height="1.6" fill="#f1c40f"/>
+  <rect x="53" y="9.5" width="1.6" height="1.6" fill="#f1c40f"/>
+  <line x1="36" y1="12.2" x2="56" y2="12.2" stroke="#34495e" stroke-width="0.7"/>
+
+  <!-- Reset button: body + plunger + shadow -->
+  <ellipse cx="41" cy="58.5" rx="7" ry="1.6" fill="#000" opacity="0.35"/>
+  <rect x="35" y="45" width="12" height="12" fill="#8a939c" rx="2" stroke="#5d6d7e" stroke-width="0.7"/>
+  <rect x="36.5" y="46.5" width="9" height="9" fill="#232a33" rx="1.2"/>
+  <circle cx="41" cy="51" r="3.4" fill="#dfe3e8" stroke="#2c3e50" stroke-width="0.6"/>
+  <circle cx="41" cy="51" r="1.4" fill="#9aa4ae"/>
+  <text x="41" y="62.5" fill="#9fb3c8" font-size="3" font-family="monospace" text-anchor="middle">RESET</text>
+
+  <!-- BOOT0 / BOOT1 jumper blocks -->
+  <ellipse cx="55" cy="58.5" rx="4" ry="1.2" fill="#000" opacity="0.3"/>
+  <ellipse cx="63" cy="58.5" rx="4" ry="1.2" fill="#000" opacity="0.3"/>
+  <rect x="52" y="45" width="6" height="12" fill="#e8b10f" rx="1" stroke="#000" stroke-width="0.5"/>
+  <rect x="60" y="45" width="6" height="12" fill="#e8b10f" rx="1" stroke="#000" stroke-width="0.5"/>
+  <rect x="53" y="46" width="4" height="4" fill="#f1c40f" stroke="#9a7603" stroke-width="0.4"/>
+  <rect x="53" y="52" width="4" height="4" fill="#f1c40f" stroke="#9a7603" stroke-width="0.4"/>
+  <rect x="61" y="46" width="4" height="4" fill="#f1c40f" stroke="#9a7603" stroke-width="0.4"/>
+  <rect x="61" y="52" width="4" height="4" fill="#f1c40f" stroke="#9a7603" stroke-width="0.4"/>
+  <text x="52" y="43" fill="#9fb3c8" font-size="2.6" font-family="monospace" text-anchor="middle">B0</text>
+  <text x="60" y="43" fill="#9fb3c8" font-size="2.6" font-family="monospace" text-anchor="middle">B1</text>
+
+  <!-- Copper traces (left rail -> MCU, right rail -> MCU) -->
+  <g stroke="#0a4d99" stroke-width="0.7" opacity="0.9" fill="none">
+    <path d="M18 75 H24 V100 H31"/>
+    <path d="M18 165 H24 V130 H31"/>
+    <path d="M18 210 H25 V190 H31"/>
+    <path d="M74 75 H68 V100 H61"/>
+    <path d="M74 165 H68 V130 H61"/>
+    <path d="M74 225 H67 V205 H61"/>
+  </g>
+  <g fill="#0a4d99" opacity="0.9">
+    <circle cx="24" cy="100" r="1"/>
+    <circle cx="24" cy="130" r="1"/>
+    <circle cx="68" cy="100" r="1"/>
+    <circle cx="68" cy="130" r="1"/>
+  </g>
+
+  <!-- STM32F103RBT6 QFP48 (diamond) with bevel + pin-1 dot -->
+  <g transform="translate(46, 110) rotate(45)">
+    <rect x="-16.5" y="-16.5" width="33" height="33" fill="#000" opacity="0.35" rx="3"/>
+    <rect x="-15" y="-15" width="30" height="30" fill="url(#bp-mcu)" rx="2" stroke="#10161d" stroke-width="0.7"/>
+    <line x1="-16" y1="-11" x2="-19" y2="-11" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="16" y1="-11" x2="19" y2="-11" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-11" y1="-16" x2="-11" y2="-19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-11" y1="16" x2="-11" y2="19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-16" y1="-9" x2="-19" y2="-9" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="16" y1="-9" x2="19" y2="-9" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-9" y1="-16" x2="-9" y2="-19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-9" y1="16" x2="-9" y2="19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-16" y1="-7" x2="-19" y2="-7" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="16" y1="-7" x2="19" y2="-7" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-7" y1="-16" x2="-7" y2="-19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-7" y1="16" x2="-7" y2="19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-16" y1="-5" x2="-19" y2="-5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="16" y1="-5" x2="19" y2="-5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-5" y1="-16" x2="-5" y2="-19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-5" y1="16" x2="-5" y2="19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-16" y1="-3" x2="-19" y2="-3" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="16" y1="-3" x2="19" y2="-3" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-3" y1="-16" x2="-3" y2="-19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-3" y1="16" x2="-3" y2="19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-16" y1="-1" x2="-19" y2="-1" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="16" y1="-1" x2="19" y2="-1" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-1" y1="-16" x2="-1" y2="-19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-1" y1="16" x2="-1" y2="19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-16" y1="1" x2="-19" y2="1" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="16" y1="1" x2="19" y2="1" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="1" y1="-16" x2="1" y2="-19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="1" y1="16" x2="1" y2="19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-16" y1="3" x2="-19" y2="3" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="16" y1="3" x2="19" y2="3" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="3" y1="-16" x2="3" y2="-19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="3" y1="16" x2="3" y2="19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-16" y1="5" x2="-19" y2="5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="16" y1="5" x2="19" y2="5" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="5" y1="-16" x2="5" y2="-19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="5" y1="16" x2="5" y2="19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-16" y1="7" x2="-19" y2="7" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="16" y1="7" x2="19" y2="7" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="7" y1="-16" x2="7" y2="-19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="7" y1="16" x2="7" y2="19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-16" y1="9" x2="-19" y2="9" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="16" y1="9" x2="19" y2="9" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="9" y1="-16" x2="9" y2="-19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="9" y1="16" x2="9" y2="19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="-16" y1="11" x2="-19" y2="11" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="16" y1="11" x2="19" y2="11" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="11" y1="-16" x2="11" y2="-19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <line x1="11" y1="16" x2="11" y2="19" stroke="#d5d8dc" stroke-width="0.7"/>
+    <text x="0" y="-4.5" fill="#aeb6bf" font-size="3.5" font-family="monospace" text-anchor="middle" transform="rotate(-45)">STM32</text>
+    <text x="0" y="0.5" fill="#aeb6bf" font-size="3" font-family="monospace" text-anchor="middle" transform="rotate(-45)">F103RBT6</text>
+    <circle cx="-10" cy="-10" r="1.8" fill="#10161d" stroke="#5d6d7e" stroke-width="0.4"/>
+  </g>
+
+  <!-- 8MHz crystal can + pads -->
+  <rect x="33" y="145" width="5" height="3" fill="#c9a227"/>
+  <rect x="54" y="145" width="5" height="3" fill="#c9a227"/>
+  <rect x="36" y="145" width="20" height="8" fill="#c7ced5" rx="4" stroke="#7f8c8d" stroke-width="0.7"/>
+  <rect x="36" y="145" width="20" height="3.5" fill="#eef1f4" rx="1.7" opacity="0.8"/>
+  <text x="46" y="151" fill="#2c3e50" font-size="3.6" font-family="monospace" text-anchor="middle">8.000</text>
+
+  <!-- 32.768kHz RTC crystal (small can, lower right of MCU) -->
+  <rect x="56" y="128" width="10" height="4.5" fill="#c7ced5" rx="2.2" stroke="#7f8c8d" stroke-width="0.5"/>
+  <text x="61" y="131.4" fill="#2c3e50" font-size="2.4" font-family="monospace" text-anchor="middle">32k</text>
+
+  <!-- Voltage regulator SOT-223 + caps -->
+  <rect x="52" y="188" width="12" height="9" fill="#1c2833" rx="1" stroke="#0c0e11" stroke-width="0.5"/>
+  <rect x="54" y="190" width="8" height="5" fill="#2e4053"/>
+  <rect x="53" y="197" width="2" height="3" fill="#c9a227"/>
+  <rect x="57" y="197" width="2" height="3" fill="#c9a227"/>
+  <rect x="61" y="197" width="2" height="3" fill="#c9a227"/>
+  <rect x="46" y="200" width="6" height="10" fill="#8e6e2f" rx="1" stroke="#5d4a12" stroke-width="0.4"/>
+  <rect x="46" y="200" width="6" height="2" fill="#c9a227"/>
+  <rect x="56" y="200" width="6" height="10" fill="#8e6e2f" rx="1" stroke="#5d4a12" stroke-width="0.4"/>
+  <rect x="56" y="200" width="6" height="2" fill="#c9a227"/>
+
+  <!-- LEDs: power (red, always) + PC13 (green, dynamic) with glow -->
+  <rect x="24" y="19" width="5" height="7" fill="#7b1f1f" rx="1"/>
+  <rect x="25" y="20" width="4" height="6" fill="#e74c3c" rx="1"/>
+  <rect x="25" y="20" width="4" height="2" fill="#ff8a7a" rx="1" opacity="0.85"/>
+  <rect x="30" y="19" width="5" height="7" fill="#0e3a22" rx="1"/>
+  <rect x="31" y="20" width="4" height="6" fill="#145a32" rx="1" data-bind="builtin-led"/>
+  <text x="37" y="16.5" fill="#9fb3c8" font-size="2" font-family="monospace" text-anchor="middle">PWR·PA5</text>
+
+  
+  <!-- Headers: gold-ring pads + drilled holes (manifest order) -->
+  <g><circle cx="15" cy="15" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="VBAT"/><circle cx="15" cy="15" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="30" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PC13"/><circle cx="15" cy="30" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="45" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PC14"/><circle cx="15" cy="45" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="60" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PC15"/><circle cx="15" cy="60" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="75" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA0"/><circle cx="15" cy="75" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="90" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA1"/><circle cx="15" cy="90" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="105" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA2"/><circle cx="15" cy="105" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="120" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA3"/><circle cx="15" cy="120" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="135" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA4"/><circle cx="15" cy="135" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="150" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA5"/><circle cx="15" cy="150" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="165" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA6"/><circle cx="15" cy="165" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="180" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA7"/><circle cx="15" cy="180" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="195" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB0"/><circle cx="15" cy="195" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="210" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB1"/><circle cx="15" cy="210" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="225" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB10"/><circle cx="15" cy="225" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="240" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB11"/><circle cx="15" cy="240" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="255" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="RESET"/><circle cx="15" cy="255" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="270" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="3V3.1"/><circle cx="15" cy="270" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="285" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="GND.1"/><circle cx="15" cy="285" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="15" cy="181" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="GND.2"/><circle cx="15" cy="181" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="15" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="3V3.2"/><circle cx="75" cy="15" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="30" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="GND.3"/><circle cx="75" cy="30" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="45" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="5V"/><circle cx="75" cy="45" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="60" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB9"/><circle cx="75" cy="60" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="75" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB8"/><circle cx="75" cy="75" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="90" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB7"/><circle cx="75" cy="90" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="105" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB6"/><circle cx="75" cy="105" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="120" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB5"/><circle cx="75" cy="120" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="135" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB4"/><circle cx="75" cy="135" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="150" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB3"/><circle cx="75" cy="150" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="165" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA15"/><circle cx="75" cy="165" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="180" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA12"/><circle cx="75" cy="180" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="195" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA11"/><circle cx="75" cy="195" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="210" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA10"/><circle cx="75" cy="210" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="225" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA9"/><circle cx="75" cy="225" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="240" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PA8"/><circle cx="75" cy="240" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="255" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB15"/><circle cx="75" cy="255" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="270" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB14"/><circle cx="75" cy="270" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="285" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB13"/><circle cx="75" cy="285" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="75" cy="181" r="3.1" fill="url(#bp-gold)" stroke="#6b4e00" stroke-width="0.4" data-pin="PB12"/><circle cx="75" cy="181" r="1.2" fill="#0a0a0a"/></g>
+  <!-- SWD bottom header -->
+  <g><circle cx="23.5" cy="315" r="3" fill="#d5d8dc" stroke="#5d6d7e" stroke-width="0.4" data-pin="SWD_3V3"/><circle cx="23.5" cy="315" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="38.5" cy="315" r="3" fill="#d5d8dc" stroke="#5d6d7e" stroke-width="0.4" data-pin="SWDIO"/><circle cx="38.5" cy="315" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="53.5" cy="315" r="3" fill="#d5d8dc" stroke="#5d6d7e" stroke-width="0.4" data-pin="SWCLK"/><circle cx="53.5" cy="315" r="1.2" fill="#0a0a0a"/></g>
+  <g><circle cx="68.5" cy="315" r="3" fill="#d5d8dc" stroke="#5d6d7e" stroke-width="0.4" data-pin="SWD_GND"/><circle cx="68.5" cy="315" r="1.2" fill="#0a0a0a"/></g>
+  <text x="46" y="310" fill="#9fb3c8" font-size="2.6" font-family="monospace" text-anchor="middle">SWD 3V3 · DIO · CLK · GND</text>
+  <!-- Silkscreen: title + pin labels -->
+  <text x="46" y="170" fill="#ffffff" font-size="4.5" font-family="monospace" text-anchor="middle" font-weight="bold">Nucleo-F103RB</text>
+  <text x="46" y="176" fill="#9fb3c8" font-size="3" font-family="monospace" text-anchor="middle">F103RB · 128K/20K</text>
+  <text x="46" y="181" fill="#9fb3c8" font-size="2.6" font-family="monospace" text-anchor="middle">PA2/PA3 · PA5</text>
+  <g fill="#ecf0f1" font-size="4.5" font-family="monospace" font-weight="bold">
+    <text x="21" y="16">VBAT</text>
+    <text x="21" y="31">PC13</text>
+    <text x="21" y="46">PC14</text>
+    <text x="21" y="61">PC15</text>
+    <text x="21" y="76">PA0</text>
+    <text x="21" y="91">PA1</text>
+    <text x="21" y="106">PA2</text>
+    <text x="21" y="121">PA3</text>
+    <text x="21" y="136">PA4</text>
+    <text x="21" y="151">PA5</text>
+    <text x="21" y="166">PA6</text>
+    <text x="21" y="181">PA7</text>
+    <text x="21" y="196">PB0</text>
+    <text x="21" y="211">PB1</text>
+    <text x="21" y="226">PB10</text>
+    <text x="21" y="241">PB11</text>
+    <text x="21" y="256">RST</text>
+    <text x="21" y="271">3V3</text>
+    <text x="21" y="286">GND</text>
+    <text x="21" y="301">GND</text>
+  </g>
+  <g fill="#ecf0f1" font-size="4.5" font-family="monospace" font-weight="bold" text-anchor="end">
+    <text x="69" y="16">3V3</text>
+    <text x="69" y="31">GND</text>
+    <text x="69" y="46">5V</text>
+    <text x="69" y="61">PB9</text>
+    <text x="69" y="76">PB8</text>
+    <text x="69" y="91">PB7</text>
+    <text x="69" y="106">PB6</text>
+    <text x="69" y="121">PB5</text>
+    <text x="69" y="136">PB4</text>
+    <text x="69" y="151">PB3</text>
+    <text x="69" y="166">PA15</text>
+    <text x="69" y="181">PA12</text>
+    <text x="69" y="196">PA11</text>
+    <text x="69" y="211">PA10</text>
+    <text x="69" y="226">PA9</text>
+    <text x="69" y="241">PA8</text>
+    <text x="69" y="256">PB15</text>
+    <text x="69" y="271">PB14</text>
+    <text x="69" y="286">PB13</text>
+    <text x="69" y="301">PB12</text>
+  </g>
 </svg>
