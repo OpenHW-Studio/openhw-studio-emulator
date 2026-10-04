@@ -38,8 +38,6 @@ export const IRReceiverUI = ({ state, attrs, onEvent }: { state: any; attrs: any
 
     const sendButton = (btn: string) => {
         const evt = { type: 'ir-send', button: btn };
-        // TEMP-DIAG irr-send (revert after isolation).
-        try { console.warn(`[IRR-SEND] btn=${btn} onEvent=${typeof onEvent} onInteract=${typeof attrs?.onInteract} attrsOnEvent=${typeof attrs?.onEvent}`); } catch { /* ignore */ }
         if (typeof onEvent === 'function') onEvent(evt);
         if (attrs && typeof attrs.onInteract === 'function') attrs.onInteract(evt);
         if (attrs && typeof attrs.onEvent === 'function') attrs.onEvent(evt);

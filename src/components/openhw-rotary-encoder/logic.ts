@@ -33,11 +33,47 @@ export class RotaryEncoderLogic extends BaseComponent {
             this.pressCount++;
             this.setPinVoltage('SW', 0.0); // Active LOW
             this.stateChanged = true;
+            this.driveBoardPin(false);
         } else if (event === 'release') {
             this.setState({ sw: false });
             this.setPinVoltage('SW', 5.0); // High when released
             this.stateChanged = true;
+            this.driveBoardPin(true);
         }
+    }
+
+    // Drive the AVR input pin so firmware digitalRead observes the press.
+    // setPinVoltage alone only moves the component-side net — the AVR PIN
+    // register moves via board-pin drive (same _drivingBus contract as DHT).
+    private driveBoardPin(isHigh: boolean) {
+        try {
+            (this as any)._drivingBus = true;
+            (this as any)._lastDrivenVoltage = isHigh ? 5.0 : 0.0;
+            const netOf = (this as any)._boardNetOf;
+            let boardPin: string | null = null;
+            if (typeof netOf === 'function') {
+                try { boardPin = netOf('SW'); } catch { boardPin = null; }
+            }
+            if (!boardPin) {
+                const runner = (this as any)._simCpu?._avrRunner;
+                const wires = runner?.currentWires;
+                if (Array.isArray(wires)) {
+                    for (const w of wires) {
+                        const from: string = w.from || '';
+                        const to: string = w.to || '';
+                        if (from === `${this.id}:SW` && !to.startsWith(this.id + ':')) boardPin = to.split(':')[1] ?? null;
+                        else if (to === `${this.id}:SW` && !from.startsWith(this.id + ':')) boardPin = from.split(':')[1] ?? null;
+                        if (boardPin) break;
+                    }
+                }
+            }
+            if (boardPin && typeof (this as any)._driveBoardPin === 'function') {
+                (this as any)._driveBoardPin(boardPin, isHigh);
+            } else if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
+                (this as any)._setAvrPinDirect(boardPin, isHigh);
+            }
+            try { (this as any)._simUpdatePhysics?.(); } catch { /* ignore */ }
+        } catch { /* drive never breaks sim */ }
     }
 
     private updateQuadraturePins() {
