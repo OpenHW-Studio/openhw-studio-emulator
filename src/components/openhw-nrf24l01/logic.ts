@@ -75,6 +75,11 @@ export class NRF24L01Logic extends SPIProtocol implements RadioNode {
         this.bandwidthHz = dataRate > 1000000 ? 2000000 : 1000000;
     }
 
+    // Frame chip-select is CSN (not CE): the SPIProtocol autodetect would
+    // otherwise latch onto CE and never see transaction boundaries, so
+    // W_TX_PAYLOAD would buffer but never queue for transmit.
+    getCSPinName(): string { return 'CSN'; }
+
     onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number) {
         super.onPinStateChange(pinId, isHigh, cpuCycles);
         if (pinId === 'CE') {

@@ -52,6 +52,11 @@ export class CC1101Logic extends SPIProtocol implements RadioNode {
         RadioEnvironment.register(this);
     }
 
+    // Frame chip-select is CSN: the SPIProtocol autodetect has no CSN
+    // entry point for this pinout and would fall back to a ghost 'CS',
+    // so transaction boundaries (TX FIFO queueing) would never fire.
+    getCSPinName(): string { return 'CSN'; }
+
     onDestroy() {
         RadioEnvironment.unregister(this);
     }
