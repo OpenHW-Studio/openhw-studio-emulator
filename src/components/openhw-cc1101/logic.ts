@@ -1,4 +1,5 @@
 import { SPIProtocol, RadioEnvironment, RadioNode, RadioPacket } from '../../protocol-handlers/index';
+import { cc1101GlueLoader, Cc1101WasmCore } from './glue';
 
 // CC1101 Registers (Simplified for simulation)
 const REG_FREQ2 = 0x0D;
@@ -35,6 +36,13 @@ export class CC1101Logic extends SPIProtocol implements RadioNode {
     private activeCommand: number | null = null;
     private burstMode: boolean = false;
 
+    // WASM protocol core (dual-runtime: when loaded, the core owns
+    // registers/FIFOs/strobes/SPI exchange and the JS below stays a
+    // reference fallback — same contract as MAX30102. Airwaves always
+    // cross in JS via RadioEnvironment, shared across WASM instances).
+    private wasm: Cc1101WasmCore | null = null;
+    private wasmLoadAttempted = false;
+
     constructor(id: string, manifest: any, attrs: any) {
         super(id, manifest);
         
@@ -49,7 +57,66 @@ export class CC1101Logic extends SPIProtocol implements RadioNode {
         this.setRegister(REG_MDMCFG2, 0x02);
 
         this.updateRadioParams();
+        this.setState({ core: 'js' });
         RadioEnvironment.register(this);
+    }
+
+    /** Lazy WASM core load — called by the runner once, never in tick. */
+    async ensureWasmLoaded(): Promise<boolean> {
+        if (this.wasm) return true;
+        if (this.wasmLoadAttempted) return false;
+        this.wasmLoadAttempted = true;
+        try {
+            const core = await cc1101GlueLoader.load(this.manifest);
+            if (core) {
+                this.wasm = core as Cc1101WasmCore;
+                this.syncFromWasm();
+                this.setState({ core: 'wasm' });
+                this.stateChanged = true;
+                return true;
+            }
+        } catch { /* fall through to JS reference */ }
+        return false;
+    }
+
+    /** Mirror the WASM state view into fields, pins, and state. */
+    private syncFromWasm(): void {
+        try {
+            const core = this.wasm;
+            if (!core) return;
+            const v = core.view();
+            if (!v || v.length < 6) return;
+            const states = ['IDLE', 'RX', 'TX'];
+            this.stateMachine = (states[v[0]] ?? 'IDLE') as 'IDLE' | 'RX' | 'TX';
+            this.frequencyHz = Number(v[5]) || this.frequencyHz;
+            try { this.setPinVoltage('GDO0', v[4] === 1 ? 5.0 : 0.0); } catch { /* ignore */ }
+            this.setState({
+                state: this.stateMachine,
+                rxQueueSize: Number(v[3]) || 0,
+                txPending: v[1] === 1,
+            });
+            this.stateChanged = true;
+        } catch { /* mirror never breaks sim */ }
+    }
+
+    /** Airwave-transmit the core's pending payload, if any. */
+    private transmitFromWasm(): void {
+        try {
+            const core = this.wasm;
+            if (!core) return;
+            const payload = core.txPayload();
+            if (!payload || payload.length === 0) return;
+            RadioEnvironment.transmit({
+                senderId: this.id,
+                frequencyHz: this.frequencyHz,
+                bandwidthHz: this.bandwidthHz,
+                modulation: this.modulation,
+                txPowerDbm: 10,
+                payload: payload
+            });
+            core.txConsumed();
+            this.syncFromWasm();
+        } catch { /* transmit never breaks sim */ }
     }
 
     // Frame chip-select is CSN: the SPIProtocol autodetect has no CSN
@@ -83,6 +150,14 @@ export class CC1101Logic extends SPIProtocol implements RadioNode {
     }
 
     onRadioPacketReceived(packet: RadioPacket, isJammed: boolean): void {
+        // WASM path: the core applies the RX-state gate and GDO0 itself.
+        if (this.wasm) {
+            try {
+                this.wasm.radioRx(packet.payload);
+                this.syncFromWasm();
+            } catch { /* ignore */ }
+            return;
+        }
         if (isJammed || this.stateMachine !== 'RX') return;
         
         // Place raw payload into RX queue
@@ -92,12 +167,36 @@ export class CC1101Logic extends SPIProtocol implements RadioNode {
         this.setPinVoltage('GDO0', 5.0);
     }
 
+    // CSN edge tracking for the WASM path (base handles the JS reference
+    // path via getCSPinName). The core owns transaction boundaries.
+    onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number): void {
+        if (this.wasm) {
+            try {
+                if (pinId === 'CSN') this.wasm.cs(!isHigh);
+                this.syncFromWasm();
+            } catch { /* ignore */ }
+            return;
+        }
+        super.onPinStateChange(pinId, isHigh, cpuCycles);
+    }
+
     onCSAssert() {
+        if (this.wasm) { try { this.wasm.cs(true); } catch { /* ignore */ } return; }
         this.activeCommand = null;
         this.burstMode = false;
     }
 
     onSPIByteExchange(value: number, index: number): number {
+        // WASM path: strobes/FIFOs/registers in the core. STX fires
+        // mid-transaction (no pin edge), so check airwaves after every byte.
+        if (this.wasm) {
+            try {
+                const miso = this.wasm.spiByte(value);
+                this.transmitFromWasm();
+                this.syncFromWasm();
+                return miso;
+            } catch { return 0xFF; }
+        }
         if (index === 0) {
             this.activeCommand = value;
             
@@ -208,10 +307,11 @@ export class CC1101Logic extends SPIProtocol implements RadioNode {
 
     onCustomTelemetry() {
         this.setCustomTelemetry({
+            core: this.wasm ? 'wasm' : 'js',
             state: this.stateMachine,
             frequency: `${(this.frequencyHz / 1000000).toFixed(2)} MHz`,
             modulation: this.modulation,
-            rxQueueSize: this.rxQueue.length,
+            rxQueueSize: Number((this.state as any)?.rxQueueSize ?? this.rxQueue.length),
             txFifoSize: this.txFifo.length,
             interruptPin: this.getPinVoltage('GDO0') > 2.5 ? 'HIGH' : 'LOW'
         });

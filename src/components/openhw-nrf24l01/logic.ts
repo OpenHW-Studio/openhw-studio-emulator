@@ -1,4 +1,5 @@
 import { SPIProtocol, RadioEnvironment, RadioNode, RadioPacket } from '../../protocol-handlers/index';
+import { nrf24GlueLoader, Nrf24WasmCore } from './glue';
 
 // nRF24L01+ Registers
 const REG_CONFIG      = 0x00;
@@ -39,6 +40,13 @@ export class NRF24L01Logic extends SPIProtocol implements RadioNode {
     private activeReg: number = 0;
     private payloadBuffer: number[] = [];
 
+    // WASM protocol core (dual-runtime: when loaded, the core owns
+    // registers/FIFOs/SPI exchange and the JS below stays a reference
+    // fallback — same contract as MAX30102. Airwaves always cross in JS
+    // via RadioEnvironment, which is shared across WASM instances).
+    private wasm: Nrf24WasmCore | null = null;
+    private wasmLoadAttempted = false;
+
     constructor(id: string, manifest: any, attrs: any) {
         super(id, manifest);
         
@@ -57,9 +65,68 @@ export class NRF24L01Logic extends SPIProtocol implements RadioNode {
         this.setRegister(REG_FIFO_STATUS, 0x11);
 
         this.updateRadioParams();
+        this.setState({ core: 'js' });
         
         // Register this node to the global airwaves
         RadioEnvironment.register(this);
+    }
+
+    /** Lazy WASM core load — called by the runner once, never in tick. */
+    async ensureWasmLoaded(): Promise<boolean> {
+        if (this.wasm) return true;
+        if (this.wasmLoadAttempted) return false;
+        this.wasmLoadAttempted = true;
+        try {
+            const core = await nrf24GlueLoader.load(this.manifest);
+            if (core) {
+                this.wasm = core as Nrf24WasmCore;
+                this.syncFromWasm();
+                this.setState({ core: 'wasm' });
+                this.stateChanged = true;
+                return true;
+            }
+        } catch { /* fall through to JS reference */ }
+        return false;
+    }
+
+    /** Mirror the WASM state view into component state + IRQ pin. */
+    private syncFromWasm(): void {
+        try {
+            const core = this.wasm;
+            if (!core) return;
+            const v = core.view();
+            if (!v || v.length < 7) return;
+            this.frequencyHz = Number(v[6]) || this.frequencyHz;
+            this.bandwidthHz = Number(v[7]) || this.bandwidthHz;
+            this.setState({
+                statusReg: `0x${(v[0] & 0xff).toString(16).padStart(2, '0')}`,
+                configReg: Number(v[1] & 0xff),
+                rxQueueSize: Number(v[4]) || 0,
+                txPending: v[2] === 1,
+            });
+            try { this.setPinVoltage('IRQ', v[5] === 1 ? 0.0 : 5.0); } catch { /* ignore */ }
+            this.stateChanged = true;
+        } catch { /* mirror never breaks sim */ }
+    }
+
+    /** Airwave-transmit the core's pending payload, if any. */
+    private transmitFromWasm(): void {
+        try {
+            const core = this.wasm;
+            if (!core) return;
+            const payload = core.txPayload();
+            if (!payload || payload.length === 0) return;
+            RadioEnvironment.transmit({
+                senderId: this.id,
+                frequencyHz: this.frequencyHz,
+                bandwidthHz: this.bandwidthHz,
+                modulation: this.modulation,
+                txPowerDbm: 0,
+                payload: payload
+            });
+            core.txConsumed();
+            this.syncFromWasm();
+        } catch { /* transmit never breaks sim */ }
     }
 
     onDestroy() {
@@ -81,6 +148,24 @@ export class NRF24L01Logic extends SPIProtocol implements RadioNode {
     getCSPinName(): string { return 'CSN'; }
 
     onPinStateChange(pinId: string, isHigh: boolean, cpuCycles: number) {
+        // WASM path: the core owns framing/CS/CE; mirror + airwave I/O here.
+        if (this.wasm) {
+            try {
+                if (pinId === 'CSN') {
+                    this.wasm.cs(!isHigh);
+                    // Payload latched at deassert with CE already high
+                    // (mirrors the JS checkTx-on-deassert path).
+                    if (isHigh) this.transmitFromWasm();
+                }
+                if (pinId === 'CE') {
+                    this.ceHigh = isHigh;
+                    this.wasm.ce(isHigh);
+                    if (isHigh) this.transmitFromWasm();
+                }
+                this.syncFromWasm();
+            } catch { /* ignore */ }
+            return;
+        }
         super.onPinStateChange(pinId, isHigh, cpuCycles);
         if (pinId === 'CE') {
             this.ceHigh = isHigh;
@@ -114,6 +199,14 @@ export class NRF24L01Logic extends SPIProtocol implements RadioNode {
     }
 
     onRadioPacketReceived(packet: RadioPacket, isJammed: boolean): void {
+        // WASM path: the core applies the PRX+CE gate and RX_DR itself.
+        if (this.wasm) {
+            try {
+                this.wasm.radioRx(packet.payload);
+                this.syncFromWasm();
+            } catch { /* ignore */ }
+            return;
+        }
         if (isJammed) return; // Drop corrupted packets in strict mode
 
         // Check if we are in RX mode (CONFIG bit 0 = 1) and CE is HIGH
@@ -142,11 +235,16 @@ export class NRF24L01Logic extends SPIProtocol implements RadioNode {
     }
 
     onCSAssert() {
+        if (this.wasm) { try { this.wasm.cs(true); } catch { /* ignore */ } return; }
         this.activeCommand = null;
         this.payloadBuffer = [];
     }
 
     onSPIByteExchange(value: number, index: number): number {
+        // WASM path: byte-level protocol engine in the core.
+        if (this.wasm) {
+            try { return this.wasm.spiByte(value); } catch { return 0xFF; }
+        }
         // First byte is always the command, we reply with STATUS register
         if (index === 0) {
             this.activeCommand = value;
@@ -198,6 +296,13 @@ export class NRF24L01Logic extends SPIProtocol implements RadioNode {
     }
 
     onCSDeassert(meta: any) {
+        // WASM path: the core latched the frame; airwave-transmit if armed.
+        if (this.wasm) {
+            try { this.wasm.cs(false); } catch { /* ignore */ }
+            this.transmitFromWasm();
+            this.syncFromWasm();
+            return;
+        }
         if (this.activeCommand === CMD_W_TX_PAYLOAD && this.payloadBuffer.length > 0) {
             this.txQueue.push(new Uint8Array(this.payloadBuffer));
             if (this.ceHigh) this.checkTx();
@@ -207,17 +312,22 @@ export class NRF24L01Logic extends SPIProtocol implements RadioNode {
     }
 
     onCustomTelemetry() {
-        const config = this.getRegister(REG_CONFIG);
-        const mode = (config & 0x01) ? 'RX' : 'TX';
-        const pwr = (config & 0x02) ? 'ON' : 'OFF';
+        const cfg = this.wasm
+            ? Number((this.state as any)?.configReg ?? 0x08)
+            : this.getRegister(REG_CONFIG);
+        const mode = (cfg & 0x01) ? 'RX' : 'TX';
+        const pwr = (cfg & 0x02) ? 'ON' : 'OFF';
 
         this.setCustomTelemetry({
+            core: this.wasm ? 'wasm' : 'js',
             power: pwr,
             mode: mode,
             frequency: `${this.frequencyHz / 1000000} MHz`,
-            rxQueueSize: this.rxQueue.length,
+            rxQueueSize: Number((this.state as any)?.rxQueueSize ?? this.rxQueue.length),
             txQueueSize: this.txQueue.length,
-            statusReg: `0x${this.getRegister(REG_STATUS).toString(16).padStart(2, '0')}`
+            statusReg: this.wasm
+                ? String((this.state as any)?.statusReg ?? '0x0e')
+                : `0x${this.getRegister(REG_STATUS).toString(16).padStart(2, '0')}`
         });
     }
 
