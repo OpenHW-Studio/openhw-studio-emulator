@@ -18,6 +18,10 @@ function toBCD(val: number): number {
     return ((Math.floor(val / 10) << 4) | (val % 10));
 }
 
+function fromBCD(bcd: number): number {
+    return ((bcd >> 4) & 0x0f) * 10 + (bcd & 0x0f);
+}
+
 export class DS1307RTCLogic extends I2CProtocol {
     // Sim-time clock: elapsed derives from cpuCycles (16M cycles = 1 sim-s),
     // so replay/pause/determinism hold. Wall clock only seeds construction.
@@ -70,7 +74,32 @@ export class DS1307RTCLogic extends I2CProtocol {
     }
 
     onI2CWriteRegister(reg: number, data: number[]): void {
-        // Simulation time is read-only from the PC, so we ignore writes.
+        // Real DS1307: a write starting at register 0 sets the clock
+        // (sec, min, hour-24h, dow, date, month, year-2000, control).
+        // Accept the SET payload: rebase the sim-time clock so subsequent
+        // reads tick forward from the written time instead of base 0:0:0.
+        if (reg !== 0 || !data || data.length < 7) {
+            if (reg === 7 && data && data.length >= 1) {
+                this.state = { ...this.state, control: data[0] & 0xff };
+            }
+            return;
+        }
+        const sec = fromBCD(data[0] & 0x7f); // bit7 = CH (clock halt)
+        const min = fromBCD(data[1] & 0x7f);
+        const hrByte = data[2];
+        const hour = (hrByte & 0x40)
+            ? fromBCD(hrByte & 0x1f) + (((hrByte >> 5) & 1) ? 12 : 0) // 12h mode
+            : fromBCD(hrByte & 0x3f); // 24h mode
+        const date = Math.min(Math.max(fromBCD(data[4] & 0x3f), 1), 31);
+        const month = Math.min(Math.max(fromBCD(data[5] & 0x1f), 1), 12);
+        const year = 2000 + fromBCD(data[6]);
+        const cycles = (this as any).simCycles || 0;
+        this.baseDate = new Date(year, month - 1, date, hour, min, sec);
+        this.startCycles = cycles;
+        this.startCyclesSet = true;
+        if (data.length >= 8) {
+            this.state = { ...this.state, control: data[7] & 0xff };
+        }
     }
 
     onI2CReadRequest(reg: number, count: number): number[] {
