@@ -110,6 +110,28 @@ export class DHT22Logic extends BaseComponent {
             || typeof (this as any)._simCpu?.addClockEvent === 'function';
     }
 
+    /** Board steps per microsecond (AVR 16MHz legacy default; F1 72 via
+     * the runner's _boardCyclesPerUs service). All slot timing derives
+     * from this so the model scales across core clocks. */
+    private cyclesPerUs(): number {
+        try {
+            const v = Number((this as any)._boardCyclesPerUs?.());
+            if (Number.isFinite(v) && v >= 1 && v <= 1000) return v;
+        } catch { /* fall through */ }
+        return 16;
+    }
+
+    private usToCycles(us: number): number {
+        return Math.max(1, Math.floor(us * this.cyclesPerUs()));
+    }
+
+    /** Runner fine-slicing gate: true while a transaction is in flight
+     * (WAKE negotiation, ACK, or bit send). Lets the F1 runner slice
+     * ticks to bit-slot granularity only when needed. */
+    public isTransactionActive(): boolean {
+        return this.protocolState !== 'IDLE';
+    }
+
     private drivePin(voltage: number) {
         this._setVoltageInternal(voltage);
         const isHigh = voltage > 1.8;
@@ -169,7 +191,7 @@ export class DHT22Logic extends BaseComponent {
 
         } else if (isHigh && this.protocolState === 'WAKE_WAIT') {
             // Arduino released the bus — measure LOW duration
-            const wakeUs = (cycles - this.wakeStartCycles) / 16;
+            const wakeUs = (cycles - this.wakeStartCycles) / this.cyclesPerUs();
             dhtLog(`[${this.id}]   → WAKE_WAIT got HIGH. wakeUs=${wakeUs.toFixed(1)}us (need ≥500us)`);
 
             if (wakeUs >= 500) {
@@ -194,19 +216,19 @@ export class DHT22Logic extends BaseComponent {
         }
         this.protocolState = 'ACKING';
         dhtLog(`[${this.id}] startAckSequence: waiting 30us before ACK LOW`);
-        this.schedule(30 * 16, () => this.sendAckLow());
+        this.schedule(this.usToCycles(30), () => this.sendAckLow());
     }
 
     private sendAckLow() {
         dhtLog(`[${this.id}] sendAckLow: driving LOW 80us`);
         this.drivePin(0);
-        this.schedule(80 * 16, () => this.sendAckHigh());
+        this.schedule(this.usToCycles(80), () => this.sendAckHigh());
     }
 
     private sendAckHigh() {
         dhtLog(`[${this.id}] sendAckHigh: driving HIGH 80us`);
         this.drivePin(5.0);
-        this.schedule(80 * 16, () => {
+        this.schedule(this.usToCycles(80), () => {
             this.prepareDataBits();
             this.protocolState = 'SENDING';
             dhtLog(`[${this.id}] Starting data transmission (T=${this.temperature} H=${this.humidity})`);
@@ -247,7 +269,7 @@ export class DHT22Logic extends BaseComponent {
         if (this.bitIndex >= 40) {
             dhtLog(`[${this.id}] All 40 bits sent — ending with 50us LOW then idle HIGH`);
             this.drivePin(0);
-            this.schedule(50 * 16, () => {
+            this.schedule(this.usToCycles(50), () => {
                 this.drivePin(5.0);
                 this.protocolState = 'IDLE';
                 (this as any)._drivingBus = false;
@@ -260,16 +282,17 @@ export class DHT22Logic extends BaseComponent {
 
         // Each bit: 50us LOW preamble, then 28us HIGH = '0' or 70us HIGH = '1'
         this.drivePin(0);
-        this.schedule(50 * 16, () => {
+        this.schedule(this.usToCycles(50), () => {
             this.drivePin(5.0);
             const highUs = bit ? 70 : 28;
-            this.schedule(highUs * 16, () => {
+            this.schedule(this.usToCycles(highUs), () => {
                 this.sendNextBit();
             });
         });
     }
 
     update() {}
+
 
     // 12.4 v2: numeric UI state for SAB slot {f0: temperature, f1: humidity} (via getSyncState snapshot).
     uiState() {
