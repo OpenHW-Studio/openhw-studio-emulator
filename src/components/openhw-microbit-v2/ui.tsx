@@ -141,40 +141,43 @@ export const MicrobitV2UI = ({ state, attrs }: { state: any; attrs: any }) => {
 
         {/* ===== mic holes ===== */}
         <g fill="#000">
-          <circle cx="118" cy="146" r="1.1" /><circle cx="121.5" cy="146" r="1.1" /><circle cx="125" cy="146" r="1.1" />
-          <circle cx="118" cy="149.5" r="1.1" /><circle cx="121.5" cy="149.5" r="1.1" /><circle cx="125" cy="149.5" r="1.1" />
+          <circle cx="118" cy="138" r="1.1" /><circle cx="121.5" cy="138" r="1.1" /><circle cx="125" cy="138" r="1.1" />
+          <circle cx="118" cy="141.5" r="1.1" /><circle cx="121.5" cy="141.5" r="1.1" /><circle cx="125" cy="141.5" r="1.1" />
         </g>
-        <text x="121.5" y="157" fill="#c8cfd6" fontSize="3.6" fontFamily="monospace" textAnchor="middle">MIC</text>
+        <text x="121.5" y="148" fill="#c8cfd6" fontSize="3.6" fontFamily="monospace" textAnchor="middle">MIC</text>
 
         {/* ===== speaker rings ===== */}
         <g fill="none" stroke="#3a4356" strokeWidth="0.7">
-          <circle cx="38" cy="148" r="4" /><circle cx="38" cy="148" r="7" /><circle cx="38" cy="148" r="10" />
+          <circle cx="38" cy="140" r="4" /><circle cx="38" cy="140" r="7" /><circle cx="38" cy="140" r="10" />
         </g>
-        <circle cx="38" cy="148" r="1.6" fill="#3a4356" />
-        <text x="38" y="164" fill="#c8cfd6" fontSize="3.6" fontFamily="monospace" textAnchor="middle">SPK</text>
+        <circle cx="38" cy="140" r="1.6" fill="#3a4356" />
+        <text x="38" y="156" fill="#c8cfd6" fontSize="3.6" fontFamily="monospace" textAnchor="middle">SPK</text>
 
         {/* ===== reset tap ===== */}
-        <circle cx="80" cy="150" r="2.2" fill="#c9a227" stroke="#7a6210" strokeWidth="0.6" />
-        <circle cx="80" cy="150" r="0.9" fill="#000" />
-        <text x="80" y="160" fill="#c8cfd6" fontSize="3.4" fontFamily="monospace" textAnchor="middle">RESET</text>
+        <circle cx="80" cy="142" r="2.2" fill="#c9a227" stroke="#7a6210" strokeWidth="0.6" />
+        <circle cx="80" cy="142" r="0.9" fill="#000" />
+        <text x="80" y="151" fill="#c8cfd6" fontSize="3.4" fontFamily="monospace" textAnchor="middle">RESET</text>
 
         {/* ===== edge connector: 5 large + 16 small gold fingers ===== */}
         {LARGE.map((p) => (
           <g key={`mb-f-${p.id}`}>
-            <rect x={p.x - 6.5} y={164} width={13} height={18} fill="url(#mb-gold)" stroke="#6b5203" strokeWidth="0.6" />
-            <text x={p.x} y={162} fill="#e8e8e8" fontSize="4.4" fontFamily="monospace" textAnchor="middle" fontWeight="bold">{p.id}</text>
+            <rect x={p.x - 6.5} y={166} width={13} height={16} fill="url(#mb-gold)" stroke="#6b5203" strokeWidth="0.6" />
+            <text x={p.x} y={163} fill="#e8e8e8" fontSize="4.4" fontFamily="monospace" textAnchor="middle" fontWeight="bold">{p.id}</text>
           </g>
         ))}
+        {/* small-finger ids run vertical (bottom-to-top): horizontal text
+            at this pitch is an unreadable mash; rotated labels stay legible */}
         {SMALL_IDS.map((id, i) => (
           <g key={`mb-s-${id}`}>
-            <rect x={smallX(i) - 1.2} y={166} width={2.4} height={16} fill="url(#mb-gold)" stroke="#6b5203" strokeWidth="0.4" />
+            <rect x={smallX(i) - 1.2} y={168} width={2.4} height={14} fill="url(#mb-gold)" stroke="#6b5203" strokeWidth="0.4" />
             <text
               x={smallX(i)}
-              y={i % 2 === 0 ? 160 : 163.4}
+              y={165}
               fill="#c8cfd6"
-              fontSize="2.6"
+              fontSize="3.2"
               fontFamily="monospace"
-              textAnchor="middle"
+              textAnchor="start"
+              transform={`rotate(-90 ${smallX(i)} 165)`}
             >
               {id}
             </text>
