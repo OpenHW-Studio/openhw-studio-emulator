@@ -15,6 +15,7 @@ export { default as openhwPicoEth } from './openhw-pico-eth/index';
 export { default as openhwPico2Eth } from './openhw-pico-2-eth/index';
 export { default as openhwEsp32 } from './ESP32/index';
 export { default as openhwEsp32Cam } from './openhw-esp32-cam/index';
+export { default as openhwMicrobitV2 } from './openhw-microbit-v2/index';
 export { default as openhwStm32BluePill } from './openhw-stm32-bluepill/index';
 export { default as openhwStm32f103cb } from './openhw-stm32f103cb/index';
 export { default as openhwStm32MapleMini } from './openhw-stm32-maple-mini/index';

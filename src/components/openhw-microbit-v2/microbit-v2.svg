@@ -1,0 +1,89 @@
+<svg width="100%" height="100%" viewBox="0 0 160 190" xmlns="http://www.w3.org/2000/svg" data-component="openhw-microbit-v2" data-bind-root="true">
+  <defs>
+    <pattern id="mb-mask" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="4" fill="#151821"/>
+      <circle cx="1.2" cy="1.2" r="0.4" fill="#1b2029"/>
+    </pattern>
+    <linearGradient id="mb-usb" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dfe6ec"/>
+      <stop offset="0.5" stop-color="#a7b2bb"/>
+      <stop offset="1" stop-color="#c6ced4"/>
+    </linearGradient>
+    <radialGradient id="mb-gold" cx="0.4" cy="0.35" r="1">
+      <stop offset="0" stop-color="#ffe9a3"/>
+      <stop offset="0.55" stop-color="#e3b808"/>
+      <stop offset="1" stop-color="#8a6d03"/>
+    </radialGradient>
+    <linearGradient id="mb-chip" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b5068"/>
+      <stop offset="0.5" stop-color="#2c3e50"/>
+      <stop offset="1" stop-color="#1a2530"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="144" height="174" rx="9" fill="#101319" stroke="#000" stroke-width="1.2"/>
+  <rect x="8" y="8" width="144" height="174" rx="9" fill="url(#mb-mask)" opacity="0.6"/>
+  <rect x="10" y="10" width="140" height="170" rx="7" fill="none" stroke="#2a3140" stroke-width="0.6" opacity="0.8"/>
+  <rect x="66" y="1" width="28" height="16" rx="2" fill="url(#mb-usb)" stroke="#5d6d7e" stroke-width="0.8"/>
+  <rect x="66" y="1" width="28" height="4" fill="#eef1f4" opacity="0.5"/>
+  <rect x="70" y="6" width="20" height="8" rx="1" fill="#1a252f"/>
+  <text x="80" y="26" fill="#c8cfd6" font-size="4.5" font-family="monospace" text-anchor="middle">USB</text>
+  <rect x="18" y="2" width="17" height="10" rx="1" fill="#e8e8e8" stroke="#5d6d7e" stroke-width="0.7"/>
+  <rect x="21" y="4.5" width="11" height="5" fill="#c0392b" rx="0.5"/>
+  <text x="26.5" y="21" fill="#c8cfd6" font-size="4" font-family="monospace" text-anchor="middle">BAT</text>
+  <circle cx="46" cy="7" r="2" fill="#27ae60"/>
+  <circle cx="46" cy="7" r="3.2" fill="none" stroke="#27ae60" stroke-width="0.5" opacity="0.6"/>
+  <text x="46" y="21" fill="#c8cfd6" font-size="4" font-family="monospace" text-anchor="middle">PWR</text>
+  <text x="80" y="38" fill="#e8e8e8" font-size="7" font-family="monospace" text-anchor="middle" font-weight="bold">micro:bit</text>
+  <text x="128" y="38" fill="#e8e8e8" font-size="5" font-family="monospace" text-anchor="middle">V2</text>
+  <rect x="54" y="42" width="54" height="54" rx="3" fill="#2a0d0d" stroke="#571414" stroke-width="0.8"/>
+  <g fill="#4d1010" stroke="#2a0808" stroke-width="0.5">
+    <circle cx="62" cy="50" r="3.4"/><circle cx="71.5" cy="50" r="3.4"/><circle cx="81" cy="50" r="3.4"/><circle cx="90.5" cy="50" r="3.4"/><circle cx="100" cy="50" r="3.4"/>
+    <circle cx="62" cy="59.5" r="3.4"/><circle cx="71.5" cy="59.5" r="3.4"/><circle cx="81" cy="59.5" r="3.4"/><circle cx="90.5" cy="59.5" r="3.4"/><circle cx="100" cy="59.5" r="3.4"/>
+    <circle cx="62" cy="69" r="3.4"/><circle cx="71.5" cy="69" r="3.4"/><circle cx="81" cy="69" r="3.4"/><circle cx="90.5" cy="69" r="3.4"/><circle cx="100" cy="69" r="3.4"/>
+    <circle cx="62" cy="78.5" r="3.4"/><circle cx="71.5" cy="78.5" r="3.4"/><circle cx="81" cy="78.5" r="3.4"/><circle cx="90.5" cy="78.5" r="3.4"/><circle cx="100" cy="78.5" r="3.4"/>
+    <circle cx="62" cy="88" r="3.4"/><circle cx="71.5" cy="88" r="3.4"/><circle cx="81" cy="88" r="3.4"/><circle cx="90.5" cy="88" r="3.4"/><circle cx="100" cy="88" r="3.4"/>
+  </g>
+  <ellipse cx="28" cy="122" rx="8" ry="1.8" fill="#000" opacity="0.4"/>
+  <rect x="20" y="108" width="16" height="12" rx="2" fill="#8a939c" stroke="#5d6d7e" stroke-width="0.8"/>
+  <rect x="22" y="110" width="12" height="8" rx="1" fill="#232a33"/>
+  <circle cx="28" cy="114" r="2.6" fill="#dfe3e8" stroke="#2c3e50" stroke-width="0.6"/>
+  <text x="28" y="128" fill="#e8e8e8" font-size="6" font-family="monospace" text-anchor="middle" font-weight="bold">A</text>
+  <ellipse cx="132" cy="122" rx="8" ry="1.8" fill="#000" opacity="0.4"/>
+  <rect x="124" y="108" width="16" height="12" rx="2" fill="#8a939c" stroke="#5d6d7e" stroke-width="0.8"/>
+  <rect x="126" y="110" width="12" height="8" rx="1" fill="#232a33"/>
+  <circle cx="132" cy="114" r="2.6" fill="#dfe3e8" stroke="#2c3e50" stroke-width="0.6"/>
+  <text x="132" y="128" fill="#e8e8e8" font-size="6" font-family="monospace" text-anchor="middle" font-weight="bold">B</text>
+  <rect x="58" y="104" width="18" height="18" fill="url(#mb-chip)" stroke="#0a0e13" stroke-width="0.7"/>
+  <circle cx="62" cy="108" r="1" fill="#10161d"/>
+  <text x="67" y="115" fill="#9fb3c8" font-size="3.4" font-family="monospace" text-anchor="middle">nRF</text>
+  <rect x="86" y="106" width="14" height="14" fill="url(#mb-chip)" stroke="#0a0e13" stroke-width="0.7"/>
+  <text x="93" y="114.5" fill="#9fb3c8" font-size="3" font-family="monospace" text-anchor="middle">MOT</text>
+  <g fill="#000">
+    <circle cx="118" cy="146" r="1.1"/><circle cx="121.5" cy="146" r="1.1"/><circle cx="125" cy="146" r="1.1"/>
+    <circle cx="118" cy="149.5" r="1.1"/><circle cx="121.5" cy="149.5" r="1.1"/><circle cx="125" cy="149.5" r="1.1"/>
+  </g>
+  <text x="121.5" y="157" fill="#c8cfd6" font-size="3.6" font-family="monospace" text-anchor="middle">MIC</text>
+  <g fill="none" stroke="#3a4356" stroke-width="0.7">
+    <circle cx="38" cy="148" r="4"/><circle cx="38" cy="148" r="7"/><circle cx="38" cy="148" r="10"/>
+  </g>
+  <circle cx="38" cy="148" r="1.6" fill="#3a4356"/>
+  <text x="38" y="164" fill="#c8cfd6" font-size="3.6" font-family="monospace" text-anchor="middle">SPK</text>
+  <circle cx="80" cy="150" r="2.2" fill="#c9a227" stroke="#7a6210" stroke-width="0.6"/>
+  <circle cx="80" cy="150" r="0.9" fill="#000"/>
+  <text x="80" y="160" fill="#c8cfd6" font-size="3.4" font-family="monospace" text-anchor="middle">RESET</text>
+  <g>
+    <rect x="17.5" y="164" width="13" height="18" fill="url(#mb-gold)" stroke="#6b5203" stroke-width="0.6"/>
+    <rect x="35.5" y="164" width="13" height="18" fill="url(#mb-gold)" stroke="#6b5203" stroke-width="0.6"/>
+    <rect x="53.5" y="164" width="13" height="18" fill="url(#mb-gold)" stroke="#6b5203" stroke-width="0.6"/>
+    <rect x="71.5" y="164" width="13" height="18" fill="url(#mb-gold)" stroke="#6b5203" stroke-width="0.6"/>
+    <rect x="89.5" y="164" width="13" height="18" fill="url(#mb-gold)" stroke="#6b5203" stroke-width="0.6"/>
+    <text x="24" y="162" fill="#e8e8e8" font-size="4.4" font-family="monospace" text-anchor="middle" font-weight="bold">P0</text>
+    <text x="42" y="162" fill="#e8e8e8" font-size="4.4" font-family="monospace" text-anchor="middle" font-weight="bold">P1</text>
+    <text x="60" y="162" fill="#e8e8e8" font-size="4.4" font-family="monospace" text-anchor="middle" font-weight="bold">P2</text>
+    <text x="78" y="162" fill="#e8e8e8" font-size="4.4" font-family="monospace" text-anchor="middle" font-weight="bold">3V3</text>
+    <text x="96" y="162" fill="#e8e8e8" font-size="4.4" font-family="monospace" text-anchor="middle" font-weight="bold">GND</text>
+  </g>
+  <g fill="url(#mb-gold)" stroke="#6b5203" stroke-width="0.4">
+    <rect x="102.8" y="166" width="2.4" height="16"/><rect x="105.9" y="166" width="2.4" height="16"/><rect x="109" y="166" width="2.4" height="16"/><rect x="112.1" y="166" width="2.4" height="16"/><rect x="115.2" y="166" width="2.4" height="16"/><rect x="118.3" y="166" width="2.4" height="16"/><rect x="121.4" y="166" width="2.4" height="16"/><rect x="124.5" y="166" width="2.4" height="16"/><rect x="127.6" y="166" width="2.4" height="16"/><rect x="130.7" y="166" width="2.4" height="16"/><rect x="133.8" y="166" width="2.4" height="16"/><rect x="136.9" y="166" width="2.4" height="16"/><rect x="140" y="166" width="2.4" height="16"/><rect x="143.1" y="166" width="2.4" height="16"/><rect x="146.2" y="166" width="2.4" height="16"/><rect x="149.3" y="166" width="2.4" height="16"/>
+  </g>
+</svg>

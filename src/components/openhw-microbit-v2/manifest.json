@@ -1,0 +1,171 @@
+{
+  "type": "openhw-microbit-v2",
+  "label": "BBC micro:bit v2",
+  "group": "Boards",
+  "description": "BBC micro:bit v2.2 (nRF52833 ARM Cortex-M4) Development Board",
+  "w": 160,
+  "h": 190,
+  "pins": [
+    {
+      "id": "P0",
+      "x": 24,
+      "y": 172,
+      "type": "digital_inout",
+      "description": "GPIO / Analog In / Touch (ring 0)"
+    },
+    {
+      "id": "P1",
+      "x": 42,
+      "y": 172,
+      "type": "digital_inout",
+      "description": "GPIO / Analog In / Touch (ring 1)"
+    },
+    {
+      "id": "P2",
+      "x": 60,
+      "y": 172,
+      "type": "digital_inout",
+      "description": "GPIO / Analog In / Touch (ring 2)"
+    },
+    {
+      "id": "P3",
+      "x": 104,
+      "y": 173,
+      "type": "digital_inout",
+      "description": "GPIO"
+    },
+    {
+      "id": "P4",
+      "x": 107.1,
+      "y": 173,
+      "type": "digital_inout",
+      "description": "GPIO"
+    },
+    {
+      "id": "P5",
+      "x": 110.2,
+      "y": 173,
+      "type": "digital_inout",
+      "description": "GPIO (button A)"
+    },
+    {
+      "id": "P6",
+      "x": 113.3,
+      "y": 173,
+      "type": "digital_inout",
+      "description": "GPIO"
+    },
+    {
+      "id": "P7",
+      "x": 116.4,
+      "y": 173,
+      "type": "digital_inout",
+      "description": "GPIO"
+    },
+    {
+      "id": "P8",
+      "x": 119.5,
+      "y": 173,
+      "type": "digital_inout",
+      "description": "GPIO"
+    },
+    {
+      "id": "P9",
+      "x": 122.6,
+      "y": 173,
+      "type": "digital_inout",
+      "description": "GPIO"
+    },
+    {
+      "id": "P10",
+      "x": 125.7,
+      "y": 173,
+      "type": "digital_inout",
+      "description": "GPIO (mic)"
+    },
+    {
+      "id": "P11",
+      "x": 128.8,
+      "y": 173,
+      "type": "digital_inout",
+      "description": "GPIO (button B)"
+    },
+    {
+      "id": "P12",
+      "x": 131.9,
+      "y": 173,
+      "type": "digital_inout",
+      "description": "GPIO"
+    },
+    {
+      "id": "P13",
+      "x": 135,
+      "y": 173,
+      "type": "digital_inout",
+      "description": "GPIO (SPI SCK)"
+    },
+    {
+      "id": "P14",
+      "x": 138.1,
+      "y": 173,
+      "type": "digital_inout",
+      "description": "GPIO (SPI MISO)"
+    },
+    {
+      "id": "P15",
+      "x": 141.2,
+      "y": 173,
+      "type": "digital_inout",
+      "description": "GPIO (SPI MOSI)"
+    },
+    {
+      "id": "P16",
+      "x": 144.3,
+      "y": 173,
+      "type": "digital_inout",
+      "description": "GPIO"
+    },
+    {
+      "id": "P19",
+      "x": 147.4,
+      "y": 173,
+      "type": "digital_inout",
+      "description": "GPIO (I2C SCL)"
+    },
+    {
+      "id": "P20",
+      "x": 150.5,
+      "y": 173,
+      "type": "digital_inout",
+      "description": "GPIO (I2C SDA)"
+    },
+    {
+      "id": "3V3",
+      "x": 78,
+      "y": 172,
+      "type": "power",
+      "description": "3.3V Power Out (ring 3V)"
+    },
+    {
+      "id": "GND",
+      "x": 96,
+      "y": 172,
+      "type": "power",
+      "description": "Ground"
+    }
+  ],
+  "ui": {
+    "svg": "./microbit-v2.svg",
+    "interactive": []
+  },
+  "sim": {
+    "runtime": "js",
+    "validation": "inline"
+  },
+  "bounds": {
+    "x": 0,
+    "y": 0,
+    "w": 160,
+    "h": 190
+  }
+}
