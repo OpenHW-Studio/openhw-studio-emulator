@@ -169,8 +169,6 @@ export const Pico2EthUI = ({ state, attrs, isRunning }: { state: any; attrs: any
   const txOn = !!state?.txActive;
   const rxOn = !!state?.rxActive;
   const ledOn = !!state?.builtInLed;
-  const ethActive = !!state?.ethActive;
-  const ethStatus = String(state?.ethStatus ?? 'off');
 
   const handleResetPress = (e: React.PointerEvent) => {
     if (!isRunning) return;
@@ -260,7 +258,7 @@ export const Pico2EthUI = ({ state, attrs, isRunning }: { state: any; attrs: any
         </div>
 
         <div
-          title={`Ethernet: ${ethStatus}`}
+          title={`Ethernet: off (removed pending reimplementation)`}
           style={{
             position: 'absolute',
             top: 22.5,
@@ -269,8 +267,8 @@ export const Pico2EthUI = ({ state, attrs, isRunning }: { state: any; attrs: any
             height: 9,
             pointerEvents: 'none',
             borderRadius: '50%',
-            border: ethActive ? '1.5px solid #2ecc71' : '1.5px solid transparent',
-            boxShadow: ethActive ? '0 0 8px #2ecc71' : 'none',
+            border: '1.5px solid transparent',
+            boxShadow: 'none',
             transition: 'border-color 0.06s, box-shadow 0.06s',
           }}
         />

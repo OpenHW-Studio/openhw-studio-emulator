@@ -1,7 +1,7 @@
 {
   "type": "openhw-pico-2-eth",
   "label": "WIZnet W5500-EVB-Pico2",
-  "description": "RP2350 W5500-EVB-Pico2 carrier (same wiring/pins as Pico version, only SoC differs). Ethernet via _picoemu_board_eth (deferred live net).",
+  "description": "RP2350 W5500-EVB-Pico2 carrier (same wiring/pins as Pico version, only SoC differs). Ethernet networking removed pending engine reimplementation.",
   "group": "Boards",
   "w": 124,
   "h": 314,
@@ -28,14 +28,6 @@
       "enum": [
         "0",
         "1"
-      ]
-    },
-    "ethLive": {
-      "type": "string",
-      "default": "off",
-      "enum": [
-        "off",
-        "on"
       ]
     }
   },

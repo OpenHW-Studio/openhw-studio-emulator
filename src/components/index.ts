@@ -38,8 +38,6 @@ export { default as openhw8051 } from './openhw-8051/index';
 export { default as openhw6502 } from './openhw-6502/index';
 export { default as openhwZ80 } from './openhw-z80/index';
 export { default as openhwRv32 } from './openhw-rv32/index';
-// WiFi Access Point — functional AP component (equivalent to wokwi-wifi-ap)
-export { WiFiApLogic as openhwWifiAp, WiFiApLogic as wokwiWifiAp } from './openhw-wifi-ap/index';
 export { default as openhwResistor } from './openhw-resistor';
 export { default as openhwPushbutton } from './openhw-pushbutton';
 export { default as openhw6mmPushbutton } from './openhw-6mm-pushbutton';

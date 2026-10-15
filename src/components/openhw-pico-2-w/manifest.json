@@ -1,7 +1,7 @@
 {
   "type": "openhw-pico-2-w",
   "label": "Raspberry Pi Pico 2 W",
-  "description": "RP2350 Pico 2 W board with CYW43 wireless. GPIO/UART/I2C/SPI/PWM/ADC in simulation; WiFi/BLE via _wifi_enable (deferred live net).",
+  "description": "RP2350 Pico 2 W board. GPIO/UART/I2C/SPI/PWM/ADC in simulation; wireless networking removed pending engine reimplementation.",
   "group": "Boards",
   "w": 124,
   "h": 314,
@@ -21,27 +21,6 @@
         "m33",
         "rv32"
       ]
-    },
-    "wirelessMode": {
-      "type": "string",
-      "default": "full",
-      "enum": [
-        "full",
-        "compat-stub",
-        "off"
-      ]
-    },
-    "wirelessSsid": {
-      "type": "string",
-      "default": "OpenHW-GUEST"
-    },
-    "wirelessPassword": {
-      "type": "string",
-      "default": ""
-    },
-    "wirelessIp": {
-      "type": "string",
-      "default": "10.13.37.42"
     }
   },
   "pins": [

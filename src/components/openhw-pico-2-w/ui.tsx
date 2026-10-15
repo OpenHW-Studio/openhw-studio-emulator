@@ -141,9 +141,6 @@ export const Pico2WUI = ({ state, attrs, isRunning }: { state: any; attrs: any; 
   const txOn = !!state?.txActive;
   const rxOn = !!state?.rxActive;
   const ledOn = !!state?.builtInLed;
-  const wirelessMode = String(attrs?.wirelessMode ?? 'full');
-  const wifiStatus = String(state?.wirelessStatus ?? (wirelessMode === 'off' ? 'off' : 'stub'));
-  const wifiActive = wirelessMode !== 'off' && wifiStatus !== 'off';
 
   const handleResetPress = (e: React.PointerEvent) => {
     if (!isRunning) return;
@@ -233,7 +230,7 @@ export const Pico2WUI = ({ state, attrs, isRunning }: { state: any; attrs: any; 
         </div>
 
         <div
-          title={`Pico 2 W wireless: ${wifiStatus}`}
+          title={`Pico 2 W wireless: off (removed pending reimplementation)`}
           style={{
             position: 'absolute',
             top: 22.5,
@@ -242,8 +239,8 @@ export const Pico2WUI = ({ state, attrs, isRunning }: { state: any; attrs: any; 
             height: 9,
             pointerEvents: 'none',
             borderRadius: '50%',
-            border: wifiActive ? '1.5px solid #38bdf8' : '1.5px solid transparent',
-            boxShadow: wifiActive ? '0 0 8px #38bdf8' : 'none',
+            border: '1.5px solid transparent',
+            boxShadow: 'none',
             transition: 'border-color 0.06s, box-shadow 0.06s',
           }}
         />
