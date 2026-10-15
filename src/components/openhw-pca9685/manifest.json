@@ -497,5 +497,12 @@
         "setup": "pwm_${COMP_SUFFIX}.begin();\npwm_${COMP_SUFFIX}.setPWMFreq(60);",
         "loop": "pwm_${COMP_SUFFIX}.setPWM(0, 0, 150);\ndelay(1000);\npwm_${COMP_SUFFIX}.setPWM(0, 0, 600);\ndelay(1000);"
       }
-    }
+    },
+    "sab": {
+        "slotKind": 6,
+        "fields": {"i0": "enabled"}
+    },
+    "ui": {"svg": "./pca9685.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 180, "h": 150}
 }

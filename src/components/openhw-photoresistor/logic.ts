@@ -67,4 +67,17 @@ export class PhotoresistorLogic extends BaseComponent {
             resistance: (this.state.resistance / 1000).toFixed(1) + ' kΩ'
         });
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: lux, f1: resistance} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {lux: Number(s.lux ?? 0), resistance: Number(s.resistance ?? 0)},
+            i: {},
+        };
+    }
+    validate(_component: any, _graph: Map<string, string[]>) {
+        return null;
+    }
 }

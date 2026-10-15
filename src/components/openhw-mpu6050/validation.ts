@@ -1,34 +1,38 @@
-export const validation = {
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
+import { createValidationIssue } from '../component-schema.js';
+import type { ComponentValidationRule } from '../component-schema.js';
+import { MPU6050Logic } from './logic';
+
+const delegate = MPU6050Logic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>, validator?: any) =>
+        MPU6050Logic.prototype.validate!.call(undefined, component, graph, validator)
+    : (_component: any, _graph: Map<string, string[]>) => null;
+
+export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
         {
+            id: 'openhw-mpu6050-check',
             name: 'MPU6050 Power Check',
-            check: (component: any, graph: Map<string, string[]>) => {
-                const vcc = graph.get(`${component.id}.VCC`);
-                const gnd = graph.get(`${component.id}.GND`);
-                if (!vcc || vcc.length === 0) return `⚠️ [MPU6050 ${component.id}] VCC not connected. Connect to 3.3V or 5V.`;
-                if (!gnd || gnd.length === 0) return `⚠️ [MPU6050 ${component.id}] GND not connected.`;
-                return null;
-            },
-        },
-        {
-            name: 'MPU6050 I2C Check',
-            check: (component: any, graph: Map<string, string[]>) => {
-                const scl = graph.get(`${component.id}.SCL`);
-                const sda = graph.get(`${component.id}.SDA`);
-                if (!scl || scl.length === 0) return `⚠️ [MPU6050 ${component.id}] SCL not connected. Connect to Arduino A5.`;
-                if (!sda || sda.length === 0) return `⚠️ [MPU6050 ${component.id}] SDA not connected. Connect to Arduino A4.`;
-                return null;
-            },
-        },
-        {
-            name: 'MPU6050 Wake Up Reminder',
-            check: (component: any, graph: Map<string, string[]>) => {
-                const sda = graph.get(`${component.id}.SDA`);
-                if (sda && sda.length > 0) {
-                    return `💡 [MPU6050 ${component.id}] Remember to call Wire.beginTransmission(0x68); Wire.write(0x6B); Wire.write(0); Wire.endTransmission(); in setup() to wake the MPU6050 from sleep mode.`;
-                }
-                return null;
-            },
-        },
-    ],
+            severity: 'warn' as const,
+            priority: 10,
+            description: 'MPU6050 Power Check',
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'openhw-mpu6050-check');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'openhw-mpu6050-check'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
+            }
+        }
+    ]
 };

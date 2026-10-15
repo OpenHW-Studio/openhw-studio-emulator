@@ -1,21 +1,37 @@
-export const validation = {
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
+import { createValidationIssue } from '../component-schema.js';
+import type { ComponentValidationRule } from '../component-schema.js';
+import { ILI9341TouchLogic } from './logic';
+
+const delegate = ILI9341TouchLogic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>, validator?: any) =>
+        ILI9341TouchLogic.prototype.validate!.call(undefined, component, graph, validator)
+    : (_component: any, _graph: Map<string, string[]>) => null;
+
+export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
         {
             id: 'ili9341-touch-power',
-            check: (comp: any, graph: any, validator: any) => {
-                const vccPinId = comp.pins?.VCC || `${comp.id}:VCC`;
-                const gndPinId = comp.pins?.GND || `${comp.id}:GND`;
-
-                const vccVolt = validator.calculateVoltageAtNode(vccPinId);
-                const gndVolt = validator.calculateVoltageAtNode(gndPinId);
-                
-                if (vccVolt < 3.0) {
-                    return { type: 'warning', message: `${comp.label} requires at least 3.3V on VCC` };
-                }
-                if (gndVolt > 0.5) {
-                    return { type: 'error', message: `${comp.label} has missing or poor ground connection` };
-                }
-                return null;
+            name: 'ili9341-touch-power',
+            severity: 'warn' as const,
+            priority: 10,
+            description: 'ili9341-touch-power',
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'ili9341-touch-power');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'ili9341-touch-power'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
             }
         }
     ]

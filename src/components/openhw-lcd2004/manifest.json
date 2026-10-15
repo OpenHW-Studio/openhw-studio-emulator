@@ -47,6 +47,22 @@
             "multiple": true
         }
     },
+    "autowiring": {
+        "connections": [
+            { "from": "VSS", "to": "arduino:GND" },
+            { "from": "VDD", "to": "arduino:5V" },
+            { "from": "V0", "to": "arduino:GND" },
+            { "from": "RS", "to": "arduino:12" },
+            { "from": "RW", "to": "arduino:GND" },
+            { "from": "E", "to": "arduino:11" },
+            { "from": "D4", "to": "arduino:5" },
+            { "from": "D5", "to": "arduino:4" },
+            { "from": "D6", "to": "arduino:3" },
+            { "from": "D7", "to": "arduino:2" },
+            { "from": "A", "to": "arduino:5V" },
+            { "from": "K", "to": "arduino:GND" }
+        ]
+    },
     "autocoding": {
         "arduino": {
             "includes": ["<LiquidCrystal.h>"],
@@ -61,5 +77,11 @@
             "setup": "lcd.putstr('Hello, OpenHW!')",
             "loop": ""
         }
-    }
+    },
+    "sab": {
+        "slotKind": 3,
+        "fields": {}
+    },
+    "ui": {"svg": "./lcd2004.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

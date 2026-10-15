@@ -1,4 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
+import { createValidationIssue } from '../component-schema.js';
 
 export class MotorDriverLogic extends BaseComponent {
     private pinData: Record<string, { lastState: boolean, lastCycle: number, highCycles: number }> = {};
@@ -90,5 +91,42 @@ export class MotorDriverLogic extends BaseComponent {
         });
 
         this.stateChanged = true;
+    }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: enabled} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {},
+            i: {enabled: (s.enabled ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const logicPower = graph.get(`${component.id}.5V`) || graph.get(`${component.id}.VCC`);
+        const motorPower = graph.get(`${component.id}.12V`) || graph.get(`${component.id}.VM`);
+        const issues = [];
+
+        if (!logicPower || logicPower.length === 0) {
+            issues.push(createValidationIssue({
+                ruleId: 'motor-driver-power-check',
+                severity: 'warn',
+                message: `⚠️ [Motor Driver ${component.id}] Error: Logic power (VCC) is missing.`,
+                compIds: [component.id],
+                remediation: 'Connect the logic supply pin.',
+                autoFix: true,
+            }));
+        }
+        if (!motorPower || motorPower.length === 0) {
+            issues.push(createValidationIssue({
+                ruleId: 'motor-driver-power-check',
+                severity: 'warn',
+                message: `⚠️ [Motor Driver ${component.id}] Error: Motor power (VM) is missing.`,
+                compIds: [component.id],
+                remediation: 'Connect the motor supply pin.',
+                autoFix: true,
+            }));
+        }
+        return issues.length > 0 ? issues : null;
     }
 }

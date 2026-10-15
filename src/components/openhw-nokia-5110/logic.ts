@@ -76,4 +76,42 @@ export class Nokia5110Logic extends SPIProtocol {
         for (let i = 0; i < 504; i++) { let b = this.fb[i]; while (b > 0) { if (b & 1) active++; b >>= 1; } }
         this.setCustomTelemetry({ resolution: '84×48 mono', fillPercent: Number(((active / 4032) * 100).toFixed(1)) });
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: powerOn} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {},
+            i: {powerOn: (s.powerOn ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const pins = validator.getComponentPins(component);
+        const vcc = pins.find((p:any) => p.includes('VCC') || p.includes('5V') || p.includes('3V3') || p.includes('V+'));
+        const gnd = pins.find((p:any) => p.includes('GND'));
+
+        if (vcc) {
+            const node = `${component.id}.${vcc}`;
+            if (((validator ? validator.getNeighbors(node) : (graph.get(node) || []))).length === 0) {
+                return '⚠️ [' + component.type + ' ' + component.id + '] Power is not connected.';
+            } else if (!validator.hasResistivePathToSupply(node)) {
+                return '⚠️ [' + component.type + ' ' + component.id + '] Power is connected but does not reach a valid power supply rail.';
+            }
+        }
+
+        if (gnd) {
+            const node = `${component.id}.${gnd}`;
+            if (((validator ? validator.getNeighbors(node) : (graph.get(node) || []))).length === 0) {
+                return '⚠️ [' + component.type + ' ' + component.id + '] Ground is not connected.';
+            } else {
+                const gndSources = validator.collectVoltageSources(node);
+                if (!gndSources.some((s: any) => s.voltage === 0)) {
+                    return '⚠️ [' + component.type + ' ' + component.id + '] Ground is connected but does not reach a valid ground rail (GND).';
+                }
+            }
+        }
+
+        return null;
+    }
 }

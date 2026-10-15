@@ -1,0 +1,13 @@
+<svg width="100%" height="100%" viewBox="0 0 128.0 64.0" xmlns="http://www.w3.org/2000/svg" data-component="openhw-nlsf595" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="126.0" height="62.0" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="64.0" y="32.0" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">SPI LED Driver (NLSF595)</text>
+  <circle cx="11" cy="11" r="2.5" fill="#888" data-pin="VCC" />
+  <circle cx="11" cy="26" r="2.5" fill="#888" data-pin="GND" />
+  <circle cx="11" cy="41" r="2.5" fill="#888" data-pin="MOSI" />
+  <circle cx="11" cy="56" r="2.5" fill="#888" data-pin="SCK" />
+  <circle cx="26" cy="56" r="2.5" fill="#888" data-pin="CS" />
+  <circle cx="118" cy="11" r="2.5" fill="#888" data-pin="R1" />
+  <circle cx="118" cy="26" r="2.5" fill="#888" data-pin="G1" />
+  <circle cx="118" cy="41" r="2.5" fill="#888" data-pin="B1" />
+</svg>

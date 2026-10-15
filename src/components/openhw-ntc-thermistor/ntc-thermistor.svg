@@ -1,0 +1,9 @@
+<svg width="100%" height="100%" viewBox="0 0 92.3 184.6" xmlns="http://www.w3.org/2000/svg" data-component="openhw-ntc-thermistor" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="90.3" height="182.6" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="46.15" y="92.3" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">NTC Thermistor Module</text>
+  <circle cx="23.1" cy="176" r="2.5" fill="#888" data-pin="A0" />
+  <circle cx="38.1" cy="176" r="2.5" fill="#888" data-pin="D0" />
+  <circle cx="53.1" cy="176" r="2.5" fill="#888" data-pin="GND" />
+  <circle cx="68.1" cy="176" r="2.5" fill="#888" data-pin="VCC" />
+</svg>

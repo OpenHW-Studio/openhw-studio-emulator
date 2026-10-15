@@ -136,6 +136,12 @@ export class ADXL345Logic extends BaseComponent {
         return val & 0xFF;
     }
 
+    // Runner I2C contract name (readByte path calls onI2CReadByte):
+    // delegate to the register-pointer read above.
+    onI2CReadByte(): number {
+        try { return this.readI2CByte(); } catch { return 0xFF; }
+    }
+
     private getRawRegisters(): Record<number, number> {
         const isMeasuring = (this.registers[0x2D] & 0x08) !== 0;
 
@@ -169,4 +175,44 @@ export class ADXL345Logic extends BaseComponent {
             i2cAddress: "0x" + this.getI2CAddress().toString(16).toUpperCase()
         });
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: accelX, f1: accelY, f2: accelZ} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {accelX: Number((this as any).accelX ?? 0), accelY: Number((this as any).accelY ?? 0), accelZ: Number((this as any).accelZ ?? 0)},
+            i: {},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        {
+const vcc = graph.get(`${component.id}.VCC`);
+        const gnd = graph.get(`${component.id}.GND`);
+        if (!vcc || vcc.length === 0) return `⚠️ [ADXL345 ${component.id}] VCC not connected. Connect to 3V-5V.`;
+        if (!gnd || gnd.length === 0) return `⚠️ [ADXL345 ${component.id}] GND not connected.`;
+        return null;
+        }
+
+        /* --- next rule --- */
+        {
+const scl = graph.get(`${component.id}.SCL`);
+        const sda = graph.get(`${component.id}.SDA`);
+        if (!scl || scl.length === 0) return `⚠️ [ADXL345 ${component.id}] SCL not connected.`;
+        if (!sda || sda.length === 0) return `⚠️ [ADXL345 ${component.id}] SDA not connected.`;
+        return null;
+        }
+
+        /* --- next rule --- */
+        {
+const cs = graph.get(`${component.id}.CS`);
+        if (cs && cs.length > 0) {
+            const isGnd = cs.some(n => n.includes('GND'));
+            if (isGnd) {
+                return `⚠️ [ADXL345 ${component.id}] CS pin is connected to GND, which forces SPI mode. Connect to VCC or leave disconnected for I2C operation.`;
+            }
+        }
+        return null;
+        }
+}
 }

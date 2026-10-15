@@ -14,6 +14,14 @@
         { "id": "SDA", "x": 0, "y": 105, "description": "I2C Data" },
         { "id": "SCL", "x": 0, "y": 120, "description": "I2C Clock" }
     ],
+    "autowiring": {
+        "connections": [
+            { "from": "GND", "to": "arduino:GND" },
+            { "from": "VCC", "to": "arduino:5V" },
+            { "from": "SDA", "to": "arduino:A4", "i2c": true },
+            { "from": "SCL", "to": "arduino:A5", "i2c": true }
+        ]
+    },
     "properties": [
         {
             "name": "i2cAddress",
@@ -55,5 +63,11 @@
             "setup": "lcd.putstr('Hello, OpenHW!')",
             "loop": ""
         }
-    }
+    },
+    "sab": {
+        "slotKind": 3,
+        "fields": {}
+    },
+    "ui": {"svg": "./lcd2004-i2c.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

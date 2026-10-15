@@ -1,7 +1,7 @@
 export const BOUNDS = { x: 0, y: 0, w: 240, h: 167 };
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import padImage from './RainDropPad.png';
+import padImage from './RainDropPad.webp';
 
 const W = 300, H = 220;
 type CloudMode = 'dry' | 'heavy';

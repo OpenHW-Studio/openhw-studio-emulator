@@ -47,5 +47,12 @@
         { "from": "S3", "to": "arduino:11" },
         { "from": "SIG", "to": "arduino:A0" }
       ]
-    }
+    },
+    "bounds": {"x": 0, "y": 0, "w": 105, "h": 270},
+    "sab": {
+        "slotKind": 4,
+        "fields": {"f0": "channel"}
+    },
+    "ui": {"svg": "./hp4067.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

@@ -1,5 +1,18 @@
-import { BaseComponent } from '../BaseComponent';
-import { SPIProtocol } from '../../protocol-handlers/index';
+import { createValidationIssue } from '../component-schema.js';
+import { WasmComponent } from '../WasmComponent';
+import { SpiBusFramer } from '../../protocol-handlers/index';
+import { sdCardGlueLoader } from './glue';
+
+// §12.4 WASM-heavy layout (same as ILI9341/SSD1306): `extends WasmComponent`
+// DIRECTLY + an owned SpiBusFramer for pure CS bookkeeping. WASM owns
+// COMPUTE (per-byte counters + activity decay); TS owns bus event decode
+// (FAT/block device via littlefs.wasm + JS shim), state, validate, uiState.
+// fallbackUpdate() = REQUIRED JS reference (defined further below).
+//
+// Why not `extends SPIProtocol`: same double-dispatch problem as the TFT
+// (protocol base + WASM adapter owning the same onSPIByte). The SD card is
+// full-duplex (MISO responses), so the framer's onByte return value carries
+// the MISO byte — exactly ONE owner per exchange. See SpiBusFramer docs.
 
 const LITTLEFS_MODULE_NAME = 'littlefs';
 const SD_BLOCK_SIZE = 512;
@@ -158,7 +171,7 @@ function createLittleFsVolume(
     };
 }
 
-export class SDCardLogic extends SPIProtocol {
+export class SDCardLogic extends WasmComponent {
     private powered = false;
     private csHigh = true;
     private mounted = true;
@@ -169,6 +182,7 @@ export class SDCardLogic extends SPIProtocol {
     private bytesIn = 0;
     private bytesOut = 0;
     private lastActivityAt = 0;
+    private lastActivityCycles = 0; // cycle-based (no Date.now in tick)
 
     private readonly textEncoder = new TextEncoder();
     private readonly textDecoder = new TextDecoder();
@@ -181,8 +195,19 @@ export class SDCardLogic extends SPIProtocol {
     private littleFsVolume: LittleFsVolume | null = null;
     private files = new Map<string, Uint8Array>();
 
+    // Owned SPI framer (composition, NOT inheritance): pure CS-edge
+    // bookkeeping. Runner bytes enter via onSPIByte() below — exactly once.
+    // Full-duplex: the onByte handler returns the MISO byte synchronously.
+    private spi = new SpiBusFramer('CS', true, {
+        onByte: (byte, index) => this.sdByteExchange(byte, index),
+        onAssert: () => {},
+        onDeassert: () => {},
+    });
+
     constructor(id: string, manifest: any) {
         super(id, manifest);
+        // §12.4: attach the WASM loader; WasmComponent owns core/ready/load.
+        this.setGlueLoader(sdCardGlueLoader as any);
 
         const capacityKbRaw = Number(manifest?.attrs?.capacityKB ?? 2048);
         const capacityKB = Number.isFinite(capacityKbRaw) && capacityKbRaw > 64
@@ -197,6 +222,7 @@ export class SDCardLogic extends SPIProtocol {
         this.writeShadowFile('/README.TXT', this.textEncoder.encode('OpenHW virtual SD card\n'));
 
         this.state = {
+            ...this.state,
             mounted: this.mounted,
             powered: false,
             selected: false,
@@ -214,9 +240,52 @@ export class SDCardLogic extends SPIProtocol {
             lastPath: '--',
             lastOp: 'idle',
             lastReadPreview: '',
+            spiRxBytes: 0,
+            spiTxBytes: 0,
+            csActive: false,
+            lastFrame: [],
+            lastResponse: [],
         };
 
         void this.initLittleFs();
+    }
+
+    // ── Runner entry points (SINGLE dispatch owner) ────────────────
+    // The runner calls these; the framer only tracks CS edges.
+
+    /** Every SPI clock byte exchange. Returns the MISO byte. */
+    onSPIByte(data: number): number {
+        const byte = data & 0xFF;
+        this.state.spiRxBytes = (this.state.spiRxBytes || 0) + 1;
+        this.stateChanged = true;
+        // Framer routes to sdByteExchange() exactly once; its return value
+        // IS the MISO byte (full-duplex — no queue owned anywhere else).
+        const miso = this.spi.pushByte(byte);
+        this.state.spiTxBytes = (this.state.spiTxBytes || 0) + 1;
+        return miso & 0xFF;
+    }
+
+    /** CS/VCC/GND pin edges. CS routes to the framer; power stays local. */
+    onPinStateChange(pinId: string, isHigh: boolean, cycles: number) {
+        // WASM bus hooks stay OFF for the SD card (JS framing authoritative).
+        super.onPinStateChange(pinId, isHigh, cycles);
+        const pin = String(pinId || '').toUpperCase();
+        if (pin === 'CS') {
+            this.spi.pushPin('CS', isHigh);
+            this.csHigh = isHigh;
+            this.state.csActive = this.spi.csActive;
+            this.state.selected = !this.csHigh;
+            if (this.csHigh) {
+                this.commandFrame = [];
+                this.writeState = null;
+            }
+            this.stateChanged = true;
+            return;
+        }
+
+        if (pin === 'VCC' || pin === 'GND') {
+            this.refreshPowerState();
+        }
     }
 
     private normalizePath(pathLike: string): string {
@@ -507,26 +576,13 @@ export class SDCardLogic extends SPIProtocol {
         return new Uint8Array(found);
     }
 
-    onPinStateChange(pinId: string, isHigh: boolean, cycles: number) {
-        super.onPinStateChange(pinId, isHigh, cycles);
-        const pin = String(pinId || '').toUpperCase();
-        if (pin === 'CS') {
-            this.csHigh = isHigh;
-            this.state.selected = !this.csHigh;
-            if (this.csHigh) {
-                this.commandFrame = [];
-                this.writeState = null;
-            }
-            this.stateChanged = true;
-            return;
-        }
-
-        if (pin === 'VCC' || pin === 'GND') {
-            this.refreshPowerState();
-        }
-    }
-
-    onSPIByteExchange(value: number, index: number) {
+    /**
+     * Full-duplex byte handler (was onSPIByteExchange under SPIProtocol).
+     * Called exactly once per exchange from onSPIByte() via the framer;
+     * the return value IS the MISO byte. Private — the runner path is
+     * onSPIByte(); tests/tools must use onSPIByte(), not this.
+     */
+    private sdByteExchange(value: number, index: number) {
         this.refreshPowerState();
 
         if (!this.mounted || !this.powered || this.csHigh) {
@@ -534,9 +590,15 @@ export class SDCardLogic extends SPIProtocol {
         }
 
         const byte = value & 0xff;
-        this.lastActivityAt = Date.now();
+        this.lastActivityAt = Date.now(); // event path (SPI byte, not tick)
+        this.lastActivityCycles = (this as any).simCycles || 0;
         this.bytesIn += 1;
         this.state.bytesIn = this.bytesIn;
+        // Mirror into the WASM activity core: the glue's onSPIByte(cycles)
+        // stamps sdcard_on_spi(handle, cycles); core.update() on tick then
+        // decays activity after 120 ms of SPI silence. JS bytesIn stays the
+        // reference for uiState via pullWasmActivityState (monotonic adopt).
+        try { this.core?.onSPIByte?.(Number((this as any).simCycles) || 0); } catch { /* ignore */ }
 
         if (this.responseQueue.length > 0) {
             return this.emitResponseByte();
@@ -608,10 +670,31 @@ export class SDCardLogic extends SPIProtocol {
         }
     }
 
-    update() {
-        this.refreshPowerState();
+    /**
+     * REQUIRED JS reference (§12.4): power + activity decay + FS counters.
+     * Runs when no WASM core is loaded (WasmComponent fallbackUpdate).
+     */
+    protected fallbackUpdate(cpuCycles?: number): void {
+        this.jsPowerAndCounters(cpuCycles);
+    }
 
-        const active = (Date.now() - this.lastActivityAt) < 120;
+    /**
+     * Post-core housekeeping on the WASM path: pull activity views, then
+     * run the SAME helper as the JS reference (shared — no drift).
+     */
+    protected afterWasmUpdate(cpuCycles?: number): void {
+        this.pullWasmActivityState();
+        this.jsPowerAndCounters(cpuCycles);
+    }
+
+    private jsPowerAndCounters(cpuCycles?: number): void {
+        this.refreshPowerState();
+        if (Number.isFinite(Number(cpuCycles))) (this as any).simCycles = Number(cpuCycles);
+        // 120ms @16MHz ~= 1.92M cycles; wall fallback only before first tick.
+        const ref = Number.isFinite(Number(cpuCycles)) ? Number(cpuCycles) : -1;
+        const active = ref >= 0
+            ? (ref - ((this as any).lastActivityCycles || 0)) < 1920000
+            : (Date.now() - this.lastActivityAt) < 120;
         if (this.state.activity !== active) {
             this.state.activity = active;
             this.stateChanged = true;
@@ -628,5 +711,78 @@ export class SDCardLogic extends SPIProtocol {
             this.state.usedBytes = usedBytes;
             this.stateChanged = true;
         }
+    }
+
+    /**
+     * Mirror WASM activity views into JS counters (monotonic guard:
+     * the core only counts up, so never adopt a LOWER value — the JS
+     * reference stays authoritative on reset/regress).
+     * View layout (see glue.ts readStateViews): f[0]=bytesIn,
+     * f[1]=bytesOut, i[0]=active.
+     */
+    protected pullWasmActivityState(): void {
+        const core = this.core;
+        if (!core) return;
+        let views: { f: Float32Array; i: Int32Array } | null = null;
+        try {
+            views = core.readStateViews();
+        } catch {
+            return;
+        }
+        if (!views) return;
+        const coreIn = views.f.length > 0 ? Math.round(views.f[0]) : this.bytesIn;
+        const coreOut = views.f.length > 1 ? Math.round(views.f[1]) : this.bytesOut;
+        if (coreIn > this.bytesIn) {
+            this.bytesIn = coreIn;
+            this.state.bytesIn = this.bytesIn;
+            this.stateChanged = true;
+        }
+        if (coreOut > this.bytesOut) {
+            this.bytesOut = coreOut;
+            this.state.bytesOut = this.bytesOut;
+            this.stateChanged = true;
+        }
+    }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: fsReady, f0: bytesIn} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {bytesIn: Number(s.bytesIn ?? 0)},
+            i: {fsReady: (s.fsReady ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const vcc = graph.get(`${component.id}.VCC`) || [];
+        const gnd = graph.get(`${component.id}.GND`) || [];
+        const cs = graph.get(`${component.id}.CS`) || [];
+        const sck = graph.get(`${component.id}.SCK`) || [];
+        const mosi = graph.get(`${component.id}.MOSI`) || [];
+        const issues = [];
+
+        if (vcc.length === 0 || gnd.length === 0) {
+            issues.push(createValidationIssue({
+                ruleId: 'sd-card-wiring-check',
+                severity: 'warn',
+                message: `⚠️ [SD ${component.id}] Warning: Connect both VCC and GND to power the card.`,
+                compIds: [component.id],
+                remediation: 'Connect the SD card power pins.',
+                autoFix: true,
+            }));
+        }
+
+        if (cs.length === 0 || sck.length === 0 || mosi.length === 0) {
+            issues.push(createValidationIssue({
+                ruleId: 'sd-card-wiring-check',
+                severity: 'warn',
+                message: `⚠️ [SD ${component.id}] Warning: CS/SCK/MOSI are required for SPI communication.`,
+                compIds: [component.id],
+                remediation: 'Wire the SD card SPI pins to the MCU.',
+                autoFix: true,
+            }));
+        }
+
+        return issues.length > 0 ? issues : null;
     }
 }

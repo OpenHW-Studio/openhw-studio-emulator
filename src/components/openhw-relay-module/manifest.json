@@ -9,16 +9,54 @@
         "triggerLevel": "low"
     },
     "pins": [
-        { "id": "VCC", "x": 30,  "y": 60,  "type": "input",   "description": "Power Supply (5V)" },
-        { "id": "GND", "x": 30,  "y": 75,  "type": "input",   "description": "Ground" },
-        { "id": "IN",  "x": 30,  "y": 90,  "type": "input",   "description": "Control signal from Arduino" },
-        { "id": "NO",  "x": 300, "y": 45,  "type": "passive", "description": "Normally Open terminal" },
-        { "id": "COM", "x": 300, "y": 90,  "type": "passive", "description": "Common terminal" },
-        { "id": "NC",  "x": 300, "y": 135, "type": "passive", "description": "Normally Closed terminal" }
+        {
+            "id": "VCC",
+            "x": 30,
+            "y": 60,
+            "type": "input",
+            "description": "Power Supply (5V)"
+        },
+        {
+            "id": "GND",
+            "x": 30,
+            "y": 75,
+            "type": "input",
+            "description": "Ground"
+        },
+        {
+            "id": "IN",
+            "x": 30,
+            "y": 90,
+            "type": "input",
+            "description": "Control signal from Arduino"
+        },
+        {
+            "id": "NO",
+            "x": 300,
+            "y": 45,
+            "type": "passive",
+            "description": "Normally Open terminal"
+        },
+        {
+            "id": "COM",
+            "x": 300,
+            "y": 90,
+            "type": "passive",
+            "description": "Common terminal"
+        },
+        {
+            "id": "NC",
+            "x": 300,
+            "y": 135,
+            "type": "passive",
+            "description": "Normally Closed terminal"
+        }
     ],
     "telemetry": {
         "template": "Energised=${state.energised}",
-        "criticalKeys": ["state.energised"]
+        "criticalKeys": [
+            "state.energised"
+        ]
     },
     "autocoding": {
         "arduino": {
@@ -34,9 +72,34 @@
     },
     "autowiring": {
         "connections": [
-            { "from": "VCC", "to": "arduino:5V" },
-            { "from": "GND", "to": "arduino:GND" },
-            { "from": "IN", "to": "arduino:2" }
+            {
+                "from": "VCC",
+                "to": "arduino:5V"
+            },
+            {
+                "from": "GND",
+                "to": "arduino:GND"
+            },
+            {
+                "from": "IN",
+                "to": "arduino:2"
+            }
         ]
-    }
+    },
+    "sab": {
+        "slotKind": 6,
+        "fields": {
+            "i0": "energised",
+            "i1": "ledOn"
+        }
+    },
+    "ui": {
+        "svg": "./relay-module.svg",
+        "interactive": []
+    },
+    "sim": {
+        "runtime": "js",
+        "validation": "inline"
+    },
+    "bounds": {"x": 0, "y": 0, "w": 340, "h": 180}
 }

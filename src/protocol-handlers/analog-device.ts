@@ -45,13 +45,10 @@ export class AnalogProtocol extends BaseComponent {
         if (!pinObj) return;
 
         const voltage = pinObj.voltage || 0;
-        
-        this.recentSamples.push(voltage);
-        if (this.recentSamples.length > this.windowSize) {
-            this.recentSamples.shift();
-        }
 
-        const avgVoltage = this.recentSamples.reduce((a, b) => a + b, 0) / this.recentSamples.length;
+        const avgVoltage = AnalogBusFramer.average(
+            this.recentSamples, voltage, this.windowSize,
+        );
         const currentAvg = Number(this.state.averageVoltage || 0);
 
         if (Math.abs(avgVoltage - currentAvg) >= this.threshold) {
@@ -67,4 +64,53 @@ export class AnalogProtocol extends BaseComponent {
             this.onAnalogVoltageChange(pinId, avgVoltage, rawAdc);
         }
     }
+}
+
+/**
+ * AnalogBusFramer — composition helper for WASM-heavy components (§12.4).
+ * Pure moving-average + threshold detect (no update/WASM knowledge). The
+ * static average()/adc() helpers are shared with AnalogProtocol above so
+ * JS and WASM paths agree bit-for-bit. A WASM-heavy analog component
+ * extends WasmComponent DIRECTLY, owns an AnalogBusFramer, feeds samples
+ * via pushSample(), and routes via routeAnalog().
+ */
+export interface AnalogFrameEvents {
+    onChange?(pinId: string, avgVoltage: number, rawAdc: number): void;
+}
+
+export class AnalogBusFramer {
+    private recentSamples: number[] = [];
+    private currentAvg = 0;
+    constructor(
+        private readonly windowSize: number,
+        private readonly threshold: number,
+        private readonly events: AnalogFrameEvents,
+    ) {}
+
+    /** Shared windowed average (mutates the caller's sample array). */
+    static average(samples: number[], voltage: number, windowSize: number): number {
+        samples.push(voltage);
+        if (samples.length > windowSize) samples.shift();
+        return samples.reduce((a, b) => a + b, 0) / samples.length;
+    }
+
+    /** Shared 10-bit ADC approximation (5V ref, matches protocol base). */
+    static adc(avgVoltage: number): number {
+        return Math.round((avgVoltage / 5.0) * 1023);
+    }
+
+    /**
+     * Feed one sample; returns { avgVoltage, rawAdc } when the threshold
+     * trips, else null. Mirrors AnalogProtocol thresholds exactly.
+     */
+    pushSample(pinId: string, voltage: number): { avgVoltage: number; rawAdc: number } | null {
+        const avg = AnalogBusFramer.average(this.recentSamples, voltage, this.windowSize);
+        if (Math.abs(avg - this.currentAvg) < this.threshold) return null;
+        const rawAdc = AnalogBusFramer.adc(avg);
+        this.currentAvg = avg;
+        this.events.onChange?.(pinId, avg, rawAdc);
+        return { avgVoltage: avg, rawAdc };
+    }
+
+    get averageVoltage(): number { return this.currentAvg; }
 }

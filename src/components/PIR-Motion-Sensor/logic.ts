@@ -20,13 +20,22 @@ export class PIRLogic extends BaseComponent {
             this.propagatePin('OUT', currentV, currentWires, allComponentsInstances);
         }
         const boardPin = this.getConnectedBoardPin();
-        if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
+        if (boardPin && typeof (this as any)._driveBoardPin === 'function') {
+            (this as any)._driveBoardPin(boardPin, isMotion);
+        } else if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
             (this as any)._setAvrPinDirect(boardPin, isMotion);
         }
     }
 
     public getConnectedBoardPin(): string | null {
         if ((this as any)._connectedPin != null) return (this as any)._connectedPin;
+        try {
+            const netOf = (this as any)._boardNetOf;
+            if (typeof netOf === 'function') {
+                const pin = netOf('OUT');
+                if (pin) { (this as any)._connectedPin = pin; return pin; }
+            }
+        } catch { /* fall through to legacy scan */ }
         const runner = this._simCpu?._avrRunner;
         if (runner?.currentWires) {
             for (const wire of runner.currentWires) {
@@ -73,7 +82,9 @@ export class PIRLogic extends BaseComponent {
             const isHigh = voltage > 1.8;
 
             const boardPin = this.getConnectedBoardPin();
-            if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
+            if (boardPin && typeof (this as any)._driveBoardPin === 'function') {
+                (this as any)._driveBoardPin(boardPin, isHigh);
+            } else if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
                 (this as any)._setAvrPinDirect(boardPin, isHigh);
             }
 
@@ -125,6 +136,33 @@ export class PIRLogic extends BaseComponent {
             delay: this.attrs?.delay ? parseInt(this.attrs.delay, 10) : 500,
             targetBoard: (this as any)._simCpu?._avrRunner?.boardId || undefined
         });
+    }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: motion} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {},
+            i: {motion: (s.motion ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const outPin = graph.get(`${component.id}.OUT`);
+        const vccPin = graph.get(`${component.id}.VCC`);
+        const gndPin = graph.get(`${component.id}.GND`);
+
+        if (!outPin || outPin.length === 0) {
+            return `⚠️ [PIR ${component.id}] Warning: OUT pin is disconnected. Motion events will not be captured.`;
+        }
+        if (!vccPin || vccPin.length === 0) {
+            return `⚠️ [PIR ${component.id}] Warning: VCC pin is disconnected.`;
+        }
+        if (!gndPin || gndPin.length === 0) {
+            return `⚠️ [PIR ${component.id}] Warning: GND pin is disconnected.`;
+        }
+
+        return null;
     }
 }
 

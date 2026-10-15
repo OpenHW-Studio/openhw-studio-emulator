@@ -1,0 +1,35 @@
+<svg width="100%" height="100%" viewBox="0 0 156.25 312.5" xmlns="http://www.w3.org/2000/svg" data-component="openhw-esp32" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="154.25" height="310.5" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="78.125" y="156.25" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">ESP32</text>
+  <circle cx="7.5" cy="37.8" r="2.5" fill="#888" data-pin="EN" />
+  <circle cx="7.5" cy="52.8" r="2.5" fill="#888" data-pin="VP" />
+  <circle cx="7.5" cy="67.8" r="2.5" fill="#888" data-pin="VN" />
+  <circle cx="7.5" cy="82.8" r="2.5" fill="#888" data-pin="34" />
+  <circle cx="7.5" cy="97.8" r="2.5" fill="#888" data-pin="35" />
+  <circle cx="7.5" cy="112.8" r="2.5" fill="#888" data-pin="32" />
+  <circle cx="7.5" cy="127.8" r="2.5" fill="#888" data-pin="33" />
+  <circle cx="7.5" cy="142.8" r="2.5" fill="#888" data-pin="25" />
+  <circle cx="7.5" cy="157.8" r="2.5" fill="#888" data-pin="26" />
+  <circle cx="7.5" cy="172.8" r="2.5" fill="#888" data-pin="27" />
+  <circle cx="7.5" cy="187.8" r="2.5" fill="#888" data-pin="14" />
+  <circle cx="7.5" cy="202.8" r="2.5" fill="#888" data-pin="12" />
+  <circle cx="7.5" cy="217.8" r="2.5" fill="#888" data-pin="13" />
+  <circle cx="7.5" cy="232.8" r="2.5" fill="#888" data-pin="GND.2" />
+  <circle cx="7.5" cy="247.8" r="2.5" fill="#888" data-pin="VIN" />
+  <circle cx="157.8" cy="37.5" r="2.5" fill="#888" data-pin="23" />
+  <circle cx="157.8" cy="52.5" r="2.5" fill="#888" data-pin="22" />
+  <circle cx="157.8" cy="67.5" r="2.5" fill="#888" data-pin="1" />
+  <circle cx="157.8" cy="82.5" r="2.5" fill="#888" data-pin="3" />
+  <circle cx="157.8" cy="97.5" r="2.5" fill="#888" data-pin="21" />
+  <circle cx="157.8" cy="112.5" r="2.5" fill="#888" data-pin="19" />
+  <circle cx="157.8" cy="127.5" r="2.5" fill="#888" data-pin="18" />
+  <circle cx="157.8" cy="142.5" r="2.5" fill="#888" data-pin="5" />
+  <circle cx="157.8" cy="157.5" r="2.5" fill="#888" data-pin="17" />
+  <circle cx="157.8" cy="172.5" r="2.5" fill="#888" data-pin="16" />
+  <circle cx="157.8" cy="187.5" r="2.5" fill="#888" data-pin="4" />
+  <circle cx="157.8" cy="202.5" r="2.5" fill="#888" data-pin="2" />
+  <circle cx="157.8" cy="217.5" r="2.5" fill="#888" data-pin="15" />
+  <circle cx="157.8" cy="232.5" r="2.5" fill="#888" data-pin="GND.1" />
+  <circle cx="157.8" cy="247.5" r="2.5" fill="#888" data-pin="3V3" />
+</svg>

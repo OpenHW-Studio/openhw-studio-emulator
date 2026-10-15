@@ -1,0 +1,9 @@
+<svg width="100%" height="100%" viewBox="0 0 57.0 120.0" xmlns="http://www.w3.org/2000/svg" data-component="openhw-dht22" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="55.0" height="118.0" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="28.5" y="60.0" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">DHT22</text>
+  <circle cx="15" cy="115" r="2.5" fill="#888" data-pin="VCC" />
+  <circle cx="25" cy="115" r="2.5" fill="#888" data-pin="DATA" />
+  <circle cx="35" cy="115" r="2.5" fill="#888" data-pin="NC" />
+  <circle cx="45" cy="115" r="2.5" fill="#888" data-pin="GND" />
+</svg>

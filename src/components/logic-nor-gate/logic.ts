@@ -36,7 +36,7 @@ export class NorGateLogic extends BaseComponent {
                 visited.add(otherKey);
 
                 const [compId, compPin] = otherKey.split(':');
-                const inst = instances.find(i => i.id === compId);
+                const inst = this.findInstance(instances, compId);
                 if (!inst) continue;
 
                 if (!inst.pins[compPin]) inst.pins[compPin] = { voltage: 0, mode: 'INPUT' };
@@ -62,5 +62,25 @@ export class NorGateLogic extends BaseComponent {
             return this.state.outputHigh ? 5.0 : 0.0;
         }
         return super.getPinVoltage(pinId);
+    }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: outputHigh} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {},
+            i: {outputHigh: (s.outputHigh ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const pinIn1 = graph.get(`${component.id}.IN1`);
+        const pinIn2 = graph.get(`${component.id}.IN2`);
+        const pinOut = graph.get(`${component.id}.OUT`);
+
+        if ((!pinIn1 || pinIn1.length === 0) && (!pinIn2 || pinIn2.length === 0) && (!pinOut || pinOut.length === 0)) {
+            return `⚠️ [NOR Gate ${component.id}] Warning: No pins are connected.`;
+        }
+        return null;
     }
 }

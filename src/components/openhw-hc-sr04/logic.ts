@@ -1,4 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
+import { createValidationIssue } from '../component-schema.js';
 import { PulseProtocol } from '../../protocol-handlers/index';
 
 export class HCSR04Logic extends PulseProtocol {
@@ -22,6 +23,13 @@ export class HCSR04Logic extends PulseProtocol {
 
     private getConnectedBoardPin(): string | null {
         if ((this as any)._connectedPin != null) return (this as any)._connectedPin;
+        try {
+            const netOf = (this as any)._boardNetOf;
+            if (typeof netOf === 'function') {
+                const pin = netOf('ECHO');
+                if (pin) { (this as any)._connectedPin = pin; return pin; }
+            }
+        } catch { /* fall through to legacy scan */ }
         const runner = this._simCpu?._avrRunner;
         if (runner?.currentWires) {
             for (const wire of runner.currentWires) {
@@ -58,13 +66,22 @@ export class HCSR04Logic extends PulseProtocol {
     private driveEcho(voltage: number) {
         if (this.isUpdating) return;
         this.isUpdating = true;
+        // Claim the bus for the whole echo window (same _drivingBus
+        // contract as OneWireProtocol): without it the runner's periodic
+        // repropagate re-asserts pullup HIGH and pulseIn() never sees LOW.
+        // Left claimed afterwards — ECHO idles LOW between measurements and
+        // the stale LOW (_lastDrivenVoltage=0) keeps it correct.
+        (this as any)._drivingBus = true;
         try {
             this._setVoltageInternal(voltage);
             const isHigh = voltage > 1.8;
 
-            // Fast path: directly write to AVR PIN register so pulseIn() reads the pulse instantly
+            // Board drive via the bus service when available (plan §5.3);
+            // legacy AVR-only fast path otherwise.
             const boardPin = this.getConnectedBoardPin();
-            if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
+            if (boardPin && typeof (this as any)._driveBoardPin === 'function') {
+                (this as any)._driveBoardPin(boardPin, isHigh);
+            } else if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
                 (this as any)._setAvrPinDirect(boardPin, isHigh);
             }
 
@@ -103,9 +120,22 @@ export class HCSR04Logic extends PulseProtocol {
         const echoDurationUs = Math.max(116, Math.round(distance * 58));
 
         this.isEchoing = true;
-        
+
         // Wait ~200us before driving ECHO high to simulate 8-cycle 40kHz sonic burst.
         // This gives the Arduino CPU enough time to hit the pulseIn() instruction.
+        // Runner-agnostic clock service first (plan §5.3); legacy AVR clock
+        // fallback; non-AVR pulse fallback last. Identical timing either way.
+        const sched = (this as any)._scheduleBoardCycles;
+        if (typeof sched === 'function') {
+            sched(() => {
+                this.driveEcho(5.0); // Start pulse
+                sched(() => {
+                    this.driveEcho(0.0); // End pulse
+                    this.isEchoing = false;
+                }, echoDurationUs * 16);
+            }, 200 * 16); // 200us at 16MHz
+            return;
+        }
         const cpu = (this as any)._simCpu;
         if (cpu && typeof cpu.addClockEvent === 'function') {
             cpu.addClockEvent(() => {
@@ -136,5 +166,47 @@ export class HCSR04Logic extends PulseProtocol {
             isEchoing: this.isEchoing,
             lastMeasurement: this.state.distance || distance,
         });
+    }
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: distance} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {distance: Number(s.distance ?? 0)},
+            i: {},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const triggerPin = `${component.id}.TRIG`;
+        const echoPin = `${component.id}.ECHO`;
+        const vccPin = `${component.id}.VCC`;
+        const gndPin = `${component.id}.GND`;
+        const issues = [];
+
+        if (((validator ? validator.getNeighbors(vccPin) : (graph.get(vccPin) || []))).length > 0 && ((validator ? validator.getNeighbors(gndPin) : (graph.get(gndPin) || []))).length > 0) {
+            if (((validator ? validator.getNeighbors(triggerPin) : (graph.get(triggerPin) || []))).length === 0) {
+                issues.push(createValidationIssue({
+                    ruleId: 'hc-sr04-connection-check',
+                    severity: 'warn',
+                    message: `⚠️ [Ultrasonic ${component.id}] Warning: TRIG pin is not connected. Sensor cannot be triggered.`,
+                    compIds: [component.id],
+                    remediation: 'Connect TRIG to a digital output pin.',
+                    autoFix: true,
+                }));
+            }
+            if (((validator ? validator.getNeighbors(echoPin) : (graph.get(echoPin) || []))).length === 0) {
+                issues.push(createValidationIssue({
+                    ruleId: 'hc-sr04-connection-check',
+                    severity: 'warn',
+                    message: `⚠️ [Ultrasonic ${component.id}] Warning: ECHO pin is not connected. No distance reading will be received.`,
+                    compIds: [component.id],
+                    remediation: 'Connect ECHO to a digital input pin.',
+                    autoFix: true,
+                }));
+            }
+        }
+
+        return issues.length > 0 ? issues : null;
     }
 }

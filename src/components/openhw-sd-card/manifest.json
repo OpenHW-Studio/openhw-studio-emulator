@@ -87,5 +87,15 @@
             "setup": "Serial.begin(9600);\nwhile (!Serial);\nSerial.print(\"Initializing SD card...\");\nif (!SD.begin(${CS})) {\n  Serial.println(\"initialization failed!\");\n  return;\n}\nSerial.println(\"initialization done.\");",
             "loop": "// SD Card ready for datalogging."
         }
-    }
+    },
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "fsReady", "f0": "bytesIn"}
+    },
+    "ui": {"svg": "./sd-card.svg", "interactive": []},
+    "sim": {"runtime": "wasm", "validation": "inline"},
+    "wasm": {"abi": 1, "file": "./core/sd_card_core_bg.wasm",
+        "exports": ["create", "destroy", "update", "on_spi", "get_state_ptr"],
+        "fallback": "js"},
+    "bounds": {"x": 0, "y": 0, "w": 135, "h": 120}
 }

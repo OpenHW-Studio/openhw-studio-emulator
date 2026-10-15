@@ -5,18 +5,75 @@
     "group": "Basic",
     "w": 45,
     "h": 60,
-    "attrs": { "breadboard": { "anchorPin": "1A", "ravine": true } },
-    "telemetry": { "template": "pressed=${state.pressed}", "criticalKeys": ["state.pressed"] },
+    "attrs": {
+        "breadboard": {
+            "anchorPin": "1A",
+            "ravine": true
+        }
+    },
+    "telemetry": {
+        "template": "pressed=${state.pressed}",
+        "criticalKeys": [
+            "state.pressed"
+        ]
+    },
     "pins": [
-        { "id": "1A", "x": 0, "y": 15, "type": "passive", "description": "Terminal 1A" },
-        { "id": "1B", "x": 0, "y": 45, "type": "passive", "description": "Terminal 1B" },
-        { "id": "2A", "x": 45, "y": 15, "type": "passive", "description": "Terminal 2A" },
-        { "id": "2B", "x": 45, "y": 45, "type": "passive", "description": "Terminal 2B" }
+        {
+            "id": "1A",
+            "x": 0,
+            "y": 15,
+            "type": "passive",
+            "description": "Terminal 1A"
+        },
+        {
+            "id": "1B",
+            "x": 0,
+            "y": 45,
+            "type": "passive",
+            "description": "Terminal 1B"
+        },
+        {
+            "id": "2A",
+            "x": 45,
+            "y": 15,
+            "type": "passive",
+            "description": "Terminal 2A"
+        },
+        {
+            "id": "2B",
+            "x": 45,
+            "y": 45,
+            "type": "passive",
+            "description": "Terminal 2B"
+        }
     ],
     "autowiring": {
         "connections": [
-            { "from": "1A", "to": "arduino:2" },
-            { "from": "2A", "to": "arduino:GND" }
+            {
+                "from": "1A",
+                "to": "arduino:2"
+            },
+            {
+                "from": "2A",
+                "to": "arduino:GND"
+            }
         ]
-    }
+    },
+    "sab": {
+        "slotKind": 5,
+        "fields": {
+            "i0": "pressed"
+        }
+    },
+    "ui": {
+        "svg": "./6mm-pushbutton.svg",
+        "interactive": [
+            "press"
+        ]
+    },
+    "sim": {
+        "runtime": "js",
+        "validation": "inline"
+    },
+    "bounds": {"x": 0, "y": 0, "w": 45, "h": 60}
 }

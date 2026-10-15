@@ -45,4 +45,33 @@ export class PushbuttonLogic extends BaseComponent {
             conductance: this.state.pressed ? '~1kΩ' : '∞ (open)',
         });
     }
+
+    // 12.4 v2: numeric UI state for SAB slot { i0: pressed }.
+    uiState() {
+        return {
+            f: {},
+            i: { pressed: this.state?.pressed ? 1 : 0 },
+        };
+    }
+
+    validate(component: any, graph: Map<string, string[]>) {
+        const pins = ['1l', '2l', '1r', '2r'];
+        const isConnected = pins.some((p) => {
+            const edges = graph.get(`${component.id}.${p}`);
+            return edges && edges.length > 0;
+        });
+
+        if (!isConnected) {
+            return {
+                ruleId: 'pushbutton-floating-input-check',
+                severity: 'warn',
+                message: `[Pushbutton ${component.id}] Warning: Button is completely disconnected.`,
+                compIds: [component.id],
+                remediation: 'Wire the pushbutton into the circuit.',
+                autoFix: true,
+            };
+        }
+
+        return null;
+    }
 }

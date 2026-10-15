@@ -1,0 +1,21 @@
+<svg width="100%" height="100%" viewBox="0 0 120.0 75.0" xmlns="http://www.w3.org/2000/svg" data-component="openhw-a4988" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="118.0" height="73.0" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="60.0" y="37.5" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">A4988 Stepper Driver</text>
+  <circle cx="112.5" cy="7.5" r="2.5" fill="#888" data-pin="ENABLE" />
+  <circle cx="97.5" cy="7.5" r="2.5" fill="#888" data-pin="MS1" />
+  <circle cx="82.5" cy="7.5" r="2.5" fill="#888" data-pin="MS2" />
+  <circle cx="67.5" cy="7.5" r="2.5" fill="#888" data-pin="MS3" />
+  <circle cx="52.5" cy="7.5" r="2.5" fill="#888" data-pin="RESET" />
+  <circle cx="37.5" cy="7.5" r="2.5" fill="#888" data-pin="SLEEP" />
+  <circle cx="22.5" cy="7.5" r="2.5" fill="#888" data-pin="STEP" />
+  <circle cx="7.5" cy="7.5" r="2.5" fill="#888" data-pin="DIR" />
+  <circle cx="112.5" cy="67.5" r="2.5" fill="#888" data-pin="VMOT" />
+  <circle cx="97.5" cy="67.5" r="2.5" fill="#888" data-pin="GND_MOT" />
+  <circle cx="82.5" cy="67.5" r="2.5" fill="#888" data-pin="2B" />
+  <circle cx="67.5" cy="67.5" r="2.5" fill="#888" data-pin="2A" />
+  <circle cx="52.5" cy="67.5" r="2.5" fill="#888" data-pin="1A" />
+  <circle cx="37.5" cy="67.5" r="2.5" fill="#888" data-pin="1B" />
+  <circle cx="22.5" cy="67.5" r="2.5" fill="#888" data-pin="VDD" />
+  <circle cx="7.5" cy="67.5" r="2.5" fill="#888" data-pin="GND_LOGIC" />
+</svg>

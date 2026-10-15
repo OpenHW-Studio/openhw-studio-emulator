@@ -111,7 +111,7 @@
       },
       {
         "from": "IN1",
-        "to": "arduino:15"
+        "to": "arduino:8"
       },
       {
         "from": "IN2",
@@ -131,7 +131,7 @@
       },
       {
         "from": "5V",
-        "to": "arduino:22"
+        "to": "arduino:5V"
       },
       {
         "from": "12V",
@@ -154,5 +154,12 @@
       "source": "active",
       "title": "Active"
     }
-  }
+  },
+    "sab": {
+        "slotKind": 6,
+        "fields": {"i0": "enabled"}
+    },
+    "ui": {"svg": "./motor-driver.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 80, "h": 80}
 }

@@ -1,0 +1,15 @@
+{
+  "name": "max30102_core",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "max30102_core_bg.wasm",
+    "max30102_core.js",
+    "max30102_core.d.ts"
+  ],
+  "main": "max30102_core.js",
+  "types": "max30102_core.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
