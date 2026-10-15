@@ -30,9 +30,9 @@
       { "from": "VDD", "to": "arduino:3V3", "color": "red" },
       { "from": "GND", "to": "arduino:GND", "color": "black" },
       { "from": "L/R", "to": "arduino:GND", "color": "black" },
-      { "from": "WS", "to": "arduino:25", "color": "yellow" },
-      { "from": "SCK", "to": "arduino:26", "color": "green" },
-      { "from": "SD", "to": "arduino:22", "color": "blue" }
+      { "from": "WS", "to": "arduino:25|15|GP19|PB12", "color": "yellow" },
+      { "from": "SCK", "to": "arduino:26|14|GP18|PB13", "color": "green" },
+      { "from": "SD", "to": "arduino:22|12|GP20|PB15", "color": "blue" }
     ]
   },
   "autocoding": {

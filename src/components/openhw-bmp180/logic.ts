@@ -78,12 +78,14 @@ export class BMP180Logic extends I2CProtocol {
         if (reg === REG_RESULT) {
             const isTemp = this.lastCmd === CMD_TEMP;
             const val = isTemp ? this._ut() : this._up();
-            return (val >> 16) & 0xFF; // MSB
+            // UT is 16-bit (MSB here); UP is 19-bit (bits[18:16] here).
+            // The old (val>>16) served 0x00 as every temperature MSB.
+            return isTemp ? ((val >> 8) & 0xFF) : ((val >> 16) & 0xFF);
         }
         if (reg === REG_RESULT + 1) {
             const isTemp = this.lastCmd === CMD_TEMP;
             const val = isTemp ? this._ut() : this._up();
-            return (val >> 8) & 0xFF; // LSB
+            return isTemp ? (val & 0xFF) : ((val >> 8) & 0xFF);
         }
         if (reg === REG_RESULT + 2) {
             return this._up() & 0xFF; // XLSB (pressure only)

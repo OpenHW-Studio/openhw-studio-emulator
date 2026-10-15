@@ -39,6 +39,14 @@
       "description": "Voltage Input (3.3V - 5V typical)"
     }
   ],
+  "autowiring": {
+    "connections": [
+      { "from": "VCC", "to": "arduino:5V" },
+      { "from": "GND", "to": "arduino:GND" },
+      { "from": "A0", "to": "arduino:A0" },
+      { "from": "D0", "to": "arduino:3" }
+    ]
+  },
     "sab": {
         "slotKind": 4,
         "fields": {"f0": "temperature"}

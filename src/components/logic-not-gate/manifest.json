@@ -24,8 +24,8 @@
     ],
     "autowiring": {
         "connections": [
-            { "from": "IN", "to": "arduino:D2" },
-            { "from": "OUT", "to": "arduino:D4", "via": "openhw-resistor", "attrs": { "value": "220" } }
+            { "from": "IN", "to": "arduino:D2|2" },
+            { "from": "OUT", "to": "arduino:D4|4", "via": "openhw-resistor", "attrs": { "value": "220" } }
         ]
     },
     "autocoding": {

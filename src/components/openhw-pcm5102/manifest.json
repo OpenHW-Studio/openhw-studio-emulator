@@ -36,9 +36,9 @@
     "connections": [
       { "from": "VCC", "to": "arduino:5V", "color": "red" },
       { "from": "GND", "to": "arduino:GND", "color": "black" },
-      { "from": "LCK", "to": "arduino:25", "color": "yellow" },
-      { "from": "BCK", "to": "arduino:26", "color": "green" },
-      { "from": "DIN", "to": "arduino:22", "color": "blue" }
+      { "from": "LCK", "to": "arduino:25|15|GP19|PB12", "color": "yellow" },
+      { "from": "BCK", "to": "arduino:26|14|GP18|PB13", "color": "green" },
+      { "from": "DIN", "to": "arduino:22|12|GP20|PB15", "color": "blue" }
     ]
   },
   "autocoding": {

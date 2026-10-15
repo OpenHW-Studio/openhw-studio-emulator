@@ -27,12 +27,12 @@
   },
   "autowiring": {
     "connections": [
-      { "from": "VDD", "to": "arduino:3V3", "color": "red" },
+      { "from": "3V", "to": "arduino:3V3", "color": "red" },
       { "from": "GND", "to": "arduino:GND", "color": "black" },
       { "from": "SEL", "to": "arduino:GND", "color": "black" },
-      { "from": "LRCL", "to": "arduino:25", "color": "yellow" },
-      { "from": "BCLK", "to": "arduino:26", "color": "green" },
-      { "from": "DOUT", "to": "arduino:22", "color": "blue" }
+      { "from": "LRCL", "to": "arduino:25|15|GP19|PB12", "color": "yellow" },
+      { "from": "BCLK", "to": "arduino:26|14|GP18|PB13", "color": "green" },
+      { "from": "DOUT", "to": "arduino:22|12|GP20|PB15", "color": "blue" }
     ]
   },
   "autocoding": {

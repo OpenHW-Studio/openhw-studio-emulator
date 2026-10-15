@@ -12,6 +12,52 @@ export class Logic extends BaseComponent {
         this.setPinVoltage('SD', 0);
     }
 
+    /**
+     * Resolve the board pin sharing the SD net (e.g. "12").
+     * Cached after first success; null is NOT cached (retries until wired).
+     */
+    private getConnectedBoardPin(): string | null {
+        if ((this as any)._connectedPin != null) return (this as any)._connectedPin;
+        try {
+            const netOf = (this as any)._boardNetOf;
+            if (typeof netOf === 'function') {
+                const pin = netOf('SD');
+                if (pin) { (this as any)._connectedPin = pin; return pin; }
+            }
+        } catch { /* fall through to legacy scan */ }
+        try {
+            const runner = (this as any)._simCpu?._avrRunner;
+            const wires = runner?.currentWires;
+            if (Array.isArray(wires)) {
+                for (const wire of wires) {
+                    const from: string = wire.from || '';
+                    const to: string = wire.to || '';
+                    if (from.startsWith(this.id + ':SD')) {
+                        const pin = to.split(':')[1] ?? null;
+                        if (pin) { (this as any)._connectedPin = pin; return pin; }
+                    } else if (to.startsWith(this.id + ':SD')) {
+                        const pin = from.split(':')[1] ?? null;
+                        if (pin) { (this as any)._connectedPin = pin; return pin; }
+                    }
+                }
+            }
+        } catch { /* ignore */ }
+        return null;
+    }
+
+    /** Drive SD both locally (UI/telemetry/wire net) and into the engine input. */
+    private driveSD(voltage: number) {
+        this.setPinVoltage('SD', voltage);
+        const isHigh = voltage > 1.8;
+        const boardPin = this.getConnectedBoardPin();
+        if (boardPin && typeof (this as any)._driveBoardPin === 'function') {
+            (this as any)._driveBoardPin(boardPin, isHigh);
+        } else if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
+            (this as any)._setAvrPinDirect(boardPin, isHigh);
+        }
+        (this as any)._simUpdatePhysics?.();
+    }
+
     onCustomTelemetry() {
         this.setCustomTelemetry({
             liveMicEnabled: this.state.liveMicEnabled ? "Yes" : "No",
@@ -77,16 +123,16 @@ export class Logic extends BaseComponent {
             if (falling) {
                 if (this.bitsShifted === 0) {
                     // 1 SCK delay for standard I2S
-                    this.setPinVoltage('SD', 0);
+                    this.driveSD(0);
                     this.bitsShifted++;
                 } else if (this.bitsShifted <= 24) { // 24 bit data
                     // MSB first
                     const bit = (this.currentSample & (1 << (24 - this.bitsShifted))) !== 0 ? 1 : 0;
-                    this.setPinVoltage('SD', bit ? 3.3 : 0);
+                    this.driveSD(bit ? 3.3 : 0);
                     this.bitsShifted++;
                 } else {
                     // Pad with 0
-                    this.setPinVoltage('SD', 0);
+                    this.driveSD(0);
                     this.bitsShifted++;
                 }
             }

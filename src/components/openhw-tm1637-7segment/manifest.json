@@ -38,6 +38,14 @@
             "description": "Ground"
         }
     ],
+    "autowiring": {
+        "connections": [
+            { "from": "GND", "to": "arduino:GND" },
+            { "from": "VCC", "to": "arduino:5V" },
+            { "from": "CLK", "to": "arduino:2" },
+            { "from": "DIO", "to": "arduino:3" }
+        ]
+    },
     "sab": {
         "slotKind": 3,
         "fields": {

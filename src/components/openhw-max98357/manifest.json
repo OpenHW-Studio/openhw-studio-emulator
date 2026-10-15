@@ -45,17 +45,17 @@
       },
       {
         "from": "LRC",
-        "to": "arduino:25",
+        "to": "arduino:25|15|GP19|PB12",
         "color": "yellow"
       },
       {
         "from": "BCLK",
-        "to": "arduino:26",
+        "to": "arduino:26|14|GP18|PB13",
         "color": "green"
       },
       {
         "from": "DIN",
-        "to": "arduino:22",
+        "to": "arduino:22|12|GP20|PB15",
         "color": "blue"
       }
     ]

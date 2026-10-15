@@ -111,7 +111,7 @@
       },
       {
         "from": "IN1",
-        "to": "arduino:15"
+        "to": "arduino:8"
       },
       {
         "from": "IN2",
@@ -131,7 +131,7 @@
       },
       {
         "from": "5V",
-        "to": "arduino:22"
+        "to": "arduino:5V"
       },
       {
         "from": "12V",
