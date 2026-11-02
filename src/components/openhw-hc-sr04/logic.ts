@@ -97,7 +97,14 @@ export class HCSR04Logic extends PulseProtocol {
     onPulseReceived(pinId: string, isHighPulse: boolean, durationUs: number): void {
         // HC-SR04 triggers when TRIG pin receives a HIGH pulse.
         // Standard trigger is 10us, but check >= 8us to handle clock cycle/precision variations on AVR boards
-        if (pinId === 'TRIG' && isHighPulse && durationUs >= 8) {
+        // durationUs === 0 means the runner could not resolve the width:
+        // the engine reports GPIO edges without timestamps (esp32-emu
+        // pollGpioChanges → [{pin, level}]), so both edges of a 10-12 us
+        // TRIG pulse carry the same poll stamp and the delta is 0. The
+        // pulse still HAPPENED — only its width is unknown — so accept it
+        // and let startEcho() use the component's own distance. Boards
+        // with cycle-accurate stamps (AVR) keep the >= 8 us noise floor.
+        if (pinId === 'TRIG' && isHighPulse && (durationUs >= 8 || durationUs === 0)) {
             this.startEcho();
         }
     }
@@ -127,13 +134,21 @@ export class HCSR04Logic extends PulseProtocol {
         // fallback; non-AVR pulse fallback last. Identical timing either way.
         const sched = (this as any)._scheduleBoardCycles;
         if (typeof sched === 'function') {
+            // Board steps per microsecond from the runner (AVR 16, ESP32
+            // measured); hard-coding 16 made every non-AVR echo window
+            // ~6x short (25 cm read back as 4.2 cm on ESP32).
+            let perUs = 16;
+            try {
+                const v = Number((this as any)._boardCyclesPerUs?.());
+                if (Number.isFinite(v) && v > 0) perUs = v;
+            } catch (_) { /* keep 16 */ }
             sched(() => {
                 this.driveEcho(5.0); // Start pulse
                 sched(() => {
                     this.driveEcho(0.0); // End pulse
                     this.isEchoing = false;
-                }, echoDurationUs * 16);
-            }, 200 * 16); // 200us at 16MHz
+                }, echoDurationUs * perUs);
+            }, 200 * perUs); // ~200us of sonic burst
             return;
         }
         const cpu = (this as any)._simCpu;
