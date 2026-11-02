@@ -19,7 +19,11 @@ export class PWMProtocol extends BaseComponent {
             pwmDutyCycle: 0,
             pwmPulseUs: 0,
             pwmPeriodUs: 0,
-            pwmPin: null
+            pwmPin: null,
+            // A runner that cannot resolve the duty resolution (ESP32
+            // LEDC reports raw counts only) marks the width as inexact;
+            // width-only consumers (servo) must ignore such samples.
+            pwmWidthExact: true
         };
     }
 
@@ -121,6 +125,7 @@ export class PWMProtocol extends BaseComponent {
                     this.state.pwmPulseUs = avgPulse;
                     this.state.pwmPeriodUs = periodUs;
                     this.state.pwmPin = pinId;
+                    this.state.pwmWidthExact = (this.recentSamples[this.recentSamples.length - 1] as any)?.widthExact !== false;
                     this.stateChanged = true;
                     (this as any)._lastPwmUpdateMs = nowMs;
 
