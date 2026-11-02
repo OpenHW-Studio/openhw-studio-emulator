@@ -221,6 +221,15 @@ export class LEDLogic extends BaseComponent {
             state.illuminated = dutyCycle >= 0.01;
             state.brightness = Math.round(dutyCycle * 255);
             state.glow = state.brightness > 50;
+        } else if (Array.isArray(this.state.vHistory) && this.state.vHistory.length > 0) {
+            // No cycles elapsed since the last sync: KEEP the live state.
+            // Zeroing here made a steadily-driven LED report
+            // illuminated:false / brightness:0 whenever the UI polled
+            // telemetry between two ticks (observed on ESP32: vHistory all
+            // 3.3 V, voltageDrop 1.8 V, yet status "off" in the same frame).
+            state.illuminated = !!this.state.illuminated;
+            state.brightness = Number(this.state.brightness) || 0;
+            state.glow = !!this.state.glow;
         } else {
             state.illuminated = false;
             state.brightness = 0;
