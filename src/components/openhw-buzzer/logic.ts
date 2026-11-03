@@ -47,7 +47,15 @@ export class BuzzerLogic extends PWMProtocol {
         super.update(cpuCycles, wires, instances);
 
         // Detect clock speed from board type present in the simulation
-        const hasPico = instances.some(c => c.type.includes('pico') || c.type.includes('rp2040'));
+        // (instances may be a Map on the runner fast path — iterate both).
+        let hasPico = false;
+        const each = (fn: (c: any) => void) => {
+            if (instances instanceof Map) { instances.forEach(fn); return; }
+            (instances as BaseComponent[]).forEach(fn);
+        };
+        each((c) => {
+            if (String(c?.type || '').includes('pico') || String(c?.type || '').includes('rp2040')) hasPico = true;
+        });
         const cpuHz = hasPico ? 125_000_000 : 16_000_000;
 
         // Silence timeout: 100ms of no edges
@@ -67,5 +75,35 @@ export class BuzzerLogic extends PWMProtocol {
             voltageDrop: ((this.state.voltageDrop || 0) as number).toFixed(2) + ' V',
             current: (((this.state.current || 0) as number) * 1000).toFixed(2) + ' mA',
         });
+    }
+
+    // 12.4 v2: numeric UI state for SAB slot { f0: frequency, i0: isBuzzing }.
+    uiState() {
+        return {
+            f: { frequency: Number(this.state?.frequency || 0) },
+            i: { isBuzzing: this.state?.isBuzzing ? 1 : 0 },
+        };
+    }
+
+    validate(component: any, graph: Map<string, string[]>) {
+        const pin1a = graph.get(`${component.id}.GND`);
+        const pin1b = graph.get(`${component.id}.1`);
+        const pin2a = graph.get(`${component.id}.SIG`);
+        const pin2b = graph.get(`${component.id}.2`);
+
+        const side1Connected = Boolean((pin1a && pin1a.length > 0) || (pin1b && pin1b.length > 0));
+        const side2Connected = Boolean((pin2a && pin2a.length > 0) || (pin2b && pin2b.length > 0));
+
+        if (!side1Connected && !side2Connected) {
+            return {
+                ruleId: 'buzzer-series-resistor',
+                severity: 'warn',
+                message: `[Buzzer ${component.id}] Warning: Buzzer is not connected.`,
+                compIds: [component.id],
+                remediation: 'Wire the buzzer into the circuit.',
+            };
+        }
+
+        return null;
     }
 }

@@ -1,0 +1,8 @@
+<svg width="100%" height="100%" viewBox="0 0 170.7 170.7" xmlns="http://www.w3.org/2000/svg" data-component="wokwi-pir-motion-sensor" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="168.7" height="168.7" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="85.35" y="85.35" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">PIR Motion Sensor</text>
+  <circle cx="67.5" cy="170.0" r="2.5" fill="#888" data-pin="VCC" />
+  <circle cx="86.5" cy="170.0" r="2.5" fill="#888" data-pin="OUT" />
+  <circle cx="105" cy="170.0" r="2.5" fill="#888" data-pin="GND" />
+</svg>

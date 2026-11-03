@@ -19,6 +19,21 @@
             "state.burnedOut"
         ]
     },
+    "sab": {
+        "slotKind": 1,
+        "fields": {
+            "f0": "brightness",
+            "i0": "illuminated"
+        }
+    },
+    "ui": {
+        "svg": "./led.svg",
+        "interactive": []
+    },
+    "sim": {
+        "runtime": "js",
+        "validation": "inline"
+    },
     "pins": [
         {
             "id": "A",
@@ -60,5 +75,9 @@
                 "to": "arduino:GND"
             }
         ]
-    }
+    },
+    "bounds": {"x": 0, "y": 0, "w": 65.3, "h": 65.3},
+    "wasm": {"abi": 1, "file": "./core/led_core_bg.wasm",
+        "exports": ["create", "destroy", "update", "get_state_ptr"],
+        "fallback": "js", "note": "smoke core is pure-JS (no .wasm ships); heavy ports use real .wasm"}
 }

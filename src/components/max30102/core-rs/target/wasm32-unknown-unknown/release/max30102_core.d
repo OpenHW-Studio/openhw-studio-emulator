@@ -1,0 +1,1 @@
+/home/danish1075/Documents/simulator/openhw-studio-emulator/src/components/max30102/core-rs/target/wasm32-unknown-unknown/release/max30102_core.wasm: /home/danish1075/Documents/simulator/openhw-studio-emulator/src/components/max30102/core-rs/src/lib.rs

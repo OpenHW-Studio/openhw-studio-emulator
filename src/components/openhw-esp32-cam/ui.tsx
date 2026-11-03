@@ -1,8 +1,71 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 // Bounding box for the selection ring and hit detection area.
 // These should match the visual size of the component on the canvas.
 export const BOUNDS = { x: 0, y: 0, w: 156.25, h: 234.375 };
+
+/**
+ * Device-webcam live view (plan human-senses): rendered only when the
+ * board attrs carry camMode:'real'. Mirrors the INMP441 mic pattern —
+ * getUserMedia video into a <video> element, tracks stopped + context
+ * released on unmount, mount-once effect (no attrs-churn re-requests).
+ * Awkward states report through attrs.onInteract (cam_live/cam_error)
+ * exactly like the mic's mic_data/mic_error.
+ */
+const CamLiveView = ({ attrs }: { attrs: any }) => {
+    const videoRef = useRef<HTMLVideoElement | null>(null);
+    const streamRef = useRef<MediaStream | null>(null);
+    useEffect(() => {
+        let live = true;
+        try {
+            const gum = navigator?.mediaDevices?.getUserMedia?.bind(navigator.mediaDevices);
+            if (!gum) {
+                attrs?.onInteract?.({ type: 'cam_error', reason: 'no-gum' });
+                return;
+            }
+            gum({ video: true }).then((stream) => {
+                if (!live) {
+                    try { stream.getTracks().forEach((t) => t.stop()); } catch { /* ignore */ }
+                    return;
+                }
+                streamRef.current = stream;
+                try {
+                    if (videoRef.current) {
+                        (videoRef.current as any).srcObject = stream;
+                        videoRef.current.play().catch(() => { /* autoplay guard */ });
+                    }
+                } catch { /* ignore */ }
+                try { attrs?.onInteract?.({ type: 'cam_live', on: true }); } catch { /* ignore */ }
+            }).catch(() => {
+                try { attrs?.onInteract?.({ type: 'cam_error', reason: 'denied' }); } catch { /* ignore */ }
+            });
+        } catch {
+            try { attrs?.onInteract?.({ type: 'cam_error', reason: 'unsupported' }); } catch { /* ignore */ }
+        }
+        return () => {
+            live = false;
+            try { streamRef.current?.getTracks().forEach((t) => t.stop()); } catch { /* ignore */ }
+            streamRef.current = null;
+        };
+        // Mount-once by design (mic lesson): re-requesting on every attrs
+        // identity change churns tracks/contexts and never sustains video.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+    return (
+        <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            data-cam-live="true"
+            style={{
+                position: 'absolute', top: 64, left: 28, width: 100, height: 75,
+                objectFit: 'cover', borderRadius: 4, background: '#000',
+                pointerEvents: 'none',
+            }}
+        />
+    );
+};
 
 const esp32CamSvgMarkup = `<svg
    width="100%"
@@ -1155,8 +1218,10 @@ const esp32CamSvgMarkup = `<svg
         transform="scale(-1)" /></g></svg>`;
 
 export const Esp32CamUI = ({ id, attrs, isRunning }: { id: string, attrs: any, isRunning?: boolean }) => {
+  const liveCam = attrs?.camMode === 'real';
   return (
     <div style={{ position: 'relative', width: BOUNDS.w, height: BOUNDS.h, overflow: 'visible' }}>
+      {liveCam ? <CamLiveView attrs={attrs} /> : null}
       {/* Inline SVG rendering at 100% container dimensions */}
       <div
         style={{

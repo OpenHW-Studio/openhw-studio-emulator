@@ -1,0 +1,13 @@
+<svg width="100%" height="100%" viewBox="0 0 200.0 240.0" xmlns="http://www.w3.org/2000/svg" data-component="openhw-nokia-5110" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="198.0" height="238.0" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="100.0" y="120.0" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">Nokia 5110 Screen</text>
+  <circle cx="47.5" cy="230" r="2.5" fill="#888" data-pin="VCC" />
+  <circle cx="62.5" cy="230" r="2.5" fill="#888" data-pin="GND" />
+  <circle cx="77.5" cy="230" r="2.5" fill="#888" data-pin="SCE" />
+  <circle cx="92.5" cy="230" r="2.5" fill="#888" data-pin="RST" />
+  <circle cx="107.5" cy="230" r="2.5" fill="#888" data-pin="DC" />
+  <circle cx="122.5" cy="230" r="2.5" fill="#888" data-pin="DN" />
+  <circle cx="137.5" cy="230" r="2.5" fill="#888" data-pin="SCLK" />
+  <circle cx="152.5" cy="230" r="2.5" fill="#888" data-pin="LED" />
+</svg>

@@ -1,0 +1,15 @@
+{
+  "type": "openhw-usb-device",
+  "label": "USB Device Terminal",
+  "group": "Interfaces",
+  "description": "USB device-side terminal sink (host-driven enumeration + CDC echo reported by runner)",
+  "w": 168,
+  "h": 120,
+  "pins": [
+    { "id": "VCC", "x": 20, "y": 110, "type": "power", "description": "5V Power" },
+    { "id": "GND", "x": 148, "y": 110, "type": "power", "description": "Ground" }
+  ],
+    "ui": {"svg": "./usb-device.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 168, "h": 120}
+}

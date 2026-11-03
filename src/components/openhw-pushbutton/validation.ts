@@ -1,34 +1,37 @@
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
 import { createValidationIssue } from '../component-schema.js';
 import type { ComponentValidationRule } from '../component-schema.js';
+import { PushbuttonLogic } from './logic';
+
+const delegate = PushbuttonLogic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>) =>
+        PushbuttonLogic.prototype.validate!.call(undefined, component, graph)
+    : (_component: any, _graph: Map<string, string[]>) => null;
 
 export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
         {
             id: 'pushbutton-floating-input-check',
             name: 'Pushbutton Floating Input Check',
-            severity: 'warn',
+            severity: 'warn' as const,
             priority: 10,
             description: 'Warn when the pushbutton is not connected at all.',
-            check: (component: any, graph: Map<string, string[]>, validator: any) => {
-                const pins = validator.getComponentPins(component);
-                
-                const isConnected = pins.some((p: string) => {
-                    const edges = graph.get(`${component.id}.${p}`);
-                    return edges && edges.length > 0;
-                });
-
-                if (!isConnected) {
-                    return createValidationIssue({
-                        ruleId: 'pushbutton-floating-input-check',
-                        severity: 'warn',
-                        message: `⚠️ [Pushbutton ${component.id}] Warning: Button is completely disconnected.`,
-                        compIds: [component.id],
-                        remediation: 'Wire the pushbutton into the circuit.',
-                        autoFix: true,
-                    });
-                }
-
-                return null;
+            check: (component: any, graph: Map<string, string[]>) => {
+                const raw = delegate(component, graph);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'pushbutton-floating-input-check');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'pushbutton-floating-input-check'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
             }
         }
     ]

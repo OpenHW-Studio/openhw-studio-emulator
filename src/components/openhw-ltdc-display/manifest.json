@@ -1,0 +1,15 @@
+{
+  "type": "openhw-ltdc-display",
+  "label": "LTDC TFT Display",
+  "group": "Displays",
+  "description": "Parallel-RGB TFT sink for STM32 LTDC scanout (framebuffer pushed by runner)",
+  "w": 168,
+  "h": 140,
+  "pins": [
+    { "id": "VCC", "x": 20, "y": 130, "type": "power", "description": "3.3V Power" },
+    { "id": "GND", "x": 148, "y": 130, "type": "power", "description": "Ground" }
+  ],
+    "ui": {"svg": "./ltdc-display.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 168, "h": 140}
+}

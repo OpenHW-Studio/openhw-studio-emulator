@@ -1,0 +1,8 @@
+<svg width="100%" height="100%" viewBox="0 0 135.4 71.8" xmlns="http://www.w3.org/2000/svg" data-component="openhw-ntc-temperature-sensor" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="133.4" height="69.8" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="67.7" y="35.9" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">Temperature Sensor (NTC)</text>
+  <circle cx="135.0" cy="26.2" r="2.5" fill="#888" data-pin="GND" />
+  <circle cx="135.0" cy="35.8" r="2.5" fill="#888" data-pin="VCC" />
+  <circle cx="135.0" cy="45.5" r="2.5" fill="#888" data-pin="OUT" />
+</svg>

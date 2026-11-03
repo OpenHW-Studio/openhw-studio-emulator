@@ -35,5 +35,12 @@
         "setup": "pinMode(latchPin_${COMP_SUFFIX}, OUTPUT);\npinMode(clockPin_${COMP_SUFFIX}, OUTPUT);\npinMode(dataPin_${COMP_SUFFIX}, OUTPUT);",
         "loop": "digitalWrite(latchPin_${COMP_SUFFIX}, LOW);\nshiftOut(dataPin_${COMP_SUFFIX}, clockPin_${COMP_SUFFIX}, MSBFIRST, 255);\ndigitalWrite(latchPin_${COMP_SUFFIX}, HIGH);\ndelay(1000);\ndigitalWrite(latchPin_${COMP_SUFFIX}, LOW);\nshiftOut(dataPin_${COMP_SUFFIX}, clockPin_${COMP_SUFFIX}, MSBFIRST, 0);\ndigitalWrite(latchPin_${COMP_SUFFIX}, HIGH);\ndelay(1000);"
       }
-    }
+    },
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "latched"}
+    },
+    "ui": {"svg": "./nlsf595.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 128, "h": 64}
 }

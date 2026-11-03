@@ -1,74 +1,59 @@
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
 import { createValidationIssue } from '../component-schema.js';
 import type { ComponentValidationRule } from '../component-schema.js';
+import { UnoLogic } from './logic';
+
+const delegate = UnoLogic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>, validator?: any) =>
+        UnoLogic.prototype.validate!.call(undefined, component, graph, validator)
+    : (_component: any, _graph: Map<string, string[]>) => null;
 
 export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
-
         {
             id: 'arduino-uno-i2c-pullups',
             name: 'I2C Pullups Check',
-            severity: 'warn',
+            severity: 'warn' as const,
             priority: 20,
             description: 'Warn when the UNO I2C pins do not have a pull-up path to VCC.',
-            check: (component: any, graph: Map<string, string[]>, validator: any) => {
-                const i2cPins = ["A4", "A5"];
-                const issues = [];
-
-                i2cPins.forEach(pinName => {
-                    const pinNode = `${component.id}.${pinName}`;
-                    const connections = graph.get(pinNode);
-
-                    if (!connections || connections.length === 0) return;
-
-                    if (!validator?.hasResistivePathToSupply(pinNode)) {
-                        issues.push(createValidationIssue({
-                            ruleId: 'arduino-uno-i2c-pullups',
-                            severity: 'warn',
-                            message: `⚠️ [Arduino ${component.id}] I2C PULLUP WARNING: ${pinNode} is in use but missing a Pull-Up resistor to VCC. I2C devices will fail. (Ignore if used for Analog Read)`,
-                            compIds: [component.id],
-                            remediation: 'Add an I2C pull-up resistor to VCC.',
-                        }));
-                    }
-                });
-
-                return issues.length > 0 ? issues : null;
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'arduino-uno-i2c-pullups');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'arduino-uno-i2c-pullups'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
             }
         },
         {
             id: 'arduino-uno-power-input',
             name: 'MCU Power Input Check',
-            severity: 'error',
+            severity: 'warn' as const,
             priority: 30,
             description: 'Check that VIN and 5V stay within safe limits.',
-            check: (component: any, graph: Map<string, string[]>, validator: any) => {
-                const vinConns = graph.get(`${component.id}.vin`) || [];
-                const v5Conns = graph.get(`${component.id}.5V`) || [];
-
-                const vinVolts = validator?.calculateVoltageAtNode(`${component.id}.vin`);
-                const v5Volts = validator?.calculateVoltageAtNode(`${component.id}.5V`);
-                const issues = [];
-
-                if (vinConns.length > 0 && vinVolts > 12.0) {
-                    issues.push(createValidationIssue({
-                        ruleId: 'arduino-uno-power-input',
-                        severity: 'error',
-                        message: `🔥 [Arduino ${component.id}] FRIED: ${vinVolts}V applied to VIN. Max is 12V.`,
-                        compIds: [component.id],
-                        remediation: 'Keep VIN below 12V.',
-                    }));
-                }
-
-                if (v5Conns.length > 0 && v5Volts > 5.5) {
-                    issues.push(createValidationIssue({
-                        ruleId: 'arduino-uno-power-input',
-                        severity: 'error',
-                        message: `🔥 [Arduino ${component.id}] FRIED: ${v5Volts}V applied to 5V pin. Bypassed internal regulator!`,
-                        compIds: [component.id],
-                        remediation: 'Do not inject more than 5.5V into the 5V pin.',
-                    }));
-                }
-
-                return issues.length > 0 ? issues : null;
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'arduino-uno-power-input');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'arduino-uno-power-input'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
             }
         }
     ]

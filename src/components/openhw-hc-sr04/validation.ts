@@ -1,45 +1,37 @@
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
 import { createValidationIssue } from '../component-schema.js';
 import type { ComponentValidationRule } from '../component-schema.js';
+import { HCSR04Logic } from './logic';
+
+const delegate = HCSR04Logic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>, validator?: any) =>
+        HCSR04Logic.prototype.validate!.call(undefined, component, graph, validator)
+    : (_component: any, _graph: Map<string, string[]>) => null;
 
 export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
         {
             id: 'hc-sr04-connection-check',
             name: 'Ultrasonic Sensor Connection Check',
-            severity: 'warn',
+            severity: 'warn' as const,
             priority: 10,
             description: 'Warn when TRIG or ECHO are disconnected while the sensor is powered.',
-            check: (component: any, graph: Map<string, string[]>, validator: any) => {
-                const triggerPin = `${component.id}.TRIG`;
-                const echoPin = `${component.id}.ECHO`;
-                const vccPin = `${component.id}.VCC`;
-                const gndPin = `${component.id}.GND`;
-                const issues = [];
-
-                if (validator.getNeighbors(vccPin).length > 0 && validator.getNeighbors(gndPin).length > 0) {
-                    if (validator.getNeighbors(triggerPin).length === 0) {
-                        issues.push(createValidationIssue({
-                            ruleId: 'hc-sr04-connection-check',
-                            severity: 'warn',
-                            message: `⚠️ [Ultrasonic ${component.id}] Warning: TRIG pin is not connected. Sensor cannot be triggered.`,
-                            compIds: [component.id],
-                            remediation: 'Connect TRIG to a digital output pin.',
-                            autoFix: true,
-                        }));
-                    }
-                    if (validator.getNeighbors(echoPin).length === 0) {
-                        issues.push(createValidationIssue({
-                            ruleId: 'hc-sr04-connection-check',
-                            severity: 'warn',
-                            message: `⚠️ [Ultrasonic ${component.id}] Warning: ECHO pin is not connected. No distance reading will be received.`,
-                            compIds: [component.id],
-                            remediation: 'Connect ECHO to a digital input pin.',
-                            autoFix: true,
-                        }));
-                    }
-                }
-
-                return issues.length > 0 ? issues : null;
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'hc-sr04-connection-check');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'hc-sr04-connection-check'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
             }
         }
     ]

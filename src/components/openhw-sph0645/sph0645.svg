@@ -1,0 +1,11 @@
+<svg width="100%" height="100%" viewBox="0 0 90.0 60.0" xmlns="http://www.w3.org/2000/svg" data-component="openhw-sph0645" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="88.0" height="58.0" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="45.0" y="30.0" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">I2S MEMS Microphone (SPH</text>
+  <circle cx="7.5" cy="52.5" r="2.5" fill="#888" data-pin="3V" />
+  <circle cx="22.5" cy="52.5" r="2.5" fill="#888" data-pin="GND" />
+  <circle cx="37.5" cy="52.5" r="2.5" fill="#888" data-pin="BCLK" />
+  <circle cx="52.5" cy="52.5" r="2.5" fill="#888" data-pin="DOUT" />
+  <circle cx="67.5" cy="52.5" r="2.5" fill="#888" data-pin="LRCL" />
+  <circle cx="82.5" cy="52.5" r="2.5" fill="#888" data-pin="SEL" />
+</svg>

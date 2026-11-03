@@ -1,52 +1,37 @@
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
 import { createValidationIssue } from '../component-schema.js';
 import type { ComponentValidationRule } from '../component-schema.js';
+import { BuzzerLogic } from './logic';
+
+const delegate = BuzzerLogic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>) =>
+        BuzzerLogic.prototype.validate!.call(undefined, component, graph)
+    : (_component: any, _graph: Map<string, string[]>) => null;
 
 export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
         {
             id: 'buzzer-series-resistor',
             name: 'Buzzer Series Resistor Check',
-            severity: 'warn',
+            severity: 'warn' as const,
             priority: 10,
             description: 'Warn when a buzzer is connected without isolation or a series resistor.',
-            check: (component: any, graph: Map<string, string[]>, validator: any) => {
-                const pins = validator.getTwoTerminalPins(component);
-                const pin1 = pins.length > 0 ? `${component.id}.${pins[0]}` : null;
-                const pin2 = pins.length > 1 ? `${component.id}.${pins[1]}` : null;
-
-                if (!pin1 || !pin2 || (validator.getNeighbors(pin1).length === 0 && validator.getNeighbors(pin2).length === 0)) {
-                    return createValidationIssue({
-                        ruleId: 'buzzer-series-resistor',
-                        severity: 'warn',
-                        message: `⚠️ [Buzzer ${component.id}] Warning: Buzzer is not connected.`,
-                        compIds: [component.id],
-                    });
-                }
-
-                let isMcu = false;
-                let hasResistor = false;
-
-                for (const pin of [pin1, pin2]) {
-                    if (!pin) continue;
-                    const sources = validator.collectVoltageSources(pin);
-                    const res = validator.findSeriesResistance(pin);
-                    if (res > 0) hasResistor = true;
-                    if (sources.some((s: any) => s.nodeId.includes('arduino') || s.nodeId.includes('pico') || s.nodeId.includes('uno'))) {
-                        isMcu = true;
-                    }
-                }
-
-                if (isMcu && !hasResistor) {
-                    return createValidationIssue({
-                        ruleId: 'buzzer-series-resistor',
-                        severity: 'warn',
-                        message: `⚠️ [Buzzer ${component.id}] Safety Warning: No series resistor detected between Buzzer and MCU. Direct drive can stress GPIO pins.`,
-                        compIds: [component.id],
-                        remediation: 'Add a series resistor or use a driver transistor.',
-                    });
-                }
-
-                return null;
+            check: (component: any, graph: Map<string, string[]>) => {
+                const raw = delegate(component, graph);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'buzzer-series-resistor');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'buzzer-series-resistor'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
             }
         }
     ]

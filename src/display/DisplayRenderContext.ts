@@ -13,10 +13,14 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 
-// The context object is created here and imported by both the Provider (frontend)
-// and the consumers (emulator UI components). Because both are in the same React tree,
-// they share the same context instance.
-export const DisplayRenderContext = createContext<Worker | null>(null);
+// SHARED context singleton: survives Vite dev re-transforms. The frontend
+// Provider (DisplayRenderContext.jsx) must import THIS object — never a
+// second createContext() — or hook consumers read null and display UIs
+// crash outside the provider tree (palette previews, canvas, etc).
+const g = globalThis as any;
+export const DisplayRenderContext: React.Context<Worker | null> =
+    g.__openhwDisplayRenderContext ??
+    (g.__openhwDisplayRenderContext = createContext<Worker | null>(null));
 
 export function useDisplayRenderWorker(): Worker | null {
     const contextWorker = useContext(DisplayRenderContext);

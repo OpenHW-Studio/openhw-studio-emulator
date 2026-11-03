@@ -1,4 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
+import { createValidationIssue } from '../component-schema.js';
 
 export class EPaperLogic extends BaseComponent {
     private dcHigh = false;
@@ -9,6 +10,7 @@ export class EPaperLogic extends BaseComponent {
     private vram = new Uint8Array(4736);
     private vramDirty = false;
     private lastSync = 0;
+    private lastSyncCycles = 0; // cycle-based throttle (no Date.now in tick)
     private powerOn = true;
     
     // Command parsing state
@@ -18,11 +20,11 @@ export class EPaperLogic extends BaseComponent {
     constructor(id: string, manifest: any) {
         super(id, manifest);
         this.vram.fill(255); // initialize to white (all 1s)
-        this.state = { vram: this.vram, powerOn: true, t: Date.now() };
+        this.state = { vram: this.vram, powerOn: true, t: 0 };
     }
 
     update(cpuCycles: number) {
-        const now = Date.now();
+        const nowMs = Math.floor(cpuCycles / 16000); // 16MHz: cycles->ms, no wall clock
         const vcc = this.getPinVoltage('VCC');
         const newPower = vcc > 2.0;
 
@@ -31,14 +33,15 @@ export class EPaperLogic extends BaseComponent {
             this.stateChanged = true;
         }
 
-        if (this.vramDirty || (now - this.lastSync > 100)) {
-            this.lastSync = now;
+        if (this.vramDirty || (nowMs - this.lastSync > 100)) {
+            this.lastSync = nowMs;
+            this.lastSyncCycles = cpuCycles;
             this.vramDirty = false;
             this.stateChanged = true;
             this.setState({
                 vram: new Uint8Array(this.vram),
                 powerOn: this.powerOn,
-                t: now
+                t: nowMs
             });
         }
         
@@ -79,7 +82,7 @@ export class EPaperLogic extends BaseComponent {
         return {
             vram: this.vram,
             powerOn: this.powerOn,
-            t: Date.now()
+            t: 0
         };
     }
 
@@ -89,5 +92,99 @@ export class EPaperLogic extends BaseComponent {
             resolution: "296x128",
             ramPointer: this.ramPointer
         });
+    }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: powerOn} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {},
+            i: {powerOn: (s.powerOn ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const pins = validator.getComponentPins(component);
+        const vcc = pins.find((p: string) => p.includes('VCC'));
+        const gnd = pins.find((p: string) => p.includes('GND'));
+        const din = pins.find((p: string) => p.includes('DIN'));
+        const clk = pins.find((p: string) => p.includes('CLK'));
+        const cs = pins.find((p: string) => p.includes('CS'));
+        const dc = pins.find((p: string) => p.includes('DC'));
+        const issues = [];
+
+        if (vcc) {
+            const node = `${component.id}.${vcc}`;
+            if (((validator ? validator.getNeighbors(node) : (graph.get(node) || []))).length === 0) {
+                issues.push(createValidationIssue({
+                    ruleId: 'epaper-interface-check',
+                    severity: 'warn',
+                    message: `⚠️ [${component.type} ${component.id}] Power (VCC) is not connected.`,
+                    compIds: [component.id],
+                    remediation: 'Connect VCC to a 3.3V power source.',
+                    autoFix: true,
+                }));
+            }
+        }
+
+        if (gnd) {
+            const node = `${component.id}.${gnd}`;
+            if (((validator ? validator.getNeighbors(node) : (graph.get(node) || []))).length === 0) {
+                issues.push(createValidationIssue({
+                    ruleId: 'epaper-interface-check',
+                    severity: 'warn',
+                    message: `⚠️ [${component.type} ${component.id}] Ground (GND) is not connected.`,
+                    compIds: [component.id],
+                    remediation: 'Connect GND to the common ground rail.',
+                    autoFix: true,
+                }));
+            }
+        }
+
+        if (din && ((validator ? validator.getNeighbors(`${component.id}.${din}`) : (graph.get(`${component.id}.${din}`) || []))).length === 0) {
+            issues.push(createValidationIssue({
+                ruleId: 'epaper-interface-check',
+                severity: 'warn',
+                message: `⚠️ [${component.type} ${component.id}] DIN (MOSI) pin is floating.`,
+                compIds: [component.id],
+                remediation: 'Connect DIN to the MCU SPI MOSI pin.',
+                autoFix: true,
+            }));
+        }
+
+        if (clk && ((validator ? validator.getNeighbors(`${component.id}.${clk}`) : (graph.get(`${component.id}.${clk}`) || []))).length === 0) {
+            issues.push(createValidationIssue({
+                ruleId: 'epaper-interface-check',
+                severity: 'warn',
+                message: `⚠️ [${component.type} ${component.id}] CLK (SCK) pin is floating.`,
+                compIds: [component.id],
+                remediation: 'Connect CLK to the MCU SPI Clock pin.',
+                autoFix: true,
+            }));
+        }
+
+        if (cs && ((validator ? validator.getNeighbors(`${component.id}.${cs}`) : (graph.get(`${component.id}.${cs}`) || []))).length === 0) {
+            issues.push(createValidationIssue({
+                ruleId: 'epaper-interface-check',
+                severity: 'warn',
+                message: `⚠️ [${component.type} ${component.id}] CS (Chip Select) pin is floating.`,
+                compIds: [component.id],
+                remediation: 'Connect CS to an MCU digital pin.',
+                autoFix: true,
+            }));
+        }
+
+        if (dc && ((validator ? validator.getNeighbors(`${component.id}.${dc}`) : (graph.get(`${component.id}.${dc}`) || []))).length === 0) {
+            issues.push(createValidationIssue({
+                ruleId: 'epaper-interface-check',
+                severity: 'warn',
+                message: `⚠️ [${component.type} ${component.id}] DC (Data/Command) pin is floating.`,
+                compIds: [component.id],
+                remediation: 'Connect DC to an MCU digital pin.',
+                autoFix: true,
+            }));
+        }
+
+        return issues.length > 0 ? issues : null;
     }
 }

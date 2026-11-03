@@ -32,6 +32,18 @@ export class SlidePotLogic extends BaseComponent {
         return { value: this.state.value };
     }
 
+    // 12.4 v2: numeric UI state for SAB slot { f0: value }.
+    uiState() {
+        return {
+            f: { value: Number(this.state?.value || 0) },
+            i: {},
+        };
+    }
+
+    validate(_component: any, _graph: Map<string, string[]>) {
+        return null;
+    }
+
     onEvent(event: any) {
         if (event && event.type === 'input' && event.value !== undefined) {
             this.state.value = event.value;

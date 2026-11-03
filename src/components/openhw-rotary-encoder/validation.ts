@@ -1,43 +1,37 @@
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
 import { createValidationIssue } from '../component-schema.js';
 import type { ComponentValidationRule } from '../component-schema.js';
+import { RotaryEncoderLogic } from './logic';
+
+const delegate = RotaryEncoderLogic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>) =>
+        RotaryEncoderLogic.prototype.validate!.call(undefined, component, graph)
+    : (_component: any, _graph: Map<string, string[]>) => null;
 
 export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
         {
             id: 'rotary-encoder-connection-check',
             name: 'Rotary Encoder Connection Check',
-            severity: 'warn',
+            severity: 'warn' as const,
             priority: 10,
             description: 'Warn when the encoder ground or quadrature outputs are disconnected.',
-            check: (component: any, graph: Map<string, string[]>, validator: any) => {
-                const clk = `${component.id}.CLK`;
-                const dt = `${component.id}.DT`;
-                const gnd = `${component.id}.GND`;
-                const issues = [];
-
-                if (validator.getNeighbors(gnd).length === 0) {
-                    issues.push(createValidationIssue({
-                        ruleId: 'rotary-encoder-connection-check',
-                        severity: 'warn',
-                        message: `⚠️ [Encoder ${component.id}] Ground (GND) is not connected.`,
-                        compIds: [component.id],
-                        remediation: 'Connect the encoder ground pin.',
-                        autoFix: true,
-                    }));
-                }
-
-                if (validator.getNeighbors(clk).length === 0 || validator.getNeighbors(dt).length === 0) {
-                    issues.push(createValidationIssue({
-                        ruleId: 'rotary-encoder-connection-check',
-                        severity: 'warn',
-                        message: `⚠️ [Encoder ${component.id}] Warning: Quadrature outputs (CLK/DT) must both be connected to track rotation.`,
-                        compIds: [component.id],
-                        remediation: 'Wire both CLK and DT to MCU inputs.',
-                        autoFix: true,
-                    }));
-                }
-
-                return issues.length > 0 ? issues : null;
+            check: (component: any, graph: Map<string, string[]>) => {
+                const raw = delegate(component, graph);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'rotary-encoder-connection-check');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'rotary-encoder-connection-check'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
             }
         }
     ]

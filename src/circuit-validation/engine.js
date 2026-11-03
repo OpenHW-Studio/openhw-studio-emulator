@@ -629,12 +629,16 @@ export class FullCircuitValidator {
             if (cleanPin.includes('3V3') || cleanPin.includes('3.3V')) return 3.3;
         }
 
-        // 3.3V MCUs (ESP32, ESP32-Cam, Raspberry Pi Pico / Pico W, STM32 BluePill)
+        // 3.3V MCUs (ESP32, ESP32-Cam, Raspberry Pi Pico family, STM32 BluePill family)
         if (this.isType(component,
             'wokwi-esp32', 'openhw-esp32', 'esp32',
             'wokwi-esp32-cam', 'openhw-esp32-cam', 'esp32-cam',
             'wokwi-raspberry-pi-pico', 'openhw-pico', 'openhw-pico-w',
-            'wokwi-stm32-bluepill', 'openhw-stm32-bluepill', 'openhw-stm32-blue-pill (frontend)'
+            'openhw-pico-2', 'openhw-pico-2-w', 'openhw-pico-eth', 'openhw-pico-2-eth',
+            'wokwi-stm32-bluepill', 'openhw-stm32-bluepill',
+            'openhw-stm32f103cb', 'openhw-stm32f103rc',
+            'openhw-stm32-maple-mini', 'openhw-stm32-nucleo-f103rb',
+            'openhw-stm32-gd32f103c8', 'openhw-stm32-gd32f103cb', 'openhw-stm32-gd32f103rb'
         )) {
             if (cleanPin.includes('5V') || cleanPin.includes('VBUS')) return 5.0;
             if (/^(D?\d+|A\d+|GP\d+|GPIO\d+|P[A-D]\d+)$/.test(cleanPin)) return 3.3;

@@ -30,9 +30,9 @@
       { "from": "VDD", "to": "arduino:3V3", "color": "red" },
       { "from": "GND", "to": "arduino:GND", "color": "black" },
       { "from": "L/R", "to": "arduino:GND", "color": "black" },
-      { "from": "WS", "to": "arduino:25", "color": "yellow" },
-      { "from": "SCK", "to": "arduino:26", "color": "green" },
-      { "from": "SD", "to": "arduino:22", "color": "blue" }
+      { "from": "WS", "to": "arduino:25|15|GP19|PB12", "color": "yellow" },
+      { "from": "SCK", "to": "arduino:26|14|GP18|PB13", "color": "green" },
+      { "from": "SD", "to": "arduino:22|12|GP20|PB15", "color": "blue" }
     ]
   },
   "autocoding": {
@@ -42,5 +42,12 @@
       "setup": "Serial.begin(9600);\\nI2S.setBCLK(${SCK});\\nI2S.setDATA(${SD});\\nI2S.begin(I2S_PHILIPS_MODE, 44100, 32);\\nSD.begin(5);\\naudioFile = SD.open(\\\"/rec.wav\\\", FILE_WRITE);",
       "loop": "int32_t sample = 0;\\nI2S.read();\\nsample = I2S.read();\\nif(audioFile) audioFile.write((uint8_t*)&sample, 4);"
     }
-  }
+  },
+    "sab": {
+        "slotKind": 4,
+        "fields": {"f0": "peakAmplitude"}
+    },
+    "ui": {"svg": "./inmp441.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 60, "h": 70}
 }

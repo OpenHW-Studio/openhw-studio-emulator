@@ -64,4 +64,34 @@ export class HX711Logic_50 extends BaseComponent {
 
         this.lastSck = sck;
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: weight} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {weight: Number((this as any).load ?? 0)},
+            i: {},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        {
+const vccConnected = connections.some((c: any) => c.pinId === "VCC");
+        const gndConnected = connections.some((c: any) => c.pinId === "GND");
+        if (!vccConnected || !gndConnected) {
+            return "HX711 requires both VCC and GND to be connected.";
+        }
+        return null;
+        }
+
+        /* --- next rule --- */
+        {
+const dtConnected = connections.some((c: any) => c.pinId === "DT");
+        const sckConnected = connections.some((c: any) => c.pinId === "SCK");
+        if (!dtConnected || !sckConnected) {
+            return "HX711 requires both DT and SCK pins to be connected for data transmission.";
+        }
+        return null;
+        }
+}
 }

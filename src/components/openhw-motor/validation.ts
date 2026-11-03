@@ -1,50 +1,37 @@
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
 import { createValidationIssue } from '../component-schema.js';
 import type { ComponentValidationRule } from '../component-schema.js';
+import { MotorLogic } from './logic';
+
+const delegate = MotorLogic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>) =>
+        MotorLogic.prototype.validate!.call(undefined, component, graph)
+    : (_component: any, _graph: Map<string, string[]>) => null;
 
 export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
         {
             id: 'motor-flyback-diode-check',
             name: 'Motor Flyback Diode Check',
-            severity: 'warn',
+            severity: 'warn' as const,
             priority: 10,
             description: 'Warn when an inductive motor load has no flyback diode.',
-            check: (component: any, graph: Map<string, string[]>, validator: any) => {
-                const pin1Neighbors = graph.get(`${component.id}.1`) || [];
-                const pin2Neighbors = graph.get(`${component.id}.2`) || [];
-
-                let hasFlybackDiode = false;
-
-                pin1Neighbors.forEach(n1 => {
-                    const comp1 = validator?.getComponent(n1);
-                    if (comp1 && (comp1.type === 'openhw-diode' || comp1.type === 'wokwi-diode')) {
-                        const otherDiodePin = n1.endsWith('.anode') ? `${comp1.id}.cathode` : `${comp1.id}.anode`;
-                        if (pin2Neighbors.includes(otherDiodePin)) {
-                            hasFlybackDiode = true;
-                        }
-                    }
-                });
-
-                let connectedToDriver = false;
-                [...pin1Neighbors, ...pin2Neighbors].forEach(n => {
-                    const comp = validator?.getComponent(n);
-                    if (comp && (comp.type.includes('motor-driver') || comp.type.includes('l293d'))) {
-                        connectedToDriver = true;
-                    }
-                });
-
-                if (!hasFlybackDiode && !connectedToDriver) {
-                    return createValidationIssue({
-                        ruleId: 'motor-flyback-diode-check',
-                        severity: 'warn',
-                        message: `⚠️ [Motor ${component.id}] FLYBACK DANGER: Inductive load without flyback diode. Turning it off generates voltage spike that can destroy switching transistor or MCU!`,
-                        compIds: [component.id],
-                        remediation: 'Add a flyback diode across the motor terminals.',
-                        autoFix: true,
-                    });
-                }
-
-                return null;
+            check: (component: any, graph: Map<string, string[]>) => {
+                const raw = delegate(component, graph);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'motor-flyback-diode-check');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'motor-flyback-diode-check'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
             }
         }
     ]

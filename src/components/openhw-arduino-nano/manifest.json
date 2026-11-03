@@ -38,5 +38,12 @@
         { "id": "GND.1", "x": 225, "y": 67.5, "type": "power" },
         { "id": "VIN", "x": 240, "y": 67.5, "type": "power" },
         { "id": "PE0", "x": 255, "y": 67.5, "type": "digital" }
-    ]
+    ],
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "rxActive"}
+    },
+    "ui": {"svg": "./arduino-nano.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 270, "h": 75}
 }

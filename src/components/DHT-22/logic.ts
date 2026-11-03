@@ -1,4 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
+import { createValidationIssue } from '../component-schema.js';
 
 type ProtocolState = 'IDLE' | 'WAKE_WAIT' | 'ACKING' | 'SENDING';
 
@@ -37,6 +38,16 @@ export class DHT22Logic extends BaseComponent {
      */
     private getConnectedBoardPin(): string | null {
         if ((this as any)._connectedPin != null) return (this as any)._connectedPin;
+        // Runner-agnostic net query first (plan §5.3); legacy wire scan below.
+        try {
+            const netOf = (this as any)._boardNetOf;
+            if (typeof netOf === 'function') {
+                for (const pn of ['DATA', 'SDA']) {
+                    const pin = netOf(pn);
+                    if (pin) { (this as any)._connectedPin = pin; return pin; }
+                }
+            }
+        } catch { /* fall through to legacy scan */ }
         const runner = this._simCpu?._avrRunner;
         if (runner?.currentWires) {
             for (const wire of runner.currentWires) {
@@ -81,13 +92,62 @@ export class DHT22Logic extends BaseComponent {
      * calls onPinStateChange back on this component, and the ACKING/SENDING guard
      * in onPinStateChange provides a second layer of protection.
      */
+    /**
+     * Schedule a callback in engine steps/cycles. Prefers the
+     * runner-agnostic clock service (plan §5.3); falls back to the AVR
+     * CPU clock events. Identical timing either way on AVR.
+     */
+    private schedule(delayCycles: number, cb: () => void): void {
+        try {
+            const sched = (this as any)._scheduleBoardCycles;
+            if (typeof sched === 'function') { sched(cb, delayCycles); return; }
+        } catch { /* fall through */ }
+        try { (this as any)._simCpu?.addClockEvent?.(cb, delayCycles); } catch { /* ignore */ }
+    }
+
+    private hasClock(): boolean {
+        return typeof (this as any)._scheduleBoardCycles === 'function'
+            || typeof (this as any)._simCpu?.addClockEvent === 'function';
+    }
+
+    /** Board steps per microsecond (AVR 16MHz legacy default; F1 72 via
+     * the runner's _boardCyclesPerUs service). All slot timing derives
+     * from this so the model scales across core clocks. */
+    private cyclesPerUs(): number {
+        try {
+            const v = Number((this as any)._boardCyclesPerUs?.());
+            if (Number.isFinite(v) && v >= 1 && v <= 1000) return v;
+        } catch { /* fall through */ }
+        return 16;
+    }
+
+    private usToCycles(us: number): number {
+        return Math.max(1, Math.floor(us * this.cyclesPerUs()));
+    }
+
+    /** Runner fine-slicing gate: true while a transaction is in flight
+     * (WAKE negotiation, ACK, or bit send). Lets the F1 runner slice
+     * ticks to bit-slot granularity only when needed. */
+    public isTransactionActive(): boolean {
+        return this.protocolState !== 'IDLE';
+    }
+
     private drivePin(voltage: number) {
         this._setVoltageInternal(voltage);
         const isHigh = voltage > 1.8;
+        // Claim the bus while driving: the runner's periodic repropagate
+        // would otherwise re-assert INPUT_PULLUP HIGH onto the AVR pin and
+        // clobber our ACK/data LOWs within microseconds (Arduino then reads
+        // HIGH forever → TIMEOUT → NaN). Same _drivingBus contract as
+        // OneWireProtocol. Cleared when the bus returns to IDLE below.
+        (this as any)._drivingBus = true;
 
-        // Fast path: directly write to AVR PIND register
+        // Board drive via the runner-agnostic bus service when available
+        // (plan §5.3); legacy AVR-only fast path otherwise.
         const boardPin = this.getConnectedBoardPin();
-        if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
+        if (boardPin && typeof (this as any)._driveBoardPin === 'function') {
+            (this as any)._driveBoardPin(boardPin, isHigh);
+        } else if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
             (this as any)._setAvrPinDirect(boardPin, isHigh);
         } else if (!boardPin) {
             dhtLog(`[${this.id}] WARN drivePin(${voltage.toFixed(1)}V): boardPin not resolved yet, relying on _simUpdatePhysics only`);
@@ -131,7 +191,7 @@ export class DHT22Logic extends BaseComponent {
 
         } else if (isHigh && this.protocolState === 'WAKE_WAIT') {
             // Arduino released the bus — measure LOW duration
-            const wakeUs = (cycles - this.wakeStartCycles) / 16;
+            const wakeUs = (cycles - this.wakeStartCycles) / this.cyclesPerUs();
             dhtLog(`[${this.id}]   → WAKE_WAIT got HIGH. wakeUs=${wakeUs.toFixed(1)}us (need ≥500us)`);
 
             if (wakeUs >= 500) {
@@ -149,31 +209,31 @@ export class DHT22Logic extends BaseComponent {
     }
 
     private startAckSequence() {
-        if (!this._simCpu) {
-            dhtLog(`[${this.id}] startAckSequence: ABORT — _simCpu is null`);
+        if (!this.hasClock()) {
+            dhtLog(`[${this.id}] startAckSequence: ABORT — no clock service`);
             this.protocolState = 'IDLE';
             return;
         }
         this.protocolState = 'ACKING';
         dhtLog(`[${this.id}] startAckSequence: waiting 30us before ACK LOW`);
-        this._simCpu.addClockEvent(() => this.sendAckLow(), 30 * 16);
+        this.schedule(this.usToCycles(30), () => this.sendAckLow());
     }
 
     private sendAckLow() {
         dhtLog(`[${this.id}] sendAckLow: driving LOW 80us`);
         this.drivePin(0);
-        this._simCpu.addClockEvent(() => this.sendAckHigh(), 80 * 16);
+        this.schedule(this.usToCycles(80), () => this.sendAckHigh());
     }
 
     private sendAckHigh() {
         dhtLog(`[${this.id}] sendAckHigh: driving HIGH 80us`);
         this.drivePin(5.0);
-        this._simCpu.addClockEvent(() => {
+        this.schedule(this.usToCycles(80), () => {
             this.prepareDataBits();
             this.protocolState = 'SENDING';
             dhtLog(`[${this.id}] Starting data transmission (T=${this.temperature} H=${this.humidity})`);
             this.sendNextBit();
-        }, 80 * 16);
+        });
     }
 
     private prepareDataBits() {
@@ -204,16 +264,17 @@ export class DHT22Logic extends BaseComponent {
     }
 
     private sendNextBit() {
-        if (!this._simCpu) return;
+        if (!this.hasClock()) return;
 
         if (this.bitIndex >= 40) {
             dhtLog(`[${this.id}] All 40 bits sent — ending with 50us LOW then idle HIGH`);
             this.drivePin(0);
-            this._simCpu.addClockEvent(() => {
+            this.schedule(this.usToCycles(50), () => {
                 this.drivePin(5.0);
                 this.protocolState = 'IDLE';
+                (this as any)._drivingBus = false;
                 dhtLog(`[${this.id}] Transmission complete → IDLE`);
-            }, 50 * 16);
+            });
             return;
         }
 
@@ -221,14 +282,45 @@ export class DHT22Logic extends BaseComponent {
 
         // Each bit: 50us LOW preamble, then 28us HIGH = '0' or 70us HIGH = '1'
         this.drivePin(0);
-        this._simCpu.addClockEvent(() => {
+        this.schedule(this.usToCycles(50), () => {
             this.drivePin(5.0);
             const highUs = bit ? 70 : 28;
-            this._simCpu.addClockEvent(() => {
+            this.schedule(this.usToCycles(highUs), () => {
                 this.sendNextBit();
-            }, highUs * 16);
-        }, 50 * 16);
+            });
+        });
     }
 
     update() {}
+
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: temperature, f1: humidity} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {temperature: Number((this as any).temperature ?? 0), humidity: Number((this as any).humidity ?? 0)},
+            i: {},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const requiredPins = ['VCC', 'GND', 'DATA'];
+        const missingPins = requiredPins.filter(pin => {
+            const node = `${component.id}.${pin}`;
+            return ((validator ? validator.getNeighbors(node) : (graph.get(node) || []))).length === 0;
+        });
+
+        if (missingPins.length > 0) {
+            return createValidationIssue({
+                ruleId: 'dht22-connection-check',
+                severity: 'warn',
+                message: `⚠️ [DHT22 ${component.id}] Pin Warning: The following pins are not connected: ${missingPins.join(', ')}. DHT22 sensor requires VCC, GND, and DATA pins to be fully wired.`,
+                compIds: [component.id],
+                remediation: 'Connect all DHT22 pins.',
+                autoFix: true,
+            });
+        }
+
+        return null;
+    }
 }

@@ -1,0 +1,399 @@
+{
+  "type": "openhw-pico-2-eth",
+  "label": "WIZnet W5500-EVB-Pico2",
+  "description": "RP2350 W5500-EVB-Pico2 carrier (same wiring/pins as Pico version, only SoC differs). Ethernet networking removed pending engine reimplementation.",
+  "group": "Boards",
+  "w": 124,
+  "h": 314,
+  "attrs": {
+    "env": {
+      "type": "string",
+      "default": ""
+    },
+    "builder": {
+      "type": "string",
+      "default": "arduino-pico"
+    },
+    "arch": {
+      "type": "string",
+      "default": "m33",
+      "enum": [
+        "m33",
+        "rv32"
+      ]
+    },
+    "boardSpi": {
+      "type": "string",
+      "default": "0",
+      "enum": [
+        "0",
+        "1"
+      ]
+    }
+  },
+  "pins": [
+    {
+      "id": "GP0",
+      "description": "GP0",
+      "x": 9.5,
+      "y": 20.4,
+      "type": "digital"
+    },
+    {
+      "id": "GP1",
+      "description": "GP1",
+      "x": 9.5,
+      "y": 35.4,
+      "type": "digital"
+    },
+    {
+      "id": "GND",
+      "description": "GND",
+      "x": 9.5,
+      "y": 50.4,
+      "type": "power"
+    },
+    {
+      "id": "GP2",
+      "description": "GP2",
+      "x": 9.5,
+      "y": 65.4,
+      "type": "digital"
+    },
+    {
+      "id": "GP3",
+      "description": "GP3",
+      "x": 9.5,
+      "y": 80.4,
+      "type": "digital"
+    },
+    {
+      "id": "GP4",
+      "description": "GP4",
+      "x": 9.5,
+      "y": 95.4,
+      "type": "digital"
+    },
+    {
+      "id": "GP5",
+      "description": "GP5",
+      "x": 9.5,
+      "y": 110.4,
+      "type": "digital"
+    },
+    {
+      "id": "GND_1",
+      "description": "GND_1",
+      "x": 9.5,
+      "y": 125.4,
+      "type": "power"
+    },
+    {
+      "id": "GP6",
+      "description": "GP6",
+      "x": 9.5,
+      "y": 140.4,
+      "type": "digital"
+    },
+    {
+      "id": "GP7",
+      "description": "GP7",
+      "x": 9.5,
+      "y": 155.4,
+      "type": "digital"
+    },
+    {
+      "id": "GP8",
+      "description": "GP8",
+      "x": 9.5,
+      "y": 170.4,
+      "type": "digital"
+    },
+    {
+      "id": "GP9",
+      "description": "GP9",
+      "x": 9.5,
+      "y": 185.4,
+      "type": "digital"
+    },
+    {
+      "id": "GND_2",
+      "description": "GND_2",
+      "x": 9.5,
+      "y": 200.4,
+      "type": "power"
+    },
+    {
+      "id": "GP10",
+      "description": "GP10",
+      "x": 9.5,
+      "y": 215.4,
+      "type": "digital"
+    },
+    {
+      "id": "GP11",
+      "description": "GP11",
+      "x": 9.5,
+      "y": 230.4,
+      "type": "digital"
+    },
+    {
+      "id": "GP12",
+      "description": "GP12",
+      "x": 9.5,
+      "y": 245.4,
+      "type": "digital"
+    },
+    {
+      "id": "GP13",
+      "description": "GP13",
+      "x": 9.5,
+      "y": 260.4,
+      "type": "digital"
+    },
+    {
+      "id": "GND_3",
+      "description": "GND_3",
+      "x": 9.5,
+      "y": 275.4,
+      "type": "power"
+    },
+    {
+      "id": "GP14",
+      "description": "GP14",
+      "x": 9.5,
+      "y": 290.4,
+      "type": "digital"
+    },
+    {
+      "id": "GP15",
+      "description": "GP15",
+      "x": 9.5,
+      "y": 305.4,
+      "type": "digital"
+    },
+    {
+      "id": "VBUS",
+      "description": "VBUS",
+      "x": 114.5,
+      "y": 20.4,
+      "type": "power"
+    },
+    {
+      "id": "VSYS",
+      "description": "VSYS",
+      "x": 114.5,
+      "y": 35.4,
+      "type": "power"
+    },
+    {
+      "id": "GND_4",
+      "description": "GND_4",
+      "x": 114.5,
+      "y": 50.4,
+      "type": "power"
+    },
+    {
+      "id": "3V3_EN",
+      "description": "3V3_EN",
+      "x": 114.5,
+      "y": 65.4,
+      "type": "power"
+    },
+    {
+      "id": "3V3",
+      "description": "3V3",
+      "x": 114.5,
+      "y": 80.4,
+      "type": "power"
+    },
+    {
+      "id": "ADC_VREF",
+      "description": "ADC_VREF",
+      "x": 114.5,
+      "y": 95.4,
+      "type": "power"
+    },
+    {
+      "id": "GP28",
+      "description": "GP28/ADC2",
+      "x": 114.5,
+      "y": 110.4,
+      "type": "analog"
+    },
+    {
+      "id": "AGND",
+      "description": "AGND",
+      "x": 114.5,
+      "y": 125.4,
+      "type": "power"
+    },
+    {
+      "id": "GP27",
+      "description": "GP27/ADC1",
+      "x": 114.5,
+      "y": 140.4,
+      "type": "analog"
+    },
+    {
+      "id": "GP26",
+      "description": "GP26/ADC0",
+      "x": 114.5,
+      "y": 155.4,
+      "type": "analog"
+    },
+    {
+      "id": "RUN",
+      "description": "RUN",
+      "x": 114.5,
+      "y": 170.4,
+      "type": "power"
+    },
+    {
+      "id": "GP22",
+      "description": "GP22",
+      "x": 114.5,
+      "y": 185.4,
+      "type": "digital"
+    },
+    {
+      "id": "GND_5",
+      "description": "GND_5",
+      "x": 114.5,
+      "y": 200.4,
+      "type": "power"
+    },
+    {
+      "id": "GP21",
+      "description": "GP21",
+      "x": 114.5,
+      "y": 215.4,
+      "type": "digital"
+    },
+    {
+      "id": "GP20",
+      "description": "GP20",
+      "x": 114.5,
+      "y": 230.4,
+      "type": "digital"
+    },
+    {
+      "id": "GP19",
+      "description": "GP19",
+      "x": 114.5,
+      "y": 245.4,
+      "type": "digital"
+    },
+    {
+      "id": "GP18",
+      "description": "GP18",
+      "x": 114.5,
+      "y": 260.4,
+      "type": "digital"
+    },
+    {
+      "id": "GND_6",
+      "description": "GND_6",
+      "x": 114.5,
+      "y": 275.4,
+      "type": "power"
+    },
+    {
+      "id": "GP17",
+      "description": "GP17",
+      "x": 114.5,
+      "y": 290.4,
+      "type": "digital"
+    },
+    {
+      "id": "GP16",
+      "description": "GP16",
+      "x": 114.5,
+      "y": 305.4,
+      "type": "digital"
+    },
+    {
+      "id": "13",
+      "description": "Alias for GP13",
+      "x": 9.5,
+      "y": 260.4,
+      "type": "digital"
+    },
+    {
+      "id": "2",
+      "description": "Alias for GP2",
+      "x": 9.5,
+      "y": 65.4,
+      "type": "digital"
+    },
+    {
+      "id": "5V",
+      "description": "Alias for VBUS",
+      "x": 114.5,
+      "y": 20.4,
+      "type": "power"
+    },
+    {
+      "id": "A4",
+      "description": "Alias for GP20",
+      "x": 114.5,
+      "y": 230.4,
+      "type": "analog"
+    },
+    {
+      "id": "A5",
+      "description": "Alias for GP21",
+      "x": 114.5,
+      "y": 215.4,
+      "type": "analog"
+    },
+    {
+      "id": "SCK",
+      "description": "Alias for GP18 (SPI SCK)",
+      "x": 114.5,
+      "y": 260.4,
+      "type": "digital"
+    },
+    {
+      "id": "MOSI",
+      "description": "Alias for GP19 (SPI MOSI)",
+      "x": 114.5,
+      "y": 245.4,
+      "type": "digital"
+    },
+    {
+      "id": "MISO",
+      "description": "Alias for GP16 (SPI MISO)",
+      "x": 114.5,
+      "y": 305.4,
+      "type": "digital"
+    },
+    {
+      "id": "SS",
+      "description": "Alias for GP17 (SPI SS/CS)",
+      "x": 114.5,
+      "y": 290.4,
+      "type": "digital"
+    }
+  ],
+  "sab": {
+    "slotKind": 0,
+    "fields": {
+      "i0": "rxActive"
+    }
+  },
+  "ui": {
+    "svg": "./openhw-pico-2-eth.svg",
+    "interactive": []
+  },
+  "sim": {
+    "runtime": "js",
+    "validation": "inline"
+  },
+  "bounds": {
+    "x": 0,
+    "y": 0,
+    "w": 124,
+    "h": 314
+  }
+}

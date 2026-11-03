@@ -1,0 +1,33 @@
+<svg width="100%" height="100%" viewBox="0 0 425.0 320.0" xmlns="http://www.w3.org/2000/svg" data-component="openhw-arduino-uno" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="423.0" height="318.0" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="212.5" y="160.0" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">Arduino Uno</text>
+  <circle cx="179.7" cy="14.5" r="2.5" fill="#888" data-pin="gnd_3" />
+  <circle cx="194.8" cy="14.5" r="2.5" fill="#888" data-pin="13" />
+  <circle cx="209.8" cy="14.5" r="2.5" fill="#888" data-pin="12" />
+  <circle cx="224.8" cy="14.5" r="2.5" fill="#888" data-pin="11" />
+  <circle cx="239.8" cy="14.5" r="2.5" fill="#888" data-pin="10" />
+  <circle cx="254.8" cy="14.5" r="2.5" fill="#888" data-pin="9" />
+  <circle cx="269.8" cy="14.5" r="2.5" fill="#888" data-pin="8" />
+  <circle cx="294.9" cy="14.5" r="2.5" fill="#888" data-pin="7" />
+  <circle cx="310.0" cy="14.5" r="2.5" fill="#888" data-pin="6" />
+  <circle cx="324.9" cy="14.5" r="2.5" fill="#888" data-pin="5" />
+  <circle cx="340.0" cy="14.5" r="2.5" fill="#888" data-pin="4" />
+  <circle cx="354.9" cy="14.5" r="2.5" fill="#888" data-pin="3" />
+  <circle cx="370.0" cy="14.5" r="2.5" fill="#888" data-pin="2" />
+  <circle cx="385.0" cy="14.5" r="2.5" fill="#888" data-pin="1" />
+  <circle cx="400.0" cy="14.5" r="2.5" fill="#888" data-pin="0" />
+  <circle cx="293.8" cy="297.0" r="2.5" fill="#888" data-pin="vin" />
+  <circle cx="279.2" cy="297.0" r="2.5" fill="#888" data-pin="gnd_1" />
+  <circle cx="264.6" cy="297.0" r="2.5" fill="#888" data-pin="gnd_2" />
+  <circle cx="250.1" cy="297.0" r="2.5" fill="#888" data-pin="5V" />
+  <circle cx="235.5" cy="297.0" r="2.5" fill="#888" data-pin="3v3" />
+  <circle cx="220.9" cy="297.0" r="2.5" fill="#888" data-pin="rst" />
+  <circle cx="206.3" cy="297.0" r="2.5" fill="#888" data-pin="ioref" />
+  <circle cx="323.2" cy="297.0" r="2.5" fill="#888" data-pin="A0" />
+  <circle cx="337.8" cy="297.0" r="2.5" fill="#888" data-pin="A1" />
+  <circle cx="352.4" cy="297.0" r="2.5" fill="#888" data-pin="A2" />
+  <circle cx="366.8" cy="297.0" r="2.5" fill="#888" data-pin="A3" />
+  <circle cx="381.5" cy="297.0" r="2.5" fill="#888" data-pin="A4" />
+  <circle cx="396.1" cy="297.0" r="2.5" fill="#888" data-pin="A5" />
+</svg>

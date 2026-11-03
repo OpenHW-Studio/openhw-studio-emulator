@@ -45,5 +45,12 @@
       "setup": "SPI.begin();\nmfrc522_${COMP_SUFFIX}.PCD_Init();\nSerial.println(\"MFRC522 RFID Ready\");",
       "loop": "Serial.println(\"Scanning for RFID card...\");\nif (mfrc522_${COMP_SUFFIX}.PICC_IsNewCardPresent() && mfrc522_${COMP_SUFFIX}.PICC_ReadCardSerial()) {\n  Serial.print(\"RFID UID:\");\n  for (byte i = 0; i < mfrc522_${COMP_SUFFIX}.uid.size; i++) {\n    Serial.print(mfrc522_${COMP_SUFFIX}.uid.uidByte[i] < 0x10 ? \" 0\" : \" \");\n    Serial.print(mfrc522_${COMP_SUFFIX}.uid.uidByte[i], HEX);\n  }\n  Serial.println();\n  mfrc522_${COMP_SUFFIX}.PICC_HaltA();\n}\ndelay(500);"
     }
-  }
+  },
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "cardPresent"}
+    },
+    "ui": {"svg": "./mfrc522.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 165, "h": 135}
 }

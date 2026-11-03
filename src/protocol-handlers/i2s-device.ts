@@ -120,4 +120,58 @@ export class I2SProtocol extends BaseComponent {
     onI2SWordSelect(channel: 0 | 1): void {
         // Optional override for WS transition edge
     }
+
+    /**
+     * Shared normalizer: 32-bit sign-extended sample → -1.0..1.0 float.
+     * WASM-heavy I2S components reuse this (same clamping as the TS path)
+     * before routeI2SFrame() so JS and core agree bit-for-bit.
+     */
+    static normalizeSample(sample: number): number {
+        const maxVal = 2147483648;
+        let normalized = sample / maxVal;
+        if (normalized > 1.0) normalized = 1.0;
+        if (normalized < -1.0) normalized = -1.0;
+        return normalized;
+    }
+}
+
+/**
+ * I2sBusFramer — composition helper for WASM-heavy components (§12.4).
+ * Pure L/R interleave + chunking (no update/WASM knowledge). Feed decoded
+ * frames via pushFrame(); when the buffer fills (or 20ms passes with
+ * ≥128 samples) onChunk fires — mirroring I2SProtocol thresholds. A
+ * WASM-heavy I2S component extends WasmComponent DIRECTLY, owns an
+ * I2sBusFramer, and routes per-frame via routeI2SFrame().
+ */
+export interface I2sFrameEvents {
+    onFrame?(channel: 0 | 1, normalized: number): void;
+    onChunk?(chunk: number[], peak: number): void;
+}
+
+export class I2sBusFramer {
+    private queue: number[] = [];
+    private peak = 0;
+    private lastFlushMs = 0;
+    constructor(
+        private readonly bufferSize = 1024,
+        private readonly events: I2sFrameEvents = {},
+    ) {}
+
+    /** Feed one decoded frame (already normalized to -1.0..1.0). */
+    pushFrame(channel: 0 | 1, normalized: number, nowMs: number): void {
+        const v = Math.max(-1.0, Math.min(1.0, normalized));
+        const abs = Math.abs(v);
+        if (abs > this.peak) this.peak = abs;
+        this.queue.push(v);
+        this.events.onFrame?.(channel, v);
+        if (this.queue.length >= this.bufferSize
+            || (nowMs - this.lastFlushMs > 20 && this.queue.length > 128)) {
+            this.events.onChunk?.([...this.queue], this.peak);
+            this.queue = [];
+            this.lastFlushMs = nowMs;
+        }
+    }
+
+    get pending(): number { return this.queue.length; }
+    get peakAmplitude(): number { return this.peak; }
 }

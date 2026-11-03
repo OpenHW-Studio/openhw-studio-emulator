@@ -1,4 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
+import { createValidationIssue } from '../component-schema.js';
 import { I2CProtocol } from '../../protocol-handlers/index';
 
 export class PCA9685Logic extends I2CProtocol {
@@ -82,5 +83,92 @@ export class PCA9685Logic extends I2CProtocol {
             dutyCycles: dutyCycles,
             resolution: '12-bit',
         });
+    }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: enabled} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {},
+            i: {enabled: (s.enabled ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const pins = validator.getComponentPins(component);
+        const sda = pins.find((p: string) => p.includes('SDA'));
+        const scl = pins.find((p: string) => p.includes('SCL'));
+        const vcc = pins.find((p: string) => p.includes('VCC') || p.includes('V+'));
+        const gnd = pins.find((p: string) => p.includes('GND'));
+        const issues = [];
+
+        if (vcc) {
+            const node = `${component.id}.${vcc}`;
+            if (((validator ? validator.getNeighbors(node) : (graph.get(node) || []))).length === 0) {
+                issues.push(createValidationIssue({
+                    ruleId: 'pca9685-i2c-interface-check',
+                    severity: 'warn',
+                    message: `⚠️ [${component.type} ${component.id}] Logic Power (VCC) is not connected.`,
+                    compIds: [component.id],
+                    remediation: 'Connect VCC to the logic supply rail.',
+                    autoFix: true,
+                }));
+            } else if (!validator.hasResistivePathToSupply(node)) {
+                issues.push(createValidationIssue({
+                    ruleId: 'pca9685-i2c-interface-check',
+                    severity: 'warn',
+                    message: `⚠️ [${component.type} ${component.id}] Logic Power (VCC) is connected but does not reach a valid power supply rail.`,
+                    compIds: [component.id],
+                    remediation: 'Ensure VCC path connects to a 3.3V/5V power source.',
+                }));
+            }
+        }
+
+        if (gnd) {
+            const node = `${component.id}.${gnd}`;
+            if (((validator ? validator.getNeighbors(node) : (graph.get(node) || []))).length === 0) {
+                issues.push(createValidationIssue({
+                    ruleId: 'pca9685-i2c-interface-check',
+                    severity: 'warn',
+                    message: `⚠️ [${component.type} ${component.id}] Ground (GND) is not connected.`,
+                    compIds: [component.id],
+                    remediation: 'Connect GND to the common ground rail.',
+                    autoFix: true,
+                }));
+            } else {
+                const gndSources = validator.collectVoltageSources(node);
+                if (!gndSources.some((s: any) => s.voltage === 0)) {
+                    issues.push(createValidationIssue({
+                        ruleId: 'pca9685-i2c-interface-check',
+                        severity: 'warn',
+                        message: `⚠️ [${component.type} ${component.id}] Ground (GND) is connected but does not reach a valid ground rail (GND).`,
+                        compIds: [component.id],
+                        remediation: 'Ensure GND path connects to a valid ground rail.',
+                    }));
+                }
+            }
+        }
+        if (sda && ((validator ? validator.getNeighbors(`${component.id}.${sda}`) : (graph.get(`${component.id}.${sda}`) || []))).length === 0) {
+            issues.push(createValidationIssue({
+                ruleId: 'pca9685-i2c-interface-check',
+                severity: 'warn',
+                message: `⚠️ [${component.type} ${component.id}] I2C SDA pin is floating.`,
+                compIds: [component.id],
+                remediation: 'Connect SDA to the MCU I2C data pin.',
+                autoFix: true,
+            }));
+        }
+        if (scl && ((validator ? validator.getNeighbors(`${component.id}.${scl}`) : (graph.get(`${component.id}.${scl}`) || []))).length === 0) {
+            issues.push(createValidationIssue({
+                ruleId: 'pca9685-i2c-interface-check',
+                severity: 'warn',
+                message: `⚠️ [${component.type} ${component.id}] I2C SCL pin is floating.`,
+                compIds: [component.id],
+                remediation: 'Connect SCL to the MCU I2C clock pin.',
+                autoFix: true,
+            }));
+        }
+
+        return issues.length > 0 ? issues : null;
     }
 }

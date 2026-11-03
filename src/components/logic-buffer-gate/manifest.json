@@ -21,5 +21,18 @@
             "type": "digital",
             "description": "Output"
         }
-    ]
+    ],
+    "autowiring": {
+        "connections": [
+            { "from": "IN", "to": "arduino:D2|2" },
+            { "from": "OUT", "to": "arduino:D4|4", "via": "openhw-resistor", "attrs": { "value": "220" } }
+        ]
+    },
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "outputHigh"}
+    },
+    "ui": {"svg": "./logic-buffer-gate.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 60, "h": 30}
 }

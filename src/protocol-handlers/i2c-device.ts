@@ -1,6 +1,10 @@
 import { BaseComponent } from '../components/BaseComponent';
 
 export class I2CProtocol extends BaseComponent {
+    // NOTE (§12.4): this class is the PURE-TS bus layer (start/stop/read-
+    // queue engine). It deliberately does NOT extend WasmComponent — same
+    // reason as SPIProtocol: all I2C components must work with zero WASM
+    // involvement; WASM-heavy components compose via I2cBusFramer.
     private readonly address: number;
     private readonly readQueue: number[] = [];
 
@@ -55,6 +59,20 @@ export class I2CProtocol extends BaseComponent {
             this.stateChanged = true;
 
             if (read) {
+                // Repeated-start support: the register pointer was just
+                // written with endTransmission(false), so no STOP has
+                // committed the write buffer yet. Drain it here (exactly
+                // once — the buffer is cleared, so a later STOP no-ops)
+                // instead of reading from a stale lastRegister.
+                const pending = this.state._currentWriteBuffer || [];
+                if (pending.length > 0) {
+                    const reg = pending[0];
+                    const data = pending.slice(1);
+                    this.state.lastRegister = reg;
+                    this.state.lastWriteData = data;
+                    this.onI2CWriteRegister(reg, data);
+                    this.state._currentWriteBuffer = [];
+                }
                 // Populate read queue
                 const reg = this.state.lastRegister !== null ? this.state.lastRegister : 0;
                 // We don't know the exact count master will read, so we ask for a chunk (e.g. 32 bytes)
@@ -105,5 +123,67 @@ export class I2CProtocol extends BaseComponent {
         }
         this.state._currentWriteBuffer = [];
         this.onI2CStopCondition();
+    }
+}
+
+/**
+ * I2cBusFramer — composition helper for WASM-heavy components (§12.4).
+ * Same rationale as SpiBusFramer: a WASM-heavy component extends
+ * WasmComponent DIRECTLY and owns an I2cBusFramer for pure framing
+ * (address match, write-buffer assembly, read-queue), so there is exactly
+ * ONE dispatch owner for every bus event — never a protocol base class
+ * AND a WASM adapter fighting over the same onI2CByte call.
+ */
+export interface I2cFrameEvents {
+    onWriteRegister?(reg: number, data: number[]): void;
+    onReadRequest?(reg: number, count: number): number[];
+    onStop?(): void;
+}
+
+export class I2cBusFramer {
+    private writeBuffer: number[] = [];
+    private readQueue: number[] = [];
+    private lastRegister: number | null = null;
+    constructor(
+        private readonly address: number,
+        private readonly events: I2cFrameEvents,
+    ) {}
+
+    getAddress(): number { return this.address; }
+
+    /** START condition; returns ACK. Read mode pre-fills the read queue. */
+    start(address: number, read: boolean): boolean {
+        if ((address & 0x7f) !== this.address) return false;
+        if (read) {
+            const reg = this.lastRegister ?? 0;
+            const data = this.events.onReadRequest?.(reg, 32) || [];
+            this.readQueue = [...data];
+        } else {
+            this.writeBuffer = [];
+        }
+        return true;
+    }
+
+    /** One write byte; always ACKs (matches I2CProtocol.onI2CByte). */
+    pushByte(data: number): boolean {
+        this.writeBuffer.push(data & 0xff);
+        return true;
+    }
+
+    /** One read byte (read queue, default 0xFF). */
+    readByte(defaultByte = 0xff): number {
+        return this.readQueue.length > 0 ? this.readQueue.shift()! : (defaultByte & 0xff);
+    }
+
+    /** STOP condition: decode reg+data, fire events. */
+    stop(): void {
+        if (this.writeBuffer.length > 0) {
+            const reg = this.writeBuffer[0];
+            const data = this.writeBuffer.slice(1);
+            this.lastRegister = reg;
+            this.events.onWriteRegister?.(reg, data);
+        }
+        this.writeBuffer = [];
+        this.events.onStop?.();
     }
 }

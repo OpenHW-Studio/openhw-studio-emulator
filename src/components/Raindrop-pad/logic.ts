@@ -35,4 +35,17 @@ export class RaindropPadLogic extends BaseComponent {
         // Keep pins in sync every tick (fast, no setState overhead)
         this.updateVoltages();
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: rainLevel, i0: limitExceeded} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {rainLevel: Number(s.rainLevel ?? 0)},
+            i: {limitExceeded: (s.limitExceeded ? 1 : 0)},
+        };
+    }
+    validate(_component: any, _graph: Map<string, string[]>) {
+        return null;
+    }
 }

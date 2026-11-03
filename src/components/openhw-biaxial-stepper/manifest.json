@@ -189,5 +189,21 @@
             "setup": "pinMode(${helper:driverOuter:ENABLE}, OUTPUT);\n  digitalWrite(${helper:driverOuter:ENABLE}, LOW);\n  pinMode(${helper:driverInner:ENABLE}, OUTPUT);\n  digitalWrite(${helper:driverInner:ENABLE}, LOW);\n  stepperOuter_${COMP_SUFFIX}.setMaxSpeed(1000);\n  stepperOuter_${COMP_SUFFIX}.setAcceleration(500);\n  stepperInner_${COMP_SUFFIX}.setMaxSpeed(1000);\n  stepperInner_${COMP_SUFFIX}.setAcceleration(500);",
             "loop": "if (stepperOuter_${COMP_SUFFIX}.distanceToGo() == 0) {\n  stepperOuter_${COMP_SUFFIX}.moveTo(-stepperOuter_${COMP_SUFFIX}.currentPosition() + 200);\n}\nif (stepperInner_${COMP_SUFFIX}.distanceToGo() == 0) {\n  stepperInner_${COMP_SUFFIX}.moveTo(-stepperInner_${COMP_SUFFIX}.currentPosition() - 200);\n}\nstepperOuter_${COMP_SUFFIX}.run();\nstepperInner_${COMP_SUFFIX}.run();"
         }
-    }
+    },
+    "sab": {
+        "slotKind": 6,
+        "fields": {
+            "f0": "outerAngle",
+            "f1": "innerAngle"
+        }
+    },
+    "ui": {
+        "svg": "./biaxial-stepper.svg",
+        "interactive": []
+    },
+    "sim": {
+        "runtime": "js",
+        "validation": "inline"
+    },
+    "bounds": {"x": 0, "y": 0, "w": 280, "h": 280}
 }

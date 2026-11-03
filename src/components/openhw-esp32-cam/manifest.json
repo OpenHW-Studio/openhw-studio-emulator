@@ -23,5 +23,12 @@
     { "id": "3", "description": "RX", "x": 143.4375, "y": 103.9 },
     { "id": "1", "description": "TX", "x": 143.4375, "y": 118.9 },
     { "id": "GND.3", "description": "GND", "x": 143.4375, "y": 133.9, "type": "power" }
-  ]
+  ],
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "streaming"}
+    },
+    "ui": {"svg": "./esp32-cam.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 156.25, "h": 234.375}
 }

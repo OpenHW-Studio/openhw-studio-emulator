@@ -1,0 +1,14 @@
+<svg width="100%" height="100%" viewBox="0 0 75.0 105.0" xmlns="http://www.w3.org/2000/svg" data-component="openhw-max98357" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="73.0" height="103.0" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="37.5" y="52.5" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">MAX98357 I2S Amp</text>
+  <circle cx="7.5" cy="7.5" r="2.5" fill="#888" data-pin="LRC" />
+  <circle cx="7.5" cy="22.5" r="2.5" fill="#888" data-pin="BCLK" />
+  <circle cx="7.5" cy="37.5" r="2.5" fill="#888" data-pin="DIN" />
+  <circle cx="7.5" cy="52.5" r="2.5" fill="#888" data-pin="GAIN" />
+  <circle cx="7.5" cy="67.5" r="2.5" fill="#888" data-pin="SD" />
+  <circle cx="7.5" cy="82.5" r="2.5" fill="#888" data-pin="GND" />
+  <circle cx="7.5" cy="97.5" r="2.5" fill="#888" data-pin="VIN" />
+  <circle cx="67.5" cy="37.5" r="2.5" fill="#888" data-pin="OUT+" />
+  <circle cx="67.5" cy="67.5" r="2.5" fill="#888" data-pin="OUT-" />
+</svg>

@@ -1,41 +1,37 @@
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
 import { createValidationIssue } from '../component-schema.js';
 import type { ComponentValidationRule } from '../component-schema.js';
+import { Wokwi7SegmentLogic } from './logic';
+
+const delegate = Wokwi7SegmentLogic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>) =>
+        Wokwi7SegmentLogic.prototype.validate!.call(undefined, component, graph)
+    : (_component: any, _graph: Map<string, string[]>) => null;
 
 export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
         {
             id: '7segment-common-and-segment-check',
             name: '7-Segment Common Pin Check',
-            severity: 'warn',
+            severity: 'warn' as const,
             priority: 10,
             description: 'Warn when the common pin or segment resistors are missing.',
-            check: (component: any, graph: Map<string, string[]>, validator: any) => {
-                const numDigits = parseInt(component.attrs?.digits || '1', 10);
-                const issues = [];
-                
-                // The manifest defines common pins as COM.1, COM.2, ... (not DIG1, DIG2)
-                let anyComConnected = false;
-                for (let i = 1; i <= numDigits; i++) {
-                    if (validator.getNeighbors(`${component.id}.COM.${i}`).length > 0) {
-                        anyComConnected = true;
-                        break;
-                    }
-                }
-
-                if (!anyComConnected) {
-                    issues.push(createValidationIssue({
-                        ruleId: '7segment-common-and-segment-check',
-                        severity: 'warn',
-                        message: `⚠️ [7-Segment ${component.id}] Common pin(s) (COM.1${numDigits > 1 ? '-COM.' + numDigits : ''}) are not connected. The display will not light up.\nConnect COM.1 (and COM.2) to Arduino GND for common-cathode mode.`,
-                        compIds: [component.id],
-                        remediation: 'Connect COM.1 and COM.2 to Arduino GND (common cathode) or 5V (common anode).',
-                        autoFix: true,
-                    }));
-                }
-
-
-
-                return issues.length > 0 ? issues : null;
+            check: (component: any, graph: Map<string, string[]>) => {
+                const raw = delegate(component, graph);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === '7segment-common-and-segment-check');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || '7segment-common-and-segment-check'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
             }
         }
     ]

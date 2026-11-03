@@ -17,5 +17,12 @@
     ],
     "autowiring": {
         "connections": []
-    }
+    },
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "ledActive"}
+    },
+    "ui": {"svg": "./attiny85.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 120, "h": 110}
 }

@@ -1,0 +1,8 @@
+<svg width="100%" height="100%" viewBox="0 0 75.0 60.0" xmlns="http://www.w3.org/2000/svg" data-component="logic-nor-gate" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="73.0" height="58.0" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="37.5" y="30.0" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">NOR Gate</text>
+  <circle cx="0" cy="15" r="2.5" fill="#888" data-pin="IN1" />
+  <circle cx="0" cy="45" r="2.5" fill="#888" data-pin="IN2" />
+  <circle cx="75" cy="30" r="2.5" fill="#888" data-pin="OUT" />
+</svg>

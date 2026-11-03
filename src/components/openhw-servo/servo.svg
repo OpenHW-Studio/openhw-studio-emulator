@@ -1,0 +1,8 @@
+<svg width="100%" height="100%" viewBox="0 0 248.3 180.6" xmlns="http://www.w3.org/2000/svg" data-component="openhw-servo" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="246.3" height="178.6" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="124.15" y="90.3" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">Servo Motor</text>
+  <circle cx="11.5" cy="75" r="2.5" fill="#888" data-pin="GND" />
+  <circle cx="11.5" cy="90" r="2.5" fill="#888" data-pin="V+" />
+  <circle cx="11.5" cy="105" r="2.5" fill="#888" data-pin="PWM" />
+</svg>

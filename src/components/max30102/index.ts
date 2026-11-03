@@ -1,35 +1,10 @@
+// Component v2 golden reference (index.ts = declarative registry record only).
+// No fs/process/document touches at module top — worker/import-safe everywhere.
+// Raw-source harvesting moved to build time (emulatorLoader ?raw glob).
 import manifest from './manifest.json';
 import { MAX30102UI, MAX30102ContextMenu, BOUNDS } from './ui';
 import { MAX30102Logic } from './logic';
 import { validation } from './validation';
-
-let _nodeFs: any = null;
-try {
-    if (typeof process !== 'undefined' && process.versions && process.versions.node) {
-        // @ts-ignore
-        _nodeFs = eval("require('node:fs')");
-    }
-} catch (e) {}
-const docHtml = '';
-
-let uiRaw = '';
-let logicRaw = '';
-let validationRaw = '';
-try {
-    uiRaw = _nodeFs?.readFileSync(new URL('./ui.tsx', import.meta.url), 'utf8');
-} catch (e) {
-    uiRaw = '';
-}
-try {
-    logicRaw = _nodeFs?.readFileSync(new URL('./logic', import.meta.url), 'utf8');
-} catch (e) {
-    logicRaw = '';
-}
-try {
-    validationRaw = _nodeFs?.readFileSync(new URL('./validation', import.meta.url), 'utf8');
-} catch (e) {
-    validationRaw = '';
-}
 
 export default {
     manifest,
@@ -37,11 +12,15 @@ export default {
     LogicClass: MAX30102Logic,
     BOUNDS,
     ContextMenu: MAX30102ContextMenu,
-    contextMenuDuringRun: true,   // slider is live-usable while running
-    contextMenuOnlyDuringRun: true,   // hide the menu when simulation is stopped
+    contextMenuDuringRun: true,
+    contextMenuOnlyDuringRun: true,
     validation,
-    doc: docHtml,
-    uiRaw,
-    logicRaw,
-    validationRaw,
+    doc: null,
+    // Raw sources are harvested at build time by the frontend's ?raw glob
+    // (emulatorLoader.collectRawComponentSources) and merged into the live
+    // registry there. Kept as empty-string fields so ComponentLab / zip-upload
+    // / backend-sync code that reads uiRaw/logicRaw keeps working.
+    uiRaw: '',
+    logicRaw: '',
+    validationRaw: '',
 };

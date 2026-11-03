@@ -1,4 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
+import { createValidationIssue } from '../component-schema.js';
 import { PulseProtocol } from '../../protocol-handlers/index';
 
 // IR Receiver (e.g. VS1838B)
@@ -51,6 +52,15 @@ export class IRReceiverLogic extends PulseProtocol {
 
     public getConnectedBoardPin(): string | null {
         if ((this as any)._connectedPin != null) return (this as any)._connectedPin;
+        try {
+            const netOf = (this as any)._boardNetOf;
+            if (typeof netOf === 'function') {
+                for (const pn of ['OUT', 'R']) {
+                    const pin = netOf(pn);
+                    if (pin) { (this as any)._connectedPin = pin; return pin; }
+                }
+            }
+        } catch { /* fall through to legacy scan */ }
         const runner = (this as any)._simCpu?._avrRunner;
         if (runner?.currentWires) {
             for (const wire of runner.currentWires) {
@@ -89,7 +99,9 @@ export class IRReceiverLogic extends PulseProtocol {
 
         const isHigh = voltage > 1.8;
         const boardPin = this.getConnectedBoardPin();
-        if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
+        if (boardPin && typeof (this as any)._driveBoardPin === 'function') {
+            (this as any)._driveBoardPin(boardPin, isHigh);
+        } else if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
             (this as any)._setAvrPinDirect(boardPin, isHigh);
         }
 
@@ -99,6 +111,9 @@ export class IRReceiverLogic extends PulseProtocol {
     }
 
     private transmitNEC(code: number) {
+        // Runner-agnostic clock service first (plan §5.3); legacy AVR clock
+        // fallback; wall-clock timeout last. Identical pulse order either way.
+        const sched = (this as any)._scheduleBoardCycles;
         const cpu = (this as any)._simCpu;
         const pulses: { isHigh: boolean; durationUs: number }[] = [];
 
@@ -119,8 +134,22 @@ export class IRReceiverLogic extends PulseProtocol {
         pulses.push({ isHigh: false, durationUs: 562 });
         pulses.push({ isHigh: true, durationUs: 1000 });
 
-        // Schedule pulse train using CPU clock events or fallback timeout
-        if (cpu && typeof cpu.addClockEvent === 'function') {
+        // Schedule pulse train using board clock service, CPU clock events or fallback timeout
+        if (typeof sched === 'function') {
+            let accumulatedCycles = 0;
+            for (const p of pulses) {
+                const targetCycles = accumulatedCycles;
+                const v = p.isHigh ? 5.0 : 0.0;
+                sched(() => {
+                    this.driveOut(v);
+                }, targetCycles);
+                accumulatedCycles += p.durationUs * 16;
+            }
+            sched(() => {
+                this.transmitting = false;
+                this.setState({ powered: true, transmitting: false });
+            }, accumulatedCycles);
+        } else if (cpu && typeof cpu.addClockEvent === 'function') {
             let accumulatedCycles = 0;
             for (const p of pulses) {
                 const targetCycles = accumulatedCycles;
@@ -205,4 +234,79 @@ export class IRReceiverLogic extends PulseProtocol {
             lastValue: String(this.state.lastValue || '0x00000000'),
         });
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: powered} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {},
+            i: {powered: ((this as any).powered ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        {
+const vcc = graph.get(`${component.id}.VCC`) || [];
+        const gnd = graph.get(`${component.id}.GND`) || [];
+        const issues = [];
+
+        if (vcc.length === 0) {
+            issues.push(createValidationIssue({
+                ruleId: 'ir-receiver-power-check',
+                severity: 'warn',
+                message: `⚠️ [IR Receiver ${component.id}] VCC not connected. Connect to 3.3V or 5V.`,
+                compIds: [component.id],
+                remediation: 'Connect VCC to the power rail.',
+                autoFix: true,
+            }));
+        }
+        if (gnd.length === 0) {
+            issues.push(createValidationIssue({
+                ruleId: 'ir-receiver-power-check',
+                severity: 'warn',
+                message: `⚠️ [IR Receiver ${component.id}] GND not connected.`,
+                compIds: [component.id],
+                remediation: 'Connect GND to the common ground rail.',
+                autoFix: true,
+            }));
+        }
+        return issues.length > 0 ? issues : null;
+        }
+
+        /* --- next rule --- */
+        {
+const out = graph.get(`${component.id}.OUT`) || [];
+        if (out.length === 0) {
+            return createValidationIssue({
+                ruleId: 'ir-receiver-out-check',
+                severity: 'warn',
+                message: `⚠️ [IR Receiver ${component.id}] OUT pin not connected. Connect to a digital pin.`,
+                compIds: [component.id],
+                remediation: 'Connect the OUT pin to an MCU digital pin.',
+                autoFix: true,
+            });
+        }
+        return null;
+        }
+
+        /* --- next rule --- */
+        {
+const out = graph.get(`${component.id}.OUT`) || [];
+        const hasDigital = out.some((c: string) =>
+            !c.includes(':A0') && !c.includes(':A1') &&
+            !c.includes(':A2') && !c.includes(':A3')
+        );
+        if (out.length > 0 && !hasDigital) {
+            return createValidationIssue({
+                ruleId: 'ir-receiver-digital-check',
+                severity: 'warn',
+                message: `⚠️ [IR Receiver ${component.id}] OUT should connect to a digital pin (e.g. D2–D13), not an analog-only pin.`,
+                compIds: [component.id],
+                remediation: 'Move OUT connection to a digital pin.',
+                autoFix: false,
+            });
+        }
+        return null;
+        }
+}
 }

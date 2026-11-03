@@ -35,28 +35,77 @@
     ],
     "autowiring": {
         "helpers": [
-            { "type": "openhw-a4988", "id": "driver" },
-            { "type": "openhw-power-supply", "id": "psu", "attrs": { "voltage": "12.0" } }
+            {
+                "type": "openhw-a4988",
+                "id": "driver"
+            },
+            {
+                "type": "openhw-power-supply",
+                "id": "psu",
+                "attrs": {
+                    "voltage": "12.0"
+                }
+            }
         ],
         "connections": [
-            { "from": "A+", "to": "helper:driver:1A" },
-            { "from": "A-", "to": "helper:driver:1B" },
-            { "from": "B+", "to": "helper:driver:2A" },
-            { "from": "B-", "to": "helper:driver:2B" },
-            
-            { "from": "helper:driver:STEP",      "to": "arduino:8" },
-            { "from": "helper:driver:DIR",       "to": "arduino:9" },
-            { "from": "helper:driver:ENABLE",    "to": "arduino:10" },
-            { "from": "helper:driver:VDD",       "to": "arduino:3V3" },
-            { "from": "helper:driver:GND_LOGIC", "to": "arduino:GND" },
-            { "from": "helper:driver:VMOT",      "to": "helper:psu:5V" },
-            { "from": "helper:driver:GND_MOT",   "to": "helper:psu:GND" },
-            { "from": "helper:driver:RESET",     "to": "arduino:3V3" },
-            { "from": "helper:driver:SLEEP",     "to": "arduino:3V3" }
+            {
+                "from": "A+",
+                "to": "helper:driver:1A"
+            },
+            {
+                "from": "A-",
+                "to": "helper:driver:1B"
+            },
+            {
+                "from": "B+",
+                "to": "helper:driver:2A"
+            },
+            {
+                "from": "B-",
+                "to": "helper:driver:2B"
+            },
+            {
+                "from": "helper:driver:STEP",
+                "to": "arduino:8"
+            },
+            {
+                "from": "helper:driver:DIR",
+                "to": "arduino:9"
+            },
+            {
+                "from": "helper:driver:ENABLE",
+                "to": "arduino:10"
+            },
+            {
+                "from": "helper:driver:VDD",
+                "to": "arduino:3V3"
+            },
+            {
+                "from": "helper:driver:GND_LOGIC",
+                "to": "arduino:GND"
+            },
+            {
+                "from": "helper:driver:VMOT",
+                "to": "helper:psu:5V"
+            },
+            {
+                "from": "helper:driver:GND_MOT",
+                "to": "helper:psu:GND"
+            },
+            {
+                "from": "helper:driver:RESET",
+                "to": "arduino:3V3"
+            },
+            {
+                "from": "helper:driver:SLEEP",
+                "to": "arduino:3V3"
+            }
         ]
     },
     "autocoding": {
-        "libraries": ["AccelStepper"],
+        "libraries": [
+            "AccelStepper"
+        ],
         "arduino": {
             "globals": "// Stepper setup with A4988 (Step=${helper:driver:STEP}, Dir=${helper:driver:DIR})\n#include <AccelStepper.h>\nAccelStepper stepper_${COMP_SUFFIX}(AccelStepper::DRIVER, ${helper:driver:STEP}, ${helper:driver:DIR});",
             "setup": "pinMode(${helper:driver:STEP}, OUTPUT);\n  pinMode(${helper:driver:DIR}, OUTPUT);\n  pinMode(${helper:driver:ENABLE}, OUTPUT);\n  digitalWrite(${helper:driver:ENABLE}, LOW);\n  stepper_${COMP_SUFFIX}.setMinPulseWidth(20);\n  stepper_${COMP_SUFFIX}.setMaxSpeed(1000);\n  stepper_${COMP_SUFFIX}.setAcceleration(500);",
@@ -64,7 +113,24 @@
         }
     },
     "telemetry": {
-      "template": "Angle=${state.angle}°, Phase=${state.currentPhase}",
-      "criticalKeys": ["state.angle"]
-    }
+        "template": "Angle=${state.angle}\u00b0, Phase=${state.currentPhase}",
+        "criticalKeys": [
+            "state.angle"
+        ]
+    },
+    "sab": {
+        "slotKind": 6,
+        "fields": {
+            "f0": "angle"
+        }
+    },
+    "ui": {
+        "svg": "./stepper-motor.svg",
+        "interactive": []
+    },
+    "sim": {
+        "runtime": "js",
+        "validation": "inline"
+    },
+    "bounds": {"x": 0, "y": 0, "w": 135, "h": 165}
 }

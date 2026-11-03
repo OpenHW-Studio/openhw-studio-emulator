@@ -1,0 +1,21 @@
+<svg width="100%" height="100%" viewBox="0 0 156.25 234.375" xmlns="http://www.w3.org/2000/svg" data-component="openhw-esp32-cam" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="154.25" height="232.375" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="78.125" y="117.1875" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">ESP32-CAM</text>
+  <circle cx="11.5625" cy="28.9" r="2.5" fill="#888" data-pin="5V.1" />
+  <circle cx="11.5625" cy="43.9" r="2.5" fill="#888" data-pin="GND.1" />
+  <circle cx="11.5625" cy="58.9" r="2.5" fill="#888" data-pin="12" />
+  <circle cx="11.5625" cy="73.9" r="2.5" fill="#888" data-pin="13" />
+  <circle cx="11.5625" cy="88.9" r="2.5" fill="#888" data-pin="15" />
+  <circle cx="11.5625" cy="103.9" r="2.5" fill="#888" data-pin="14" />
+  <circle cx="11.5625" cy="118.9" r="2.5" fill="#888" data-pin="2" />
+  <circle cx="11.5625" cy="133.9" r="2.5" fill="#888" data-pin="4" />
+  <circle cx="143.4375" cy="28.9" r="2.5" fill="#888" data-pin="3V3" />
+  <circle cx="143.4375" cy="43.9" r="2.5" fill="#888" data-pin="16" />
+  <circle cx="143.4375" cy="58.9" r="2.5" fill="#888" data-pin="0" />
+  <circle cx="143.4375" cy="73.9" r="2.5" fill="#888" data-pin="GND.2" />
+  <circle cx="143.4375" cy="88.9" r="2.5" fill="#888" data-pin="VCC" />
+  <circle cx="143.4375" cy="103.9" r="2.5" fill="#888" data-pin="3" />
+  <circle cx="143.4375" cy="118.9" r="2.5" fill="#888" data-pin="1" />
+  <circle cx="143.4375" cy="133.9" r="2.5" fill="#888" data-pin="GND.3" />
+</svg>

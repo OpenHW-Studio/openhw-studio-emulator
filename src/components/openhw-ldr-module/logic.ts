@@ -1,4 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
+import { createValidationIssue } from '../component-schema.js';
 
 export class LdrModuleLogic extends BaseComponent {
     constructor(id: string, manifest: any) {
@@ -67,5 +68,46 @@ export class LdrModuleLogic extends BaseComponent {
             analogOutV: Number((this.getPinVoltage('AO') || 0).toFixed(2)),
             dOut: !!this.state.dOut
         });
+    }
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: light, i0: dOut} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {light: Number(s.light ?? 0)},
+            i: {dOut: (s.dOut ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const vccNode = `${component.id}.VCC`;
+        const gndNode = `${component.id}.GND`;
+        const outNode = `${component.id}.AO`;
+        const vccV = validator.calculateVoltageAtNode(vccNode);
+        const gndV = validator.calculateVoltageAtNode(gndNode);
+
+        if (vccV > 0.5 && Math.abs(vccV - gndV) < 0.1) {
+            return createValidationIssue({
+                ruleId: 'ldr-module-wiring-check',
+                severity: 'error',
+                message: `🔥 [LDR Module ${component.id}] FATAL: VCC and GND are shorted on the module pins!`,
+                compIds: [component.id],
+                remediation: 'Fix the short between VCC and GND.',
+                autoFix: false,
+            });
+        }
+
+        if (((validator ? validator.getNeighbors(vccNode) : (graph.get(vccNode) || []))).length > 0 && ((validator ? validator.getNeighbors(outNode) : (graph.get(outNode) || []))).length === 0) {
+            return createValidationIssue({
+                ruleId: 'ldr-module-wiring-check',
+                severity: 'warn',
+                message: `⚠️ [LDR Module ${component.id}] Warning: Module is powered but the Signal (AO) pin is not connected to anything.`,
+                compIds: [component.id],
+                remediation: 'Connect AO to an analog input pin.',
+                autoFix: true,
+            });
+        }
+
+        return null;
     }
 }

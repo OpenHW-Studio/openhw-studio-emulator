@@ -43,5 +43,12 @@
         "setup": "Serial.begin(9600);",
         "loop": "int val_${COMP_SUFFIX} = analogRead(sensorPin_${COMP_SUFFIX});\nSerial.print(\"Moisture: \");\nSerial.println(val_${COMP_SUFFIX});\ndelay(1000);"
       }
-    }
+    },
+    "sab": {
+        "slotKind": 4,
+        "fields": {"f0": "moisture"}
+    },
+    "ui": {"svg": "./soil-moisture-sensor.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 270, "h": 90}
 }

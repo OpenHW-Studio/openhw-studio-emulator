@@ -13,6 +13,7 @@ The Emulator package is a shared library that defines how components behave and 
 - **Component Registry**: Defines the JSON manifests for all supported components (LEDs, LCDs, Motors, etc.).
 - **Circuit Validation**: Implements a graph-based validation engine to detect wiring errors (e.g., short circuits, missing resistors) before simulation starts.
 - **Pin Logic**: Handles the digital and analog signal mapping between the CPU and virtual components.
+- **Component Status & Capabilities**: For details on how component verification levels, hardware checklists, and visibility controls work across the emulator and frontend, see [**Component Status & Visibility Guide**](./COMPONENT_STATUS_GUIDE.md).
 
 ### Runtime Notes (March 2026)
 - RP2040/Pico simulation paths now use validated firmware vector loading to avoid invalid-memory execution loops from malformed firmware payloads.

@@ -164,6 +164,59 @@ export function validateComponentManifest(manifest) {
         errors.push('Manifest.contextMenuOnlyDuringRun must be a boolean when provided.');
     }
 
+    // Component v2 additive keys (sab / ui / sim / wasm). Old frontends ignore
+    // them; new registry code reads them for slot kinds, svg art, runtime.
+    if (manifestObject.sab !== undefined) {
+        const sab = manifestObject.sab;
+        if (!sab || typeof sab !== 'object' || Array.isArray(sab)) {
+            errors.push('Manifest.sab must be an object when provided.');
+        } else {
+            if (sab.slotKind !== undefined && !Number.isInteger(Number(sab.slotKind))) {
+                errors.push('Manifest.sab.slotKind must be an integer when provided.');
+            }
+            if (sab.fields !== undefined && (typeof sab.fields !== 'object' || sab.fields === null || Array.isArray(sab.fields))) {
+                errors.push('Manifest.sab.fields must be an object when provided.');
+            }
+        }
+    }
+
+    if (manifestObject.ui !== undefined) {
+        const ui = manifestObject.ui;
+        if (!ui || typeof ui !== 'object' || Array.isArray(ui)) {
+            errors.push('Manifest.ui must be an object when provided.');
+        } else if (ui.svg !== undefined && (typeof ui.svg !== 'string' || !ui.svg.trim())) {
+            errors.push('Manifest.ui.svg must be a non-empty string when provided.');
+        }
+    }
+
+    if (manifestObject.sim !== undefined) {
+        const sim = manifestObject.sim;
+        if (!sim || typeof sim !== 'object' || Array.isArray(sim)) {
+            errors.push('Manifest.sim must be an object when provided.');
+        } else {
+            if (sim.runtime !== undefined && sim.runtime !== 'js' && sim.runtime !== 'wasm') {
+                errors.push('Manifest.sim.runtime must be "js" or "wasm" when provided.');
+            }
+            if (sim.validation !== undefined && sim.validation !== 'inline' && sim.validation !== 'file') {
+                errors.push('Manifest.sim.validation must be "inline" or "file" when provided.');
+            }
+        }
+    }
+
+    if (manifestObject.wasm !== undefined) {
+        const wasm = manifestObject.wasm;
+        if (!wasm || typeof wasm !== 'object' || Array.isArray(wasm)) {
+            errors.push('Manifest.wasm must be an object when provided.');
+        } else {
+            if (wasm.abi !== undefined && !Number.isInteger(Number(wasm.abi))) {
+                errors.push('Manifest.wasm.abi must be an integer when provided.');
+            }
+            if (wasm.file !== undefined && (typeof wasm.file !== 'string' || !wasm.file.trim())) {
+                errors.push('Manifest.wasm.file must be a non-empty string when provided.');
+            }
+        }
+    }
+
     return {
         valid: errors.length === 0,
         errors,

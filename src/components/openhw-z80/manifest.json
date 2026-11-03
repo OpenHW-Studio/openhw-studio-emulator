@@ -1,0 +1,352 @@
+{
+  "type": "openhw-z80",
+  "label": "Zilog Z80",
+  "group": "Boards",
+  "description": "Zilog Z80 8-bit microprocessor board (OUT (01h),A console). Assembly in the editor, assembled in-WASM.",
+  "w": 92,
+  "h": 330,
+  "attrs": {
+    "isa": {
+      "type": "string",
+      "default": "Z80"
+    },
+    "org": {
+      "type": "string",
+      "default": ""
+    },
+    "builder": {
+      "type": "string",
+      "default": "retro-asm"
+    }
+  },
+  "pins": [
+    {
+      "id": "L0",
+      "x": 15,
+      "y": 15,
+      "type": "digital_inout",
+      "description": "Console TX (drain)"
+    },
+    {
+      "id": "L1",
+      "x": 15,
+      "y": 30,
+      "type": "digital_inout",
+      "description": "Console RX (inject)"
+    },
+    {
+      "id": "L2",
+      "x": 15,
+      "y": 45,
+      "type": "digital_inout",
+      "description": "L2"
+    },
+    {
+      "id": "L3",
+      "x": 15,
+      "y": 60,
+      "type": "digital_inout",
+      "description": "L3"
+    },
+    {
+      "id": "L4",
+      "x": 15,
+      "y": 75,
+      "type": "digital_inout",
+      "description": "L4"
+    },
+    {
+      "id": "L5",
+      "x": 15,
+      "y": 90,
+      "type": "digital_inout",
+      "description": "L5"
+    },
+    {
+      "id": "L6",
+      "x": 15,
+      "y": 105,
+      "type": "digital_inout",
+      "description": "L6"
+    },
+    {
+      "id": "L7",
+      "x": 15,
+      "y": 120,
+      "type": "digital_inout",
+      "description": "L7"
+    },
+    {
+      "id": "L8",
+      "x": 15,
+      "y": 135,
+      "type": "digital_inout",
+      "description": "L8"
+    },
+    {
+      "id": "L9",
+      "x": 15,
+      "y": 150,
+      "type": "digital_inout",
+      "description": "L9"
+    },
+    {
+      "id": "L10",
+      "x": 15,
+      "y": 165,
+      "type": "digital_inout",
+      "description": "L10"
+    },
+    {
+      "id": "L11",
+      "x": 15,
+      "y": 180,
+      "type": "digital_inout",
+      "description": "L11"
+    },
+    {
+      "id": "L12",
+      "x": 15,
+      "y": 195,
+      "type": "digital_inout",
+      "description": "L12"
+    },
+    {
+      "id": "L13",
+      "x": 15,
+      "y": 210,
+      "type": "digital_inout",
+      "description": "L13"
+    },
+    {
+      "id": "L14",
+      "x": 15,
+      "y": 225,
+      "type": "digital_inout",
+      "description": "L14"
+    },
+    {
+      "id": "L15",
+      "x": 15,
+      "y": 240,
+      "type": "digital_inout",
+      "description": "L15"
+    },
+    {
+      "id": "L16",
+      "x": 15,
+      "y": 255,
+      "type": "digital_inout",
+      "description": "L16"
+    },
+    {
+      "id": "L17",
+      "x": 15,
+      "y": 270,
+      "type": "digital_inout",
+      "description": "L17"
+    },
+    {
+      "id": "L18",
+      "x": 15,
+      "y": 285,
+      "type": "digital_inout",
+      "description": "L18"
+    },
+    {
+      "id": "L19",
+      "x": 15,
+      "y": 300,
+      "type": "digital_inout",
+      "description": "L19"
+    },
+    {
+      "id": "R0",
+      "x": 75,
+      "y": 15,
+      "type": "digital_inout",
+      "description": "R0"
+    },
+    {
+      "id": "R1",
+      "x": 75,
+      "y": 30,
+      "type": "digital_inout",
+      "description": "R1"
+    },
+    {
+      "id": "R2",
+      "x": 75,
+      "y": 45,
+      "type": "digital_inout",
+      "description": "R2"
+    },
+    {
+      "id": "R3",
+      "x": 75,
+      "y": 60,
+      "type": "digital_inout",
+      "description": "R3"
+    },
+    {
+      "id": "R4",
+      "x": 75,
+      "y": 75,
+      "type": "digital_inout",
+      "description": "R4"
+    },
+    {
+      "id": "R5",
+      "x": 75,
+      "y": 90,
+      "type": "digital_inout",
+      "description": "R5"
+    },
+    {
+      "id": "R6",
+      "x": 75,
+      "y": 105,
+      "type": "digital_inout",
+      "description": "R6"
+    },
+    {
+      "id": "R7",
+      "x": 75,
+      "y": 120,
+      "type": "digital_inout",
+      "description": "R7"
+    },
+    {
+      "id": "R8",
+      "x": 75,
+      "y": 135,
+      "type": "digital_inout",
+      "description": "R8"
+    },
+    {
+      "id": "R9",
+      "x": 75,
+      "y": 150,
+      "type": "digital_inout",
+      "description": "R9"
+    },
+    {
+      "id": "R10",
+      "x": 75,
+      "y": 165,
+      "type": "digital_inout",
+      "description": "R10"
+    },
+    {
+      "id": "R11",
+      "x": 75,
+      "y": 180,
+      "type": "digital_inout",
+      "description": "R11"
+    },
+    {
+      "id": "R12",
+      "x": 75,
+      "y": 195,
+      "type": "digital_inout",
+      "description": "R12"
+    },
+    {
+      "id": "R13",
+      "x": 75,
+      "y": 210,
+      "type": "digital_inout",
+      "description": "R13"
+    },
+    {
+      "id": "R14",
+      "x": 75,
+      "y": 225,
+      "type": "digital_inout",
+      "description": "R14"
+    },
+    {
+      "id": "R15",
+      "x": 75,
+      "y": 240,
+      "type": "digital_inout",
+      "description": "R15"
+    },
+    {
+      "id": "R16",
+      "x": 75,
+      "y": 255,
+      "type": "digital_inout",
+      "description": "R16"
+    },
+    {
+      "id": "R17",
+      "x": 75,
+      "y": 270,
+      "type": "digital_inout",
+      "description": "R17"
+    },
+    {
+      "id": "R18",
+      "x": 75,
+      "y": 285,
+      "type": "digital_inout",
+      "description": "R18"
+    },
+    {
+      "id": "R19",
+      "x": 75,
+      "y": 300,
+      "type": "digital_inout",
+      "description": "R19"
+    },
+    {
+      "id": "SWD_3V3",
+      "x": 23.5,
+      "y": 315,
+      "type": "power",
+      "description": "SWD 3.3V"
+    },
+    {
+      "id": "SWDIO",
+      "x": 38.5,
+      "y": 315,
+      "type": "digital_inout",
+      "description": "SWD Data"
+    },
+    {
+      "id": "SWCLK",
+      "x": 53.5,
+      "y": 315,
+      "type": "digital_inout",
+      "description": "SWD Clock"
+    },
+    {
+      "id": "SWD_GND",
+      "x": 68.5,
+      "y": 315,
+      "type": "power",
+      "description": "SWD Ground"
+    }
+  ],
+  "sab": {
+    "slotKind": 0,
+    "fields": {
+      "i0": "builtInLed"
+    }
+  },
+  "ui": {
+    "svg": "./openhw-z80.svg",
+    "interactive": []
+  },
+  "sim": {
+    "runtime": "js",
+    "validation": "inline"
+  },
+  "bounds": {
+    "x": 0,
+    "y": 0,
+    "w": 92,
+    "h": 330
+  }
+}

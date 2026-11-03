@@ -31,9 +31,9 @@
     ],
     "autowiring": {
         "connections": [
-            { "from": "IN1", "to": "arduino:D2" },
-            { "from": "IN2", "to": "arduino:D3" },
-            { "from": "OUT", "to": "arduino:D4", "via": "openhw-resistor", "attrs": { "value": "220" } }
+            { "from": "IN1", "to": "arduino:D2|2" },
+            { "from": "IN2", "to": "arduino:D3|3" },
+            { "from": "OUT", "to": "arduino:D4|4", "via": "openhw-resistor", "attrs": { "value": "220" } }
         ]
     },
     "autocoding": {
@@ -41,6 +41,12 @@
             "setup": "Serial.begin(9600);\npinMode(${IN1}, OUTPUT);\npinMode(${IN2}, OUTPUT);\npinMode(${OUT}, INPUT);\nSerial.println(\"XOR Gate ready\");",
             "loop": "for (int i=0; i<4; i++) {\n  digitalWrite(${IN1}, (i&1)?HIGH:LOW);\n  digitalWrite(${IN2}, (i&2)?HIGH:LOW);\n  delay(5);\n  Serial.print(\"XOR | \");\n  Serial.print((i&1)?1:0);\n  Serial.print((i&2)?1:0);\n  Serial.print(\" -> \");\n  Serial.println(digitalRead(${OUT}));\n  delay(500);\n}"
         }
-    }
+    },
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "outputHigh"}
+    },
+    "ui": {"svg": "./logic-xor-gate.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 75, "h": 60}
 }
-

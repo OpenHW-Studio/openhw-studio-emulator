@@ -1,4 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
+import { createValidationIssue } from '../component-schema.js';
 
 export class DFlipFlopRLogic extends BaseComponent {
     private prevClk: boolean = false;
@@ -58,7 +59,7 @@ export class DFlipFlopRLogic extends BaseComponent {
                 visited.add(otherKey);
 
                 const [compId, compPin] = otherKey.split(':');
-                const inst = instances.find(i => i.id === compId);
+                const inst = this.findInstance(instances, compId);
                 if (!inst) continue;
 
                 if (!inst.pins[compPin]) inst.pins[compPin] = { voltage: 0, mode: 'INPUT' };
@@ -83,5 +84,34 @@ export class DFlipFlopRLogic extends BaseComponent {
         if (pinId === 'Q') return this.state.q ? 5.0 : 0.0;
         if (pinId === 'Qbar') return this.state.qbar ? 5.0 : 0.0;
         return super.getPinVoltage(pinId);
+    }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: q, i1: qbar} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {},
+            i: {q: (s.q ? 1 : 0), qbar: (s.qbar ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const pinD = graph.get(`${component.id}.D`);
+        const pinClk = graph.get(`${component.id}.CLK`);
+        const pinR = graph.get(`${component.id}.R`);
+        const pinQ = graph.get(`${component.id}.Q`);
+
+        if ((!pinD || pinD.length === 0) && (!pinClk || pinClk.length === 0) &&
+            (!pinQ || pinQ.length === 0) && (!pinR || pinR.length === 0)) {
+            return createValidationIssue({
+                ruleId: 'logic-d-flipflop-reset-connection-check',
+                severity: 'warn',
+                message: `⚠️ [D Flip-Flop (Reset) ${component.id}] Warning: No pins are connected.`,
+                compIds: [component.id],
+                remediation: 'Wire the D, CLK, Q, and R pins as required by the design.',
+                autoFix: true,
+            });
+        }
+        return null;
     }
 }

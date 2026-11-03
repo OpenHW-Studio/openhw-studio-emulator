@@ -1,84 +1,82 @@
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
 import { createValidationIssue } from '../component-schema.js';
 import type { ComponentValidationRule } from '../component-schema.js';
+import { DS18B20Logic } from './logic';
+
+const delegate = DS18B20Logic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>, validator?: any) =>
+        DS18B20Logic.prototype.validate!.call(undefined, component, graph, validator)
+    : (_component: any, _graph: Map<string, string[]>) => null;
 
 export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
         {
             id: 'ds18b20-power-check',
             name: 'DS18B20 Power Check',
-            severity: 'warn',
+            severity: 'warn' as const,
             priority: 10,
             description: 'Warn when VCC or GND pins are disconnected.',
-            check: (component: any, graph: Map<string, string[]>) => {
-                const vdd = graph.get(`${component.id}.VCC`) || graph.get(`${component.id}.VDD`) || [];
-                const gnd = graph.get(`${component.id}.GND`) || [];
-                const issues = [];
-
-                if (vdd.length === 0) {
-                    issues.push(createValidationIssue({
-                        ruleId: 'ds18b20-power-check',
-                        severity: 'warn',
-                        message: `⚠️ [DS18B20 ${component.id}] VCC pin not connected. Connect to 3.3V or 5V.`,
-                        compIds: [component.id],
-                        remediation: 'Connect VCC to the power rail.',
-                        autoFix: true,
-                    }));
-                }
-                if (gnd.length === 0) {
-                    issues.push(createValidationIssue({
-                        ruleId: 'ds18b20-power-check',
-                        severity: 'warn',
-                        message: `⚠️ [DS18B20 ${component.id}] GND pin not connected.`,
-                        compIds: [component.id],
-                        remediation: 'Connect GND to the common ground rail.',
-                        autoFix: true,
-                    }));
-                }
-                return issues.length > 0 ? issues : null;
-            },
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'ds18b20-power-check');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'ds18b20-power-check'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
+            }
         },
         {
             id: 'ds18b20-data-check',
             name: 'DS18B20 Data Pin Check',
-            severity: 'warn',
+            severity: 'warn' as const,
             priority: 20,
             description: 'Warn when DQ pin is disconnected.',
-            check: (component: any, graph: Map<string, string[]>) => {
-                const dq = graph.get(`${component.id}.DQ`) || [];
-                if (dq.length === 0) {
-                    return createValidationIssue({
-                        ruleId: 'ds18b20-data-check',
-                        severity: 'warn',
-                        message: `⚠️ [DS18B20 ${component.id}] DQ (data) pin not connected. Connect to a digital pin.`,
-                        compIds: [component.id],
-                        remediation: 'Connect the DQ pin to an MCU digital pin.',
-                        autoFix: true,
-                    });
-                }
-                return null;
-            },
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'ds18b20-data-check');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'ds18b20-data-check'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
+            }
         },
         {
             id: 'ds18b20-pullup-check',
             name: 'DS18B20 Pull-up Resistor Check',
-            severity: 'info',
+            severity: 'warn' as const,
             priority: 30,
             description: 'Check for pull-up resistor on DQ line.',
-            check: (component: any, graph: Map<string, string[]>) => {
-                const dq = graph.get(`${component.id}.DQ`) || [];
-                const hasResistor = dq.some((c: string) => c.includes('openhw-resistor'));
-                if (!hasResistor && dq.length > 0) {
-                    return createValidationIssue({
-                        ruleId: 'ds18b20-pullup-check',
-                        severity: 'info',
-                        message: `ℹ️ [DS18B20 ${component.id}] Note: Breakout board includes onboard pull-up. If using a bare sensor, ensure a 4.7kΩ pull-up resistor is present between DQ and VCC.`,
-                        compIds: [component.id],
-                        remediation: 'Verify pull-up resistor requirements.',
-                        autoFix: false,
-                    });
-                }
-                return null;
-            },
-        },
-    ],
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'ds18b20-pullup-check');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'ds18b20-pullup-check'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
+            }
+        }
+    ]
 };

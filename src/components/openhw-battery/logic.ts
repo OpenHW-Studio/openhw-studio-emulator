@@ -1,7 +1,10 @@
 import { BaseComponent } from '../BaseComponent';
+import { createValidationIssue } from '../component-schema.js';
 
 export class BatteryLogic extends BaseComponent {
-    lastUpdate = Date.now();
+    // Sim-time discharge: dt derives from cpuCycles (16M cycles = 1 sim-s).
+    lastUpdate = Date.now(); // legacy wall seed (pre-first-tick only)
+    private lastUpdateCycles: number | null = null;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
@@ -25,9 +28,17 @@ export class BatteryLogic extends BaseComponent {
     }
 
     update(cpuCycles: number, currentWires: any[], allComponents: BaseComponent[], totalCurrentDraw: number = 0) {
-        const now = Date.now();
-        const dtHours = (now - this.lastUpdate) / (1000 * 60 * 60);
-        this.lastUpdate = now;
+        // Cycle-based dt (deterministic, pause-safe); wall fallback pre-first-tick.
+        let dtHours: number;
+        if (this.lastUpdateCycles === null) {
+            const now = Date.now();
+            dtHours = (now - this.lastUpdate) / (1000 * 60 * 60);
+            this.lastUpdate = now;
+            this.lastUpdateCycles = cpuCycles;
+        } else {
+            dtHours = Math.max(0, cpuCycles - this.lastUpdateCycles) / 16000000 / 3600;
+            this.lastUpdateCycles = cpuCycles;
+        }
 
         if (this.state.isDead) {
             this.setPinVoltage('VCC', 0.0);
@@ -66,7 +77,7 @@ export class BatteryLogic extends BaseComponent {
 
                 if (compId === this.id || visitedComps.has(compId)) continue;
 
-                const inst = allComponents.find(i => i.id === compId);
+                const inst = this.findInstance(allComponents, compId);
                 if (!inst) continue;
 
                 visitedComps.add(compId);
@@ -130,5 +141,30 @@ export class BatteryLogic extends BaseComponent {
             voltage: this.state.voltage.toFixed(2) + 'V',
             status: this.state.isDead ? 'Empty' : 'Discharging'
         });
+    }
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: voltage, f1: charge} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {voltage: Number(s.voltage ?? 0), charge: Number(s.charge ?? 0)},
+            i: {},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const vccNode = `${component.id}.VCC`;
+        const gndNode = `${component.id}.GND`;
+        if (validator.findResistanceBetween(vccNode, gndNode) < 1.0) {
+            return createValidationIssue({
+                ruleId: 'battery-short-circuit-check',
+                severity: 'error',
+                message: `🔥 [Battery ${component.id}] Dead short detected! Battery will overheat and catch fire.`,
+                compIds: [component.id],
+                remediation: 'Remove the short or add a proper load path.',
+                autoFix: false,
+            });
+        }
+        return null;
     }
 }

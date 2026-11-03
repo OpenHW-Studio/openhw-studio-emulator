@@ -1,0 +1,54 @@
+<svg width="100%" height="100%" viewBox="0 0 124 314" xmlns="http://www.w3.org/2000/svg">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="122" height="312" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="62.0" y="157.0" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">Raspberry Pi Pico 2 W</text>
+  <circle cx="9.5" cy="20.4" r="2.5" fill="#888" data-pin="GP0" />
+  <circle cx="9.5" cy="35.4" r="2.5" fill="#888" data-pin="GP1" />
+  <circle cx="9.5" cy="50.4" r="2.5" fill="#888" data-pin="GND" />
+  <circle cx="9.5" cy="65.4" r="2.5" fill="#888" data-pin="GP2" />
+  <circle cx="9.5" cy="80.4" r="2.5" fill="#888" data-pin="GP3" />
+  <circle cx="9.5" cy="95.4" r="2.5" fill="#888" data-pin="GP4" />
+  <circle cx="9.5" cy="110.4" r="2.5" fill="#888" data-pin="GP5" />
+  <circle cx="9.5" cy="125.4" r="2.5" fill="#888" data-pin="GND_1" />
+  <circle cx="9.5" cy="140.4" r="2.5" fill="#888" data-pin="GP6" />
+  <circle cx="9.5" cy="155.4" r="2.5" fill="#888" data-pin="GP7" />
+  <circle cx="9.5" cy="170.4" r="2.5" fill="#888" data-pin="GP8" />
+  <circle cx="9.5" cy="185.4" r="2.5" fill="#888" data-pin="GP9" />
+  <circle cx="9.5" cy="200.4" r="2.5" fill="#888" data-pin="GND_2" />
+  <circle cx="9.5" cy="215.4" r="2.5" fill="#888" data-pin="GP10" />
+  <circle cx="9.5" cy="230.4" r="2.5" fill="#888" data-pin="GP11" />
+  <circle cx="9.5" cy="245.4" r="2.5" fill="#888" data-pin="GP12" />
+  <circle cx="9.5" cy="260.4" r="2.5" fill="#888" data-pin="GP13" />
+  <circle cx="9.5" cy="275.4" r="2.5" fill="#888" data-pin="GND_3" />
+  <circle cx="9.5" cy="290.4" r="2.5" fill="#888" data-pin="GP14" />
+  <circle cx="9.5" cy="305.4" r="2.5" fill="#888" data-pin="GP15" />
+  <circle cx="114.5" cy="20.4" r="2.5" fill="#888" data-pin="VBUS" />
+  <circle cx="114.5" cy="35.4" r="2.5" fill="#888" data-pin="VSYS" />
+  <circle cx="114.5" cy="50.4" r="2.5" fill="#888" data-pin="GND_4" />
+  <circle cx="114.5" cy="65.4" r="2.5" fill="#888" data-pin="3V3_EN" />
+  <circle cx="114.5" cy="80.4" r="2.5" fill="#888" data-pin="3V3" />
+  <circle cx="114.5" cy="95.4" r="2.5" fill="#888" data-pin="ADC_VREF" />
+  <circle cx="114.5" cy="110.4" r="2.5" fill="#888" data-pin="GP28" />
+  <circle cx="114.5" cy="125.4" r="2.5" fill="#888" data-pin="AGND" />
+  <circle cx="114.5" cy="140.4" r="2.5" fill="#888" data-pin="GP27" />
+  <circle cx="114.5" cy="155.4" r="2.5" fill="#888" data-pin="GP26" />
+  <circle cx="114.5" cy="170.4" r="2.5" fill="#888" data-pin="RUN" />
+  <circle cx="114.5" cy="185.4" r="2.5" fill="#888" data-pin="GP22" />
+  <circle cx="114.5" cy="200.4" r="2.5" fill="#888" data-pin="GND_5" />
+  <circle cx="114.5" cy="215.4" r="2.5" fill="#888" data-pin="GP21" />
+  <circle cx="114.5" cy="230.4" r="2.5" fill="#888" data-pin="GP20" />
+  <circle cx="114.5" cy="245.4" r="2.5" fill="#888" data-pin="GP19" />
+  <circle cx="114.5" cy="260.4" r="2.5" fill="#888" data-pin="GP18" />
+  <circle cx="114.5" cy="275.4" r="2.5" fill="#888" data-pin="GND_6" />
+  <circle cx="114.5" cy="290.4" r="2.5" fill="#888" data-pin="GP17" />
+  <circle cx="114.5" cy="305.4" r="2.5" fill="#888" data-pin="GP16" />
+  <circle cx="9.5" cy="260.4" r="2.5" fill="#888" data-pin="13" />
+  <circle cx="9.5" cy="65.4" r="2.5" fill="#888" data-pin="2" />
+  <circle cx="114.5" cy="20.4" r="2.5" fill="#888" data-pin="5V" />
+  <circle cx="114.5" cy="230.4" r="2.5" fill="#888" data-pin="A4" />
+  <circle cx="114.5" cy="215.4" r="2.5" fill="#888" data-pin="A5" />
+  <circle cx="114.5" cy="260.4" r="2.5" fill="#888" data-pin="SCK" />
+  <circle cx="114.5" cy="245.4" r="2.5" fill="#888" data-pin="MOSI" />
+  <circle cx="114.5" cy="305.4" r="2.5" fill="#888" data-pin="MISO" />
+  <circle cx="114.5" cy="290.4" r="2.5" fill="#888" data-pin="SS" />
+</svg>

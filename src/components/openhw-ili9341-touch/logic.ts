@@ -24,6 +24,7 @@ export class ILI9341TouchLogic extends BaseComponent {
     private vram = new Uint8Array(typeof SharedArrayBuffer !== 'undefined' ? new SharedArrayBuffer(240 * 320 * 3) : 240 * 320 * 3);
     private vramDirty = false;
     private lastSync = 0;
+    private lastSyncCycles = 0; // cycle-based throttle (no Date.now in tick)
     private powerOn = true;
     private writeCount = 0;
     private madctl = 0x48;
@@ -39,7 +40,7 @@ export class ILI9341TouchLogic extends BaseComponent {
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
-        this.state = { buffer: this.vram, powerOn: true, t: Date.now() };
+        this.state = { buffer: this.vram, powerOn: true, t: 0 };
     }
 
     // Touch interaction from UI
@@ -50,7 +51,7 @@ export class ILI9341TouchLogic extends BaseComponent {
     }
 
     update(cpuCycles: number) {
-        const now = Date.now();
+        const nowMs = Math.floor(cpuCycles / 16000); // 16MHz: cycles->ms, no wall clock
         const vcc = this.getPinVoltage('VCC');
         const newPower = vcc > 2.0;
 
@@ -63,8 +64,9 @@ export class ILI9341TouchLogic extends BaseComponent {
             }
         }
 
-        if (this.vramDirty || (now - this.lastSync > 100)) {
-            this.lastSync = now;
+        if (this.vramDirty || (nowMs - this.lastSync > 100)) {
+            this.lastSync = nowMs;
+            this.lastSyncCycles = cpuCycles;
             this.vramDirty = false;
             this.stateChanged = true;
         }
@@ -221,7 +223,7 @@ export class ILI9341TouchLogic extends BaseComponent {
         return {
             buffer: this.vram,
             powerOn: this.powerOn,
-            t: Date.now()
+            t: 0
         };
     }
 
@@ -244,5 +246,30 @@ export class ILI9341TouchLogic extends BaseComponent {
             touchX: this.touchX,
             touchY: this.touchY
         });
+    }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: powerOn} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {},
+            i: {powerOn: (s.powerOn ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const vccPinId = component.pins?.VCC || `${component.id}:VCC`;
+        const gndPinId = component.pins?.GND || `${component.id}:GND`;
+
+        const vccVolt = validator.calculateVoltageAtNode(vccPinId);
+        const gndVolt = validator.calculateVoltageAtNode(gndPinId);
+
+        if (vccVolt < 3.0) {
+            return { type: 'warning', message: `${component.label} requires at least 3.3V on VCC` };
+        }
+        if (gndVolt > 0.5) {
+            return { type: 'error', message: `${component.label} has missing or poor ground connection` };
+        }
+        return null;
     }
 }

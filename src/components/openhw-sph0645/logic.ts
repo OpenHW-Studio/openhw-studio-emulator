@@ -84,4 +84,17 @@ export class Logic extends BaseComponent {
             this.state.liveMicEnabled = false;
         }
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: peakAmplitude} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {peakAmplitude: Number(s.peakAmplitude ?? 0)},
+            i: {},
+        };
+    }
+    validate(_component: any, _graph: Map<string, string[]>) {
+        return null;
+    }
 }

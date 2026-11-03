@@ -61,5 +61,13 @@
         "setup": "FastLED.addLeds<NEOPIXEL, 6>(leds_${COMP_SUFFIX}, NUM_LEDS_${COMP_SUFFIX});",
         "loop": "fill_solid(leds_${COMP_SUFFIX}, NUM_LEDS_${COMP_SUFFIX}, CRGB::Blue);\nFastLED.show();\ndelay(500);\nfill_solid(leds_${COMP_SUFFIX}, NUM_LEDS_${COMP_SUFFIX}, CRGB::Black);\nFastLED.show();\ndelay(500);"
       }
-    }
+    },
+    "sab": {
+        "slotKind": 1,
+        "fields": {"i0": "enabled"}
+    },
+    "ui": {"svg": "./neopixel-matrix.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "wasm": {"abi": 1, "file": "./core/neopixel_core_bg.wasm", "exports": ["create", "destroy", "set_freq", "reset", "edge", "poll", "out_len", "out_ptr"], "fallback": "js"},
+    "bounds": {"x": 0, "y": 0, "w": 30, "h": 30}
 }

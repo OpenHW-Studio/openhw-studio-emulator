@@ -1,16 +1,37 @@
-export const validation = {
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
+import { createValidationIssue } from '../component-schema.js';
+import type { ComponentValidationRule } from '../component-schema.js';
+import { OrGateLogic } from './logic';
+
+const delegate = OrGateLogic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>, validator?: any) =>
+        OrGateLogic.prototype.validate!.call(undefined, component, graph, validator)
+    : (_component: any, _graph: Map<string, string[]>) => null;
+
+export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
         {
-            name: "OR Gate Connection Check",
-            check: (component: any, graph: Map<string, string[]>, validator: any) => {
-                const pinIn1 = graph.get(`${component.id}.IN1`);
-                const pinIn2 = graph.get(`${component.id}.IN2`);
-                const pinOut = graph.get(`${component.id}.OUT`);
-
-                if ((!pinIn1 || pinIn1.length === 0) && (!pinIn2 || pinIn2.length === 0) && (!pinOut || pinOut.length === 0)) {
-                    return `⚠️ [OR Gate ${component.id}] Warning: No pins are connected.`;
-                }
-                return null;
+            id: 'logic-or-gate-check',
+            name: 'OR Gate Connection Check',
+            severity: 'warn' as const,
+            priority: 10,
+            description: 'OR Gate Connection Check',
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'logic-or-gate-check');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'logic-or-gate-check'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
             }
         }
     ]

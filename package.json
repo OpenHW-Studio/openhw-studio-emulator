@@ -5,7 +5,6 @@
   "main": "src/components/index.ts",
   "type": "module",
   "scripts": {
-    "start": "node src/server.js",
     "validate:smoke": "node src/circuit-validation/smoke-test.js",
     "test:validation": "node --test src/circuit-validation/*.test.js",
     "test": "node --test src/circuit-validation/*.test.js && node src/circuit-validation/smoke-test.js"

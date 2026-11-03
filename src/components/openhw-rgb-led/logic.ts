@@ -53,4 +53,20 @@ export class RGBLEDLogic extends BaseComponent {
             this.stateChanged = true;
         }
     }
+
+    // 12.4 v2: numeric UI state for SAB slot { f0: r, f1: g, f2: b }.
+    uiState() {
+        return {
+            f: {
+                r: Number(this.state?.r || 0),
+                g: Number(this.state?.g || 0),
+                b: Number(this.state?.b || 0),
+            },
+            i: {},
+        };
+    }
+
+    validate(_component: any, _graph: Map<string, string[]>) {
+        return null;
+    }
 }
