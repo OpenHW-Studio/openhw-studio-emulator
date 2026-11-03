@@ -60,8 +60,10 @@ export class JoystickLogic extends BaseComponent {
         this.setPinVoltage('VRX', vx);
         this.setPinVoltage('VRY', vy);
         // Manifest pins are VERT/HORZ — drive those (VRX/VRY are legacy).
-        this.setPinVoltage('VERT', vx);
-        this.setPinVoltage('HORZ', vy);
+        // HORZ is the X axis and VERT the Y axis; the old crossed mapping
+        // made a purely horizontal push read on the vertical channel.
+        this.setPinVoltage('HORZ', vx);
+        this.setPinVoltage('VERT', vy);
     }
 
     onCustomTelemetry() {
