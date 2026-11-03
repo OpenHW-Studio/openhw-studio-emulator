@@ -10,6 +10,19 @@ export class KeypadLogic extends BaseComponent {
         this.state = { pressedKey: null };
     }
 
+    /** Matrix contacts as a conductance network: rows and columns are the
+     * same pins the manifest exposes. Runners with a DC solve read this to
+     * collapse the column pull-up while the firmware scans the pressed
+     * row (the model itself stores no voltages). */
+    getMnaPins() { return ['R1', 'R2', 'R3', 'R4', 'C1', 'C2', 'C3', 'C4']; }
+    getMnaStamps() {
+        const pair = this.state?.connectedPair;
+        if (!Array.isArray(pair) || pair.length !== 2) return [];
+        // A pressed key is a mechanical contact: ~1k, like the pushbutton's
+        // closed switch. Open keys contribute nothing.
+        return [{ pins: [pair[0], pair[1]], g: 1000 }];
+    }
+
     onEvent(event: string) {
         if (event.startsWith('press:')) {
             const key = event.split(':')[1];

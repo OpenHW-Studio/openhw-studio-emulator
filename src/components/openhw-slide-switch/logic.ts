@@ -13,8 +13,6 @@ export class SlideSwitchLogic extends BaseComponent {
         const openCond = 1e-9;
         const isRight = this.state.value === "1" || this.state.value === 1;
 
-        console.log(`[SlideSwitchLogic] getMnaStamps() called. state.value=${this.state.value}, isRight=${isRight}`);
-
         return [
             // Left position: 1 <-> 2 shorted, 3 <-> 2 open
             // Right position: 1 <-> 2 open, 3 <-> 2 shorted
