@@ -58,8 +58,21 @@ export class BuzzerLogic extends PWMProtocol {
         });
         const cpuHz = hasPico ? 125_000_000 : 16_000_000;
 
-        // Silence timeout: 100ms of no edges
-        const silenceTimeoutCycles = cpuHz * 0.1;
+        // Silence timeout: 100ms of no edges.
+        //
+        // Prefer the runner's clock service: `cpuCycles` is the runner's
+        // monotonic STEP counter, and units-per-microsecond differ per board
+        // (AVR 16, RP2040 125, RP2350 150). The old board-type scan below
+        // never matched because the runner's instance map holds components
+        // only — no board entry — so every Pico silently fell back to the
+        // 16MHz AVR threshold (1.6M) while a single Pico tick is ~2M steps:
+        // the buzzer was declared silent on every tick and never settled,
+        // even with a continuous 2kHz signal on its pin.
+        const cyclesPerUs = Number((this as any)._boardCyclesPerUs?.());
+        const effectiveHz = (Number.isFinite(cyclesPerUs) && cyclesPerUs > 0)
+            ? cyclesPerUs * 1_000_000
+            : cpuHz;
+        const silenceTimeoutCycles = effectiveHz * 0.1;
         const lastEdgeCycle: number = (this as any)._lastEdgeCycle || 0;
         if (lastEdgeCycle > 0 && (cpuCycles - lastEdgeCycle) > silenceTimeoutCycles) {
             if (this.state.isBuzzing) {
