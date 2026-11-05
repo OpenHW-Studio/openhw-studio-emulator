@@ -24,6 +24,14 @@ export class SoilMoistureSensorLogic extends BaseComponent {
         this.setPinVoltage('SIG', outSig);
     }
 
+    // Powered-rail refresh. Runners that inject rails with setPinVoltage
+    // (Pico/ARM) never dispatch a pin-change event, so a device that only
+    // computes in onPinStateChange would hold SIG at 0V forever. Recompute
+    // per tick like the LDR/NTC module siblings.
+    update() {
+        this.onPinStateChange();
+    }
+
     onEvent(event: any) {
         if (event && event.type === 'SET_MOISTURE') {
             this.setState({ moisture: event.value });
