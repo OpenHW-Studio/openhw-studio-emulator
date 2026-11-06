@@ -59,7 +59,11 @@ export class BiaxialStepperLogic extends BaseComponent {
                 currentPhase = newPhaseVal;
                 changed = true;
             }
-        } else {
+        } else if (phaseA === 0 && phaseB === 0) {
+            // Only a truly unpowered pair releases the phase. A partial
+            // dispatch (one coil pin updated before its complement) reads
+            // as an invalid mix; resetting there lost every step because
+            // the next callback saw currentPhase === -1.
             currentPhase = -1;
         }
 
