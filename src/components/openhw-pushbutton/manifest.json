@@ -3,19 +3,61 @@
     "label": "Push Button",
     "description": "Momentary tactile push button.",
     "group": "Basic",
-    "w": 75, "h": 60,
-    "attrs": { "color": "green", "breadboard": { "anchorPin": "1l", "ravine": true } },
-    "telemetry": { "template": "pressed=${state.pressed}", "criticalKeys": ["state.pressed"] },
+    "w": 75,
+    "h": 60,
+    "attrs": {
+        "color": "green",
+        "breadboard": {
+            "anchorPin": "1l",
+            "ravine": true
+        }
+    },
+    "telemetry": {
+        "template": "pressed=${state.pressed}",
+        "criticalKeys": [
+            "state.pressed"
+        ]
+    },
     "pins": [
-        { "id": "1l", "x": 0,  "y": 15, "type": "passive", "description": "Terminal 1L" },
-        { "id": "2l", "x": 0, "y": 45, "type": "passive", "description": "Terminal 2L" },
-        { "id": "1r", "x": 75, "y": 15, "type": "passive", "description": "Terminal 1R" },
-        { "id": "2r", "x": 75, "y": 45, "type": "passive", "description": "Terminal 2R" }
+        {
+            "id": "1l",
+            "x": 0,
+            "y": 15,
+            "type": "passive",
+            "description": "Terminal 1L"
+        },
+        {
+            "id": "2l",
+            "x": 0,
+            "y": 45,
+            "type": "passive",
+            "description": "Terminal 2L"
+        },
+        {
+            "id": "1r",
+            "x": 75,
+            "y": 15,
+            "type": "passive",
+            "description": "Terminal 1R"
+        },
+        {
+            "id": "2r",
+            "x": 75,
+            "y": 45,
+            "type": "passive",
+            "description": "Terminal 2R"
+        }
     ],
     "autowiring": {
         "connections": [
-            { "from": "1l", "to": "arduino:2" },
-            { "from": "2l", "to": "arduino:GND" }
+            {
+                "from": "1l",
+                "to": "arduino:2"
+            },
+            {
+                "from": "2l",
+                "to": "arduino:GND"
+            }
         ]
     },
     "autocoding": {
@@ -23,5 +65,22 @@
             "setup": "Serial.begin(9600);\npinMode(${1l}, INPUT_PULLUP);\nSerial.println(\"Push Button Ready\");",
             "loop": "bool pressed_${COMP_SUFFIX} = (digitalRead(${1l}) == LOW);\nSerial.print(\"Button: \");\nSerial.println(pressed_${COMP_SUFFIX} ? \"PRESSED\" : \"released\");\ndelay(100);"
         }
-    }
+    },
+    "sab": {
+        "slotKind": 5,
+        "fields": {
+            "i0": "pressed"
+        }
+    },
+    "ui": {
+        "svg": "./pushbutton.svg",
+        "interactive": [
+            "press"
+        ]
+    },
+    "sim": {
+        "runtime": "js",
+        "validation": "inline"
+    },
+    "bounds": {"x": 0, "y": 0, "w": 75, "h": 60}
 }

@@ -114,4 +114,17 @@ export class IRRemoteLogic extends BaseComponent {
             isTransmitting: this.isTransmitting
         });
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: transmitting} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {},
+            i: {transmitting: (s.transmitting ? 1 : 0)},
+        };
+    }
+    validate(_component: any, _graph: Map<string, string[]>) {
+        return null;
+    }
 }

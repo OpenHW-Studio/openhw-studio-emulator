@@ -1,0 +1,14 @@
+<svg width="100%" height="100%" viewBox="0 0 120.0 110.0" xmlns="http://www.w3.org/2000/svg" data-component="openhw-attiny85" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="118.0" height="108.0" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="60.0" y="55.0" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">ATtiny85 Board</text>
+  <circle cx="108" cy="16" r="2.5" fill="#888" data-pin="P5" />
+  <circle cx="108" cy="31" r="2.5" fill="#888" data-pin="P4" />
+  <circle cx="108" cy="46" r="2.5" fill="#888" data-pin="P3" />
+  <circle cx="108" cy="61" r="2.5" fill="#888" data-pin="P2" />
+  <circle cx="108" cy="76" r="2.5" fill="#888" data-pin="P1" />
+  <circle cx="108" cy="91" r="2.5" fill="#888" data-pin="P0" />
+  <circle cx="34" cy="93" r="2.5" fill="#888" data-pin="5V" />
+  <circle cx="56" cy="93" r="2.5" fill="#888" data-pin="GND" />
+  <circle cx="78" cy="93" r="2.5" fill="#888" data-pin="VIN" />
+</svg>

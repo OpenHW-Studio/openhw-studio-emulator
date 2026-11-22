@@ -62,4 +62,50 @@ export class RelayModuleLogic extends BaseComponent {
 
         this.setState({ energised: this.energised, ledOn: this.energised });
     }
+
+    // 12.4 v2: numeric UI state for SAB slot { i0: energised, i1: ledOn }.
+    uiState() {
+        return {
+            f: {},
+            i: {
+                energised: this.state?.energised ? 1 : 0,
+                ledOn: this.state?.ledOn ? 1 : 0,
+            },
+        };
+    }
+
+    validate(component: any, graph: Map<string, string[]>) {
+        const vcc = graph.get(`${component.id}.VCC`);
+        const gnd = graph.get(`${component.id}.GND`);
+        const inp = graph.get(`${component.id}.IN`);
+        const issues = [];
+        if (!vcc || vcc.length === 0) {
+            issues.push({
+                ruleId: 'relay-module-power-check',
+                severity: 'warn',
+                message: `[Relay ${component.id}] VCC not connected. Connect to 5V (not Arduino 5V pin — use external supply for high-current loads).`,
+                compIds: [component.id],
+                remediation: 'Connect the relay VCC pin to a 5V supply.',
+            });
+        }
+        if (!gnd || gnd.length === 0) {
+            issues.push({
+                ruleId: 'relay-module-power-check',
+                severity: 'warn',
+                message: `[Relay ${component.id}] GND not connected.`,
+                compIds: [component.id],
+                remediation: 'Connect the relay GND pin to ground.',
+            });
+        }
+        if (!inp || inp.length === 0) {
+            issues.push({
+                ruleId: 'relay-module-control-pin-check',
+                severity: 'warn',
+                message: `[Relay ${component.id}] IN pin not connected. Connect to an Arduino digital output pin.`,
+                compIds: [component.id],
+                remediation: 'Connect the relay IN pin to a digital output.',
+            });
+        }
+        return issues.length > 0 ? issues : null;
+    }
 }

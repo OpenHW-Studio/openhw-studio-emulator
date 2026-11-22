@@ -1,0 +1,15 @@
+<svg width="100%" height="100%" viewBox="0 0 180.0 120.0" xmlns="http://www.w3.org/2000/svg" data-component="openhw-max7219" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="178.0" height="118.0" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="90.0" y="60.0" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">MAX7219 Dot Matrix</text>
+  <circle cx="0" cy="30" r="2.5" fill="#888" data-pin="VCC" />
+  <circle cx="0" cy="45" r="2.5" fill="#888" data-pin="GND" />
+  <circle cx="0" cy="60" r="2.5" fill="#888" data-pin="DIN" />
+  <circle cx="0" cy="75" r="2.5" fill="#888" data-pin="CS" />
+  <circle cx="0" cy="90" r="2.5" fill="#888" data-pin="CLK" />
+  <circle cx="180" cy="30" r="2.5" fill="#888" data-pin="VCC_OUT" />
+  <circle cx="180" cy="45" r="2.5" fill="#888" data-pin="GND_OUT" />
+  <circle cx="180" cy="60" r="2.5" fill="#888" data-pin="DOUT" />
+  <circle cx="180" cy="75" r="2.5" fill="#888" data-pin="CS_OUT" />
+  <circle cx="180" cy="90" r="2.5" fill="#888" data-pin="CLK_OUT" />
+</svg>

@@ -1,80 +1,37 @@
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
 import { createValidationIssue } from '../component-schema.js';
 import type { ComponentValidationRule } from '../component-schema.js';
+import { SoilMoistureSensorLogic } from './logic';
+
+const delegate = SoilMoistureSensorLogic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>, validator?: any) =>
+        SoilMoistureSensorLogic.prototype.validate!.call(undefined, component, graph, validator)
+    : (_component: any, _graph: Map<string, string[]>) => null;
 
 export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
         {
             id: 'soil-moisture-sensor-connection-check',
             name: 'Sensor Connection Check',
-            severity: 'warn',
+            severity: 'warn' as const,
             priority: 10,
             description: 'Warn when sensor power, ground, or signal pins are disconnected.',
-            check: (component: any, graph: Map<string, string[]>, validator: any) => {
-                const pins = validator.getComponentPins(component);
-                const vcc = pins.find((p: string) => p.includes('VCC') || p.includes('5V') || p.includes('V+'));
-                const gnd = pins.find((p: string) => p.includes('GND'));
-                const sigPins = pins.filter((p: string) => p.includes('SIG') || p.includes('OUT') || p.includes('AO') || p.includes('DO'));
-
-                if (vcc) {
-                    const node = `${component.id}.${vcc}`;
-                    if (validator.getNeighbors(node).length === 0) {
-                        return createValidationIssue({
-                            ruleId: 'soil-moisture-sensor-connection-check',
-                            severity: 'warn',
-                            message: `⚠️ [${component.type} ${component.id}] Power is not connected.`,
-                            compIds: [component.id],
-                            remediation: 'Connect the sensor power pin to the supply rail.',
-                            autoFix: true,
-                        });
-                    } else if (!validator.hasResistivePathToSupply(node)) {
-                        return createValidationIssue({
-                            ruleId: 'soil-moisture-sensor-connection-check',
-                            severity: 'warn',
-                            message: `⚠️ [${component.type} ${component.id}] Power is connected but does not reach a valid power supply rail.`,
-                            compIds: [component.id],
-                            remediation: 'Ensure power path connects to a 3.3V/5V power source.',
-                        });
-                    }
-                }
-
-                if (gnd) {
-                    const node = `${component.id}.${gnd}`;
-                    if (validator.getNeighbors(node).length === 0) {
-                        return createValidationIssue({
-                            ruleId: 'soil-moisture-sensor-connection-check',
-                            severity: 'warn',
-                            message: `⚠️ [${component.type} ${component.id}] Ground is not connected.`,
-                            compIds: [component.id],
-                            remediation: 'Connect the sensor ground pin to the common ground rail.',
-                            autoFix: true,
-                        });
-                    } else {
-                        const gndSources = validator.collectVoltageSources(node);
-                        if (!gndSources.some((s: any) => s.voltage === 0)) {
-                            return createValidationIssue({
-                                ruleId: 'soil-moisture-sensor-connection-check',
-                                severity: 'warn',
-                                message: `⚠️ [${component.type} ${component.id}] Ground is connected but does not reach a valid ground rail (GND).`,
-                                compIds: [component.id],
-                                remediation: 'Ensure ground path connects to a valid ground rail.',
-                            });
-                        }
-                    }
-                }
-                
-                const connectedSigs = sigPins.filter(p => validator.getNeighbors(`${component.id}.${p}`).length > 0);
-                if (sigPins.length > 0 && connectedSigs.length === 0) {
-                    return createValidationIssue({
-                        ruleId: 'soil-moisture-sensor-connection-check',
-                        severity: 'warn',
-                        message: `⚠️ [${component.type} ${component.id}] Warning: No signal/output pins are connected. The sensor will not provide any data.`,
-                        compIds: [component.id],
-                        remediation: 'Wire the signal output to an MCU input or analog read pin.',
-                        autoFix: true,
-                    });
-                }
-
-                return null;
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'soil-moisture-sensor-connection-check');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'soil-moisture-sensor-connection-check'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
             }
         }
     ]

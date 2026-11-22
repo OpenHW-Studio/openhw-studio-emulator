@@ -34,5 +34,12 @@
             "setup": "Serial.begin(9600);",
             "loop": "char key_${COMP_SUFFIX} = keypad_${COMP_SUFFIX}.getKey();\nif (key_${COMP_SUFFIX}) {\n  Serial.print(\"Key Pressed: \");\n  Serial.println(key_${COMP_SUFFIX});\n}"
         }
-    }
+    },
+    "sab": {
+        "slotKind": 5,
+        "fields": {"i0": "keyAvailable"}
+    },
+    "ui": {"svg": "./membrane-keypad.svg", "interactive": ["press"]},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 415.37, "h": 537.4}
 }

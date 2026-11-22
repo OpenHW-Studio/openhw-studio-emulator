@@ -94,5 +94,12 @@
       "setup": "tft.begin();\ntft.setRotation(1);\ntft.fillScreen(ILI9341_BLACK);\nif (! ctp.begin(40)) {\n  tft.println(\"Touch init failed\");\n}\ntft.setCursor(20, 100);\ntft.setTextColor(ILI9341_WHITE);\ntft.setTextSize(3);\ntft.println(\"OpenHW Studio\");\ntft.setCursor(20, 140);\ntft.setTextSize(2);\ntft.println(\"TFT Touch Ready\");\ndelay(2000);\ntft.fillScreen(ILI9341_BLACK);",
       "loop": "if (ctp.touched()) {\n  TS_Point p = ctp.getPoint();\n  p.x = map(p.x, 0, 240, 240, 0);\n  p.y = map(p.y, 0, 320, 320, 0);\n  tft.fillCircle(p.y, p.x, 2, ILI9341_WHITE);\n}\ndelay(10);"
     }
-  }
+  },
+    "sab": {
+        "slotKind": 3,
+        "fields": {"i0": "powerOn"}
+    },
+    "ui": {"svg": "./ili9341-touch.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 240, "h": 360}
 }

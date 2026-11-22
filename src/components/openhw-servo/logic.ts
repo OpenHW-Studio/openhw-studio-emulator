@@ -13,6 +13,7 @@ import { PWMProtocol } from '../../protocol-handlers/index';
 export class ServoLogic extends PWMProtocol {
     private targetAngle = -1;
     private lastUpdateCycle = 0;
+    private lastBoardMs = -1;
 
     // Min/max pulse widths for SG90 / standard servos
     private static readonly MIN_US = 544;
@@ -30,6 +31,10 @@ export class ServoLogic extends PWMProtocol {
 
     // Called by PWMProtocol when a stable, debounced PWM signal is measured
     onPWMSignal(pinId: string, frequencyHz: number, dutyCycle: number, pulseUs: number): void {
+        // A runner that cannot resolve the duty resolution (ESP32 LEDC
+        // reports raw counts only) cannot know the pulse width: ignore the
+        // sample instead of snapping to a bogus angle.
+        if ((this.state as any)?.pwmWidthExact === false) return;
         let angle = (pulseUs - ServoLogic.MIN_US) * 180 / (ServoLogic.MAX_US - ServoLogic.MIN_US);
         angle = Math.max(0, Math.min(180, angle));
         this.targetAngle = angle;
@@ -45,6 +50,54 @@ export class ServoLogic extends PWMProtocol {
         });
     }
 
+    // 12.4 v2: numeric UI state for SAB slot { f0: angle }.
+    uiState() {
+        return {
+            f: { angle: Number(this.state?.angle || 0) },
+            i: {},
+        };
+    }
+
+    validate(component: any, graph: Map<string, string[]>) {
+        const pwmPin = graph.get(`${component.id}.PWM`);
+        const vccPin = graph.get(`${component.id}.V+`);
+        const gndPin = graph.get(`${component.id}.GND`);
+        const issues = [];
+
+        if (!pwmPin || pwmPin.length === 0) {
+            issues.push({
+                ruleId: 'servo-power-and-signal-check',
+                severity: 'warn',
+                message: `[Servo ${component.id}] Warning: PWM Signal pin is floating.`,
+                compIds: [component.id],
+                remediation: 'Connect the PWM control pin.',
+                autoFix: true,
+            });
+        }
+        if (!vccPin || vccPin.length === 0) {
+            issues.push({
+                ruleId: 'servo-power-and-signal-check',
+                severity: 'warn',
+                message: `[Servo ${component.id}] Warning: V+ Power is not connected.`,
+                compIds: [component.id],
+                remediation: 'Connect the servo power pin.',
+                autoFix: true,
+            });
+        }
+        if (!gndPin || gndPin.length === 0) {
+            issues.push({
+                ruleId: 'servo-power-and-signal-check',
+                severity: 'warn',
+                message: `[Servo ${component.id}] Warning: Ground is not connected.`,
+                compIds: [component.id],
+                remediation: 'Connect the servo ground pin.',
+                autoFix: true,
+            });
+        }
+
+        return issues.length > 0 ? issues : null;
+    }
+
     update(cpuCycles: number, wires: any[], instances: BaseComponent[]) {
         super.update(cpuCycles, wires, instances);
 
@@ -58,8 +111,24 @@ export class ServoLogic extends PWMProtocol {
         this.lastUpdateCycle = cpuCycles;
 
         if (Math.abs(this.state.angle - this.targetAngle) > 0.1) {
-            // Standard servo speed: ~400°/sec. At 16MHz, 1s = 16,000,000 cycles
-            const maxMovement = 400 * (elapsedCycles / 16_000_000);
+            // Standard servo speed: ~400°/sec. Travel is an animation, so
+            // prefer the runner's board clock (simulated ms) over cycles:
+            // only AVR advances 16M steps per second (ESP32 executes far
+            // fewer steps per emulated microsecond, so the cycle formula
+            // crawled there — 2° in 40 s instead of reaching the target).
+            // Without the service, keep the AVR-exact cycle formula.
+            let dtSec = elapsedCycles / 16_000_000;
+            const clock = (this as any)._boardTimeMs;
+            if (typeof clock === 'function') {
+                try {
+                    const nowMs = Number(clock());
+                    if (Number.isFinite(nowMs) && nowMs >= 0) {
+                        if (this.lastBoardMs < 0) this.lastBoardMs = nowMs;
+                        else { dtSec = Math.max(0, (nowMs - this.lastBoardMs) / 1000); this.lastBoardMs = nowMs; }
+                    }
+                } catch { /* keep the cycle formula */ }
+            }
+            const maxMovement = 400 * dtSec;
 
             if (this.state.angle < this.targetAngle) {
                 this.state.angle = Math.min(this.targetAngle, this.state.angle + maxMovement);

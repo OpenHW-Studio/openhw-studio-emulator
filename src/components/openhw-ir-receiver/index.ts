@@ -1,32 +1,26 @@
+// Component v2 golden reference (index.ts = declarative registry record only).
+// No fs/process/document touches at module top — worker/import-safe everywhere.
+// Raw-source harvesting moved to build time (emulatorLoader ?raw glob).
 import manifest from './manifest.json';
 import { IRReceiverUI, IRReceiverContextMenu, BOUNDS } from './ui';
 import { IRReceiverLogic } from './logic';
 import { validation } from './validation';
 
-let _nodeFs: any = null;
-try {
-    if (typeof process !== 'undefined' && process.versions && process.versions.node) {
-        // @ts-ignore
-        _nodeFs = eval("require('node:fs')");
-    }
-} catch (e) {}
-
-let docHtml = '';
-try {
-    const docUrl = new URL('./doc/index.html', import.meta.url);
-    docHtml = _nodeFs?.readFileSync(docUrl, 'utf8');
-} catch (e) {
-    docHtml = '';
-}
-
 export default {
     manifest,
-    UI:                       IRReceiverUI,
-    LogicClass:               IRReceiverLogic,
+    UI: IRReceiverUI,
+    LogicClass: IRReceiverLogic,
     BOUNDS,
-    ContextMenu:              IRReceiverContextMenu,
-    contextMenuDuringRun:     true,
+    ContextMenu: IRReceiverContextMenu,
+    contextMenuDuringRun: true,
     contextMenuOnlyDuringRun: false,
     validation,
-    doc: docHtml,
+    doc: null,
+    // Raw sources are harvested at build time by the frontend's ?raw glob
+    // (emulatorLoader.collectRawComponentSources) and merged into the live
+    // registry there. Kept as empty-string fields so ComponentLab / zip-upload
+    // / backend-sync code that reads uiRaw/logicRaw keeps working.
+    uiRaw: '',
+    logicRaw: '',
+    validationRaw: '',
 };

@@ -1,0 +1,14 @@
+<svg width="100%" height="100%" viewBox="0 0 240.0 360.0" xmlns="http://www.w3.org/2000/svg" data-component="openhw-ili9341" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="238.0" height="358.0" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="120.0" y="180.0" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">ILI9341 2.8" TFT LCD</text>
+  <circle cx="60" cy="352.5" r="2.5" fill="#888" data-pin="VCC" />
+  <circle cx="75" cy="352.5" r="2.5" fill="#888" data-pin="GND" />
+  <circle cx="90" cy="352.5" r="2.5" fill="#888" data-pin="CS" />
+  <circle cx="105" cy="352.5" r="2.5" fill="#888" data-pin="RESET" />
+  <circle cx="120" cy="352.5" r="2.5" fill="#888" data-pin="DC" />
+  <circle cx="135" cy="352.5" r="2.5" fill="#888" data-pin="MOSI" />
+  <circle cx="150" cy="352.5" r="2.5" fill="#888" data-pin="SCK" />
+  <circle cx="165" cy="352.5" r="2.5" fill="#888" data-pin="LED" />
+  <circle cx="180" cy="352.5" r="2.5" fill="#888" data-pin="MISO" />
+</svg>

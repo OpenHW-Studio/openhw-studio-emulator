@@ -36,9 +36,9 @@
     "connections": [
       { "from": "VCC", "to": "arduino:5V", "color": "red" },
       { "from": "GND", "to": "arduino:GND", "color": "black" },
-      { "from": "LCK", "to": "arduino:25", "color": "yellow" },
-      { "from": "BCK", "to": "arduino:26", "color": "green" },
-      { "from": "DIN", "to": "arduino:22", "color": "blue" }
+      { "from": "LCK", "to": "arduino:25|15|GP19|PB12", "color": "yellow" },
+      { "from": "BCK", "to": "arduino:26|14|GP18|PB13", "color": "green" },
+      { "from": "DIN", "to": "arduino:22|12|GP20|PB15", "color": "blue" }
     ]
   },
   "autocoding": {
@@ -48,5 +48,12 @@
       "setup": "Serial.begin(9600);\\nI2S.setBCLK(${BCK});\\nI2S.setDATA(${DIN});\\nI2S.begin(I2S_PHILIPS_MODE, 44100, 16);\\nSD.begin(5);\\naudioFile = SD.open(\\\"/rec.wav\\\");",
       "loop": "if (audioFile && audioFile.available()) {\\n  int16_t sample = 0;\\n  audioFile.read((uint8_t*)&sample, 2);\\n  I2S.write(sample);\\n  I2S.write(sample);\\n}"
     }
-  }
+  },
+    "sab": {
+        "slotKind": 7,
+        "fields": {"i0": "playing"}
+    },
+    "ui": {"svg": "./pcm5102.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 90, "h": 60}
 }

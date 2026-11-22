@@ -1,16 +1,43 @@
 // Export everything from the emulator components package so the frontend can import it
 export { BaseComponent } from './BaseComponent';
+export { WasmComponent } from './WasmComponent';
+export { DisplayRenderContext, useDisplayRenderWorker } from '../display/DisplayRenderContext';
 export * from '../protocol-handlers/index';
 export { default as openhwLed } from './openhw-led';
 export { default as openhwArduinoUno } from './openhw-arduino-uno';
+// Board shells (UI-only while execution is AVR-only): the svg/manifest/ui
+// artwork stays on canvas; CPU/runner logic returns from scratch later.
 export { default as openhwPico } from './openhw-pico/index';
+export { default as openhwPico2 } from './openhw-pico-2/index';
 export { default as openhwPicoW } from './openhw-pico-w/index';
+export { default as openhwPico2W } from './openhw-pico-2-w/index';
+export { default as openhwPicoEth } from './openhw-pico-eth/index';
+export { default as openhwPico2Eth } from './openhw-pico-2-eth/index';
 export { default as openhwEsp32 } from './ESP32/index';
-export { default as openhwStm32BluePill } from './openhw-stm32-bluepill/index';
-export { default as openhwStm32BluePillFrontend } from './openhw-stm32-blue-pill (frontend)/index';
-// WiFi Access Point — functional AP component (equivalent to wokwi-wifi-ap)
-export { WiFiApLogic as openhwWifiAp, WiFiApLogic as wokwiWifiAp } from './openhw-wifi-ap/index';
 export { default as openhwEsp32Cam } from './openhw-esp32-cam/index';
+export { default as openhwMicrobitV2 } from './openhw-microbit-v2/index';
+export { default as openhwLtdcDisplay } from './openhw-ltdc-display/index';
+export { default as openhwUsbDevice } from './openhw-usb-device/index';
+export { default as openhwStm32BluePill } from './openhw-stm32-bluepill/index';
+export { default as openhwStm32f103cb } from './openhw-stm32f103cb/index';
+export { default as openhwStm32MapleMini } from './openhw-stm32-maple-mini/index';
+export { default as openhwStm32NucleoF103rb } from './openhw-stm32-nucleo-f103rb/index';
+export { default as openhwStm32f103rc } from './openhw-stm32f103rc/index';
+export { default as openhwStm32Gd32f103c8 } from './openhw-stm32-gd32f103c8/index';
+export { default as openhwStm32Gd32f103cb } from './openhw-stm32-gd32f103cb/index';
+export { default as openhwStm32Gd32f103rb } from './openhw-stm32-gd32f103rb/index';
+export { default as openhwStm32f4 } from './openhw-stm32f4/index';
+export { default as openhwStm32f401 } from './openhw-stm32f401/index';
+export { default as openhwStm32f411 } from './openhw-stm32f411/index';
+export { default as openhwStm32f407ve } from './openhw-stm32f407ve/index';
+export { default as openhwStm32f429 } from './openhw-stm32f429/index';
+export { default as openhw8086 } from './openhw-8086/index';
+export { default as openhw8088 } from './openhw-8088/index';
+export { default as openhw8085 } from './openhw-8085/index';
+export { default as openhw8051 } from './openhw-8051/index';
+export { default as openhw6502 } from './openhw-6502/index';
+export { default as openhwZ80 } from './openhw-z80/index';
+export { default as openhwRv32 } from './openhw-rv32/index';
 export { default as openhwResistor } from './openhw-resistor';
 export { default as openhwPushbutton } from './openhw-pushbutton';
 export { default as openhw6mmPushbutton } from './openhw-6mm-pushbutton';

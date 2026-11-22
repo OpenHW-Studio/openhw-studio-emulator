@@ -1,75 +1,37 @@
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
 import { createValidationIssue } from '../component-schema.js';
 import type { ComponentValidationRule } from '../component-schema.js';
+import { LogicIC74xxLogic } from './logic';
+
+const delegate = LogicIC74xxLogic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>, validator?: any) =>
+        LogicIC74xxLogic.prototype.validate!.call(undefined, component, graph, validator)
+    : (_component: any, _graph: Map<string, string[]>) => null;
 
 export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
         {
             id: 'logic-ic-74xx-power-input-check',
             name: '74xx IC Power and Input Check',
-            severity: 'warn',
+            severity: 'warn' as const,
             priority: 10,
             description: 'Detect missing power, ground, and floating logic inputs on 74xx ICs.',
-            check: (component: any, graph: Map<string, string[]>, validator: any) => {
-                const vcc = `${component.id}.VCC`;
-                const gnd = `${component.id}.GND`;
-
-                if (validator.getNeighbors(vcc).length === 0) {
-                    return createValidationIssue({
-                        ruleId: 'logic-ic-74xx-power-input-check',
-                        severity: 'warn',
-                        message: `⚠️ [74xx IC ${component.id}] Power (VCC) is missing. Digital logic requires power.`,
-                        compIds: [component.id],
-                        remediation: 'Connect VCC to the logic supply rail.',
-                        autoFix: true,
-                    });
-                }
-                if (!validator.hasResistivePathToSupply(vcc)) {
-                    return createValidationIssue({
-                        ruleId: 'logic-ic-74xx-power-input-check',
-                        severity: 'warn',
-                        message: `⚠️ [74xx IC ${component.id}] Power (VCC) is connected but does not reach a valid power supply rail.`,
-                        compIds: [component.id],
-                        remediation: 'Ensure VCC path connects to a 5V/3.3V power source.',
-                    });
-                }
-
-                if (validator.getNeighbors(gnd).length === 0) {
-                    return createValidationIssue({
-                        ruleId: 'logic-ic-74xx-power-input-check',
-                        severity: 'warn',
-                        message: `⚠️ [74xx IC ${component.id}] Ground (GND) is missing.`,
-                        compIds: [component.id],
-                        remediation: 'Connect GND to the common ground rail.',
-                        autoFix: true,
-                    });
-                }
-                const gndSources = validator.collectVoltageSources(gnd);
-                if (!gndSources.some((s: any) => s.voltage === 0)) {
-                    return createValidationIssue({
-                        ruleId: 'logic-ic-74xx-power-input-check',
-                        severity: 'warn',
-                        message: `⚠️ [74xx IC ${component.id}] Ground (GND) is connected but does not reach a valid ground rail (GND).`,
-                        compIds: [component.id],
-                        remediation: 'Ensure GND path connects to a valid ground rail.',
-                    });
-                }
-
-                const pins = validator.getComponentPins(component);
-                const inputPins = pins.filter((p: string) => p.includes('IN') || /^[ABCD]\d?$/.test(p));
-                const floatingInputs = inputPins.filter((p: string) => validator.getNeighbors(`${component.id}.${p}`).length === 0);
-
-                if (floatingInputs.length > 0) {
-                    return createValidationIssue({
-                        ruleId: 'logic-ic-74xx-power-input-check',
-                        severity: 'warn',
-                        message: `⚠️ [74xx IC ${component.id}] Floating Inputs: Pins ${floatingInputs.join(', ')} are not connected. CMOS logic chips can behave unpredictably with floating inputs.`,
-                        compIds: [component.id],
-                        remediation: 'Tie unused inputs to a defined logic level through a resistor or direct connection per the datasheet.',
-                        autoFix: true,
-                    });
-                }
-
-                return null;
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'logic-ic-74xx-power-input-check');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'logic-ic-74xx-power-input-check'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
             }
         }
     ]

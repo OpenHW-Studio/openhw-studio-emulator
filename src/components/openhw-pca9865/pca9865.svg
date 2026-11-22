@@ -1,0 +1,67 @@
+<svg width="100%" height="100%" viewBox="0 0 342.8 171.4" xmlns="http://www.w3.org/2000/svg" data-component="openhw-pca9865" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="340.8" height="169.4" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="171.4" y="85.7" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">16-Channel PWM Module (P</text>
+  <circle cx="0" cy="32.1" r="2.5" fill="#888" data-pin="GND" />
+  <circle cx="0" cy="47.1" r="2.5" fill="#888" data-pin="OE" />
+  <circle cx="0" cy="62.1" r="2.5" fill="#888" data-pin="SCL" />
+  <circle cx="0" cy="77.1" r="2.5" fill="#888" data-pin="SDA" />
+  <circle cx="0" cy="92.1" r="2.5" fill="#888" data-pin="VCC" />
+  <circle cx="0" cy="107.1" r="2.5" fill="#888" data-pin="V+" />
+  <circle cx="155" cy="15" r="2.5" fill="#888" data-pin="GND_R" />
+  <circle cx="155" cy="22" r="2.5" fill="#888" data-pin="OE_R" />
+  <circle cx="155" cy="29" r="2.5" fill="#888" data-pin="SCL_R" />
+  <circle cx="155" cy="36" r="2.5" fill="#888" data-pin="SDA_R" />
+  <circle cx="155" cy="43" r="2.5" fill="#888" data-pin="VCC_R" />
+  <circle cx="155" cy="50" r="2.5" fill="#888" data-pin="V+_R" />
+  <circle cx="95" cy="5" r="2.5" fill="#888" data-pin="V+_IN" />
+  <circle cx="105" cy="5" r="2.5" fill="#888" data-pin="GND_IN" />
+  <circle cx="26" cy="62" r="2.5" fill="#888" data-pin="S0" />
+  <circle cx="26" cy="68" r="2.5" fill="#888" data-pin="V+0" />
+  <circle cx="26" cy="74" r="2.5" fill="#888" data-pin="G0" />
+  <circle cx="32" cy="62" r="2.5" fill="#888" data-pin="S1" />
+  <circle cx="32" cy="68" r="2.5" fill="#888" data-pin="V+1" />
+  <circle cx="32" cy="74" r="2.5" fill="#888" data-pin="G1" />
+  <circle cx="38" cy="62" r="2.5" fill="#888" data-pin="S2" />
+  <circle cx="38" cy="68" r="2.5" fill="#888" data-pin="V+2" />
+  <circle cx="38" cy="74" r="2.5" fill="#888" data-pin="G2" />
+  <circle cx="44" cy="62" r="2.5" fill="#888" data-pin="S3" />
+  <circle cx="44" cy="68" r="2.5" fill="#888" data-pin="V+3" />
+  <circle cx="44" cy="74" r="2.5" fill="#888" data-pin="G3" />
+  <circle cx="58" cy="62" r="2.5" fill="#888" data-pin="S4" />
+  <circle cx="58" cy="68" r="2.5" fill="#888" data-pin="V+4" />
+  <circle cx="58" cy="74" r="2.5" fill="#888" data-pin="G4" />
+  <circle cx="64" cy="62" r="2.5" fill="#888" data-pin="S5" />
+  <circle cx="64" cy="68" r="2.5" fill="#888" data-pin="V+5" />
+  <circle cx="64" cy="74" r="2.5" fill="#888" data-pin="G5" />
+  <circle cx="70" cy="62" r="2.5" fill="#888" data-pin="S6" />
+  <circle cx="70" cy="68" r="2.5" fill="#888" data-pin="V+6" />
+  <circle cx="70" cy="74" r="2.5" fill="#888" data-pin="G6" />
+  <circle cx="76" cy="62" r="2.5" fill="#888" data-pin="S7" />
+  <circle cx="76" cy="68" r="2.5" fill="#888" data-pin="V+7" />
+  <circle cx="76" cy="74" r="2.5" fill="#888" data-pin="G7" />
+  <circle cx="90" cy="62" r="2.5" fill="#888" data-pin="S8" />
+  <circle cx="90" cy="68" r="2.5" fill="#888" data-pin="V+8" />
+  <circle cx="90" cy="74" r="2.5" fill="#888" data-pin="G8" />
+  <circle cx="96" cy="62" r="2.5" fill="#888" data-pin="S9" />
+  <circle cx="96" cy="68" r="2.5" fill="#888" data-pin="V+9" />
+  <circle cx="96" cy="74" r="2.5" fill="#888" data-pin="G9" />
+  <circle cx="102" cy="62" r="2.5" fill="#888" data-pin="S10" />
+  <circle cx="102" cy="68" r="2.5" fill="#888" data-pin="V+10" />
+  <circle cx="102" cy="74" r="2.5" fill="#888" data-pin="G10" />
+  <circle cx="108" cy="62" r="2.5" fill="#888" data-pin="S11" />
+  <circle cx="108" cy="68" r="2.5" fill="#888" data-pin="V+11" />
+  <circle cx="108" cy="74" r="2.5" fill="#888" data-pin="G11" />
+  <circle cx="122" cy="62" r="2.5" fill="#888" data-pin="S12" />
+  <circle cx="122" cy="68" r="2.5" fill="#888" data-pin="V+12" />
+  <circle cx="122" cy="74" r="2.5" fill="#888" data-pin="G12" />
+  <circle cx="128" cy="62" r="2.5" fill="#888" data-pin="S13" />
+  <circle cx="128" cy="68" r="2.5" fill="#888" data-pin="V+13" />
+  <circle cx="128" cy="74" r="2.5" fill="#888" data-pin="G13" />
+  <circle cx="134" cy="62" r="2.5" fill="#888" data-pin="S14" />
+  <circle cx="134" cy="68" r="2.5" fill="#888" data-pin="V+14" />
+  <circle cx="134" cy="74" r="2.5" fill="#888" data-pin="G14" />
+  <circle cx="140" cy="62" r="2.5" fill="#888" data-pin="S15" />
+  <circle cx="140" cy="68" r="2.5" fill="#888" data-pin="V+15" />
+  <circle cx="140" cy="74" r="2.5" fill="#888" data-pin="G15" />
+</svg>

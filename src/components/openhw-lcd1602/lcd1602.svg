@@ -1,0 +1,21 @@
+<svg width="100%" height="100%" viewBox="0 0 315.0 135.0" xmlns="http://www.w3.org/2000/svg" data-component="openhw-lcd1602" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="313.0" height="133.0" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="157.5" y="67.5" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">LCD 16x2 (Parallel)</text>
+  <circle cx="45" cy="15" r="2.5" fill="#888" data-pin="VSS" />
+  <circle cx="60" cy="15" r="2.5" fill="#888" data-pin="VDD" />
+  <circle cx="75" cy="15" r="2.5" fill="#888" data-pin="V0" />
+  <circle cx="90" cy="15" r="2.5" fill="#888" data-pin="RS" />
+  <circle cx="105" cy="15" r="2.5" fill="#888" data-pin="RW" />
+  <circle cx="120" cy="15" r="2.5" fill="#888" data-pin="E" />
+  <circle cx="135" cy="15" r="2.5" fill="#888" data-pin="D0" />
+  <circle cx="150" cy="15" r="2.5" fill="#888" data-pin="D1" />
+  <circle cx="165" cy="15" r="2.5" fill="#888" data-pin="D2" />
+  <circle cx="180" cy="15" r="2.5" fill="#888" data-pin="D3" />
+  <circle cx="195" cy="15" r="2.5" fill="#888" data-pin="D4" />
+  <circle cx="210" cy="15" r="2.5" fill="#888" data-pin="D5" />
+  <circle cx="225" cy="15" r="2.5" fill="#888" data-pin="D6" />
+  <circle cx="240" cy="15" r="2.5" fill="#888" data-pin="D7" />
+  <circle cx="255" cy="15" r="2.5" fill="#888" data-pin="A" />
+  <circle cx="270" cy="15" r="2.5" fill="#888" data-pin="K" />
+</svg>

@@ -1,0 +1,13 @@
+<svg width="100%" height="100%" viewBox="0 0 94.5 135.0" xmlns="http://www.w3.org/2000/svg" data-component="openhw-adxl345" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="92.5" height="133.0" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="47.25" y="67.5" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">ADXL345 Accelerometer</text>
+  <circle cx="6" cy="15" r="2.5" fill="#888" data-pin="GND" />
+  <circle cx="6" cy="30" r="2.5" fill="#888" data-pin="VCC" />
+  <circle cx="6" cy="45" r="2.5" fill="#888" data-pin="CS" />
+  <circle cx="6" cy="60" r="2.5" fill="#888" data-pin="INT1" />
+  <circle cx="6" cy="75" r="2.5" fill="#888" data-pin="INT2" />
+  <circle cx="6" cy="90" r="2.5" fill="#888" data-pin="SDO" />
+  <circle cx="6" cy="105" r="2.5" fill="#888" data-pin="SDA" />
+  <circle cx="6" cy="120" r="2.5" fill="#888" data-pin="SCL" />
+</svg>

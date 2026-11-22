@@ -66,4 +66,33 @@ export class StepperMotorLogic extends BaseComponent {
             currentPhase: this.currentPhase,
         });
     }
+
+    // 12.4 v2: numeric UI state for SAB slot { f0: angle }.
+    uiState() {
+        return {
+            f: { angle: Number(this.state?.angle || 0) },
+            i: {},
+        };
+    }
+
+    validate(component: any, graph: Map<string, string[]>) {
+        const requiredPins = ['A+', 'A-', 'B+', 'B-'];
+        const missingPins = requiredPins.filter((pin) => {
+            const edges = graph.get(`${component.id}.${pin}`);
+            return !edges || edges.length === 0;
+        });
+
+        if (missingPins.length > 0) {
+            return {
+                ruleId: 'stepper-coil-connection-check',
+                severity: 'warn',
+                message: `[Stepper ${component.id}] Coil Warning: The following pins are not connected: ${missingPins.join(', ')}. Stepper motor requires both coils (A and B) to be fully wired.`,
+                compIds: [component.id],
+                remediation: 'Connect all stepper coil pins.',
+                autoFix: true,
+            };
+        }
+
+        return null;
+    }
 }

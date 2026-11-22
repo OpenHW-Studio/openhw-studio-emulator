@@ -9,5 +9,11 @@
     "width": 300,
     "height": 300
   },
-  "pins": []
+  "pins": [],
+    "sab": {
+        "slotKind": 3,
+        "fields": {}
+    },
+    "ui": {"svg": "./image.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

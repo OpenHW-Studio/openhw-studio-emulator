@@ -6,7 +6,6 @@ export const BOUNDS = { x: 0, y: 0, w: 76, h: 113 };
 export const Wokwi7SegmentUI = ({ state, attrs }: { state: any, attrs: any }) => {
     // Parse attributes
     const digits = parseInt(attrs?.digits || '1', 10);
-    const hasColon = attrs?.colon === '1' || attrs?.colon === 'true';
     const activeColor = attrs?.color || '#FFA500'; // Default to orange if unspecified, but use user's color if provided. Wait, manifest defaults to "red".
     const offColor = '#505355'; // Dark gray for off state
     const background = attrs?.background || '#252626'; // Base fill
@@ -18,9 +17,9 @@ export const Wokwi7SegmentUI = ({ state, attrs }: { state: any, attrs: any }) =>
         return state?.digitSegments?.[digitIndex]?.[segLetter] ? glowColor : offColor;
     };
 
-    const renderDigit = (x: number, digitIndex: number) => {
+    const renderDigit = (digitIndex: number) => {
         return (
-            <g transform={`translate(${x}, 0)`}>
+            <g>
                 {/* DP */}
                 <circle cx="62" cy="91" r="4" fill={getFill(digitIndex, 'DP')} />
                 
@@ -75,8 +74,10 @@ export const Wokwi7SegmentUI = ({ state, attrs }: { state: any, attrs: any }) =>
                 </g>
 
                 {/* Render Digits */}
-                {Array.from({ length: digits }).map((_, i) => 
-                    renderDigit(i * 76, i)
+                {Array.from({ length: digits }).map((_, i) =>
+                    <g key={`digit-${i}`} transform={`translate(${i * 76}, 0)`}>
+                        {renderDigit(i)}
+                    </g>
                 )}
             </svg>
         </div>

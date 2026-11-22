@@ -1,4 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
+import { createValidationIssue } from '../component-schema.js';
 
 // ── IC Definitions ──────────────────────────────────────────────────
 // Each IC type defines its internal gate connections.
@@ -189,7 +190,7 @@ export class LogicIC74xxLogic extends BaseComponent {
                 visited.add(otherKey);
 
                 const [compId, compPin] = otherKey.split(':');
-                const inst = instances.find(i => i.id === compId);
+                const inst = this.findInstance(instances, compId);
                 if (!inst) continue;
 
                 if (!inst.pins[compPin]) inst.pins[compPin] = { voltage: 0, mode: 'INPUT' };
@@ -222,5 +223,77 @@ export class LogicIC74xxLogic extends BaseComponent {
             }
         }
         return super.getPinVoltage(pinId);
+    }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: enabled} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {},
+            i: {enabled: (s.enabled ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const vcc = `${component.id}.VCC`;
+        const gnd = `${component.id}.GND`;
+
+        if (((validator ? validator.getNeighbors(vcc) : (graph.get(vcc) || []))).length === 0) {
+            return createValidationIssue({
+                ruleId: 'logic-ic-74xx-power-input-check',
+                severity: 'warn',
+                message: `⚠️ [74xx IC ${component.id}] Power (VCC) is missing. Digital logic requires power.`,
+                compIds: [component.id],
+                remediation: 'Connect VCC to the logic supply rail.',
+                autoFix: true,
+            });
+        }
+        if (!validator.hasResistivePathToSupply(vcc)) {
+            return createValidationIssue({
+                ruleId: 'logic-ic-74xx-power-input-check',
+                severity: 'warn',
+                message: `⚠️ [74xx IC ${component.id}] Power (VCC) is connected but does not reach a valid power supply rail.`,
+                compIds: [component.id],
+                remediation: 'Ensure VCC path connects to a 5V/3.3V power source.',
+            });
+        }
+
+        if (((validator ? validator.getNeighbors(gnd) : (graph.get(gnd) || []))).length === 0) {
+            return createValidationIssue({
+                ruleId: 'logic-ic-74xx-power-input-check',
+                severity: 'warn',
+                message: `⚠️ [74xx IC ${component.id}] Ground (GND) is missing.`,
+                compIds: [component.id],
+                remediation: 'Connect GND to the common ground rail.',
+                autoFix: true,
+            });
+        }
+        const gndSources = validator.collectVoltageSources(gnd);
+        if (!gndSources.some((s: any) => s.voltage === 0)) {
+            return createValidationIssue({
+                ruleId: 'logic-ic-74xx-power-input-check',
+                severity: 'warn',
+                message: `⚠️ [74xx IC ${component.id}] Ground (GND) is connected but does not reach a valid ground rail (GND).`,
+                compIds: [component.id],
+                remediation: 'Ensure GND path connects to a valid ground rail.',
+            });
+        }
+
+        const pins = validator.getComponentPins(component);
+        const inputPins = pins.filter((p: string) => p.includes('IN') || /^[ABCD]\d?$/.test(p));
+        const floatingInputs = inputPins.filter((p: string) => ((validator ? validator.getNeighbors(`${component.id}.${p}`) : (graph.get(`${component.id}.${p}`) || []))).length === 0);
+
+        if (floatingInputs.length > 0) {
+            return createValidationIssue({
+                ruleId: 'logic-ic-74xx-power-input-check',
+                severity: 'warn',
+                message: `⚠️ [74xx IC ${component.id}] Floating Inputs: Pins ${floatingInputs.join(', ')} are not connected. CMOS logic chips can behave unpredictably with floating inputs.`,
+                compIds: [component.id],
+                remediation: 'Tie unused inputs to a defined logic level through a resistor or direct connection per the datasheet.',
+                autoFix: true,
+            });
+        }
+
+        return null;
     }
 }

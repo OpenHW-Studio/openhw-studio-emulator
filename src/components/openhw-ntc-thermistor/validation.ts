@@ -1,52 +1,38 @@
-export const validation = {
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
+import { createValidationIssue } from '../component-schema.js';
+import type { ComponentValidationRule } from '../component-schema.js';
+import { NTCThermistorLogic } from './logic';
+
+const delegate = NTCThermistorLogic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>, validator?: any) =>
+        NTCThermistorLogic.prototype.validate!.call(undefined, component, graph, validator)
+    : (_component: any, _graph: Map<string, string[]>) => null;
+
+export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
         {
+            id: 'openhw-ntc-thermistor-check',
             name: 'NTC Thermistor Connection Check',
-            check: (component: any, graph: Map<string, string[]>) => {
-                const pinA = graph.get(`${component.id}.A`);
-                const pinB = graph.get(`${component.id}.B`);
-
-                if ((!pinA || pinA.length === 0) && (!pinB || pinB.length === 0)) {
-                    return `⚠️ [NTC ${component.id}] Not connected. Wire in a voltage divider: 5V → 10kΩ resistor → analog pin → NTC → GND.`;
-                }
-                if (!pinA || pinA.length === 0) {
-                    return `⚠️ [NTC ${component.id}] Terminal A is not connected.`;
-                }
-                if (!pinB || pinB.length === 0) {
-                    return `⚠️ [NTC ${component.id}] Terminal B is not connected.`;
-                }
-                return null;
-            },
-        },
-        {
-            name: 'NTC Thermistor Analog Pin Check',
-            check: (component: any, graph: Map<string, string[]>) => {
-                const all = [
-                    ...(graph.get(`${component.id}.A`) || []),
-                    ...(graph.get(`${component.id}.B`) || []),
-                ];
-                const hasAnalog = all.some((c: string) =>
-                    [':A0',':A1',':A2',':A3',':A4',':A5'].some(p => c.includes(p))
-                );
-                if (!hasAnalog) {
-                    return `⚠️ [NTC ${component.id}] Connect one terminal to an analog pin (A0–A5). Use analogRead() and the Beta equation to calculate temperature.`;
-                }
-                return null;
-            },
-        },
-        {
-            name: 'NTC Thermistor Pull-up Resistor Check',
-            check: (component: any, graph: Map<string, string[]>) => {
-                const all = [
-                    ...(graph.get(`${component.id}.A`) || []),
-                    ...(graph.get(`${component.id}.B`) || []),
-                ];
-                const hasResistor = all.some((c: string) => c.includes('openhw-resistor') || c.includes('openhw-resistor'));
-                if (!hasResistor) {
-                    return `⚠️ [NTC ${component.id}] NTC thermistors need a series resistor (10kΩ) to form a voltage divider. Without it, analogRead() will not give meaningful temperature values.`;
-                }
-                return null;
-            },
-        },
-    ],
+            severity: 'warn' as const,
+            priority: 10,
+            description: 'NTC Thermistor Connection Check',
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'openhw-ntc-thermistor-check');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'openhw-ntc-thermistor-check'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
+            }
+        }
+    ]
 };

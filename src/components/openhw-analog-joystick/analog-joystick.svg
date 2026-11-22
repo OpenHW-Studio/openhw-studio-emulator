@@ -1,0 +1,10 @@
+<svg width="100%" height="100%" viewBox="0 0 237.4 277.5" xmlns="http://www.w3.org/2000/svg" data-component="openhw-analog-joystick" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="235.4" height="275.5" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="118.7" y="138.75" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">Analog Joystick</text>
+  <circle cx="77.3" cy="263.6" r="2.5" fill="#888" data-pin="VCC" />
+  <circle cx="92.3" cy="263.6" r="2.5" fill="#888" data-pin="VERT" />
+  <circle cx="122.3" cy="263.6" r="2.5" fill="#888" data-pin="HORZ" />
+  <circle cx="137.3" cy="263.6" r="2.5" fill="#888" data-pin="SEL" />
+  <circle cx="167.3" cy="263.6" r="2.5" fill="#888" data-pin="GND" />
+</svg>

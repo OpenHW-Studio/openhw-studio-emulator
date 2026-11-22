@@ -40,5 +40,12 @@
             "setup": "if(!accel_${COMP_SUFFIX}.begin()) {\n  Serial.println(\"No ADXL345 detected\");\n  while(1);\n}",
             "loop": "sensors_event_t event_${COMP_SUFFIX};\naccel_${COMP_SUFFIX}.getEvent(&event_${COMP_SUFFIX});\nSerial.print(\"X: \"); Serial.print(event_${COMP_SUFFIX}.acceleration.x);\nSerial.print(\"  Y: \"); Serial.print(event_${COMP_SUFFIX}.acceleration.y);\nSerial.print(\"  Z: \"); Serial.print(event_${COMP_SUFFIX}.acceleration.z);\nSerial.println(\" m/s^2\");\ndelay(500);"
         }
-    }
+    },
+    "sab": {
+        "slotKind": 4,
+        "fields": {"f0": "accelX", "f1": "accelY", "f2": "accelZ"}
+    },
+    "ui": {"svg": "./adxl345.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 94.5, "h": 135}
 }

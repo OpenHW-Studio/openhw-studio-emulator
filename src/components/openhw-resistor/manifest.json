@@ -1,7 +1,7 @@
 {
     "type": "openhw-resistor",
     "label": "Resistor",
-    "description": "Passive two-terminal component that limits current flow. Configurable resistance (Ω). Essential for current-limiting LEDs and voltage dividers.",
+    "description": "Passive two-terminal component that limits current flow. Configurable resistance (\u03a9). Essential for current-limiting LEDs and voltage dividers.",
     "group": "Basic",
     "w": 60,
     "h": 15,
@@ -32,5 +32,22 @@
             "type": "passive",
             "description": "Terminal 2"
         }
-    ]
+    ],
+    "sab": {
+        "slotKind": 0,
+        "fields": {
+            "f0": "voltageDrop",
+            "f1": "current",
+            "i0": "glow"
+        }
+    },
+    "ui": {
+        "svg": "./resistor.svg",
+        "interactive": []
+    },
+    "sim": {
+        "runtime": "js",
+        "validation": "inline"
+    },
+    "bounds": {"x": 0, "y": 0, "w": 60, "h": 15}
 }

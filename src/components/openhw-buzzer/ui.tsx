@@ -24,20 +24,30 @@ export const BuzzerUI = ({ state, attrs }: { state: any, attrs: any }) => {
     // The actual frequency to play: dynamic frequency from logic (if valid) else fallback to attr.
     const activeFreq = dynamicFreq > 0 ? dynamicFreq : freqAttr;
 
-    // Initialize persistent oscillator and gain nodes once on mount
+    // Lazily init audio on first user gesture — creating an AudioContext
+    // on mount fires "AudioContext was not allowed to start" in the console
+    // (autoplay policy) and wastes a context per buzzer on the canvas.
     useEffect(() => {
         let activeOsc: OscillatorNode | null = null;
         let activeGain: GainNode | null = null;
+        let gestureHandler: (() => void) | null = null;
+        let cancelled = false;
 
-        try {
-            if (!audioCtx) {
+        const initAudio = () => {
+            if (cancelled || audioCtx) return;
+            try {
                 const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
                 if (AudioContextClass) {
                     audioCtx = new AudioContextClass({ latencyHint: 'interactive' });
                 }
+            } catch {
+                return;
             }
+        };
 
-            if (audioCtx) {
+        const startNodes = () => {
+            if (cancelled || !audioCtx || oscRef.current) return;
+            try {
                 if (audioCtx.state === 'suspended') {
                     audioCtx.resume().catch(() => {});
                 }
@@ -58,12 +68,31 @@ export const BuzzerUI = ({ state, attrs }: { state: any, attrs: any }) => {
 
                 oscRef.current = activeOsc;
                 gainRef.current = activeGain;
+            } catch (err) {
+                console.warn('Low-latency Web Audio API initialization failed:', err);
             }
-        } catch (err) {
-            console.warn('Low-latency Web Audio API initialization failed:', err);
+        };
+
+        // If something is already buzzing (or audio was unlocked by an
+        // earlier gesture), start now; otherwise wait for first gesture.
+        if (isBuzzing || (audioCtx && audioCtx.state === 'running')) {
+            initAudio();
+            startNodes();
+        } else {
+            gestureHandler = () => {
+                initAudio();
+                startNodes();
+            };
+            window.addEventListener('pointerdown', gestureHandler, { once: true });
+            window.addEventListener('keydown', gestureHandler, { once: true });
         }
 
         return () => {
+            cancelled = true;
+            if (gestureHandler) {
+                window.removeEventListener('pointerdown', gestureHandler);
+                window.removeEventListener('keydown', gestureHandler);
+            }
             if (activeOsc) {
                 try {
                     activeOsc.stop();

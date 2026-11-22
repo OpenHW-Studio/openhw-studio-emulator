@@ -1,0 +1,13 @@
+<svg width="100%" height="100%" viewBox="0 0 198.0 158.4" xmlns="http://www.w3.org/2000/svg" data-component="max30102" data-bind-root="true">
+  <!-- Placeholder art (component v2): replaced by real per-component SVG. -->
+  <rect x="1" y="1" width="196.0" height="156.4" rx="6" fill="#1e293b" stroke="#475569" />
+  <text x="99.0" y="79.2" text-anchor="middle" dominant-baseline="middle" fill="#cbd5e1" font-size="9" font-family="sans-serif">MAX30102 Heart Rate</text>
+  <circle cx="71.3" cy="62.4" r="2.5" fill="#888" data-pin="VIN" />
+  <circle cx="56.2" cy="62.4" r="2.5" fill="#888" data-pin="SDA" />
+  <circle cx="41" cy="62.4" r="2.5" fill="#888" data-pin="SCL" />
+  <circle cx="26.6" cy="62.4" r="2.5" fill="#888" data-pin="GND" />
+  <circle cx="26.6" cy="1.6" r="2.5" fill="#888" data-pin="INT" />
+  <circle cx="41" cy="1.6" r="2.5" fill="#888" data-pin="IRD" />
+  <circle cx="56.2" cy="1.6" r="2.5" fill="#888" data-pin="RD" />
+  <circle cx="71.3" cy="1.6" r="2.5" fill="#888" data-pin="NC" />
+</svg>

@@ -1,56 +1,37 @@
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
 import { createValidationIssue } from '../component-schema.js';
 import type { ComponentValidationRule } from '../component-schema.js';
+import { L293DLogic } from './logic';
+
+const delegate = L293DLogic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>, validator?: any) =>
+        L293DLogic.prototype.validate!.call(undefined, component, graph, validator)
+    : (_component: any, _graph: Map<string, string[]>) => null;
 
 export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
         {
             id: 'l293d-dual-power-supply-check',
             name: 'L293D Dual Power Supply Check',
-            severity: 'warn',
+            severity: 'warn' as const,
             priority: 10,
             description: 'Check the logic and motor power rails on the L293D.',
-            check: (component: any, graph: Map<string, string[]>, validator: any) => {
-                const vcc1 = `${component.id}.VCC1`;
-                const vcc2 = `${component.id}.VCC2`;
-                const gndCandidates = [`${component.id}.GND1`, `${component.id}.GND2`, `${component.id}.GND3`, `${component.id}.GND4`, `${component.id}.GND`];
-                const gnd = gndCandidates.find(node => validator.getNeighbors(node).length > 0) || gndCandidates[0];
-                const issues = [];
-
-                const v1 = validator.calculateVoltageAtNode(vcc1);
-                const v2 = validator.calculateVoltageAtNode(vcc2);
-
-                if (v1 < 4.5) {
-                    issues.push(createValidationIssue({
-                        ruleId: 'l293d-dual-power-supply-check',
-                        severity: 'warn',
-                        message: `⚠️ [L293D ${component.id}] Logic Power (VCC1) is missing or too low. Motor driver will not function.`,
-                        compIds: [component.id],
-                        remediation: 'Connect VCC1 to the correct logic supply.',
-                        autoFix: true,
-                    }));
-                }
-                if (v2 < v1) {
-                    issues.push(createValidationIssue({
-                        ruleId: 'l293d-dual-power-supply-check',
-                        severity: 'warn',
-                        message: `⚠️ [L293D ${component.id}] Warning: Motor Power (VCC2) is lower than Logic Power. Motors may be underpowered or stall.`,
-                        compIds: [component.id],
-                        remediation: 'Raise the motor supply rail above the logic rail.',
-                        autoFix: true,
-                    }));
-                }
-                if (validator.getNeighbors(gnd).length === 0) {
-                    issues.push(createValidationIssue({
-                        ruleId: 'l293d-dual-power-supply-check',
-                        severity: 'warn',
-                        message: `⚠️ [L293D ${component.id}] Ground connection is missing.`,
-                        compIds: [component.id],
-                        remediation: 'Connect the L293D ground pin to the common ground rail.',
-                        autoFix: true,
-                    }));
-                }
-
-                return issues.length > 0 ? issues : null;
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'l293d-dual-power-supply-check');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'l293d-dual-power-supply-check'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
             }
         }
     ]

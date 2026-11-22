@@ -44,6 +44,32 @@ export class PotentiometerLogic extends BaseComponent {
         return { value: this.state.value };
     }
 
+    // 12.4 v2: numeric UI state for SAB slot { f0: value }.
+    uiState() {
+        return {
+            f: { value: Number(this.state?.value || 0) },
+            i: {},
+        };
+    }
+
+    validate(component: any, graph: Map<string, string[]>) {
+        const wiperNode = `${component.id}.SIG`;
+        const connections = graph.get(wiperNode) || [];
+
+        if (connections.length === 0) {
+            return {
+                ruleId: 'potentiometer-floating-wiper',
+                severity: 'warn',
+                message: `[Potentiometer ${component.id}] Wiper (pin 2) is not connected. It won't provide any signal to your MCU.`,
+                compIds: [component.id],
+                remediation: 'Connect the wiper to an Analog input pin.',
+                autoFix: true,
+            };
+        }
+
+        return null;
+    }
+
     onEvent(event: any) {
         if (event && event.type === 'input' && event.value !== undefined) {
             this.state.value = event.value;

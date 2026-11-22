@@ -9,5 +9,11 @@
     "color": "#ffffff",
     "fontSize": 24
   },
-  "pins": []
+  "pins": [],
+    "sab": {
+        "slotKind": 3,
+        "fields": {}
+    },
+    "ui": {"svg": "./text.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"}
 }

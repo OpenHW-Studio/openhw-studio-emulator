@@ -24,6 +24,13 @@ export class GasSensorLogic extends BaseComponent {
 
     public getConnectedBoardPin(): string | null {
         if ((this as any)._connectedPin != null) return (this as any)._connectedPin;
+        try {
+            const netOf = (this as any)._boardNetOf;
+            if (typeof netOf === 'function') {
+                const pin = netOf('DO');
+                if (pin) { (this as any)._connectedPin = pin; return pin; }
+            }
+        } catch { /* fall through to legacy scan */ }
         const runner = this._simCpu?._avrRunner;
         if (runner?.currentWires) {
             for (const wire of runner.currentWires) {
@@ -97,7 +104,9 @@ export class GasSensorLogic extends BaseComponent {
 
             const isHigh = digitalVoltage > 1.8;
             const boardPin = this.getConnectedBoardPin();
-            if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
+            if (boardPin && typeof (this as any)._driveBoardPin === 'function') {
+                (this as any)._driveBoardPin(boardPin, isHigh);
+            } else if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
                 (this as any)._setAvrPinDirect(boardPin, isHigh);
             }
 
@@ -113,5 +122,32 @@ export class GasSensorLogic extends BaseComponent {
         if (pinId === 'VCC' || pinId === '5V' || pinId === 'GND') {
             this.updateVoltages();
         }
+    }
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: gasLevel, i0: limitExceeded} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {gasLevel: Number(s.gasLevel ?? 0)},
+            i: {limitExceeded: (s.limitExceeded ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        // Original rule used a (comp, wires) signature; wires aren't available
+        // here — derive connectivity from graph keys instead (same semantics).
+        const connectedPins = [...graph.keys()];
+        void validator;
+        const hasVCC = connectedPins.includes(`${component.id}:VCC`);
+        const hasGND = connectedPins.includes(`${component.id}:GND`);
+        const hasOut = connectedPins.includes(`${component.id}:DO`) || connectedPins.includes(`${component.id}:AO`);
+
+        if (!hasVCC || !hasGND) {
+            return `Gas Sensor ${component.id} requires VCC and GND connections to function`;
+        }
+        if (!hasOut) {
+            return `Gas Sensor ${component.id} has no output pins (DO or AO) connected`;
+        }
+        return null;
     }
 }

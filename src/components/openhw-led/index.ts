@@ -1,35 +1,16 @@
+// Component v2 golden reference (index.ts = declarative registry record only).
+// No fs/process/document touches at module top — worker/import-safe everywhere.
+// Raw-source harvesting moved to build time (emulatorLoader ?raw glob).
+// svgUrl: bundler-resolved .svg art (Vite ?url / file loader); falls back to
+// null when the toolchain does not handle .svg imports.
 import { validation } from './validation';
 import manifest from './manifest.json';
 import { LEDLogic } from './logic';
 import { LEDUI, BOUNDS } from './ui';
+// @ts-ignore — resolved by Vite asset pipeline; plain tsc treats as untyped
+import svgUrl from './led.svg?url';
 
-let _nodeFs: any = null;
-try {
-    if (typeof process !== 'undefined' && process.versions && process.versions.node) {
-        // @ts-ignore
-        _nodeFs = eval("require('node:fs')");
-    }
-} catch (e) {}
-const docHtml = '';
-
-let uiRaw = '';
-let logicRaw = '';
-let validationRaw = '';
-try {
-    uiRaw = _nodeFs?.readFileSync(new URL('./ui.tsx', import.meta.url), 'utf8');
-} catch (e) {
-    uiRaw = '';
-}
-try {
-    logicRaw = _nodeFs?.readFileSync(new URL('./logic', import.meta.url), 'utf8');
-} catch (e) {
-    logicRaw = '';
-}
-try {
-    validationRaw = _nodeFs?.readFileSync(new URL('./validation', import.meta.url), 'utf8');
-} catch (e) {
-    validationRaw = '';
-}
+export const svg = svgUrl || null;
 
 export default {
     manifest,
@@ -39,10 +20,15 @@ export default {
     contextMenuDuringRun: false,
     BOUNDS,
     validation,
-    doc: docHtml,
-    uiRaw,
-    logicRaw,
-    validationRaw,
+    svg: svgUrl || null,
+    doc: null,
+    // Raw sources are harvested at build time by the frontend's ?raw glob
+    // (emulatorLoader.collectRawComponentSources) and merged into the live
+    // registry there. Kept as empty-string fields so ComponentLab / zip-upload
+    // / backend-sync code that reads uiRaw/logicRaw keeps working.
+    uiRaw: '',
+    logicRaw: '',
+    validationRaw: '',
     autocoding: {
         arduino: {
             setup: "pinMode(13, OUTPUT);",

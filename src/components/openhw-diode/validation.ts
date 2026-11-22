@@ -1,47 +1,37 @@
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
 import { createValidationIssue } from '../component-schema.js';
 import type { ComponentValidationRule } from '../component-schema.js';
+import { DiodeLogic } from './logic';
+
+const delegate = DiodeLogic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>, validator?: any) =>
+        DiodeLogic.prototype.validate!.call(undefined, component, graph, validator)
+    : (_component: any, _graph: Map<string, string[]>) => null;
 
 export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
         {
             id: 'diode-connection-check',
             name: 'Diode Connection Check',
-            severity: 'warn',
+            severity: 'warn' as const,
             priority: 10,
             description: 'Warn when the diode is disconnected or reverse-biased.',
-            check: (component: any, graph: Map<string, string[]>, validator: any) => {
-                const anodeNode = `${component.id}.A`;
-                const cathodeNode = `${component.id}.K`;
-
-                const aConns = graph.get(anodeNode) || [];
-                const kConns = graph.get(cathodeNode) || [];
-
-                if (aConns.length === 0 && kConns.length === 0) {
-                    return createValidationIssue({
-                        ruleId: 'diode-connection-check',
-                        severity: 'warn',
-                        message: `⚠️ [Diode ${component.id}] Warning: Neither Anode nor Cathode is connected.`,
-                        compIds: [component.id],
-                        remediation: 'Wire the diode into a circuit with the correct polarity.',
-                        autoFix: true,
-                    });
-                }
-
-                const vA = validator.calculateVoltageAtNode(anodeNode);
-                const vK = validator.calculateVoltageAtNode(cathodeNode);
-
-                if (vK > vA + 0.1 && aConns.length > 0 && kConns.length > 0) {
-                    return createValidationIssue({
-                        ruleId: 'diode-connection-check',
-                        severity: 'warn',
-                        message: `⚠️ [Diode ${component.id}] Reverse Bias: Cathode voltage (${vK.toFixed(1)}V) is higher than Anode (${vA.toFixed(1)}V). Diode will block current.`,
-                        compIds: [component.id],
-                        remediation: 'Flip the diode orientation or reverse the applied polarity.',
-                        autoFix: false,
-                    });
-                }
-
-                return null;
+            check: (component: any, graph: Map<string, string[]>, validator?: any) => {
+                const raw = delegate(component, graph, validator);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'diode-connection-check');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'diode-connection-check'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
             }
         }
     ]

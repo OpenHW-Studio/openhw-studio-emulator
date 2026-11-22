@@ -11,41 +11,142 @@
         "colon": "false"
     },
     "pins": [
-        { "id": "G", "x": 8, "y": 11, "type": "digital" },
-        { "id": "F", "x": 23, "y": 11, "type": "digital" },
-        { "id": "COM.2", "x": 38, "y": 11, "type": "digital" },
-        { "id": "A", "x": 53, "y": 11, "type": "digital" },
-        { "id": "B", "x": 68, "y": 11, "type": "digital" },
-        { "id": "E", "x": 8, "y": 101, "type": "digital" },
-        { "id": "D", "x": 23, "y": 101, "type": "digital" },
-        { "id": "COM.1", "x": 38, "y": 101, "type": "digital" },
-        { "id": "C", "x": 53, "y": 101, "type": "digital" },
-        { "id": "DP", "x": 68, "y": 101, "type": "digital" }
+        {
+            "id": "G",
+            "x": 8,
+            "y": 11,
+            "type": "digital"
+        },
+        {
+            "id": "F",
+            "x": 23,
+            "y": 11,
+            "type": "digital"
+        },
+        {
+            "id": "COM.2",
+            "x": 38,
+            "y": 11,
+            "type": "digital"
+        },
+        {
+            "id": "A",
+            "x": 53,
+            "y": 11,
+            "type": "digital"
+        },
+        {
+            "id": "B",
+            "x": 68,
+            "y": 11,
+            "type": "digital"
+        },
+        {
+            "id": "E",
+            "x": 8,
+            "y": 101,
+            "type": "digital"
+        },
+        {
+            "id": "D",
+            "x": 23,
+            "y": 101,
+            "type": "digital"
+        },
+        {
+            "id": "COM.1",
+            "x": 38,
+            "y": 101,
+            "type": "digital"
+        },
+        {
+            "id": "C",
+            "x": 53,
+            "y": 101,
+            "type": "digital"
+        },
+        {
+            "id": "DP",
+            "x": 68,
+            "y": 101,
+            "type": "digital"
+        }
     ],
     "telemetry": {
-      "template": "Segments=(${state.a},${state.b},${state.c},${state.d},${state.e},${state.f},${state.g})",
-      "criticalKeys": ["state.a", "state.b", "state.c"]
+        "template": "Segments=(${state.a},${state.b},${state.c},${state.d},${state.e},${state.f},${state.g})",
+        "criticalKeys": [
+            "state.a",
+            "state.b",
+            "state.c"
+        ]
     },
     "autowiring": {
-      "connections": [
-        { "from": "A", "to": "arduino:2" },
-        { "from": "B", "to": "arduino:3" },
-        { "from": "C", "to": "arduino:4" },
-        { "from": "D", "to": "arduino:5" },
-        { "from": "E", "to": "arduino:6" },
-        { "from": "F", "to": "arduino:7" },
-        { "from": "G", "to": "arduino:8" },
-        { "from": "DP", "to": "arduino:9" },
-        { "from": "COM.1", "to": "arduino:GND" },
-        { "from": "COM.2", "to": "arduino:GND" }
-      ]
+        "connections": [
+            {
+                "from": "A",
+                "to": "arduino:2"
+            },
+            {
+                "from": "B",
+                "to": "arduino:3"
+            },
+            {
+                "from": "C",
+                "to": "arduino:4"
+            },
+            {
+                "from": "D",
+                "to": "arduino:5"
+            },
+            {
+                "from": "E",
+                "to": "arduino:6"
+            },
+            {
+                "from": "F",
+                "to": "arduino:7"
+            },
+            {
+                "from": "G",
+                "to": "arduino:8"
+            },
+            {
+                "from": "DP",
+                "to": "arduino:9"
+            },
+            {
+                "from": "COM.1",
+                "to": "arduino:GND"
+            },
+            {
+                "from": "COM.2",
+                "to": "arduino:GND"
+            }
+        ]
     },
     "autocoding": {
-      "libraries": ["SevSeg"],
-      "arduino": {
-        "globals": "#include \"SevSeg.h\"\nSevSeg sevseg_${COMP_SUFFIX};",
-        "setup": "byte numDigits = 1;\nbyte digitPins[] = {10};\nbyte segmentPins[] = {2, 3, 4, 5, 6, 7, 8, 9};\nbool resistorsOnSegments = true;\nbyte hardwareConfig = (String(\"${common}\") == \"anode\") ? COMMON_ANODE : COMMON_CATHODE;\nsevseg_${COMP_SUFFIX}.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments);\nsevseg_${COMP_SUFFIX}.setBrightness(90);",
-        "loop": "sevseg_${COMP_SUFFIX}.setNumber(4);\nsevseg_${COMP_SUFFIX}.refreshDisplay();"
-      }
-    }
+        "libraries": [
+            "SevSeg"
+        ],
+        "arduino": {
+            "globals": "#include \"SevSeg.h\"\nSevSeg sevseg_${COMP_SUFFIX};",
+            "setup": "byte numDigits = 1;\nbyte digitPins[] = {10};\nbyte segmentPins[] = {2, 3, 4, 5, 6, 7, 8, 9};\nbool resistorsOnSegments = true;\nbyte hardwareConfig = (String(\"${common}\") == \"anode\") ? COMMON_ANODE : COMMON_CATHODE;\nsevseg_${COMP_SUFFIX}.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments);\nsevseg_${COMP_SUFFIX}.setBrightness(90);",
+            "loop": "sevseg_${COMP_SUFFIX}.setNumber(4);\nsevseg_${COMP_SUFFIX}.refreshDisplay();"
+        }
+    },
+    "sab": {
+        "slotKind": 3,
+        "fields": {
+            "i0": "colon"
+        }
+    },
+    "ui": {
+        "svg": "./7segment.svg",
+        "interactive": []
+    },
+    "sim": {
+        "runtime": "js",
+        "validation": "inline"
+    },
+    "bounds": {"x": 0, "y": 0, "w": 76, "h": 113}
 }

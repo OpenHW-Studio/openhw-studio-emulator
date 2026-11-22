@@ -45,17 +45,17 @@
       },
       {
         "from": "LRC",
-        "to": "arduino:25",
+        "to": "arduino:25|15|GP19|PB12",
         "color": "yellow"
       },
       {
         "from": "BCLK",
-        "to": "arduino:26",
+        "to": "arduino:26|14|GP18|PB13",
         "color": "green"
       },
       {
         "from": "DIN",
-        "to": "arduino:22",
+        "to": "arduino:22|12|GP20|PB15",
         "color": "blue"
       }
     ]
@@ -70,5 +70,12 @@
       "setup": "Serial.begin(9600);\nI2S.setBCLK(${BCLK});\nI2S.setDATA(${DIN});\nI2S.begin(I2S_PHILIPS_MODE, 44100, 16);\nSD.begin(5);\naudioFile = SD.open(\"/rec.wav\");",
       "loop": "if (audioFile && audioFile.available()) {\n  int16_t sample = 0;\n  audioFile.read((uint8_t*)&sample, 2);\n  I2S.write(sample);\n  I2S.write(sample);\n}"
     }
-  }
+  },
+    "sab": {
+        "slotKind": 7,
+        "fields": {"i0": "playing"}
+    },
+    "ui": {"svg": "./max98357.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 75, "h": 105}
 }

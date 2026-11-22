@@ -1,4 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
+import { createValidationIssue } from '../component-schema.js';
 
 export class ClockGeneratorLogic extends BaseComponent {
     private lastToggleTime: number = 0;
@@ -57,7 +58,7 @@ export class ClockGeneratorLogic extends BaseComponent {
                 visited.add(otherKey);
 
                 const [compId, compPin] = otherKey.split(':');
-                const inst = instances.find(i => i.id === compId);
+                const inst = this.findInstance(instances, compId);
                 if (!inst) continue;
 
                 if (!inst.pins[compPin]) inst.pins[compPin] = { voltage: 0, mode: 'INPUT' };
@@ -81,5 +82,29 @@ export class ClockGeneratorLogic extends BaseComponent {
     getPinVoltage(pinId: string): number {
         if (pinId === 'OUT') return this.outputState ? 5.0 : 0.0;
         return super.getPinVoltage(pinId);
+    }
+
+    // 12.4 v2: numeric UI state for SAB slot {i0: out} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {},
+            i: {out: (s.out ? 1 : 0)},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const pinOut = graph.get(`${component.id}.OUT`);
+        if (!pinOut || pinOut.length === 0) {
+            return createValidationIssue({
+                ruleId: 'clock-generator-output-check',
+                severity: 'warn',
+                message: `⚠️ [Clock Generator ${component.id}] Warning: Clock OUT pin is not connected to anything.`,
+                compIds: [component.id],
+                remediation: 'Connect the clock output to the circuit that consumes it.',
+                autoFix: true,
+            });
+        }
+        return null;
     }
 }

@@ -60,5 +60,12 @@
     { "id": "MOSI", "description": "Alias for GP19 (SPI MOSI)", "x": 114.5, "y": 245.4, "type": "digital" },
     { "id": "MISO", "description": "Alias for GP16 (SPI MISO)", "x": 114.5, "y": 305.4, "type": "digital" },
     { "id": "SS", "description": "Alias for GP17 (SPI SS/CS)", "x": 114.5, "y": 290.4, "type": "digital" }
-  ]
+  ],
+    "sab": {
+        "slotKind": 0,
+        "fields": {"i0": "rxActive"}
+    },
+    "ui": {"svg": "./pico.svg", "interactive": []},
+    "sim": {"runtime": "js", "validation": "inline"},
+    "bounds": {"x": 0, "y": 0, "w": 124, "h": 314}
 }

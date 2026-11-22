@@ -1,4 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
+import { createValidationIssue } from '../component-schema.js';
 import { OneWireProtocol } from '../../protocol-handlers/index';
 
 // DS18B20 — Digital 1-Wire Temperature Sensor
@@ -128,4 +129,76 @@ export class DS18B20Logic extends OneWireProtocol {
         }
         return crc;
     }
+
+    // 12.4 v2: numeric UI state for SAB slot {f0: temperature} (via getSyncState snapshot).
+    uiState() {
+        const s: any = (typeof (this as any).getSyncState === 'function')
+            ? ((this as any).getSyncState() || {}) : ((this as any).state || {});
+        return {
+            f: {temperature: Number((this as any).temperature ?? 25)},
+            i: {},
+        };
+    }
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        {
+const vdd = graph.get(`${component.id}.VCC`) || graph.get(`${component.id}.VDD`) || [];
+        const gnd = graph.get(`${component.id}.GND`) || [];
+        const issues = [];
+
+        if (vdd.length === 0) {
+            issues.push(createValidationIssue({
+                ruleId: 'ds18b20-power-check',
+                severity: 'warn',
+                message: `⚠️ [DS18B20 ${component.id}] VCC pin not connected. Connect to 3.3V or 5V.`,
+                compIds: [component.id],
+                remediation: 'Connect VCC to the power rail.',
+                autoFix: true,
+            }));
+        }
+        if (gnd.length === 0) {
+            issues.push(createValidationIssue({
+                ruleId: 'ds18b20-power-check',
+                severity: 'warn',
+                message: `⚠️ [DS18B20 ${component.id}] GND pin not connected.`,
+                compIds: [component.id],
+                remediation: 'Connect GND to the common ground rail.',
+                autoFix: true,
+            }));
+        }
+        return issues.length > 0 ? issues : null;
+        }
+
+        /* --- next rule --- */
+        {
+const dq = graph.get(`${component.id}.DQ`) || [];
+        if (dq.length === 0) {
+            return createValidationIssue({
+                ruleId: 'ds18b20-data-check',
+                severity: 'warn',
+                message: `⚠️ [DS18B20 ${component.id}] DQ (data) pin not connected. Connect to a digital pin.`,
+                compIds: [component.id],
+                remediation: 'Connect the DQ pin to an MCU digital pin.',
+                autoFix: true,
+            });
+        }
+        return null;
+        }
+
+        /* --- next rule --- */
+        {
+const dq = graph.get(`${component.id}.DQ`) || [];
+        const hasResistor = dq.some((c: string) => c.includes('openhw-resistor'));
+        if (!hasResistor && dq.length > 0) {
+            return createValidationIssue({
+                ruleId: 'ds18b20-pullup-check',
+                severity: 'info',
+                message: `ℹ️ [DS18B20 ${component.id}] Note: Breakout board includes onboard pull-up. If using a bare sensor, ensure a 4.7kΩ pull-up resistor is present between DQ and VCC.`,
+                compIds: [component.id],
+                remediation: 'Verify pull-up resistor requirements.',
+                autoFix: false,
+            });
+        }
+        return null;
+        }
+}
 }

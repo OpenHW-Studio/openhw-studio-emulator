@@ -110,4 +110,43 @@ export class Wokwi7SegmentLogic extends BaseComponent {
             totalDigits: this.numDigits,
         });
     }
+
+    // 12.4 v2: numeric UI state for SAB slot { i0: colon }.
+    uiState() {
+        return {
+            f: {},
+            i: { colon: this.state?.colon ? 1 : 0 },
+        };
+    }
+
+    validate(component: any, graph: Map<string, string[]>, validator?: any) {
+        const numDigits = parseInt(component.attrs?.digits || '1', 10);
+        const issues = [];
+
+        // The manifest defines common pins as COM.1, COM.2, ... (not DIG1, DIG2)
+        let anyComConnected = false;
+        for (let i = 1; i <= numDigits; i++) {
+            const node = `${component.id}.COM.${i}`;
+            const edges = graph.get(node);
+            const count = edges && edges.length > 0 ? edges.length
+                : (validator?.getNeighbors ? validator.getNeighbors(node).length : 0);
+            if (count > 0) {
+                anyComConnected = true;
+                break;
+            }
+        }
+
+        if (!anyComConnected) {
+            issues.push({
+                ruleId: '7segment-common-and-segment-check',
+                severity: 'warn',
+                message: `[7-Segment ${component.id}] Common pin(s) (COM.1${numDigits > 1 ? '-COM.' + numDigits : ''}) are not connected. The display will not light up.\nConnect COM.1 (and COM.2) to Arduino GND for common-cathode mode.`,
+                compIds: [component.id],
+                remediation: 'Connect COM.1 and COM.2 to Arduino GND (common cathode) or 5V (common anode).',
+                autoFix: true,
+            });
+        }
+
+        return issues.length > 0 ? issues : null;
+    }
 }

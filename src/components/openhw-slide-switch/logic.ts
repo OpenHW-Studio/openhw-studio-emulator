@@ -13,8 +13,6 @@ export class SlideSwitchLogic extends BaseComponent {
         const openCond = 1e-9;
         const isRight = this.state.value === "1" || this.state.value === 1;
 
-        console.log(`[SlideSwitchLogic] getMnaStamps() called. state.value=${this.state.value}, isRight=${isRight}`);
-
         return [
             // Left position: 1 <-> 2 shorted, 3 <-> 2 open
             // Right position: 1 <-> 2 open, 3 <-> 2 shorted
@@ -25,6 +23,19 @@ export class SlideSwitchLogic extends BaseComponent {
 
     getSyncState() {
         return { value: this.state.value };
+    }
+
+    // 12.4 v2: numeric UI state for SAB slot { i0: value }.
+    // state.value is "0"/"1" (string); map to 0/1 via Number().
+    uiState() {
+        return {
+            f: {},
+            i: { value: Number(this.state?.value) === 1 ? 1 : 0 },
+        };
+    }
+
+    validate(_component: any, _graph: Map<string, string[]>) {
+        return null;
     }
 
     onEvent(event: any) {

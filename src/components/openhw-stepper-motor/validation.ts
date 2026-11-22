@@ -1,33 +1,37 @@
+// Component v2: validation logic lives in logic.ts::validate() (single source).
+// This module is a backward-compat shim — registry/validator code that imports
+// './validation' keeps working unchanged. New code should call logic.validate().
 import { createValidationIssue } from '../component-schema.js';
 import type { ComponentValidationRule } from '../component-schema.js';
+import { StepperMotorLogic } from './logic';
+
+const delegate = StepperMotorLogic.prototype.validate
+    ? (component: any, graph: Map<string, string[]>) =>
+        StepperMotorLogic.prototype.validate!.call(undefined, component, graph)
+    : (_component: any, _graph: Map<string, string[]>) => null;
 
 export const validation: { rules: ComponentValidationRule[] } = {
     rules: [
         {
             id: 'stepper-coil-connection-check',
             name: 'Stepper Coil Connection Check',
-            severity: 'warn',
+            severity: 'warn' as const,
             priority: 10,
             description: 'Warn when one or more stepper coils are disconnected.',
-            check: (component: any, graph: Map<string, string[]>, validator: any) => {
-                const requiredPins = ['A+', 'A-', 'B+', 'B-'];
-                const missingPins = requiredPins.filter(pin => {
-                    const node = `${component.id}.${pin}`;
-                    return validator.getNeighbors(node).length === 0;
-                });
-
-                if (missingPins.length > 0) {
-                    return createValidationIssue({
-                        ruleId: 'stepper-coil-connection-check',
-                        severity: 'warn',
-                        message: `⚠️ [Stepper ${component.id}] Coil Warning: The following pins are not connected: ${missingPins.join(', ')}. Stepper motor requires both coils (A and B) to be fully wired.`,
-                        compIds: [component.id],
-                        remediation: 'Connect all stepper coil pins.',
-                        autoFix: true,
-                    });
-                }
-
-                return null;
+            check: (component: any, graph: Map<string, string[]>) => {
+                const raw = delegate(component, graph);
+                if (!raw) return null;
+                const list = Array.isArray(raw) ? raw : [raw];
+                const mine = list.filter((r: any) => String(r.ruleId || r.id || '') === 'stepper-coil-connection-check');
+                if (mine.length === 0) return null;
+                return mine.map((r: any) => createValidationIssue({
+                    ruleId: String(r.ruleId || r.id || 'stepper-coil-connection-check'),
+                    severity: r.severity || 'warn',
+                    message: String(r.message || ''),
+                    compIds: r.compIds || [component.id],
+                    remediation: r.remediation,
+                    autoFix: r.autoFix,
+                }));
             }
         }
     ]

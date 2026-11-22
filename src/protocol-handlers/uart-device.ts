@@ -48,3 +48,29 @@ export class UARTProtocol extends BaseComponent {
         this.onUARTByte(byte);
     }
 }
+
+/**
+ * UartBusFramer — composition helper for WASM-heavy components (§12.4).
+ * Pure byte counting + event fan-out (no update/WASM knowledge). A
+ * WASM-heavy UART component extends WasmComponent DIRECTLY, owns a
+ * UartBusFramer, feeds RX bytes via pushByte(), and routes via
+ * routeUARTByte(); the TX queue stays plain JS (strings never cross).
+ */
+export interface UartFrameEvents {
+    onByte?(byte: number, rxIndex: number): void;
+}
+
+export class UartBusFramer {
+    private rxCount = 0;
+    constructor(private readonly events: UartFrameEvents) {}
+
+    /** Feed one RX byte; returns the 0-based RX index. */
+    pushByte(data: number): number {
+        const byte = data & 0xff;
+        const idx = this.rxCount++;
+        this.events.onByte?.(byte, idx);
+        return idx;
+    }
+
+    get rxBytes(): number { return this.rxCount; }
+}

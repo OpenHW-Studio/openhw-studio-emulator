@@ -7,22 +7,71 @@
     "h": 100,
     "attrs": {},
     "pins": [
-        { "id": "1", "x": 0, "y": 30, "type": "power", "description": "Terminal 1" },
-        { "id": "2", "x": 0, "y": 90, "type": "power", "description": "Terminal 2" }
+        {
+            "id": "1",
+            "x": 0,
+            "y": 30,
+            "type": "power",
+            "description": "Terminal 1"
+        },
+        {
+            "id": "2",
+            "x": 0,
+            "y": 90,
+            "type": "power",
+            "description": "Terminal 2"
+        }
     ],
     "autowiring": {
         "helpers": [
-            { "type": "openhw-motor-driver", "id": "driver" },
-            { "type": "openhw-power-supply", "id": "psu", "attrs": { "voltage": "12.0" } }
+            {
+                "type": "openhw-motor-driver",
+                "id": "driver"
+            },
+            {
+                "type": "openhw-power-supply",
+                "id": "psu",
+                "attrs": {
+                    "voltage": "12.0"
+                }
+            }
         ],
         "connections": [
-            { "from": "1", "to": "helper:driver:OUT1|OUT3", "color": "green" },
-            { "from": "2", "to": "helper:driver:OUT2|OUT4", "color": "green" },
-            { "from": "helper:driver:IN1|IN3", "to": "arduino:15|4|8|10|12", "color": "orange" },
-            { "from": "helper:driver:IN2|IN4", "to": "arduino:7|2|9|11|13", "color": "orange" },
-            { "from": "helper:driver:ENA|ENB", "to": "arduino:5|3|A0|A1|A2", "color": "orange" },
-            { "from": "helper:driver:12V", "to": "helper:psu:5V", "color": "red" },
-            { "from": "helper:driver:5V",  "to": "arduino:22", "color": "red" }
+            {
+                "from": "1",
+                "to": "helper:driver:OUT1|OUT3",
+                "color": "green"
+            },
+            {
+                "from": "2",
+                "to": "helper:driver:OUT2|OUT4",
+                "color": "green"
+            },
+            {
+                "from": "helper:driver:IN1|IN3",
+                "to": "arduino:15|4|8|10|12",
+                "color": "orange"
+            },
+            {
+                "from": "helper:driver:IN2|IN4",
+                "to": "arduino:7|2|9|11|13",
+                "color": "orange"
+            },
+            {
+                "from": "helper:driver:ENA|ENB",
+                "to": "arduino:5|3|A0|A1|A2",
+                "color": "orange"
+            },
+            {
+                "from": "helper:driver:12V",
+                "to": "helper:psu:5V",
+                "color": "red"
+            },
+            {
+                "from": "helper:driver:5V",
+                "to": "arduino:22",
+                "color": "red"
+            }
         ]
     },
     "autocoding": {
@@ -44,5 +93,20 @@
             "source": "direction",
             "title": "Direction"
         }
-    }
+    },
+    "sab": {
+        "slotKind": 6,
+        "fields": {
+            "f0": "speed"
+        }
+    },
+    "ui": {
+        "svg": "./motor.svg",
+        "interactive": []
+    },
+    "sim": {
+        "runtime": "js",
+        "validation": "inline"
+    },
+    "bounds": {"x": 0, "y": 0, "w": 200, "h": 100}
 }
