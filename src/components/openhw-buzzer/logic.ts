@@ -39,6 +39,9 @@ export class BuzzerLogic extends PWMProtocol {
         }
     }
 
+    private _ticksSinceSignal = 0;
+    private _seenEdgeCycle = -1;
+
     // Silence detection — if PWMProtocol stops firing, the signal has gone quiet
     update(cpuCycles: number, wires: any[], instances: BaseComponent[]) {
         if ((this as any)._isToneBypassed) {
@@ -72,13 +75,29 @@ export class BuzzerLogic extends PWMProtocol {
         const effectiveHz = (Number.isFinite(cyclesPerUs) && cyclesPerUs > 0)
             ? cyclesPerUs * 1_000_000
             : cpuHz;
-        const silenceTimeoutCycles = effectiveHz * 0.1;
         const lastEdgeCycle: number = (this as any)._lastEdgeCycle || 0;
-        if (lastEdgeCycle > 0 && (cpuCycles - lastEdgeCycle) > silenceTimeoutCycles) {
+
+        // Tick-counted silence window: engines advance the cycle counter
+        // per-step-budget anywhere from instruction counts (AVR) to
+        // hundreds of millions of guest cycles in one tick (Pico sleep
+        // fast-forward), so any fixed cycle threshold is either too
+        // tight (silences every tick) or never fires. A tone that keeps
+        // driving updates _lastEdgeCycle every tick; silence is simply
+        // "N consecutive update() ticks with no new edge stamp"
+        // (~128 ms at a 16 ms tick ≈ the old 100 ms rule).
+        if (lastEdgeCycle !== this._seenEdgeCycle) {
+            this._seenEdgeCycle = lastEdgeCycle;
+            this._ticksSinceSignal = 0;
+        } else {
+            this._ticksSinceSignal++;
+        }
+
+        if (lastEdgeCycle > 0 && this._ticksSinceSignal > 8) {
             if (this.state.isBuzzing) {
                 this.setState({ isBuzzing: false, frequency: 0, current: 0, voltageDrop: 0 });
             }
         }
+        void effectiveHz;
     }
 
     onCustomTelemetry() {

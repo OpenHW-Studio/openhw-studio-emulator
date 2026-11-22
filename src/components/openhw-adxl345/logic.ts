@@ -86,8 +86,11 @@ export class ADXL345Logic extends BaseComponent {
         // ADXL345 typical operating range is 2.0V to 3.6V, but since it's commonly used
         // on 5V compatible breakout boards, we'll consider it powered if VCC is >= 2.0V.
         this.powered = vcc >= 2.0;
-        if (this.state.powered !== this.powered) {
-            this.setState({ powered: this.powered });
+        if (this.state.powered !== this.powered || this.state.powerCtl !== this.registers[0x2D]) {
+            this.setState({
+                powered: this.powered,
+                powerCtl: this.registers[0x2D],
+            });
         }
     }
 
@@ -98,8 +101,12 @@ export class ADXL345Logic extends BaseComponent {
     }
 
     onI2CStart(address: number, read: boolean): boolean {
-        if (!this.powered) return false;
-
+        // Address match owns the bus. Do NOT gate on `powered`: the engine's
+        // jsmirror ACKs the address at attach time, and the model's VCC pin
+        // is seeded by the runner's rail pump after the first tick — gating
+        // here dropped the boot-time POWER_CTL write permanently (observed:
+        // DEVID read 0xE5 but measure bit stayed 0). `powered` remains live
+        // telemetry.
         const addr7 = (address > 0x7F) ? (address >> 1) : address;
         this.selected = (addr7 === this.getI2CAddress());
         this.expectingRegister = !read;
@@ -126,6 +133,20 @@ export class ADXL345Logic extends BaseComponent {
     onI2CStop(): void {
         this.selected = false;
         this.expectingRegister = true;
+    }
+
+    // Runner map contract: `pushI2CReadMaps` asks every I2C model for its
+    // full register image once per tick and pushes it into the engine's
+    // jsmirror map, so master reads return model values instead of 0xFF.
+    // `reg` is the image base (the runner always asks from 0).
+    onI2CReadRequest(reg: number, count: number): number[] {
+        const raw = this.getRawRegisters();
+        const out: number[] = [];
+        for (let i = 0; i < count; i++) {
+            const r = (reg + i) & 0xFF;
+            out.push((raw[r] ?? 0x00) & 0xFF);
+        }
+        return out;
     }
 
     readI2CByte(): number {
@@ -172,6 +193,7 @@ export class ADXL345Logic extends BaseComponent {
             accelY: Number(this.accelY.toFixed(2)),
             accelZ: Number(this.accelZ.toFixed(2)),
             powered: this.powered ? "Yes" : "No",
+            powerCtl: this.registers[0x2D],
             i2cAddress: "0x" + this.getI2CAddress().toString(16).toUpperCase()
         });
     }

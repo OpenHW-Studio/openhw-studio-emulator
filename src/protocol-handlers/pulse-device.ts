@@ -30,12 +30,25 @@ export class PulseProtocol extends BaseComponent {
         // Subclasses should override this
     }
 
+    /** Board steps per microsecond in the caller's cycle domain. AVR
+     *  reports 16 MHz; ARM boards override via _boardCyclesPerUs. The old
+     *  hard-coded /16 made every pulse 7.8x long on RP2040 (200 MHz) and
+     *  9.4x on RP2350 (150 MHz). */
+    private cyclesPerUs(): number {
+        try {
+            const f = (this as any)._boardCyclesPerUs;
+            const v = typeof f === 'function' ? Number(f()) : 0;
+            if (Number.isFinite(v) && v > 0) return v;
+        } catch { /* fall back to AVR */ }
+        return 16;
+    }
+
     onPinStateChange(pinId: string, isHigh: boolean, cycles: number): void {
         super.onPinStateChange(pinId, isHigh, cycles);
 
         const lastEdge = this.lastEdgeTimes[pinId];
-        if (lastEdge > 0) {
-            const durationUs = (cycles - lastEdge) / 16;
+        if (lastEdge !== undefined) {
+            const durationUs = (cycles - lastEdge) / this.cyclesPerUs();
             // If the pin just went HIGH, the finished pulse was LOW (!isHigh)
             const wasHighPulse = !isHigh;
             
@@ -57,8 +70,7 @@ export class PulseProtocol extends BaseComponent {
      */
     sendPulse(pinId: string, isHigh: boolean, durationUs: number, idleVoltage: number = 0): void {
         this.setPinVoltage(pinId, isHigh ? 5.0 : 0.0);
-        // Assuming 16MHz clock
-        const endCycle = Number((this as any).lastCpuCycles || 0) + (durationUs * 16);
+        const endCycle = Number((this as any).lastCpuCycles || 0) + (durationUs * this.cyclesPerUs());
         this.pendingPulses.push({ pinId, endCycle, idleVoltage });
     }
 

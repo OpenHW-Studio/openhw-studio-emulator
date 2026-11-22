@@ -7,6 +7,17 @@ export class HCSR04Logic extends PulseProtocol {
     private _simCpu?: any;
     private isUpdating: boolean = false;
     public echoOutputVoltage: number = 0.0;
+    /** Telemetry counters: accepted TRIG pulses vs echoes started. A gap
+     *  means a trigger arrived while the previous echo was still in flight
+     *  (the model ignores retriggers, like real hardware). */
+    private triggerCount = 0;
+    private echoCount = 0;
+    /** Cycle-domain diagnostics: width of each finished echo as the MODEL
+     *  scheduled it. If this stays ~5800 us while the guest measures less,
+     *  the guest's clock jumped during pulseIn; if it shrinks, a fall
+     *  callback fired early. */
+    private lastEchoWidthsUs: number[] = [];
+    private echoRiseCycle = -1;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
@@ -75,6 +86,17 @@ export class HCSR04Logic extends PulseProtocol {
         try {
             this._setVoltageInternal(voltage);
             const isHigh = voltage > 1.8;
+            try {
+                const nowC = Number((this as any)._boardCyclesNow?.()) || 0;
+                if (isHigh) {
+                    this.echoRiseCycle = nowC;
+                } else if (this.echoRiseCycle >= 0) {
+                    const perUs = Number((this as any)._boardCyclesPerUs?.()) || 16;
+                    this.lastEchoWidthsUs.push(Number(((nowC - this.echoRiseCycle) / perUs).toFixed(1)));
+                    if (this.lastEchoWidthsUs.length > 10) this.lastEchoWidthsUs.shift();
+                    this.echoRiseCycle = -1;
+                }
+            } catch { /* diagnostics only */ }
 
             // Board drive via the bus service when available (plan §5.3);
             // legacy AVR-only fast path otherwise.
@@ -105,6 +127,7 @@ export class HCSR04Logic extends PulseProtocol {
         // and let startEcho() use the component's own distance. Boards
         // with cycle-accurate stamps (AVR) keep the >= 8 us noise floor.
         if (pinId === 'TRIG' && isHighPulse && (durationUs >= 8 || durationUs === 0)) {
+            this.triggerCount++;
             this.startEcho();
         }
     }
@@ -122,6 +145,7 @@ export class HCSR04Logic extends PulseProtocol {
 
     private startEcho() {
         if (this.isEchoing) return;
+        this.echoCount++;
 
         const distance = parseFloat(String(this.attrs?.distance ?? this.state?.distance ?? '100'));
         const echoDurationUs = Math.max(116, Math.round(distance * 58));
@@ -179,6 +203,9 @@ export class HCSR04Logic extends PulseProtocol {
             configuredDistance: distance,
             echoDurationUs: Number(echoDurationUs.toFixed(1)),
             isEchoing: this.isEchoing,
+            triggers: this.triggerCount,
+            echoes: this.echoCount,
+            echoWidthsUs: this.lastEchoWidthsUs,
             lastMeasurement: this.state.distance || distance,
         });
     }

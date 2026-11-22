@@ -35,6 +35,18 @@ export class OneWireProtocol extends BaseComponent {
         };
     }
 
+    // Runner-agnostic clock domain: `_boardCyclesPerUs` (injected by ARM
+    // runners) gives cycles/µs in the board's cycle domain; AVR falls back
+    // to its 16 MHz legacy. Presence/slot holds are expressed in µs, so the
+    // model behaves identically on Pico (150/200 cyc/µs) as on Uno (16).
+    private owCpus(): number {
+        try {
+            const f = (this as any)._boardCyclesPerUs;
+            if (typeof f === 'function') return Number(f()) || 16;
+        } catch { /* fall through */ }
+        return 16;
+    }
+
     isBusy(): boolean {
         return this.sendingBit || this._drivingBus;
     }
@@ -126,6 +138,14 @@ export class OneWireProtocol extends BaseComponent {
     private releaseDQ(pinId: string) {
         this._lastDrivenVoltage = 5.0;
         this._drivingBus = false;
+        // Release always ends our low pulse — clear the slot flag too.
+        // ARM runners inject model-driven DQ into the engine IN latch
+        // directly (no edge replay comes back through dispatchOptionalOneWire),
+        // so without this the model's own release never cleared
+        // `sendingBit` and the guest's first slot after a presence pulse
+        // was silently swallowed (DS18B20: 0xCC read as 0x66, scratchpad
+        // garbage). AVR clears it via the slot echo; ARM never saw the echo.
+        this.sendingBit = false;
         this.sendingBit = false;
         this.setPinVoltage(pinId, 5.0);
         // Restore bus to HIGH and notify runner (bus service first).
@@ -166,15 +186,16 @@ export class OneWireProtocol extends BaseComponent {
         this.ignoreNextSlot = false;
         this.stateChanged = true;
 
-        // Schedule Presence Pulse: wait ~30 µs (480 AVR cycles @ 16 MHz), pull low for ~120 µs (1920 AVR cycles @ 16 MHz)
+        // Schedule Presence Pulse: wait ~30 µs, pull DQ low for ~120 µs
+        const cpu = this.owCpus();
         this.schedule(() => {
             this.sendingBit = true;
             this.driveDQ(pinId, 0.0);
 
             this.schedule(() => {
                 this.releaseDQ(pinId);
-            }, 1920);
-        }, 480);
+            }, Math.floor(120 * cpu));
+        }, Math.floor(30 * cpu));
     }
 
     onOneWireWriteBit(pinId: string, bit: number, meta: any): void {
@@ -323,10 +344,12 @@ export class OneWireProtocol extends BaseComponent {
         this.sendingBit = true;
         this.driveDQ(pinId, 0.0);
 
-        // Hold LOW for ~30 µs (480 AVR cycles @ 16 MHz), then release
+        // Hold LOW for ~60 µs so an ARM-edged replay (which lands ≤~25 us
+        // after the master fell) is guaranteed to overlap the master's
+        // sample window; the slot still ends well inside the 120 us budget.
         this.schedule(() => {
             this.releaseDQ(pinId);
-        }, 480);
+        }, Math.floor(60 * this.owCpus()));
     }
 }
 

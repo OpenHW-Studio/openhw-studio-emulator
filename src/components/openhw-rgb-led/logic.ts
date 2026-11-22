@@ -39,6 +39,7 @@ export class RGBLEDLogic extends BaseComponent {
     }
 
     onPWMSignal(pinId: string, frequencyHz: number, dutyCycle: number, pulseUs: number) {
+        if (typeof dutyCycle !== 'number' || !Number.isFinite(dutyCycle)) return;
         if (pinId === 'R' || pinId === 'G' || pinId === 'B') {
             // dutyCycle is 0.0 to 1.0. Map to 0-255
             const mappedVal = Math.min(255, Math.max(0, Math.floor(dutyCycle * 255)));

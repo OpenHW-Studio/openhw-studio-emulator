@@ -50,6 +50,11 @@ export class ILI9341TouchLogic extends BaseComponent {
         this.isTouched = isDown;
     }
 
+    /** Runner I2C-mirror address resolver contract. */
+    getI2CAddress(): number {
+        return this.i2cAddress;
+    }
+
     update(cpuCycles: number) {
         const nowMs = Math.floor(cpuCycles / 16000); // 16MHz: cycles->ms, no wall clock
         const vcc = this.getPinVoltage('VCC');
@@ -187,32 +192,30 @@ export class ILI9341TouchLogic extends BaseComponent {
 
     onI2CByteRead(addr: number): number {
         if (!this.isAddressed) return 0xFF;
-
-        let res = 0;
-        // Basic FT6206 implementation
-        switch (this.i2cRegister) {
-            case 0x02: // TD_STATUS (number of touch points)
-                res = this.isTouched ? 1 : 0;
-                break;
-            case 0x03: // P1_XH (X high, plus event flag)
-                // Event flag = 0 (put down) or 2 (contact)
-                res = ((this.touchX >> 8) & 0x0F) | (this.isTouched ? 0x80 : 0); // 0x80 is contact
-                break;
-            case 0x04: // P1_XL (X low)
-                res = this.touchX & 0xFF;
-                break;
-            case 0x05: // P1_YH (Y high, plus touch ID)
-                res = (this.touchY >> 8) & 0x0F;
-                break;
-            case 0x06: // P1_YL (Y low)
-                res = this.touchY & 0xFF;
-                break;
-            default:
-                res = 0;
-                break;
-        }
+        const res = this.ft6206Register(this.i2cRegister);
         this.i2cRegister++; // Auto-increment register on read
         return res;
+    }
+
+    // FT6206 register image for the runner's I2C map push (master reads).
+    // Mirrors `onI2CByteRead` but is pure/indexed by register number so the
+    // engine's own read pointer can walk it.
+    private ft6206Register(reg: number): number {
+        switch (reg & 0xFF) {
+            case 0x02: return this.isTouched ? 1 : 0; // TD_STATUS
+            case 0x03: return ((this.touchX >> 8) & 0x0F) | (this.isTouched ? 0x80 : 0);
+            case 0x04: return this.touchX & 0xFF;
+            case 0x05: return (this.touchY >> 8) & 0x0F;
+            case 0x06: return this.touchY & 0xFF;
+            case 0xA8: return 0x11; // FT6206 chip ID
+            default: return 0x00;
+        }
+    }
+
+    onI2CReadRequest(reg: number, count: number): number[] {
+        const out: number[] = [];
+        for (let i = 0; i < count; i++) out.push(this.ft6206Register(reg + i));
+        return out;
     }
 
     onI2CStop() {

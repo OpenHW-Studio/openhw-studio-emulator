@@ -1,10 +1,11 @@
 import manifest from './manifest.json';
 import { HP4067UI, BOUNDS } from './ui';
+import { HP4067Logic } from './logic';
 
-// Minimal export shape expected by the frontend component registry
+// Export shape expected by the frontend component registry.
 export default {
 	manifest,
 	UI: HP4067UI,
 	BOUNDS,
-	// LogicClass, validation and doc are optional and may be added later
+	LogicClass: HP4067Logic,
 };

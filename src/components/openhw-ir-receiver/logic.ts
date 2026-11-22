@@ -36,6 +36,10 @@ export class IRReceiverLogic extends PulseProtocol {
     private lastButton: string = '';
     private lastValue: number = 0;
     private _simCpu?: any;
+    /** Model-side pulse diagnostics: how many drive edges were emitted and
+     *  which board pin they resolved to (null = no wire found). */
+    private pulseEdges = 0;
+    private pulsePin: string | null = null;
 
     constructor(id: string, manifest: any) {
         super(id, manifest);
@@ -98,7 +102,9 @@ export class IRReceiverLogic extends PulseProtocol {
         try { this.setPinVoltage('OUT', voltage); } catch (_) {}
 
         const isHigh = voltage > 1.8;
+        this.pulseEdges++;
         const boardPin = this.getConnectedBoardPin();
+        this.pulsePin = boardPin;
         if (boardPin && typeof (this as any)._driveBoardPin === 'function') {
             (this as any)._driveBoardPin(boardPin, isHigh);
         } else if (boardPin && typeof (this as any)._setAvrPinDirect === 'function') {
@@ -115,14 +121,27 @@ export class IRReceiverLogic extends PulseProtocol {
         // fallback; wall-clock timeout last. Identical pulse order either way.
         const sched = (this as any)._scheduleBoardCycles;
         const cpu = (this as any)._simCpu;
+        // Microsecond → step-domain scale. This used to be the AVR constant
+        // 16, which made every NEC pulse 7.8x too short on RP2040 (200 MHz)
+        // and 9.4x on RP2350 (150 MHz) — the receiver's own popup path still
+        // "worked" because nothing on AVR decoded the widths, but a Pico
+        // guest saw a ~1.2 ms leader instead of 9 ms.
+        let cyclesPerUs = 16;
+        try {
+            const f = (this as any)._boardCyclesPerUs;
+            const v = typeof f === 'function' ? Number(f()) : 0;
+            if (Number.isFinite(v) && v > 0) cyclesPerUs = v;
+        } catch { /* fall back to AVR scale */ }
         const pulses: { isHigh: boolean; durationUs: number }[] = [];
 
         // 1. Leader pulse: 9000us mark (LOW), 4500us space (HIGH)
         pulses.push({ isHigh: false, durationUs: 9000 });
         pulses.push({ isHigh: true, durationUs: 4500 });
 
-        // 2. 32-bit NEC code (MSB first)
-        for (let i = 31; i >= 0; i--) {
+        // 2. 32-bit NEC code (LSB first — the standard wire order, and the
+        //    same order openhw-ir-remote uses; this model used to send MSB
+        //    first, so a standard NEC decoder read the whole frame reversed).
+        for (let i = 0; i < 32; i++) {
             const bit = (code >>> i) & 1;
             // Bit Mark is 562us LOW
             pulses.push({ isHigh: false, durationUs: 562 });
@@ -143,7 +162,7 @@ export class IRReceiverLogic extends PulseProtocol {
                 sched(() => {
                     this.driveOut(v);
                 }, targetCycles);
-                accumulatedCycles += p.durationUs * 16;
+                accumulatedCycles += Math.round(p.durationUs * cyclesPerUs);
             }
             sched(() => {
                 this.transmitting = false;
@@ -157,7 +176,7 @@ export class IRReceiverLogic extends PulseProtocol {
                 cpu.addClockEvent(() => {
                     this.driveOut(v);
                 }, targetCycles);
-                accumulatedCycles += p.durationUs * 16;
+                accumulatedCycles += Math.round(p.durationUs * cyclesPerUs);
             }
             cpu.addClockEvent(() => {
                 this.transmitting = false;
@@ -185,6 +204,10 @@ export class IRReceiverLogic extends PulseProtocol {
         const evtType = event.type || event.event;
         const btn = event.button || event.value || event.key;
         if (evtType === 'ir-send' || evtType === 'ir_send' || evtType === 'button_click' || evtType === 'SET_ATTR') {
+            // A real receiver does not restart a frame mid-burst; ignoring a
+            // retrigger keeps duplicate UI/E2E deliveries from stacking three
+            // overlapping NEC trains on the same pin.
+            if (this.transmitting) return;
             const code = NEC_CODES[btn] ?? (typeof btn === 'number' ? btn : undefined);
             if (code !== undefined) {
                 this.lastButton = String(btn);
@@ -232,6 +255,8 @@ export class IRReceiverLogic extends PulseProtocol {
             transmitting: Boolean(this.state.transmitting),
             lastButton: String(this.state.lastButton || 'None'),
             lastValue: String(this.state.lastValue || '0x00000000'),
+            edges: this.pulseEdges,
+            pin: this.pulsePin,
         });
     }
 

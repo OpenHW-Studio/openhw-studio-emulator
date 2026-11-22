@@ -81,6 +81,7 @@ export class LEDLogic extends BaseComponent {
     }
 
     onPWMSignal(pinId: string, frequencyHz: number, dutyCycle: number, pulseUs: number): void {
+        if (typeof dutyCycle !== 'number' || !Number.isFinite(dutyCycle)) return;
         this._pwmDutyCycle = dutyCycle;
         this._pwmWallMs = Date.now(); // event path (not tick) — wall clock OK
         const cycles = this.cyclesNow();
